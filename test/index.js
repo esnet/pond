@@ -1,0 +1,1 @@
+require("./tests/timerange.test.js");
