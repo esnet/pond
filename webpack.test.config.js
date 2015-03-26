@@ -18,5 +18,4 @@ module.exports = {
         extensions: ["", ".js"],
         modulesDirectories: ["node_modules", "."]
     },
-    devtool: "inline-source-map",
 };

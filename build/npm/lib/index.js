@@ -1,3 +1,5 @@
 "use strict";
 
-exports.TimeRange = require("./Timerange");
+exports.TimeRange = require("./timerange.js");
+exports.IndexedEvent = require("./indexed-event.js");
+exports.Event = require("./event.js");

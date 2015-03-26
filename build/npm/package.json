@@ -1,5 +1,5 @@
 {
-  "name": "ts",
+  "name": "pond",
   "version": "0.1.0",
   "description": "A timeseries library",
   "main": "lib",

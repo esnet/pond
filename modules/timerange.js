@@ -1,6 +1,7 @@
 
 var Immutable = require("immutable");
 var _ = require("underscore");
+var moment = require("moment");
 
 class TimeRange {
 
@@ -12,11 +13,18 @@ class TimeRange {
         } else if (_.isDate(b) && _.isDate(e)) {
             this._range = Immutable.Map({"begin": new Date(b.getTime()),
                                          "end": new Date(e.getTime())});
+        } else if (moment.isMoment(b) && moment.isMoment(e)) {
+            this._range = Immutable.Map({"begin": new Date(b.valueOf()),
+                                          "end": new Date(e.valueOf())});
         }
     }
 
-    toString() {
-        return "[", this._range.get("begin") + ", " +  this._range.get("end") + "]";
+    toLocalString() {
+        return "[" + this._range.get("begin").toString() + ", " +  this._range.get("end").toString() + "]";
+    }
+
+    toUTCString() {
+        return "[" + this._range.get("begin").toUTCString() + ", " +  this._range.get("end").toUTCString() + "]";
     }
 
     begin() {
@@ -29,7 +37,7 @@ class TimeRange {
 
     /**
      * Sets a new begin time on the TimeRange. The result will be a new TimeRange.
-     * 
+     *
      * @param {Date} - The begin time to set the start of the Timerange to.
      */
     setBegin(t) {
@@ -38,7 +46,7 @@ class TimeRange {
 
     /**
      * Sets a new end time on the TimeRange. The result will be a new TimeRange.
-     * 
+     *
      * @param {Date} - The time to set the end of the Timerange to.
      */
     setEnd(t) {
@@ -100,7 +108,7 @@ class TimeRange {
 
     /**
     * Returns a new Timerange which covers the extents of this and other combined.
-    * 
+    *
     * @param - The other Range to take the Union with.
     * @returns {TimeRange} Returns a new Range that is the union of this and other.
     */
