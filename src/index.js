@@ -1,0 +1,9 @@
+exports.Range = require("./modules/timerange.js");
+exports.Util = require("./modules/util.js");
+exports.Index = require("./modules/index.js");
+exports.Event = require("./modules/event.js").Event;
+exports.IndexedEvent = require("./modules/event.js").IndexedEvent;
+exports.Bucket = require("./bucket");
+exports.Generator = require("./generator");
+exports.Aggregator = require("./aggregator");
+exports.Functions = require("./functions");

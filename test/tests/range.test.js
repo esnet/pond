@@ -7,13 +7,13 @@ var fmt = "YYYY-MM-DD HH:mm";
 
 describe("Time ranges", function () {
 
-    var TimeRange = require("../../modules/timerange.js");
+    var Range = require("../../src/modules/range.js");
 
     describe("Range creation", function () {
         it('can create a new range with a begin and end time', function(done) {
             var beginTime = moment("2012-01-11 11:11", fmt).toDate();
             var endTime =   moment("2012-02-22 12:12", fmt).toDate();
-            var range = new TimeRange(beginTime, endTime);
+            var range = new Range(beginTime, endTime);
 
             expect(range.begin().getTime()).to.equal(beginTime.getTime());
             expect(range.end().getTime()).to.equal(endTime.getTime());
@@ -26,8 +26,8 @@ describe("Time ranges", function () {
             var beginTime = moment("2012-01-11 1:11", fmt).toDate();
             var endTime =   moment("2012-02-12 2:12", fmt).toDate();
             var newTime =   moment("2012-03-13 3:13", fmt).toDate();
-            var rangeOrig = new TimeRange(beginTime, endTime);
-            var rangeCopy = new TimeRange(rangeOrig);
+            var rangeOrig = new Range(beginTime, endTime);
+            var rangeCopy = new Range(rangeOrig);
 
             //We expect the copy to not equal the original, but for the dates
             //within the copy to be the same
@@ -44,7 +44,7 @@ describe("Time ranges", function () {
             var endTime =   moment("2012-02-12 2:12", fmt).toDate();
             var newTime =   moment("2012-03-13 3:13", fmt).toDate();
 
-            var range = new TimeRange(beginTime, endTime);
+            var range = new Range(beginTime, endTime);
             var mutatedRange = range.setEnd(newTime);
 
             //Expect the range to be difference and the end time to be different
@@ -59,11 +59,11 @@ describe("Time ranges", function () {
         it('can be compared for overlap to a non-overlapping range', function(done) {
             var ta = moment("2010-01-01 12:00", fmt).toDate();
             var tb = moment("2010-02-01 12:00", fmt).toDate();
-            var range1 = new TimeRange(ta, tb);
+            var range1 = new Range(ta, tb);
 
             var tc = moment("2010-03-15 12:00", fmt).toDate();
             var td = moment("2010-04-15 12:00", fmt).toDate();
-            var range2 = new TimeRange(tc, td);
+            var range2 = new Range(tc, td);
 
             expect(range1.overlaps(range2)).to.be.false;
             expect(range2.overlaps(range1)).to.be.false;
@@ -73,11 +73,11 @@ describe("Time ranges", function () {
         it('can be compared for overlap to an overlapping range', function(done) {
             var ta = moment("2010-01-01 12:00", fmt).toDate();
             var tb = moment("2010-09-01 12:00", fmt).toDate();
-            var range1 = new TimeRange(ta, tb);
+            var range1 = new Range(ta, tb);
 
             var td = moment("2010-08-15 12:00", fmt).toDate();
             var te = moment("2010-11-15 12:00", fmt).toDate();
-            var range2 = new TimeRange(td, te);
+            var range2 = new Range(td, te);
 
             expect(range1.overlaps(range2)).to.be.true;
             expect(range2.overlaps(range1)).to.be.true;
@@ -87,11 +87,11 @@ describe("Time ranges", function () {
         it('can be compared for containment to an range contained within it completely', function(done) {
             var ta = moment("2010-01-01 12:00", fmt).toDate();
             var tb = moment("2010-09-01 12:00", fmt).toDate();
-            var range1 = new TimeRange(ta, tb);
+            var range1 = new Range(ta, tb);
 
             var td = moment("2010-03-15 12:00", fmt).toDate();
             var te = moment("2010-06-15 12:00", fmt).toDate();
-            var range2 = new TimeRange(td, te);
+            var range2 = new Range(td, te);
 
             expect(range1.contains(range2)).to.be.true;
             done();
@@ -100,11 +100,11 @@ describe("Time ranges", function () {
         it('can be compared for containment to an overlapping range', function(done) {
             var ta = moment("2010-01-01 12:00", fmt).toDate();
             var tb = moment("2010-09-01 12:00", fmt).toDate();
-            var range1 = new TimeRange(ta, tb);
+            var range1 = new Range(ta, tb);
 
             var td = moment("2010-06-15 12:00", fmt).toDate();
             var te = moment("2010-12-15 12:00", fmt).toDate();
-            var range2 = new TimeRange(td, te);
+            var range2 = new Range(td, te);
 
             expect(range1.contains(range2)).to.be.false;
             done();
@@ -117,7 +117,7 @@ describe("Time ranges", function () {
         it('can be compared to a time before the range', function(done) {
             var ta = moment("2010-06-01 12:00", fmt).toDate();
             var tb =   moment("2010-08-01 12:00", fmt).toDate();
-            var range1 = new TimeRange(ta, tb);
+            var range1 = new Range(ta, tb);
 
             var before = moment("2010-01-15 12:00", fmt).toDate();
 
@@ -128,7 +128,7 @@ describe("Time ranges", function () {
         it('can be compared to a time during the range', function(done) {
             var ta = moment("2010-06-01 12:00", fmt).toDate();
             var tb =   moment("2010-08-01 12:00", fmt).toDate();
-            var range1 = new TimeRange(ta, tb);
+            var range1 = new Range(ta, tb);
 
             var during = moment("2010-07-15 12:00", fmt).toDate();
 
@@ -139,7 +139,7 @@ describe("Time ranges", function () {
         it('can be compared to a time after the range', function(done) {
             var ta = moment("2010-06-01 12:00", fmt).toDate();
             var tb =   moment("2010-08-01 12:00", fmt).toDate();
-            var range1 = new TimeRange(ta, tb);
+            var range1 = new Range(ta, tb);
 
             var after  = moment("2010-12-15 12:00", fmt).toDate();
 
@@ -154,11 +154,11 @@ describe("Time ranges", function () {
             // Two non-overlapping ranges: intersect() returns undefined
             var beginTime = moment("2010-01-01 12:00", fmt).toDate();
             var endTime =   moment("2010-06-01 12:00", fmt).toDate();
-            var range = new TimeRange(beginTime, endTime);
+            var range = new Range(beginTime, endTime);
 
             var beginTimeOutside = moment("2010-07-15 12:00", fmt).toDate();
             var endTimeOutside =   moment("2010-08-15 12:00", fmt).toDate();
-            var rangeOutside = new TimeRange(beginTimeOutside, endTimeOutside);
+            var rangeOutside = new Range(beginTimeOutside, endTimeOutside);
 
             expect(range.intersection(rangeOutside)).to.be.undefined;
             done();
@@ -171,13 +171,13 @@ describe("Time ranges", function () {
             //           05-06       intersection
             var beginTime = moment("2010-01-01 12:00", fmt).toDate();
             var endTime =   moment("2010-06-01 12:00", fmt).toDate();
-            var range = new TimeRange(beginTime, endTime);
+            var range = new Range(beginTime, endTime);
 
             var beginTimeOverlap = moment("2010-05-01 12:00", fmt).toDate();
             var endTimeOverlap =   moment("2010-07-01 12:00", fmt).toDate();
-            var rangeOverlap = new TimeRange(beginTimeOverlap, endTimeOverlap);
+            var rangeOverlap = new Range(beginTimeOverlap, endTimeOverlap);
 
-            var expected = new TimeRange(beginTimeOverlap, endTime);
+            var expected = new Range(beginTimeOverlap, endTime);
 
             expect(range.intersection(rangeOverlap).toString()).to.equal(expected.toString());
             done();
@@ -190,11 +190,11 @@ describe("Time ranges", function () {
             //       02--04       intersection
             var beginTime = moment("2010-01-01 12:00", fmt).toDate();
             var endTime =   moment("2010-06-01 12:00", fmt).toDate();
-            var range = new TimeRange(beginTime, endTime);
+            var range = new Range(beginTime, endTime);
 
             var beginTimeInside = moment("2010-02-01 12:00", fmt).toDate();
             var endTimeInside =   moment("2010-04-01 12:00", fmt).toDate();
-            var rangeInside = new TimeRange(beginTimeInside, endTimeInside);
+            var rangeInside = new Range(beginTimeInside, endTimeInside);
 
             expect(range.intersection(rangeInside).toString()).to.equal(rangeInside.toString());
             expect(rangeInside.intersection(range).toString()).to.equal(rangeInside.toString());
