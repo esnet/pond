@@ -1,39 +1,74 @@
-# timeseries
+# Pond
 
 A library build on top of immutable.js to provide basic timeseries functionality within ESnet tools.
 
 ## Why
 
-Because we use timeseries data all the time, especially on the client, but potentially on the server. We would like a library to do this is a consistent and immutable way.
+Because we use timeseries data throughout our network visualization application, especially on the client, but potentially on the server. We would like a library to do this is a consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated than they need to be. Not only do we need to deal with different formats at the UI layer, we also repeat our processing code over and over.
 
-### Example 1: we collect some timeseries data from the server and want to send it to the client. Perhaps the server is node.js.
+## What does it do?
 
-- Pull the data from a database
+Pond is built on several primitives:
 
-	var ts = getDataFromDB();
+* Time - these are basic Javascript Date objects. We refer to these as timestamps.
+* Timerange - a begin and end time, packaged together.
+* Index - A timerange denoted by a string, for example 5m-1234 is a 5 minute timerange.
 
-- Put the data, as a string, in the server response:
+Building on these, we have:
 
-	resp = ts.toString();
+* Event - These are a timestamp and a data object packaged together.
+* IndexedEvent - An index (timerange) and a data object packaged together.
+* Series - Conceptually a sequence of Events.
+* IndexedSeries - A sequence of Events  within a timerange denoted by an Index. [TODO]
 
-- Receive the data on the client:
+And then high level helper functions to:
 
-    var ts = new Timeseries(data);
+* Create timerange bound buckets and aggregate events into those buckets
+* Create Series objects from Event streams [TODO]
+* Resampling [TODO]
 
-- Get the time range of the data:
+## Examples
 
-	var range = ts.timeRange();
+### Creating a series
 
-- See if the time range overlaps with an existing timerange:
+Suppose you have some timeseries data that looks like this. 
 
-	if (range.overlaps(cachedRange)) { ... }
+    var data = {
+        "name": "traffic",
+        "columns": ["time", "value"],
+        "points": [
+            [1400425947000, 52],
+            [1400425948000, 18],
+            [1400425949000, 26],
+            [1400425950000, 93],
+            ...
+        ]
+    };
 
+In fact, if you get your data from InfluxDB, this is exactly what your data will look like.
 
-## Time ranges
+Now you want to create a Series object from that. To do that simply use the constructor:
 
-You create a Timerange to hold a begin and end time:
+    var series = new Series(data);
 
-    var timerange = new Timeseries.TimeRange(begin, end);
+To get how many rows there are in a `Series` use `size()`.
+
+To get a particular row back out of the `Series`, use `at(i)`. It will return the row and an `Event`. like this:
+
+```
+    var event = series.at(1);
+```
+
+An event is a timestamp and some data, so to deconstruct the event you can use `timestamp()` and `data()` methods:
+
+```
+    var data = series.data(); // {"value":18}
+    var timestamp = series.timestamp().getTime(); //1400425948000
+```
+
+## How to use
+
+TODO
 
 # Tests
 

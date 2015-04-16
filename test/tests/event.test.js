@@ -26,5 +26,4 @@ describe("Events", function () {
             done();
         });
     });
-
 });

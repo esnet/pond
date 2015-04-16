@@ -25,7 +25,9 @@ class Event {
 
     constructor(timestamp, data) {
         //Timestamp
-        if (_.isDate(timestamp)) {
+        if (_.isNumber(timestamp)) {
+            this._t = new Date(timestamp);
+        } else if (_.isDate(timestamp)) {
             this._t = new Date(timestamp.getTime());
         } else if (moment.isMoment(timestamp)) {
             this._t = new Date(timestamp.valueOf());

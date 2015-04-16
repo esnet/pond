@@ -1,6 +1,5 @@
-
-var Immutable = require("immutable");
 var _ = require("underscore");
+var Immutable = require("immutable");
 var moment = require("moment");
 
 class TimeRange {
