@@ -23,9 +23,22 @@ var Index = require("./index");
  */
 class Event {
 
-    constructor(timestamp, data) {
+    constructor(arg1, arg2) {
+
+        //Copy constructor
+        if (arg1 instanceof Event) {
+            let other = arg1;
+            this._t = other._t;
+            this._d = other._d;
+            return;
+        }
+
+        //Time, data constructor
+        let timestamp = arg1;
+        let data = arg2;
+
         //Timestamp
-        if (_.isNumber(timestamp)) {
+        if (_.isNumber(arg1)) {
             this._t = new Date(timestamp);
         } else if (_.isDate(timestamp)) {
             this._t = new Date(timestamp.getTime());
@@ -41,14 +54,36 @@ class Event {
         } else {
             this._d = new Immutable.Map({"value": data});
         }
+
+        if (this._t && this._d) {
+            return;
+        }
+
+        //JSON Object constructor
+        if (_.isObject(arg1) && _.isUndefined(arg2)) {
+            let obj = arg1;
+            let timestamp = obj.time;
+            let data = obj.data;
+            this._t = new Date(timestamp);
+            this._d = new Immutable.Map(data);
+        }
+
     }
 
-    toUTCString() {
-        return this.index() + ": " + this._t.toUTCString() + ": " + this._d;
+    toJSON() {
+        return {time: this._t.getTime(), data: this._d.toJSON()};
     }
 
-    toLocalString() {
-        return this.index() + ": " + this._t.toString() + ": " + this._d;
+    toString() {
+        return JSON.stringify(this.toJSON());
+    }
+
+    timestampAsUTCString() {
+        return this._t.toUTCString();
+    }
+
+    timestampAsLocalString() {
+        return this._t.toString();
     }
 
     timestamp() {
@@ -113,9 +148,49 @@ class IndexedEvent {
         }
     }
 
+    toJSON() {
+        return {index: this._i.asString(), data: this._d.toJSON()};
+    }
+
+    toString() {
+        return JSON.stringify(this.toJSON());
+    }
+
+    //
+    // Access the index itself
+    //
+
     index() {
         return this._i;
     }
+
+    //
+    // Access the timerange represented by the index
+    //
+
+    timerangeAsUTCString() {
+        return this.timerange().toUTCString();
+    }
+
+    timerangeAsLocalString() {
+        return this.timerange().toLocalString();
+    }
+
+    timerange() {
+        return this._i.asTimerange();
+    }
+
+    begin() {
+        return this.timerange().begin();
+    }
+
+    end() {
+        return this.timerange().end();
+    }
+
+    //
+    // Access the event data
+    //
 
     data() {
         return this._d;
@@ -126,32 +201,6 @@ class IndexedEvent {
         return this._d.get(k);
     }
 
-    toString() {
-        return this.index().asString() + ": " + this.range().toString();
-    }
-
-    toLocalString() {
-        return this.index().asString() + ": " + this.range().toLocalString();
-    }
-
-    range() {
-        return this._i.asRange();
-    }
-
-    begin() {
-        return this.range().begin();
-    }
-
-    end() {
-        return this.range().end();
-    }
-
-    stringify() {
-        return JSON.stringify({
-            "index": this._i.asString(),
-            "data": this._d
-        });
-    }
 }
 
 module.exports.Event = Event;

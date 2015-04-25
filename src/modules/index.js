@@ -1,4 +1,3 @@
-
 var moment = require("moment");
 var _ = require("underscore");
 
@@ -14,8 +13,11 @@ var units = {
 
 /**
  * An index that represents as a string a range of time.
- * The actual timerange can be found using asRange(). This will return a TimeRange
- * instance. The original string representation can be found with asString().
+ *
+ * The actual derived timerange can be found using asRange(). This will return
+ * a TimeRange instance.
+ *
+ * The original string representation can be found with toString().
  */
 class Index {
 
@@ -47,11 +49,19 @@ class Index {
         return new TimeRange(beginTime, endTime);
     }
 
-    asString() {
+    toJSON() {
         return this._s;
     }
 
-    asRange() {
+    toString() {
+        return this._s;
+    }
+
+    asString() {
+        return this.toString(); //alias
+    }
+
+    asTimerange() {
         return this._r;
     }
 }

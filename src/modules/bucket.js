@@ -23,27 +23,22 @@ var TimeRange = require("./range");
  * And example of an index might be 1d-1673. This uniquely
  * refers to a block of time 1 day long, starting 1673 days after
  * the beginning of 1970.
- *
- * When a result is emitted from the Bucket that is in the form
- * of an IndexedEvent.
  */
 class Bucket {
 
     constructor(index) {
         //Index
         if (_.isString(index)) {
-            this._i = new Index(index);
+            this._index = new Index(index);
         } else if (index instanceof Index) {
-            this._i = index;
+            this._index = index;
         }
-
-        console.log("constructed bucket with index", index, this._i);
 
         this._cache = [];  // Mutable internal list
     }
 
     index() {
-        return this._i;
+        return this._index;
     }
 
     toUTCString() {
@@ -59,7 +54,7 @@ class Bucket {
     //
 
     range() {
-        return this._i.asRange();
+        return this._index.asTimerange();
     }
 
     begin() {
@@ -71,25 +66,38 @@ class Bucket {
     }
 
     //
-    // Bucket cache
-    //
-    // TODO: bucket cache should be a strategy pattern
+    // Bucket cache, which could potentially be redis or something
+    // so pushing to the cache takes a callback, which will be called
+    // when the value is added to the cache
     //
 
-    _pushToCache(value) {
+    _pushToCache(value, cb) {
         this._cache.push(value);
+        let err = null;
+        cb && cb(null);
     }
 
-    _cache() {
-        return this._cache;
+    _readValuesFromCache(cb) {
+        cb && cb(this._cache);
     }
 
-    addValue(value, fn, cb) {
-        this._pushToCache(value);
-        var result = fn.call(this, this._cache);
-        console.log("   cache", this._cache, "->", result);
-        var event = new IndexedEvent(this._i, result);
-        cb && cb(event);
+    //
+    // Add values to the bucket
+    //
+
+    addValue(value, cb) {
+        this._pushToCache(value, (err) => {cb && cb(err)});
+    }
+
+    //
+    // Sync the processing result from the bucket
+    //
+
+    sync(processor, cb) {
+        this._readValuesFromCache((values) => {
+            let result = processor.call(this, this._index, values);
+            cb && cb(result);
+        });
     }
 }
 

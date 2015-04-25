@@ -15,7 +15,22 @@ class TimeRange {
         } else if (moment.isMoment(b) && moment.isMoment(e)) {
             this._range = Immutable.Map({"begin": new Date(b.valueOf()),
                                           "end": new Date(e.valueOf())});
+        } else if (_.isNumber(b) && _.isNumber(e)) {
+            this._range = Immutable.Map({"begin": new Date(b),
+                                         "end": new Date(e)});
         }
+    }
+
+    //
+    // Serialize
+    //
+    
+    toJSON() {
+        return this._range.toJSON();
+    }
+
+    toString() {
+        return this._s;
     }
 
     toLocalString() {

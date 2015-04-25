@@ -12,24 +12,6 @@ var units = {
     "d": {"label": "days", "length": 60*60*24}
 }
 
-/**
- * Takes the size (e.g. 1d, 6h, 5m, 30s) and returns the length
- * of the bucket in ms.
- */
-function getLengthFromSize(size) {
-    var num, unit, length;
-
-    //size should be two parts, a number and a letter. From the size
-    //we can get the length
-    var re = /([0-9]+)([smhd])/;
-    var parts = re.exec(size);
-    if (parts && parts.length >= 3) {
-        num = parseInt(parts[1]);
-        unit = parts[2];
-        length = num * units[unit].length * 1000;
-    }
-    return length;
-}
 
 /**
  * A BucketGenerator
@@ -46,12 +28,39 @@ class Generator {
 
     constructor(size) {
         this.size = size;
-        this.length = getLengthFromSize(size);
+        this.length = Generator.getLengthFromSize(size);
     }
 
-    _bucketPosFromDate(date) {
+    /**
+     * Takes the size (e.g. 1d, 6h, 5m, 30s) and returns the length
+     * of the bucket in ms.
+     */
+    static getLengthFromSize(size) {
+        var num, unit, length;
+
+        //size should be two parts, a number and a letter. From the size
+        //we can get the length
+        var re = /([0-9]+)([smhd])/;
+        var parts = re.exec(size);
+        if (parts && parts.length >= 3) {
+            num = parseInt(parts[1]);
+            unit = parts[2];
+            length = num * units[unit].length * 1000;
+        }
+        return length;
+    }
+
+
+    static getBucketPosFromDate(date, length) {
+        //console.log("getBucketPosFromDate", date)
         var dd = moment.utc(date).valueOf();
-        return parseInt(dd/this.length, 10);
+        return parseInt(dd/=length, 10);
+    }
+
+    bucketIndex(date) {
+        var pos = Generator.getBucketPosFromDate(date, this.length);
+        var index = this.size + "-" + pos;
+        return index;
     }
 
     /**
@@ -61,9 +70,7 @@ class Generator {
      * midnight to midnight, depending on local timezone.
      */
     bucket(date) {
-        var pos = this._bucketPosFromDate(date);
-        var index = this.size + "-" + pos; 
-        console.log("Generating bucket", index);
+        var index = this.bucketIndex(date);
         return new Bucket(index);
     }
 }
