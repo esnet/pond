@@ -143,30 +143,43 @@ var sept_2014_data = {
 
 describe("Series", function () {
 
-    var {Series} = require("../../src/modules/series.js");
+    var {TimeSeries} = require("../../src/modules/series.js");
 
-    describe("Series created with a javascript object", function () {
+    describe("TimeSeries created with a javascript objects", function () {
         it("can create an series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
+            console.log(`Timeseries: ${series}`);
+            console.log(` - event at 0: ${series.at(0)}`);
+            console.log(` - range: ${series.range()}`);
+            console.log(`   - begin: ${series.begin()}`);
+            console.log(`   - end: ${series.end()}`);
+            expect(series).to.be.ok;
+            done();
+        });
+    });
+
+    describe("Timeseries created with a javascript object", function () {
+        it("can create an series", function(done) {
+            var series = new TimeSeries(data);
             expect(series).to.be.ok;
             done();
         });
 
         it("can return the size of the series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.size()).to.equal(4);
             done();
         });
 
         it("can return an item in the series as an event", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             var event = series.at(1);
             expect(event).to.be.an.instanceof(Event);
             done();
         });
 
         it("can return an item in the series with the correct data", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             var event = series.at(1);
             expect(JSON.stringify(event.data())).to.equal('{"value":18,"status":"ok"}');
             expect(event.timestamp().getTime()).to.equal(1400425948000);
@@ -174,7 +187,7 @@ describe("Series", function () {
         });
 
         it("can serialize to a string", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             var event = series.at(1);
             var expectedString = `{"name":"traffic","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`
             expect(series.toString()).to.equal(expectedString);
@@ -182,68 +195,58 @@ describe("Series", function () {
         });
 
         it("can return the time range of the series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             var expectedString = "[Sun May 18 2014 08:12:27 GMT-0700 (PDT), Sun May 18 2014 08:12:30 GMT-0700 (PDT)]";
             expect(series.range().toLocalString()).to.equal(expectedString);
             done();
         });
+    });
+
+    describe("Series can be reduced", function () {
 
         it("can sum the series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.sum("value")).to.equal(189);
             done();
         });
 
         it("can sum the series with no column name specified", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.sum()).to.equal(189);
             done();
         });
 
         it("can sum the series with a bogus column name and get undefined", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.sum("invalid")).to.be.undefined;
             done();
         });
 
         it("can avg the series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.avg()).to.equal(47.25);
             done();
         });
 
         it("can avg the series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.avg()).to.equal(47.25);
             done();
         });
 
         it("can find the max of the series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.max()).to.equal(93);
             done();
         });
 
         it("can find the min of the series", function(done) {
-            var series = new Series(data);
+            var series = new TimeSeries(data);
             expect(series.min()).to.equal(18);
             done();
         });
-
-        it("can can load in 5 days of hourly data", function(done) {
-            var series = new Series(sept_2014_data);
-            //console.log(series.toString());
-            //console.log("COUNT:", series.size());
-            //console.log("BEGIN:", series.begin());
-            //console.log("END:", series.end());
-            //console.log("MAX:", series.max());
-            //console.log("MIN:", series.min());
-            //console.log("AVG:", series.avg());
-            //console.log("SUM:", series.sum());
-
-            done();
-        });
     });
+
 });
 
 

@@ -25,7 +25,7 @@ module.exports = {
 
   module: {
     loaders: [
-      { test: /\.js$/, loader: 'babel-loader' }
+      { test: /\.(js|jsx)$/, loader: 'babel?optional=es7.objectRestSpread' }
     ]
   },
 

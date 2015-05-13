@@ -10,12 +10,14 @@ describe("Indexes", function () {
             var index = new Index("1d-12355");
             var expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
             expect(index.asTimerange().toUTCString()).to.equal(expected);
+            expect(index.asTimerange().humanizeDuration()).to.equal("a day");
             done();
         });
         it('can create a hourly index', function(done) {
             var index = new Index("1h-123554");
             var expected = "[Sun, 05 Feb 1984 02:00:00 GMT, Sun, 05 Feb 1984 03:00:00 GMT]";
             expect(index.asTimerange().toUTCString()).to.equal(expected);
+            expect(index.asTimerange().humanizeDuration()).to.equal("an hour");
             done();
         });
 
@@ -23,6 +25,7 @@ describe("Indexes", function () {
             var index = new Index("5m-4135541");
             var expected = "[Sat, 25 Apr 2009 12:25:00 GMT, Sat, 25 Apr 2009 12:30:00 GMT]";
             expect(index.asTimerange().toUTCString()).to.equal(expected);
+            expect(index.asTimerange().humanizeDuration()).to.equal("5 minutes");
             done();
         });
 
@@ -30,6 +33,7 @@ describe("Indexes", function () {
             var index = new Index("30s-41135541");
             var expected = "[Sun, 08 Feb 2009 04:10:30 GMT, Sun, 08 Feb 2009 04:11:00 GMT]";
             expect(index.asTimerange().toUTCString()).to.equal(expected);
+            expect(index.asTimerange().humanizeDuration()).to.equal("a few seconds");
             done();
         });
     });

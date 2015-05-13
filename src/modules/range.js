@@ -21,6 +21,13 @@ class TimeRange {
         }
     }
 
+    /**
+     * Returns the internal range, which is an Immutable Map containing begin and end keys
+     */
+    range() {
+        return this._range;
+    }
+
     //
     // Serialize
     //
@@ -30,7 +37,7 @@ class TimeRange {
     }
 
     toString() {
-        return this._s;
+        return JSON.stringify(this.toJSON());
     }
 
     toLocalString() {
@@ -146,6 +153,14 @@ class TimeRange {
         var e = this.end() < other.end() ? this.end() : other.end();
         return new TimeRange(new Date(b.getTime()),
                              new Date(e.getTime()));
+    }
+
+    duration() {
+        return this.end().getTime() - this.begin().getTime();
+    }
+
+    humanizeDuration() {
+        return moment.duration(this.duration()).humanize();
     }
 
 }

@@ -4,6 +4,31 @@ var Immutable = require("immutable");
 
 var util = require("./util");
 var Index = require("./index");
+var TimeRange = require("./range");
+
+function timestampFromArgs(arg1) {
+    let timestamp;
+    if (_.isNumber(arg1)) {
+        timestamp = new Date(timestamp);
+    } else if (_.isDate(timestamp)) {
+        timestamp = new Date(timestamp.getTime());
+    } else if (moment.isMoment(timestamp)) {
+        timestamp = new Date(timestamp.valueOf());
+    }
+    return timestamp;
+}
+
+function dataFromArgs(arg1) {
+    var data = {};
+    if (_.isObject(arg1)) {
+        data = new Immutable.Map(arg1);
+    } else if (data instanceof Immutable.Map) {
+        data = arg1;
+    } else {
+        data = new Immutable.Map({"value": arg1});
+    }
+    return data;
+}
 
 /**
  * A generic event
@@ -28,50 +53,21 @@ class Event {
         //Copy constructor
         if (arg1 instanceof Event) {
             let other = arg1;
-            this._t = other._t;
-            this._d = other._d;
+            this._time = other._time;
+            this._data = other._data;
             return;
         }
-
-        //Time, data constructor
-        let timestamp = arg1;
-        let data = arg2;
 
         //Timestamp
-        if (_.isNumber(arg1)) {
-            this._t = new Date(timestamp);
-        } else if (_.isDate(timestamp)) {
-            this._t = new Date(timestamp.getTime());
-        } else if (moment.isMoment(timestamp)) {
-            this._t = new Date(timestamp.valueOf());
-        }
+        this._time = timestampFromArgs(arg1);
 
         //Data
-        if (_.isObject(data)) {
-            this._d = new Immutable.Map(data);
-        } else if (data instanceof Immutable.Map) {
-            this._d = data;
-        } else {
-            this._d = new Immutable.Map({"value": data});
-        }
-
-        if (this._t && this._d) {
-            return;
-        }
-
-        //JSON Object constructor
-        if (_.isObject(arg1) && _.isUndefined(arg2)) {
-            let obj = arg1;
-            let timestamp = obj.time;
-            let data = obj.data;
-            this._t = new Date(timestamp);
-            this._d = new Immutable.Map(data);
-        }
-
+        this._data = dataFromArgs(arg2);
+        console.log("Taken arg2", arg1, arg2)
     }
 
     toJSON() {
-        return {time: this._t.getTime(), data: this._d.toJSON()};
+        return {time: this._time.getTime(), data: this._data.toJSON()};
     }
 
     toString() {
@@ -79,31 +75,120 @@ class Event {
     }
 
     timestampAsUTCString() {
-        return this._t.toUTCString();
+        return this._time.toUTCString();
     }
 
     timestampAsLocalString() {
-        return this._t.toString();
+        return this._time.toString();
     }
 
     timestamp() {
-        return this._t;
+        return this._time;
     }
 
     data() {
-        return this._d;
+        return this._data;
     }
 
     get(key) {
         var k = key || "value";
-        return this._d.get(k);
+        return this._data.get(k);
     }
 
     stringify() {
-        return data.stringify(this._d);
+        return data.stringify(this._data);
     }
 }
 
+/**
+ * An time range event uses a TimeRange to specify the range over which the event occurs
+ * and maps that to a data object representing some measurements or metrics during
+ * that time range.
+ *
+ * You supply the timerange as a TimeRange object.
+ *
+ * The data is also specified during construction and me be either:
+ *  1) a Javascript object or simple type
+ *  2) an Immutable.Map.
+ *
+ * If an Javascript object is provided it will be stored internally as an Immutable Map.
+ * If the data provided is some other simple type (such as an integer) then it will be
+ * equivalent to supplying an object of {value: data}. Data may also be undefined.
+ *
+ * The get the data out of an IndexedEvent instance use data(). It will return an
+ * Immutable.Map. Alternatively you can call toJSON() to return a Javascript object
+ * representation of the data, while toString() will serialize the event to a string.
+ *
+ */
+class TimeRangeEvent {
+
+    constructor(arg1, arg2) {
+
+        console.log("Construct TimeRangeEvent")
+
+        //Timerange
+        if (arg1 instanceof TimeRange) {
+            let timerange = arg1;
+            this._range = timerange;
+        }
+
+        //Data
+        this._data = dataFromArgs(arg2);
+    }
+
+    toJSON() {
+        return {timerange: this._range.toJSON(), data: this._data.toJSON()};
+    }
+
+    toString() {
+        return JSON.stringify(this.toJSON());
+    }
+
+    //
+    // Access the timerange represented by the index
+    //
+
+    timerange() {
+        return this._range;
+    }
+
+    timerangeAsUTCString() {
+        return this.timerange().toUTCString();
+    }
+
+    timerangeAsLocalString() {
+        return this.timerange().toLocalString();
+    }
+
+
+    begin() {
+        console.log("call begin", this._range)
+        return this._range.begin();
+    }
+
+    end() {
+        return this._range.end();
+    }
+
+    humanizeDuration() {
+        return this._range.humanizeDuration();
+    }
+
+    //
+    // Access the event data
+    //
+
+    data() {
+        return this._data;
+    }
+
+    get(key) {
+        var k = key || "value";
+        console.log("   get", this._data.toJSON())
+        return this._data.get(k);
+    }
+
+}
 
 /**
  * An indexed event uses a Index to specify a timerange over which the event occurs
@@ -140,16 +225,16 @@ class IndexedEvent {
 
         //Data
         if (_.isObject(data)) {
-            this._d = new Immutable.Map(data);
+            this._data = new Immutable.Map(data);
         } else if (data instanceof Immutable.Map) {
-            this._d = data;
+            this._data = data;
         } else {
-            this._d = new Immutable.Map({"value": data});
+            this._data = new Immutable.Map({"value": data});
         }
     }
 
     toJSON() {
-        return {index: this._i.asString(), data: this._d.toJSON()};
+        return {index: this._i.asString(), data: this._data.toJSON()};
     }
 
     toString() {
@@ -193,15 +278,16 @@ class IndexedEvent {
     //
 
     data() {
-        return this._d;
+        return this._data;
     }
 
     get(key) {
         var k = key || "value";
-        return this._d.get(k);
+        return this._data.get(k);
     }
 
 }
 
 module.exports.Event = Event;
+module.exports.TimeRangeEvent = TimeRangeEvent;
 module.exports.IndexedEvent = IndexedEvent;

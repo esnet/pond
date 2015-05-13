@@ -6,74 +6,53 @@ var TimeRange = require("./range");
 var {Event} = require("./event");
 
 /**
- * A series is a structure containing times and associated data for each of those times.
- * You can think of a series as a list of events, with some additional meta data on top
- * of those. A series exists between two points in time, i.e. has a timerange associated
- * with it.
+ * Base class for a series of events.
  *
- * Data passed into it should have the following format:
- *   {
- *     "name": "traffic",
- *     "columns": ["time", "value", ...],
- *     "points": [
- *        [1400425947000, 52, ...],
- *        [1400425948000, 18, ...],
- *        [1400425949000, 26, ...],
- *        [1400425950000, 93, ...],
- *        ...
- *      ]
- *   }
- * Essential parts:
- *     name    - the name of the series
- *     columns - a list of the columns referenced in the point
- *               the first column should be called time. The other columns can be
- *               anything
- *     points  - a list, with each item in the list being an array of values corresponding
- *               to the columns
+ * A series is compact representation for a list of events, with some additional
+ * meta data on top of that.
+ *
  */
 class Series {
 
-    constructor(data) {
-        if (data instanceof Series) {
+    /**
+     * A series is constructed by either:
+     * 1) passing in another series (copy constructor)
+     * 2) passing in three arguments:
+     *     name - the name of the series
+     *     columns - an array containing the title of each data column
+     *     data - an array containing the data of each column
+     *
+     * Internally a Series is List of Maps. Each item in the list is one data map,
+     * and is stored as an Immutable Map, where the keys are the column names
+     * and the value is the data for that column at that index. This enables
+     * efficient extraction of Events, since the internal data of the Event can
+     * be simply a reference to the Immutable Map in this Series, combined with the
+     * time or timerange index.
+     */
+    constructor(arg1, arg2, arg3) {
+        if (arg1 instanceof Series) {
+            let other = arg1;
+
             //Copy constructor
-            this._series = data._series;
-            this._times = data._times;
-            this._name = data._names;
-            this._columns = data._columns;
-        } else if (_.isObject(data)) {
-            var points = data.points || [];
+            this._name = other._names;
+            this._columns = other._columns;
+            this._series = other._series;
 
-            //Name
-            this._name = data.name || "";
+        } else if (_.isString(arg1) && _.isArray(arg2) && _.isArray(arg3)) {
+            let name = arg1;
+            let columns = arg2
+            let data = arg3;
 
-            //Columns (internal)
-            var columns = data.columns || [];
+            this._name = name;
             this._columns = Immutable.fromJS(columns);
-
-            //List of times
-            this._times = Immutable.fromJS(_.map(points, function(point) {
-                return point[0];
-            }));
-
-            //Series of data
-            var series = _.map(points, function(point) {
+            this._series = Immutable.fromJS(_.map(data, function(point) {
                 var pointMap = {};
                 _.each(point, function(p, i) {
-                    if (i > 0) {
-                        pointMap[columns[i]] = p;
-                    }
+                    pointMap[columns[i]] = p;
                 });
                 return pointMap;
-            });
-            this._series = Immutable.fromJS(series);
-
-            //Range of this timeseries (_range() may be implemented by subclass)
-            this._range = this._range();
+            }));
         }
-    }
-
-    _range() {
-        return new TimeRange(this._times.min(), this._times.max());
     }
 
     //
@@ -83,40 +62,19 @@ class Series {
     toJSON() {
         let cols = this._columns;
         let series = this._series;
-        let times = this._times;
         return {
             name: this._name,
             columns: cols.toJSON(),
             points: series.map((value, i) => {
-                var data = [times.get(i)];
-                cols.forEach((column, j) => {
-                    if (j > 0) {
-                        data.push(value.get(column));
-                    }
+                return cols.map((column, j) => {
+                    data.push(value.get(column));
                 });
-                return data;
             })
         }
     }
 
     toString() {
         return JSON.stringify(this.toJSON());
-    }
-
-    //
-    // Series range
-    //
-
-    range() {
-        return this._range;
-    }
-
-    begin() {
-        return this.range().begin();
-    }
-
-    end() {
-        return this.range().end();
     }
 
     //
@@ -127,9 +85,14 @@ class Series {
         return this._series.size;
     }
 
-    at(i) {
-        return new Event(this._times.get(i), this._series.get(i));
+    count() {
+        return this.size();
     }
+
+    at(i) {
+        return this._series.get(i);
+    }
+
 
     //
     // Aggregate the series
@@ -177,6 +140,138 @@ class Series {
 }
 
 /**
+ * A TimeSeries is a a Series where each event is an association of a timestamp
+ * and some associated data.
+ *
+ * Data passed into it may have the following format, which corresponds to InfluxDB's
+ * wire format:
+ *
+ *   {
+ *     "name": "traffic",
+ *     "columns": ["time", "value", ...],
+ *     "points": [
+ *        [1400425947000, 52, ...],
+ *        [1400425948000, 18, ...],
+ *        [1400425949000, 26, ...],
+ *        [1400425950000, 93, ...],
+ *        ...
+ *      ]
+ *   }
+ *
+ * The timerange associated with a TimeSeries is simply the bounds of the
+ * events within it (i.e. the min and max times)
+ */
+class TimeSeries extends Series {
+
+    constructor(arg1) {
+
+        if (arg1 instanceof Series) {
+            //Copy constructor
+            let other = arg1;
+            this._name = other._names;
+            this._columns = other._columns;
+            this._times = other._times;
+            this._series = other._series;
+        } else if (_.isObject(arg1)) {
+            //Javascript object constructor
+            let obj = arg1;
+            let name = obj.name || "";
+            let columns = obj.columns.slice(1) || []; // TODO: check to see if the first item is the time
+            let points = obj.points || [];
+            let data = [];
+            let times = [];
+
+            //Series of data that we extract out the time and pass the rest to the base class
+            _.each(points, function(point) {
+                let [time, ...others] = point;
+                times.push(time);
+                data.push(others);
+            });
+
+            //List of times, as Immutable List
+            this._times = Immutable.fromJS(times);
+
+            super(name, columns, data);
+        }
+
+        console.log("Result", this)
+    }
+
+    //
+    // Serialize
+    //
+
+    /**
+     * Turn the TimeSeries into regular javascript objects
+     */
+    toJSON() {
+        let name = this._name;
+        let cols = this._columns;
+        let series = this._series;
+        let times = this._times;
+
+        var points = series.map((value, i) => {
+            var data = [times.get(i)]; //time
+            cols.forEach((column, j) => {data.push(value.get(column))}); //values
+            return data;
+        }).toJSON();
+
+        //The JSON output has 'time' as the first column
+        var columns = ["time"];
+        cols.forEach((column) => {columns.push(column)});
+
+        return {
+            name: name,
+            columns: columns,
+            points: points
+        }
+    }
+
+    /**
+     * Represent the TimeSeries as a string
+     */
+    toString() {
+        return JSON.stringify(this.toJSON());
+    }
+
+    //
+    // Series range
+    //
+
+    range() {
+        let result = new TimeRange(this._times.min(), this._times.max());
+        return result;
+    }
+
+    begin() {
+        return this.range().begin();
+    }
+
+    end() {
+        return this.range().end();
+    }
+
+    //
+    // Access the series itself
+    //
+
+    at(i) {
+        return new Event(this._times.get(i), this._series.get(i));
+    }
+
+}
+
+class TimeRangeSeries extends Series {
+    constructor(index, data) {
+        super(data);
+    }
+
+    at(i) {
+        return new TimeRangeEvent(this._times.get(i), this._series.get(i));
+    }
+}
+
+/**
  * EXPERIMENTAL
  *
  * An IndexSeries is a timeseries, like a Series, only the timerange associated with it
@@ -192,7 +287,7 @@ class Series {
  *
  */
 
-class IndexedSeries extends Series {
+class IndexedSeries extends TimeSeries {
 
     constructor(index, data) {
         if (_.isString(index)) {
@@ -250,4 +345,5 @@ class IndexedSeries extends Series {
 }
 
 module.exports.Series = Series;
+module.exports.TimeSeries = TimeSeries;
 module.exports.IndexedSeries = IndexedSeries;
