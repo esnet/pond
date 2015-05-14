@@ -2,12 +2,12 @@
   "name": "pond",
   "version": "0.1.0",
   "description": "A timeseries library",
-  "main": "lib",
   "author": "",
   "license": "MIT",
   "dependencies": {
     "immutable": "^3.6.4",
     "moment": "^2.9.0",
     "underscore": "^1.8.2"
-  }
+  },
+  "main": "lib"
 }

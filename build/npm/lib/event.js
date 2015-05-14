@@ -15,11 +15,11 @@ var TimeRange = require("./range");
 function timestampFromArgs(arg1) {
     var timestamp = undefined;
     if (_.isNumber(arg1)) {
-        timestamp = new Date(timestamp);
-    } else if (_.isDate(timestamp)) {
-        timestamp = new Date(timestamp.getTime());
-    } else if (moment.isMoment(timestamp)) {
-        timestamp = new Date(timestamp.valueOf());
+        timestamp = new Date(arg1);
+    } else if (_.isDate(arg1)) {
+        timestamp = new Date(arg1.getTime());
+    } else if (moment.isMoment(arg1)) {
+        timestamp = new Date(arg1.valueOf());
     }
     return timestamp;
 }

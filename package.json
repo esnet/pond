@@ -2,7 +2,6 @@
   "name": "pond",
   "version": "0.1.0",
   "description": "A timeseries library",
-  "main": "build/npm",
   "scripts": {
     "build-global": "rm -rf build/global && NODE_ENV=production webpack modules/index.js build/global/pond.js && NODE_ENV=production COMPRESS=1 webpack modules/index.js build/global/pond.min.js && echo \"gzipped, the global build is `gzip -c build/global/pond.min.js | wc -c` bytes\"",
     "build-npm": "rm -rf build/npm && babel -d build/npm/lib ./src/modules && cp README.md build/npm && find -X build/npm/lib -type d -name __tests__ | xargs rm -rf && node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=undefined;JSON.stringify(p,null,2)' > build/npm/package.json",
