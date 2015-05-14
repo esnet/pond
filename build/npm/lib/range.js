@@ -4,8 +4,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var Immutable = require("immutable");
 var _ = require("underscore");
+var Immutable = require("immutable");
 var moment = require("moment");
 
 var TimeRange = (function () {
@@ -22,10 +22,38 @@ var TimeRange = (function () {
         } else if (moment.isMoment(b) && moment.isMoment(e)) {
             this._range = Immutable.Map({ begin: new Date(b.valueOf()),
                 end: new Date(e.valueOf()) });
+        } else if (_.isNumber(b) && _.isNumber(e)) {
+            this._range = Immutable.Map({ begin: new Date(b),
+                end: new Date(e) });
         }
     }
 
     _createClass(TimeRange, {
+        range: {
+
+            /**
+             * Returns the internal range, which is an Immutable Map containing begin and end keys
+             */
+
+            value: function range() {
+                return this._range;
+            }
+        },
+        toJSON: {
+
+            //
+            // Serialize
+            //
+
+            value: function toJSON() {
+                return this._range.toJSON();
+            }
+        },
+        toString: {
+            value: function toString() {
+                return JSON.stringify(this.toJSON());
+            }
+        },
         toLocalString: {
             value: function toLocalString() {
                 return "[" + this._range.get("begin").toString() + ", " + this._range.get("end").toString() + "]";
@@ -166,6 +194,16 @@ var TimeRange = (function () {
                 var b = this.begin() > other.begin() ? this.begin() : other.begin();
                 var e = this.end() < other.end() ? this.end() : other.end();
                 return new TimeRange(new Date(b.getTime()), new Date(e.getTime()));
+            }
+        },
+        duration: {
+            value: function duration() {
+                return this.end().getTime() - this.begin().getTime();
+            }
+        },
+        humanizeDuration: {
+            value: function humanizeDuration() {
+                return moment.duration(this.duration()).humanize();
             }
         }
     });
