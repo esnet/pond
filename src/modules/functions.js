@@ -1,29 +1,25 @@
 var _ = require("underscore");
+
 var {IndexedEvent} = require("./event");
 
 module.exports = {
 
     /**
      * These functions take an index and a list of values and
-     * return an new IndexedEvent
+     * return a calculated result.
      */
 
     "sum": function(index, values) {
-        var sum = _.reduce(values, function(a, b) {
-            return a + b;
-        }, 0);
-        return new IndexedEvent(index, sum);
+        return _.reduce(values, (a, b) => {return a + b;}, 0);
     },
     "avg": function(index, values) {
-        var sum = _.reduce(values, function(a, b) {
-            return a + b;
-        }, 0);
-        return new IndexedEvent(index, sum / values.length);
+        var sum = _.reduce(values, (a, b) => {return a + b;}, 0);
+        return sum / values.length;
     },
     "max": function(index, values) {
-        return new IndexedEvent(index, _.max(values));
+        return _.max(values);
     },
     "count": function(index, values) {
-        return new IndexedEvent(index, values.length);
+        return values.length;
     },
 }

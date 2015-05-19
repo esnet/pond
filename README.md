@@ -150,9 +150,108 @@ An event is a timestamp and some data, so to deconstruct the event you can use `
     var data = series.data(); // {"value":18}
     var timestamp = series.timestamp().getTime(); //1400425948000
 
-## How to use
 
-TODO
+### Aggregation
+
+Say you have an incoming stream of Events and you want to aggregate them together. Pond can help with that. Here's an example. Lets create some events on 2/14/2015 that cross over the hour 7:57am, 7:58am, 7:59am, 8:00am and 8:01am. The values for these events are [3, 9, 6, 4, 5]:
+
+    var incomingEvents = [];
+    incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 57, 0), 3));
+    incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 58, 0), 9));
+    incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 59, 0), 6));
+    incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  0, 0), 4));
+    incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  1, 0), 5));
+
+Now lets find the avg value in each of the hours. To do this we setup an Aggregator that's indexed on the hour ("1h") and will use an average function "avg", like this:
+
+    var Pond = require("pond");
+    var {Aggregator, Functions} = require("pond");
+    var {max, avg, sum, count} = Functions;
+    
+    var hourlyAverage = new Aggregator("1h", avg);
+
+The we hook up the hourlyAverage event emitted so we can collect the result (or pass it on to another aggregator). Here we'll just put them into a map using the index (or the hour) as a key:
+
+    hourlyAverage.onEmit((index, event) => { outputEvents[index.asString()] = event;});
+
+Then we can add events as long as we want, forever even:
+
+    _.each(incomingEvents, event => { hourlyAverage.addEvent(event); });
+
+Knowing when to be done with a bucket that we're aggregating into depends on the situation. If this is a continuous stream of events then the code currenly considers it done with a bucket when an event comes in that fits into another bucket. In this example the first event will create the first bucket. Then next two events also fit into this bucket. The 4th event is in the following hour so the old bucket is aggregated based on the aggregation function, and event is emitted with that value, and a new bucket is created for the 4th event. The 5th event goes into the same bucket. In this case we want to flush the bucket after the 5th event, so we call:
+
+    hourlyAverage.done();
+
+After this our `outputEvents` object will contain two entries:
+
+    outputEvents["1h-396206"].get();   // 6
+    outputEvents["1h-396207"].get();  // 4.5
+
+Events may also be more complex, with entries like this:
+
+    Event(now, {"cpu1": 23.4, "cpu2": 55.1}
+
+Aggregation events will keep the same structure.
+
+### Collection
+
+A close relative of aggregation is collection. A collection object can be used to assemble IndexedTimeSeries by feeding events to the Collector. This is probably best explained with an example.
+
+First, lets make some events:
+
+    var events = [];
+    events.push(new Event(new Date(2015, 2, 14, 7, 57, 0), {"cpu1": 23.4, "cpu2": 55.1}));
+    events.push(new Event(new Date(2015, 2, 14, 7, 58, 0), {"cpu1": 36.2, "cpu2": 45.6}));
+    events.push(new Event(new Date(2015, 2, 14, 7, 59, 0), {"cpu1": 38.6, "cpu2": 65.2}));
+    events.push(new Event(new Date(2015, 2, 14, 8,  0, 0), {"cpu1": 24.5, "cpu2": 85.2}));
+    events.push(new Event(new Date(2015, 2, 14, 8,  1, 0), {"cpu1": 45.2, "cpu2": 91.6}));
+
+Similarly to constructing a Aggregator, we build a Collector:
+
+    var hourlyCollector = new Collector("1h");
+
+Then we catch emitted IndexedTimeSeries:
+
+    hourlyCollector.onEmit((series) => {
+        console.log(series);
+    });
+
+And then as in the Aggregator, we feed it our events, and call done() to flush at then end:
+
+    //Add events
+    _.each(events, (event) => {
+        hourlyCollector.addEvent(event);
+    });
+
+    //Done
+    hourlyCollector.done();
+
+The result will be an emitted timeseries object containing all events within each indexed hour.
+
+For 2/14/2014 7am-8am:
+
+    {
+        "name": "1h-396206",
+        "index": "1h-396206",
+        "columns": ["time", "cpu1", "cpu2"],
+        "points": [
+            ["2015-03-14T14:57:00.000Z", 23.4, 55.1],
+            ["2015-03-14T14:58:00.000Z", 36.2, 45.6],
+            ["2015-03-14T14:59:00.000Z", 38.6, 65.2]
+        ]
+    }
+
+For 2/14/2014 8am-9am:
+
+    {
+        "name": "1h-396207",
+        "index": "1h-396207",
+        "columns": ["time", "cpu1", "cpu2"],
+        "points":[
+            ["2015-03-14T15:00:00.000Z",24.5,85.2],
+            ["2015-03-14T15:01:00.000Z",45.2,91.6]
+        ]
+    }
 
 # Tests
 

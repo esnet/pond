@@ -12,46 +12,71 @@ var {Event} = require("./event");
  * meta data on top of that.
  *
  */
+
 class Series {
 
     /**
-     * A series is constructed by either:
-     * 1) passing in another series (copy constructor)
-     * 2) passing in three arguments:
-     *     name - the name of the series
-     *     columns - an array containing the title of each data column
-     *     data - an array containing the data of each column
+     * A Series is constructed by either:
+     *
+     *  1) passing in another series (copy constructor)
+     *  2) passing in three arguments:
+     *      name - the name of the series
+     *      columns - an array containing the title of each data column
+     *      data - an array containing the data of each column
+     *             Note: data may be either:
+     *               a) An Immutable.List of Immutable.Map data objects
+     *               b) An array of objects
      *
      * Internally a Series is List of Maps. Each item in the list is one data map,
      * and is stored as an Immutable Map, where the keys are the column names
-     * and the value is the data for that column at that index. This enables
-     * efficient extraction of Events, since the internal data of the Event can
-     * be simply a reference to the Immutable Map in this Series, combined with the
-     * time or timerange index.
+     * and the value is the data for that column at that index.
+     *
+     * This enables efficient extraction of Events, since the internal data of the
+     * Event can be simply a reference to the Immutable Map in this Series, combined
+     * with the time, Timerange or Index.
      */
+    
     constructor(arg1, arg2, arg3) {
         if (arg1 instanceof Series) {
+            
+            //
+            // Copy constructor
+            //
+
             let other = arg1;
 
-            //Copy constructor
             this._name = other._names;
             this._columns = other._columns;
             this._series = other._series;
 
-        } else if (_.isString(arg1) && _.isArray(arg2) && _.isArray(arg3)) {
+        } else if (_.isString(arg1) &&
+                   _.isArray(arg2) &&
+                  (_.isArray(arg3) || Immutable.List.isList(arg3))) {
+
+            //
+            // Object constructor
+            //
+
             let name = arg1;
             let columns = arg2
             let data = arg3;
 
             this._name = name;
             this._columns = Immutable.fromJS(columns);
-            this._series = Immutable.fromJS(_.map(data, function(point) {
-                var pointMap = {};
-                _.each(point, function(p, i) {
-                    pointMap[columns[i]] = p;
-                });
-                return pointMap;
-            }));
+
+            if (Immutable.List.isList(data)) {
+                this._series = data;
+            } else {
+                this._series = Immutable.fromJS(
+                    _.map(data, function(d) {
+                        var pointMap = {};
+                        _.each(d, function(p, i) {
+                            pointMap[columns[i]] = p;
+                        });
+                        return pointMap;
+                    })
+                );
+            }
         }
     }
 
@@ -75,6 +100,10 @@ class Series {
 
     toString() {
         return JSON.stringify(this.toJSON());
+    }
+
+    name() {
+        return this._name;
     }
 
     //
@@ -139,6 +168,20 @@ class Series {
     }
 }
 
+/** Internal function to find the unique keys of a bunch
+  * of immutable maps objects. There's probably a more elegent way
+  * to do this.
+  */
+function uniqueKeys(events) {
+    var arrayOfKeys = []
+    for (let e of events) {
+        for (let k of e.data().keySeq()) {
+            arrayOfKeys.push(k)
+        }
+    }
+    return new Immutable.Set(arrayOfKeys);
+}
+
 /**
  * A TimeSeries is a a Series where each event is an association of a timestamp
  * and some associated data.
@@ -158,6 +201,8 @@ class Series {
  *      ]
  *   }
  *
+ * Alternatively, the TimeSeries may be constructed from a list of Events.
+ *
  * The timerange associated with a TimeSeries is simply the bounds of the
  * events within it (i.e. the min and max times)
  */
@@ -166,35 +211,85 @@ class TimeSeries extends Series {
     constructor(arg1) {
 
         if (arg1 instanceof Series) {
-            //Copy constructor
+
+            //
+            // Copy constructor
+            //
+
             let other = arg1;
+            
             this._name = other._names;
             this._columns = other._columns;
             this._times = other._times;
             this._series = other._series;
+
         } else if (_.isObject(arg1)) {
-            //Javascript object constructor
+            
+            //
+            // Object constructor
+            //
+            // There are two forms of Timeseries construction:
+            //   - As a list of Events
+            //   - As a list of points and columns
+            //
+            // See below.
+            //
+
             let obj = arg1;
             let name = obj.name || "";
-            let columns = obj.columns.slice(1) || []; // TODO: check to see if the first item is the time
-            let points = obj.points || [];
-            let data = [];
+            let columns = [];
             let times = [];
+            let data = [];
 
-            //Series of data that we extract out the time and pass the rest to the base class
-            _.each(points, function(point) {
-                let [time, ...others] = point;
-                times.push(time);
-                data.push(others);
-            });
+            if (_.has(obj, "events")) {
 
-            //List of times, as Immutable List
-            this._times = Immutable.fromJS(times);
+                //
+                // If events is passed in, then we construct the series out of a list
+                // of Event objects
+                //
+                
+                let events = obj.events;
 
-            super(name, columns, data);
+                columns = uniqueKeys(events).toJSON();
+                _.each(events, event => {
+                    times.push(event.timestamp());
+                    data.push(event.data());
+                });
+
+                //List of times, as Immutable List
+                this._times = new Immutable.List(times);
+
+                //Construct the base series
+                super(name, columns, new Immutable.List(data));
+
+            } else if (_.has(obj, "columns") && _.has(obj, "points")) {
+
+                //
+                // If columns and points are passed in, then we construct the series
+                // out of those, assuming the format of each point is:
+                //
+                //   [time, col1, col2, col3]
+                //
+
+                let points = obj.points || [];
+
+                // TODO: check to see if the first item is the time
+                columns = obj.columns.slice(1) || [];
+
+                //Series of data that we extract out the time and
+                //pass the rest to the base class
+                _.each(points, point => {
+                    let [time, ...others] = point;
+                    times.push(time);
+                    data.push(others);
+                });
+
+                //List of times, as Immutable List
+                this._times = Immutable.fromJS(times);
+
+                super(name, columns, data);
+            }
         }
-
-        console.log("Result", this)
     }
 
     //
@@ -261,6 +356,9 @@ class TimeSeries extends Series {
 
 }
 
+/**
+ * TODO
+ */
 class TimeRangeSeries extends Series {
     constructor(index, data) {
         super(data);
@@ -307,16 +405,19 @@ class IndexedSeries extends TimeSeries {
         let cols = this._columns;
         let series = this._series;
         let times = this._times;
+
+        //The JSON output has 'time' as the first column
+        var columns = ["time"];
+        cols.forEach((column) => {columns.push(column)});
+
         return {
             name: this._name,
             index: this.indexAsString(),
-            columns: cols.toJSON(),
+            columns: columns,
             points: series.map((value, i) => {
                 var data = [times.get(i)];
                 cols.forEach((column, j) => {
-                    if (j > 0) {
-                        data.push(value.get(column));
-                    }
+                    data.push(value.get(column));
                 });
                 return data;
             })
@@ -339,7 +440,7 @@ class IndexedSeries extends TimeSeries {
         return this._index.asString();
     }
 
-    _range() {
+    range() {
         return this._index.asTimerange();
     }
 }

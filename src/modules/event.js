@@ -63,7 +63,6 @@ class Event {
 
         //Data
         this._data = dataFromArgs(arg2);
-        console.log("Taken arg2", arg1, arg2)
     }
 
     toJSON() {
@@ -124,8 +123,6 @@ class TimeRangeEvent {
 
     constructor(arg1, arg2) {
 
-        console.log("Construct TimeRangeEvent")
-
         //Timerange
         if (arg1 instanceof TimeRange) {
             let timerange = arg1;
@@ -162,7 +159,6 @@ class TimeRangeEvent {
 
 
     begin() {
-        console.log("call begin", this._range)
         return this._range.begin();
     }
 
@@ -184,7 +180,6 @@ class TimeRangeEvent {
 
     get(key) {
         var k = key || "value";
-        console.log("   get", this._data.toJSON())
         return this._data.get(k);
     }
 

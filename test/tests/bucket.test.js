@@ -216,7 +216,7 @@ describe("Buckets", () => {
 
     });
 
-    describe("Aggregator tests!", function () {
+    describe("Aggregator", function () {
 
         var {Event, IndexedEvent} = require("../../src/modules/event");
         var TimeRange = require("../../src/modules/range");
@@ -289,8 +289,8 @@ describe("Buckets", () => {
             //Done
             SumAggregator.done();
 
-            expect(sumEvents["1h-396206"].get()).to.equal(18);
-            expect(sumEvents["1h-396207"].get()).to.equal(9);
+            expect(sumEvents["1h-396206"].get("value")).to.equal(18);
+            expect(sumEvents["1h-396207"].get("value")).to.equal(9);
             done();
         });
 
@@ -332,13 +332,93 @@ describe("Buckets", () => {
             //Done
             CountAggregator.done();
 
-            console.log(countEvents);
-
             expect(countEvents["1d-16314"].get()).to.equal(24);
             expect(countEvents["1d-16318"].get()).to.equal(20);
             done();
         });
 
+    });
+
+    describe("Aggregator tests for object events", function () {
+
+        var {Event, IndexedEvent} = require("../../src/modules/event");
+        var TimeRange = require("../../src/modules/range");
+        var Aggregator = require("../../src/modules/aggregator");
+        var {max, avg, sum, count} = require("../../src/modules/functions");
+
+        var incomingEvents = [];
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 57, 0), {"cpu1": 23.4, "cpu2": 55.1}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 58, 0), {"cpu1": 36.2, "cpu2": 45.6}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 59, 0), {"cpu1": 38.6, "cpu2": 65.2}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  0, 0), {"cpu1": 24.5, "cpu2": 85.2}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  1, 0), {"cpu1": 45.2, "cpu2": 91.6}));
+
+        it('should calculate the correct sum for the two 1hr buckets', (done) => {
+            var sumEvents = {};
+            var SumAggregator = new Aggregator("1h", sum);
+            SumAggregator.onEmit((index, event) => {
+                sumEvents[index.asString()] = event;
+            });
+
+            //Add events
+            _.each(incomingEvents, (event) => {
+                SumAggregator.addEvent(event);
+            });
+
+            //Done
+            SumAggregator.done();
+
+            expect(sumEvents["1h-396206"].get("cpu1")).to.equal(98.2);
+            expect(sumEvents["1h-396206"].get("cpu2")).to.equal(165.9);
+            expect(sumEvents["1h-396207"].get("cpu1")).to.equal(69.7);
+            expect(sumEvents["1h-396207"].get("cpu2")).to.equal(176.8);
+            done();
+        });
+    });
+
+    describe("Collection tests", function () {
+
+        var {Event, IndexedEvent} = require("../../src/modules/event");
+        var TimeRange = require("../../src/modules/range");
+        var Collector = require("../../src/modules/collector");
+        var {max, avg, sum, count} = require("../../src/modules/functions");
+
+        var incomingEvents = [];
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 57, 0), {"cpu1": 23.4, "cpu2": 55.1}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 58, 0), {"cpu1": 36.2, "cpu2": 45.6}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 59, 0), {"cpu1": 38.6, "cpu2": 65.2}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  0, 0), {"cpu1": 24.5, "cpu2": 85.2}));
+        incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  1, 0), {"cpu1": 45.2, "cpu2": 91.6}));
+
+        it('should calculate the correct sum for the two 1hr buckets', (done) => {
+            var collection = {};
+
+            var hourlyCollection = new Collector("1h", (series) => {
+                collection[series.index().asString()] = series;
+            });
+
+            //Add events
+            _.each(incomingEvents, (event) => {
+                hourlyCollection.addEvent(event);
+            });
+
+            //Done
+            hourlyCollection.done();
+
+            var expected1 = '{"name":"1h-396206","index":"1h-396206","columns":["time","cpu1","cpu2"],"points":[["2015-03-14T14:57:00.000Z",23.4,55.1],["2015-03-14T14:58:00.000Z",36.2,45.6],["2015-03-14T14:59:00.000Z",38.6,65.2]]}';
+            var expected2 = '{"name":"1h-396207","index":"1h-396207","columns":["time","cpu1","cpu2"],"points":[["2015-03-14T15:00:00.000Z",24.5,85.2],["2015-03-14T15:01:00.000Z",45.2,91.6]]}';
+
+            expect(collection["1h-396206"].name()).to.equal("1h-396206");
+            expect(collection["1h-396207"].name()).to.equal("1h-396207");
+
+            expect(collection["1h-396206"].size()).to.equal(3);
+            expect(collection["1h-396207"].size()).to.equal(2);
+
+            expect(collection["1h-396206"].toString()).to.equal(expected1);
+            expect(collection["1h-396207"].toString()).to.equal(expected2);
+
+            done();
+        });
     });
 
 });

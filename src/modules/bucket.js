@@ -1,9 +1,25 @@
 var moment = require("moment");
+var Immutable = require("immutable");
 var _ = require("underscore");
 
 var {IndexedEvent} = require("./event");
+var {IndexedSeries} = require("./series.js");
 var Index = require("./index");
 var TimeRange = require("./range");
+
+/** Internal function to fund the unique keys of a bunch
+  * of immutable maps objects. There's probably a more elegent way
+  * to do this.
+  */
+function uniqueKeys(events) {
+    var arrayOfKeys = []
+    for (let e of events) {
+        for (let k of e.data().keySeq()) {
+            arrayOfKeys.push(k)
+        }
+    }
+    return new Immutable.Set(arrayOfKeys);
+}
 
 /**
  * A bucket is a mutable collection of values that is used to
@@ -68,16 +84,17 @@ class Bucket {
     //
     // Bucket cache, which could potentially be redis or something
     // so pushing to the cache takes a callback, which will be called
-    // when the value is added to the cache
+    // when the event is added to the cache.
+    //
+    // TODO: This should be stategy based.
     //
 
-    _pushToCache(value, cb) {
-        this._cache.push(value);
-        let err = null;
+    _pushToCache(event, cb) {
+        this._cache.push(event);
         cb && cb(null);
     }
 
-    _readValuesFromCache(cb) {
+    _readFromCache(cb) {
         cb && cb(this._cache);
     }
 
@@ -85,18 +102,40 @@ class Bucket {
     // Add values to the bucket
     //
 
-    addValue(value, cb) {
-        this._pushToCache(value, (err) => {cb && cb(err)});
+    addEvent(event, cb) {
+        this._pushToCache(event, (err) => {cb && cb(err)});
     }
 
-    //
-    // Sync the processing result from the bucket
-    //
+    /**
+     * Takes the values within the bucket and aggregates them together
+     * into a new IndexedEvent using the operator supplied. Then result
+     * or error is passed to the callback.
+     */
+    aggregate(operator, cb) {
+        this._readFromCache((events) => {
+            let keys = uniqueKeys(events);
+            let result = {};
+            _.each(keys.toJS(), k => {
+                let vals = _.map(events, (v) => { return v.get(k); });
+                result[k] = operator.call(this, this._index, vals, k);
+            });
+            var event = new IndexedEvent(this._index, result);
+            cb && cb(event);
+        });
+    }
 
-    sync(processor, cb) {
-        this._readValuesFromCache((values) => {
-            let result = processor.call(this, this._index, values);
-            cb && cb(result);
+    /**
+     * Takes the values within the bucket and collects them together
+     * into a new IndexedSeries using the operator supplied. Then result
+     * or error is passed to the callback.
+     */
+    collect(cb) {
+        this._readFromCache((events) => {
+            var series = new IndexedSeries(this._index, {
+                "name": this._index.toString(),
+                "events": events
+            });
+            cb && cb(series);
         });
     }
 }

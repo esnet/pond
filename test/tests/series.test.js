@@ -148,11 +148,6 @@ describe("Series", function () {
     describe("TimeSeries created with a javascript objects", function () {
         it("can create an series", function(done) {
             var series = new TimeSeries(data);
-            console.log(`Timeseries: ${series}`);
-            console.log(` - event at 0: ${series.at(0)}`);
-            console.log(` - range: ${series.range()}`);
-            console.log(`   - begin: ${series.begin()}`);
-            console.log(`   - end: ${series.end()}`);
             expect(series).to.be.ok;
             done();
         });
@@ -290,8 +285,8 @@ describe("IndexedSeries", function () {
         });
 
         it("can return the time range of the series", function(done) {
-            var series = new IndexedSeries("1d-1234", data);
-            var expectedString = "[Fri May 18 1973 17:00:00 GMT-0700 (PDT), Sat May 19 1973 17:00:00 GMT-0700 (PDT)]";
+            var series = new IndexedSeries("1d-10234", data);
+            var expectedString = "[Wed Jan 07 1998 16:00:00 GMT-0800 (PST), Thu Jan 08 1998 16:00:00 GMT-0800 (PST)]";
             expect(series.range().toLocalString()).to.equal(expectedString);
             done();
         });

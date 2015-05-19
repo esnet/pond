@@ -2,12 +2,10 @@ var Generator = require("./generator");
 var _ = require("underscore");
 var Immutable = require("immutable");
 
-class Aggregator {
+class Collector {
 
-    constructor(size, processor, selector, observer) {
+    constructor(size, observer) {
         this._generator = new Generator(size);
-        this._processor = processor;
-        this._selector = selector;
         this._currentBucket = null;
 
         //Callback
@@ -27,8 +25,8 @@ class Aggregator {
 
         if (thisBucketIndex !== currentBucketIndex) {
             if (this._currentBucket) {
-                this._currentBucket.aggregate(this._processor, (event) => {
-                    this._onEmit && this._onEmit(this._currentBucket.index(), event);
+                this._currentBucket.collect((series) => {
+                    this._onEmit && this._onEmit(series);
                 });
             }
             this._currentBucket = this._generator.bucket(d);
@@ -42,9 +40,8 @@ class Aggregator {
      */
     done() {
         if (this._currentBucket) {
-            this._currentBucket.aggregate(this._processor, (event) => {
-                this._onEmit && this._onEmit(this._currentBucket.index(),
-                                             event);
+            this._currentBucket.collect((series) => {
+                this._onEmit && this._onEmit(series);
                 this._currentBucket = null;
             });
         }
@@ -63,7 +60,7 @@ class Aggregator {
         // is done.
         //
 
-        bucket.addEvent(event, this._aggregationFn, function(err) {
+        bucket.addEvent(event, function(err) {
             if (err) {
                 console.error("Could not add value to bucket:", err);
             }
@@ -76,4 +73,4 @@ class Aggregator {
     }
 }
 
-module.exports = Aggregator;
+module.exports = Collector;

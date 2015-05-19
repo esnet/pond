@@ -15,8 +15,9 @@ exports.IndexedSeries = require("./build/npm/lib/series.js").IndexedSeries;
 
 //Builder
 exports.Bucket = require("./build/npm/lib/bucket.js");
-exports.Aggregator = require("./build/npm/lib/aggregator.js");
 exports.Generator = require("./build/npm/lib/generator.js");
+exports.Aggregator = require("./build/npm/lib/aggregator.js");
+exports.Collector = require("./build/npm/lib/generator.js");
 
 //Util
 exports.Functions = require("./build/npm/lib/functions.js");
