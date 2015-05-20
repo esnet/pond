@@ -19,8 +19,8 @@ if (process.env.COMPRESS) {
 module.exports = {
 
   output: {
-    library: 'Pond',
-    libraryTarget: 'umd'
+    library: ["ESnet", "Pond"],
+    libraryTarget: 'assign'
   },
 
   module: {

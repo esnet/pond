@@ -70,7 +70,6 @@ var Event = (function () {
 
         //Data
         this._data = dataFromArgs(arg2);
-        console.log("Taken arg2", arg1, arg2);
     }
 
     _createClass(Event, {
@@ -145,8 +144,6 @@ var TimeRangeEvent = (function () {
     function TimeRangeEvent(arg1, arg2) {
         _classCallCheck(this, TimeRangeEvent);
 
-        console.log("Construct TimeRangeEvent");
-
         //Timerange
         if (arg1 instanceof TimeRange) {
             var timerange = arg1;
@@ -190,7 +187,6 @@ var TimeRangeEvent = (function () {
         },
         begin: {
             value: function begin() {
-                console.log("call begin", this._range);
                 return this._range.begin();
             }
         },
@@ -217,7 +213,6 @@ var TimeRangeEvent = (function () {
         get: {
             value: function get(key) {
                 var k = key || "value";
-                console.log("   get", this._data.toJSON());
                 return this._data.get(k);
             }
         }

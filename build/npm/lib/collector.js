@@ -8,20 +8,18 @@ var Generator = require("./generator");
 var _ = require("underscore");
 var Immutable = require("immutable");
 
-var Aggregator = (function () {
-    function Aggregator(size, processor, selector, observer) {
-        _classCallCheck(this, Aggregator);
+var Collector = (function () {
+    function Collector(size, observer) {
+        _classCallCheck(this, Collector);
 
         this._generator = new Generator(size);
-        this._processor = processor;
-        this._selector = selector;
         this._currentBucket = null;
 
         //Callback
         this._onEmit = observer;
     }
 
-    _createClass(Aggregator, {
+    _createClass(Collector, {
         bucket: {
 
             /**
@@ -39,8 +37,8 @@ var Aggregator = (function () {
 
                 if (thisBucketIndex !== currentBucketIndex) {
                     if (this._currentBucket) {
-                        this._currentBucket.aggregate(this._processor, function (event) {
-                            _this._onEmit && _this._onEmit(_this._currentBucket.index(), event);
+                        this._currentBucket.collect(function (series) {
+                            _this._onEmit && _this._onEmit(series);
                         });
                     }
                     this._currentBucket = this._generator.bucket(d);
@@ -59,8 +57,8 @@ var Aggregator = (function () {
                 var _this = this;
 
                 if (this._currentBucket) {
-                    this._currentBucket.aggregate(this._processor, function (event) {
-                        _this._onEmit && _this._onEmit(_this._currentBucket.index(), event);
+                    this._currentBucket.collect(function (series) {
+                        _this._onEmit && _this._onEmit(series);
                         _this._currentBucket = null;
                     });
                 }
@@ -82,7 +80,7 @@ var Aggregator = (function () {
                 // is done.
                 //
 
-                bucket.addEvent(event, this._aggregationFn, function (err) {
+                bucket.addEvent(event, function (err) {
                     if (err) {
                         console.error("Could not add value to bucket:", err);
                     }
@@ -97,7 +95,7 @@ var Aggregator = (function () {
         }
     });
 
-    return Aggregator;
+    return Collector;
 })();
 
-module.exports = Aggregator;
+module.exports = Collector;
