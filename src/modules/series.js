@@ -36,7 +36,8 @@ class Series {
      * with the time, Timerange or Index.
      */
     
-    constructor(arg1, arg2, arg3) {
+    constructor(arg1, arg2, arg3, arg4) {
+
         if (arg1 instanceof Series) {
             
             //
@@ -46,22 +47,26 @@ class Series {
             let other = arg1;
 
             this._name = other._names;
+            this._meta = other._meta;
             this._columns = other._columns;
             this._series = other._series;
 
         } else if (_.isString(arg1) &&
-                   _.isArray(arg2) &&
-                  (_.isArray(arg3) || Immutable.List.isList(arg3))) {
+                   _.isObject(arg2) &&
+                   _.isArray(arg3) &&
+                  (_.isArray(arg4) || Immutable.List.isList(arg4))) {
 
             //
             // Object constructor
             //
 
             let name = arg1;
-            let columns = arg2
-            let data = arg3;
-
+            let meta = arg2;
+            let columns = arg3
+            let data = arg4;
+            
             this._name = name;
+            this._meta = Immutable.fromJS(meta);
             this._columns = Immutable.fromJS(columns);
 
             if (Immutable.List.isList(data)) {
@@ -102,8 +107,16 @@ class Series {
         return JSON.stringify(this.toJSON());
     }
 
+    //
+    // Access meta data about the series
+    //
+
     name() {
         return this._name;
+    }
+
+    meta(key) {
+        return this._meta.get(key);
     }
 
     //
@@ -224,7 +237,7 @@ class TimeSeries extends Series {
             this._series = other._series;
 
         } else if (_.isObject(arg1)) {
-            
+
             //
             // Object constructor
             //
@@ -236,7 +249,7 @@ class TimeSeries extends Series {
             //
 
             let obj = arg1;
-            let name = obj.name || "";
+
             let columns = [];
             let times = [];
             let data = [];
@@ -248,7 +261,7 @@ class TimeSeries extends Series {
                 // of Event objects
                 //
                 
-                let events = obj.events;
+                let {events, name, ...meta} = obj;
 
                 columns = uniqueKeys(events).toJSON();
                 _.each(events, event => {
@@ -260,9 +273,13 @@ class TimeSeries extends Series {
                 this._times = new Immutable.List(times);
 
                 //Construct the base series
-                super(name, columns, new Immutable.List(data));
+                super(name, meta, columns, new Immutable.List(data));
 
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
+
+                var {name, points, columns, ...meta} = obj;
+                name = name || "";
+                meta = meta || {};
 
                 //
                 // If columns and points are passed in, then we construct the series
@@ -287,7 +304,7 @@ class TimeSeries extends Series {
                 //List of times, as Immutable List
                 this._times = Immutable.fromJS(times);
 
-                super(name, columns, data);
+                super(name, meta, columns, data);
             }
         }
     }
@@ -315,11 +332,11 @@ class TimeSeries extends Series {
         var columns = ["time"];
         cols.forEach((column) => {columns.push(column)});
 
-        return {
+        return _.extend(this._meta.toJSON(), {
             name: name,
             columns: columns,
             points: points
-        }
+        });
     }
 
     /**
@@ -410,7 +427,7 @@ class IndexedSeries extends TimeSeries {
         var columns = ["time"];
         cols.forEach((column) => {columns.push(column)});
 
-        return {
+        return _.extend(this._meta.toJSON(), {
             name: this._name,
             index: this.indexAsString(),
             columns: columns,
@@ -421,7 +438,7 @@ class IndexedSeries extends TimeSeries {
                 });
                 return data;
             })
-        }
+        });
     }
 
     toString() {

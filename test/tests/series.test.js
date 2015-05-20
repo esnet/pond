@@ -14,6 +14,30 @@ var data = {
     ]
 };
 
+var interface_data = {
+    "name": "star-cr5:to_anl_ip-a_v4",
+    "description": "star-cr5->anl(as683):100ge:site-ex:show:intercloud",
+    "device": "star-cr5",
+    "id": 169,
+    "interface": "to_anl_ip-a_v4",
+    "is_ipv6": false,
+    "is_oscars": false,
+    "oscars_id": null,
+    "resource_uri": "",
+    "site": "anl",
+    "site_device": "noni",
+    "site_interface": "et-1/0/0",
+    "stats_type": "Standard",
+    "title": null,
+    "columns": ["time", "in", "out"],
+    "points": [
+        [1400425947000, 52, 34],
+        [1400425948000, 18, 13],
+        [1400425949000, 26, 67],
+        [1400425950000, 93, 91],
+    ]
+};
+
 var sept_2014_data = {
     "name": "traffic",
     "columns": ["time", "value"],
@@ -193,6 +217,17 @@ describe("Series", function () {
             var series = new TimeSeries(data);
             var expectedString = "[Sun May 18 2014 08:12:27 GMT-0700 (PDT), Sun May 18 2014 08:12:30 GMT-0700 (PDT)]";
             expect(series.range().toLocalString()).to.equal(expectedString);
+            done();
+        });
+    });
+
+    describe("Timeseries with meta data can be created with a javascript object", function () {
+        it("can create an series", function(done) {
+            var series = new TimeSeries(interface_data);
+            var expected = '{"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud","name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]]}';            
+            expect(series.toString()).to.equal(expected);
+            expect(series.meta("interface")).to.equal("to_anl_ip-a_v4");
+            expect(series.meta("bob")).to.be.undefined();
             done();
         });
     });
