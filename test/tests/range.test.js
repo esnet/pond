@@ -2,6 +2,7 @@ var moment = require('moment');
 var expect = require('chai').expect;
 
 var fmt = "YYYY-MM-DD HH:mm";
+var fmt2 = "YYYY-MM-DD HH:mm:ss";
 
 describe("Time ranges", function () {
 
@@ -32,6 +33,26 @@ describe("Time ranges", function () {
             expect(rangeCopy).to.not.equal(rangeOrig);
             expect(rangeCopy.begin().getTime()).to.equal(beginTime.getTime());
             expect(rangeCopy.end().getTime()).to.equal(endTime.getTime());
+            done();
+        });
+    });
+
+    describe("Range display", function () {
+        it('can display range as a human friendly string', function(done) {
+            var beginTime = moment("2014-08-01 05:19:59", fmt2).toDate();
+            var endTime =   moment("2014-08-01 07:41:06", fmt2).toDate();
+            var range = new Range(beginTime, endTime);
+            var expected = "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am"
+            expect(range.humanize()).to.equal(expected);
+            done();
+        });
+        it('can display range as a human friendly string', function(done) {
+            //var beginTime = moment();
+            //var endTime =   beginTime.clone().subtract(30, "days");
+            var range = Range.lastThirtyDays();
+            console.log(range.humanize())
+            var expected = "a few seconds ago to a month ago"
+            expect(range.relativeString()).to.equal(expected);
             done();
         });
     });

@@ -64,6 +64,20 @@ var TimeRange = (function () {
                 return "[" + this._range.get("begin").toUTCString() + ", " + this._range.get("end").toUTCString() + "]";
             }
         },
+        humanize: {
+            value: function humanize() {
+                var begin = new moment(this._range.get("begin"));
+                var end = new moment(this._range.get("end"));
+                return "" + begin.format("MMM D, YYYY hh:mm:ss a") + " to " + end.format("MMM D, YYYY hh:mm:ss a");
+            }
+        },
+        relativeString: {
+            value: function relativeString() {
+                var begin = new moment(this._range.get("begin"));
+                var end = new moment(this._range.get("end"));
+                return "" + begin.fromNow() + " to " + end.fromNow();
+            }
+        },
         begin: {
             value: function begin() {
                 return this._range.get("begin");
@@ -204,6 +218,40 @@ var TimeRange = (function () {
         humanizeDuration: {
             value: function humanizeDuration() {
                 return moment.duration(this.duration()).humanize();
+            }
+        }
+    }, {
+        lastDay: {
+
+            //
+            // Static TimeRange creators
+            //
+
+            value: function lastDay(thing) {
+                var beginTime = moment();
+                var endTime = beginTime.clone().subtract(24, "hours");
+                return new TimeRange(beginTime, endTime);
+            }
+        },
+        lastSevenDays: {
+            value: function lastSevenDays(thing) {
+                var beginTime = moment();
+                var endTime = beginTime.clone().subtract(7, "days");
+                return new TimeRange(beginTime, endTime);
+            }
+        },
+        lastThirtyDays: {
+            value: function lastThirtyDays(thing) {
+                var beginTime = moment();
+                var endTime = beginTime.clone().subtract(30, "days");
+                return new TimeRange(beginTime, endTime);
+            }
+        },
+        lastNinetyDays: {
+            value: function lastNinetyDays(thing) {
+                var beginTime = moment();
+                var endTime = beginTime.clone().subtract(90, "days");
+                return new TimeRange(beginTime, endTime);
             }
         }
     });

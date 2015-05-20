@@ -257,6 +257,20 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	                return "[" + this._range.get("begin").toUTCString() + ", " + this._range.get("end").toUTCString() + "]";
 	            }
 	        },
+	        humanize: {
+	            value: function humanize() {
+	                var begin = new moment(this._range.get("begin"));
+	                var end = new moment(this._range.get("end"));
+	                return "" + begin.format("MMM D, YYYY hh:mm:ss a") + " to " + end.format("MMM D, YYYY hh:mm:ss a");
+	            }
+	        },
+	        relativeString: {
+	            value: function relativeString() {
+	                var begin = new moment(this._range.get("begin"));
+	                var end = new moment(this._range.get("end"));
+	                return "" + begin.fromNow() + " to " + end.fromNow();
+	            }
+	        },
 	        begin: {
 	            value: function begin() {
 	                return this._range.get("begin");
@@ -397,6 +411,40 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	        humanizeDuration: {
 	            value: function humanizeDuration() {
 	                return moment.duration(this.duration()).humanize();
+	            }
+	        }
+	    }, {
+	        lastDay: {
+
+	            //
+	            // Static TimeRange creators
+	            //
+
+	            value: function lastDay(thing) {
+	                var beginTime = moment();
+	                var endTime = beginTime.clone().subtract(24, "hours");
+	                return new TimeRange(beginTime, endTime);
+	            }
+	        },
+	        lastSevenDays: {
+	            value: function lastSevenDays(thing) {
+	                var beginTime = moment();
+	                var endTime = beginTime.clone().subtract(7, "days");
+	                return new TimeRange(beginTime, endTime);
+	            }
+	        },
+	        lastThirtyDays: {
+	            value: function lastThirtyDays(thing) {
+	                var beginTime = moment();
+	                var endTime = beginTime.clone().subtract(30, "days");
+	                return new TimeRange(beginTime, endTime);
+	            }
+	        },
+	        lastNinetyDays: {
+	            value: function lastNinetyDays(thing) {
+	                var beginTime = moment();
+	                var endTime = beginTime.clone().subtract(90, "days");
+	                return new TimeRange(beginTime, endTime);
 	            }
 	        }
 	    });
@@ -1114,8 +1162,14 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	 *
 	 * Alternatively, the TimeSeries may be constructed from a list of Events.
 	 *
+	 * Internaly the above series is represented as two lists, one of times and
+	 * one of data associated with those times. The index of the list links them
+	 * together. You can fetch the full item at index n using get(n). This returns
+	 * the item as an Event. Note that the internal data of the Event will be
+	 * a reference to the immutable Map in the series list, so there's no copying. 
+	 *
 	 * The timerange associated with a TimeSeries is simply the bounds of the
-	 * events within it (i.e. the min and max times)
+	 * events within it (i.e. the min and max times).
 	 */
 
 	var TimeSeries = (function (_Series) {
@@ -1130,12 +1184,9 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	            // Copy constructor
 	            //
 
+	            //Construct the base series
 	            var other = arg1;
-
-	            this._name = other._names;
-	            this._columns = other._columns;
-	            this._times = other._times;
-	            this._series = other._series;
+	            _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", this).call(this, other._names, other._meta, other._columns, other._series);
 	        } else if (_.isObject(arg1)) {
 	            var name;
 
@@ -1180,11 +1231,11 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	                        data.push(event.data());
 	                    });
 
-	                    //List of times, as Immutable List
-	                    _this._times = new Immutable.List(times);
-
 	                    //Construct the base series
 	                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, _name, _meta, columns, new Immutable.List(data));
+
+	                    //List of times, as Immutable List
+	                    _this._times = new Immutable.List(times);
 	                } else if (_.has(obj, "columns") && _.has(obj, "points")) {
 	                    name = obj.name;
 	                    _points = obj.points;
@@ -1219,10 +1270,10 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	                        data.push(others);
 	                    });
 
+	                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, name, meta, columns, data);
+
 	                    //List of times, as Immutable List
 	                    _this._times = Immutable.fromJS(times);
-
-	                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, name, meta, columns, data);
 	                }
 	            })();
 	        }
@@ -1358,13 +1409,13 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	    function IndexedSeries(index, data) {
 	        _classCallCheck(this, IndexedSeries);
 
+	        _get(Object.getPrototypeOf(IndexedSeries.prototype), "constructor", this).call(this, data);
+
 	        if (_.isString(index)) {
 	            this._index = new Index(index);
 	        } else if (index instanceof Index) {
 	            this._index = index;
 	        }
-
-	        _get(Object.getPrototypeOf(IndexedSeries.prototype), "constructor", this).call(this, data);
 	    }
 
 	    _inherits(IndexedSeries, _TimeSeries);

@@ -293,8 +293,14 @@ function uniqueKeys(events) {
  *
  * Alternatively, the TimeSeries may be constructed from a list of Events.
  *
+ * Internaly the above series is represented as two lists, one of times and
+ * one of data associated with those times. The index of the list links them
+ * together. You can fetch the full item at index n using get(n). This returns
+ * the item as an Event. Note that the internal data of the Event will be
+ * a reference to the immutable Map in the series list, so there's no copying. 
+ *
  * The timerange associated with a TimeSeries is simply the bounds of the
- * events within it (i.e. the min and max times)
+ * events within it (i.e. the min and max times).
  */
 
 var TimeSeries = (function (_Series) {
@@ -309,12 +315,9 @@ var TimeSeries = (function (_Series) {
             // Copy constructor
             //
 
+            //Construct the base series
             var other = arg1;
-
-            this._name = other._names;
-            this._columns = other._columns;
-            this._times = other._times;
-            this._series = other._series;
+            _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", this).call(this, other._names, other._meta, other._columns, other._series);
         } else if (_.isObject(arg1)) {
             var name;
 
@@ -359,11 +362,11 @@ var TimeSeries = (function (_Series) {
                         data.push(event.data());
                     });
 
-                    //List of times, as Immutable List
-                    _this._times = new Immutable.List(times);
-
                     //Construct the base series
                     _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, _name, _meta, columns, new Immutable.List(data));
+
+                    //List of times, as Immutable List
+                    _this._times = new Immutable.List(times);
                 } else if (_.has(obj, "columns") && _.has(obj, "points")) {
                     name = obj.name;
                     _points = obj.points;
@@ -398,10 +401,10 @@ var TimeSeries = (function (_Series) {
                         data.push(others);
                     });
 
+                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, name, meta, columns, data);
+
                     //List of times, as Immutable List
                     _this._times = Immutable.fromJS(times);
-
-                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, name, meta, columns, data);
                 }
             })();
         }
@@ -537,13 +540,13 @@ var IndexedSeries = (function (_TimeSeries) {
     function IndexedSeries(index, data) {
         _classCallCheck(this, IndexedSeries);
 
+        _get(Object.getPrototypeOf(IndexedSeries.prototype), "constructor", this).call(this, data);
+
         if (_.isString(index)) {
             this._index = new Index(index);
         } else if (index instanceof Index) {
             this._index = index;
         }
-
-        _get(Object.getPrototypeOf(IndexedSeries.prototype), "constructor", this).call(this, data);
     }
 
     _inherits(IndexedSeries, _TimeSeries);

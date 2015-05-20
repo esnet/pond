@@ -216,8 +216,14 @@ function uniqueKeys(events) {
  *
  * Alternatively, the TimeSeries may be constructed from a list of Events.
  *
+ * Internaly the above series is represented as two lists, one of times and
+ * one of data associated with those times. The index of the list links them
+ * together. You can fetch the full item at index n using get(n). This returns
+ * the item as an Event. Note that the internal data of the Event will be
+ * a reference to the immutable Map in the series list, so there's no copying. 
+ *
  * The timerange associated with a TimeSeries is simply the bounds of the
- * events within it (i.e. the min and max times)
+ * events within it (i.e. the min and max times).
  */
 class TimeSeries extends Series {
 
@@ -229,12 +235,9 @@ class TimeSeries extends Series {
             // Copy constructor
             //
 
+            //Construct the base series
             let other = arg1;
-            
-            this._name = other._names;
-            this._columns = other._columns;
-            this._times = other._times;
-            this._series = other._series;
+            super(other._names, other._meta, other._columns, other._series);
 
         } else if (_.isObject(arg1)) {
 
@@ -269,11 +272,11 @@ class TimeSeries extends Series {
                     data.push(event.data());
                 });
 
-                //List of times, as Immutable List
-                this._times = new Immutable.List(times);
-
                 //Construct the base series
                 super(name, meta, columns, new Immutable.List(data));
+
+                //List of times, as Immutable List
+                this._times = new Immutable.List(times);
 
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
 
@@ -301,10 +304,10 @@ class TimeSeries extends Series {
                     data.push(others);
                 });
 
+                super(name, meta, columns, data);
+
                 //List of times, as Immutable List
                 this._times = Immutable.fromJS(times);
-
-                super(name, meta, columns, data);
             }
         }
     }
@@ -405,13 +408,13 @@ class TimeRangeSeries extends Series {
 class IndexedSeries extends TimeSeries {
 
     constructor(index, data) {
+        super(data);
+
         if (_.isString(index)) {
             this._index = new Index(index);
         } else if (index instanceof Index) {
             this._index = index;
         }
-
-        super(data);
     }
 
     //

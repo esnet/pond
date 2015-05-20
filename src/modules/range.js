@@ -48,6 +48,18 @@ class TimeRange {
         return "[" + this._range.get("begin").toUTCString() + ", " +  this._range.get("end").toUTCString() + "]";
     }
 
+    humanize() {
+        let begin = new moment(this._range.get("begin"));
+        let end = new moment(this._range.get("end"));
+        return `${begin.format("MMM D, YYYY hh:mm:ss a")} to ${end.format("MMM D, YYYY hh:mm:ss a")}`;
+    }
+
+    relativeString() {
+        let begin = new moment(this._range.get("begin"));
+        let end = new moment(this._range.get("end"));
+        return `${begin.fromNow()} to ${end.fromNow()}`;
+    }
+
     begin() {
         return this._range.get("begin");
     }
@@ -161,6 +173,34 @@ class TimeRange {
 
     humanizeDuration() {
         return moment.duration(this.duration()).humanize();
+    }
+
+    //
+    // Static TimeRange creators
+    //
+
+    static lastDay(thing) {
+        var beginTime = moment();
+        var endTime =   beginTime.clone().subtract(24, "hours");
+        return new TimeRange(beginTime, endTime);
+    }
+
+    static lastSevenDays(thing) {
+        var beginTime = moment();
+        var endTime =   beginTime.clone().subtract(7, "days");
+        return new TimeRange(beginTime, endTime);
+    }
+
+    static lastThirtyDays(thing) {
+        var beginTime = moment();
+        var endTime =   beginTime.clone().subtract(30, "days");
+        return new TimeRange(beginTime, endTime);
+    }
+
+    static lastNinetyDays(thing) {
+        var beginTime = moment();
+        var endTime =   beginTime.clone().subtract(90, "days");
+        return new TimeRange(beginTime, endTime);
     }
 
 }
