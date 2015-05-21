@@ -14,17 +14,14 @@ var TimeRange = (function () {
 
         if (b instanceof TimeRange) {
             this._range = b._range;
-        } else if (b instanceof Immutable.Map) {
+        } else if (b instanceof Immutable.List) {
             this._range = b;
         } else if (_.isDate(b) && _.isDate(e)) {
-            this._range = Immutable.Map({ begin: new Date(b.getTime()),
-                end: new Date(e.getTime()) });
+            this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
         } else if (moment.isMoment(b) && moment.isMoment(e)) {
-            this._range = Immutable.Map({ begin: new Date(b.valueOf()),
-                end: new Date(e.valueOf()) });
+            this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
         } else if (_.isNumber(b) && _.isNumber(e)) {
-            this._range = Immutable.Map({ begin: new Date(b),
-                end: new Date(e) });
+            this._range = Immutable.List([new Date(b), new Date(e)]);
         }
     }
 
@@ -32,7 +29,7 @@ var TimeRange = (function () {
         range: {
 
             /**
-             * Returns the internal range, which is an Immutable Map containing begin and end keys
+             * Returns the internal range, which is an Immutable List containing begin and end keys
              */
 
             value: function range() {
@@ -56,36 +53,36 @@ var TimeRange = (function () {
         },
         toLocalString: {
             value: function toLocalString() {
-                return "[" + this._range.get("begin").toString() + ", " + this._range.get("end").toString() + "]";
+                return "[" + this.begin().toString() + ", " + this.end().toString() + "]";
             }
         },
         toUTCString: {
             value: function toUTCString() {
-                return "[" + this._range.get("begin").toUTCString() + ", " + this._range.get("end").toUTCString() + "]";
+                return "[" + this.begin().toUTCString() + ", " + this.end().toUTCString() + "]";
             }
         },
         humanize: {
             value: function humanize() {
-                var begin = new moment(this._range.get("begin"));
-                var end = new moment(this._range.get("end"));
+                var begin = new moment(this.begin());
+                var end = new moment(this.end());
                 return "" + begin.format("MMM D, YYYY hh:mm:ss a") + " to " + end.format("MMM D, YYYY hh:mm:ss a");
             }
         },
         relativeString: {
             value: function relativeString() {
-                var begin = new moment(this._range.get("begin"));
-                var end = new moment(this._range.get("end"));
+                var begin = new moment(this.begin());
+                var end = new moment(this.end());
                 return "" + begin.fromNow() + " to " + end.fromNow();
             }
         },
         begin: {
             value: function begin() {
-                return this._range.get("begin");
+                return this._range.get(0);
             }
         },
         end: {
             value: function end() {
-                return this._range.get("end");
+                return this._range.get(1);
             }
         },
         setBegin: {
@@ -97,7 +94,7 @@ var TimeRange = (function () {
              */
 
             value: function setBegin(t) {
-                return new TimeRange(this._range.set("begin", t));
+                return new TimeRange(this._range.set(0, t));
             }
         },
         setEnd: {
@@ -109,7 +106,7 @@ var TimeRange = (function () {
              */
 
             value: function setEnd(t) {
-                return new TimeRange(this._range.set("end", t));
+                return new TimeRange(this._range.set(1, t));
             }
         },
         equals: {

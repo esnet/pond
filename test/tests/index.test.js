@@ -8,6 +8,7 @@ describe("Indexes", function () {
     describe("Index creation", function () {
         it('can create a daily index', function(done) {
             var index = new Index("1d-12355");
+            console.log("Index:", index.asTimerange().toUTCString());
             var expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
             expect(index.asTimerange().toUTCString()).to.equal(expected);
             expect(index.asTimerange().humanizeDuration()).to.equal("a day");

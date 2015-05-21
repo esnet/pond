@@ -80,8 +80,7 @@ describe("Events", function () {
 
             var event = new TimeRangeEvent(timerange, sampleEvent);
 
-            var expected = '{"timerange":{"begin":"2015-04-22T03:30:00.000Z","end":"2015-04-22T13:00:00.000Z"},"data":{"external_ticket":"","start_time":"2015-04-22T03:30:00Z","completed":true,"end_time":"2015-04-22T13:00:00Z","organization":"Internet2 / Level 3","title":"STAR-CR5 < 100 ge 06519 > ANL  - Outage","type":"U","esnet_ticket":"ESNET-20150421-013","description":"At 13:33 pacific circuit 06519 went down."}}'
-
+            var expected = '{"timerange":["2015-04-22T03:30:00.000Z","2015-04-22T13:00:00.000Z"],"data":{"external_ticket":"","start_time":"2015-04-22T03:30:00Z","completed":true,"end_time":"2015-04-22T13:00:00Z","organization":"Internet2 / Level 3","title":"STAR-CR5 < 100 ge 06519 > ANL  - Outage","type":"U","esnet_ticket":"ESNET-20150421-013","description":"At 13:33 pacific circuit 06519 went down."}}';
             expect(`${event}`).to.equal(expected);
             expect(event.begin().getTime()).to.equal(1429673400000);
             expect(event.end().getTime()).to.equal(1429707600000);

@@ -7,22 +7,19 @@ class TimeRange {
     constructor(b, e) {
         if (b instanceof TimeRange) {
             this._range = b._range;
-        } else if (b instanceof Immutable.Map) {
+        } else if (b instanceof Immutable.List) {
             this._range = b;
         } else if (_.isDate(b) && _.isDate(e)) {
-            this._range = Immutable.Map({"begin": new Date(b.getTime()),
-                                         "end": new Date(e.getTime())});
+            this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
         } else if (moment.isMoment(b) && moment.isMoment(e)) {
-            this._range = Immutable.Map({"begin": new Date(b.valueOf()),
-                                          "end": new Date(e.valueOf())});
+            this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
         } else if (_.isNumber(b) && _.isNumber(e)) {
-            this._range = Immutable.Map({"begin": new Date(b),
-                                         "end": new Date(e)});
+            this._range = Immutable.List([new Date(b), new Date(e)]);
         }
     }
 
     /**
-     * Returns the internal range, which is an Immutable Map containing begin and end keys
+     * Returns the internal range, which is an Immutable List containing begin and end keys
      */
     range() {
         return this._range;
@@ -41,31 +38,31 @@ class TimeRange {
     }
 
     toLocalString() {
-        return "[" + this._range.get("begin").toString() + ", " +  this._range.get("end").toString() + "]";
+        return "[" + this.begin().toString() + ", " +  this.end().toString() + "]";
     }
 
     toUTCString() {
-        return "[" + this._range.get("begin").toUTCString() + ", " +  this._range.get("end").toUTCString() + "]";
+        return "[" + this.begin().toUTCString() + ", " +  this.end().toUTCString() + "]";
     }
 
     humanize() {
-        let begin = new moment(this._range.get("begin"));
-        let end = new moment(this._range.get("end"));
+        let begin = new moment(this.begin());
+        let end = new moment(this.end());
         return `${begin.format("MMM D, YYYY hh:mm:ss a")} to ${end.format("MMM D, YYYY hh:mm:ss a")}`;
     }
 
     relativeString() {
-        let begin = new moment(this._range.get("begin"));
-        let end = new moment(this._range.get("end"));
+        let begin = new moment(this.begin());
+        let end = new moment(this.end());
         return `${begin.fromNow()} to ${end.fromNow()}`;
     }
 
     begin() {
-        return this._range.get("begin");
+        return this._range.get(0);
     }
 
     end() {
-        return this._range.get("end");
+        return this._range.get(1);
     }
 
     /**
@@ -74,7 +71,7 @@ class TimeRange {
      * @param {Date} - The begin time to set the start of the Timerange to.
      */
     setBegin(t) {
-        return new TimeRange(this._range.set("begin", t));
+        return new TimeRange(this._range.set(0, t));
     }
 
     /**
@@ -83,7 +80,7 @@ class TimeRange {
      * @param {Date} - The time to set the end of the Timerange to.
      */
     setEnd(t) {
-        return new TimeRange(this._range.set("end", t));
+        return new TimeRange(this._range.set(1, t));
     }
 
     /**
