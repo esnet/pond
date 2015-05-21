@@ -18,6 +18,11 @@ describe("Time ranges", function () {
             expect(range.end().getTime()).to.equal(endTime.getTime());
             done();
         });
+        it('can create a new range with two UNIX epoch times in an array', function(done) {
+            var range = new Range([1326309060000, 1329941520000]);
+            expect(range.toJSON()).to.deep.equal([1326309060000, 1329941520000]);
+            done();
+        });
     });
 
     describe("Range copying", function () {
@@ -37,7 +42,25 @@ describe("Time ranges", function () {
         });
     });
 
-    describe("Range display", function () {
+    describe("Range serialization", function () {
+        it('can output JSON in the correct format', function(done) {
+            var beginTime = moment("2012-01-11 11:11", fmt).toDate();
+            var endTime =   moment("2012-02-22 12:12", fmt).toDate();
+            var range = new Range(beginTime, endTime);
+            expect(range.toJSON()).to.deep.equal([1326309060000, 1329941520000]);
+            done();
+        });
+        it('can output a string representation', function(done) {
+            var beginTime = moment("2012-01-11 11:11", fmt).toDate();
+            var endTime =   moment("2012-02-22 12:12", fmt).toDate();
+            var range = new Range(beginTime, endTime);
+            expect(range.toString()).to.equal('[1326309060000,1329941520000]');
+            done();
+        });
+
+    });
+
+    describe("Range human friendly display", function () {
         it('can display range as a human friendly string', function(done) {
             var beginTime = moment("2014-08-01 05:19:59", fmt2).toDate();
             var endTime =   moment("2014-08-01 07:41:06", fmt2).toDate();
@@ -46,7 +69,7 @@ describe("Time ranges", function () {
             expect(range.humanize()).to.equal(expected);
             done();
         });
-        it('can display range as a human friendly string', function(done) {
+        it('can display relative ranges as a human friendly string', function(done) {
             //var beginTime = moment();
             //var endTime =   beginTime.clone().subtract(30, "days");
             var range = Range.lastThirtyDays();

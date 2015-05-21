@@ -4,17 +4,26 @@ var moment = require("moment");
 
 class TimeRange {
 
-    constructor(b, e) {
-        if (b instanceof TimeRange) {
-            this._range = b._range;
-        } else if (b instanceof Immutable.List) {
-            this._range = b;
-        } else if (_.isDate(b) && _.isDate(e)) {
-            this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
-        } else if (moment.isMoment(b) && moment.isMoment(e)) {
-            this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
-        } else if (_.isNumber(b) && _.isNumber(e)) {
-            this._range = Immutable.List([new Date(b), new Date(e)]);
+    constructor(arg1, arg2) {
+        if (arg1 instanceof TimeRange) {
+            let other = arg1;
+            this._range = other._range;
+        } else if (arg1 instanceof Immutable.List) {
+            let rangeList = arg1;
+            this._range = rangeList;
+        } else if (_.isArray(arg1)) {
+            let rangeArray = arg1;
+            this._range = Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
+        } else {
+            let b = arg1;
+            let e = arg2;
+            if (_.isDate(b) && _.isDate(e)) {
+                this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
+            } else if (moment.isMoment(b) && moment.isMoment(e)) {
+                this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
+            } else if (_.isNumber(b) && _.isNumber(e)) {
+                this._range = Immutable.List([new Date(b), new Date(e)]);
+            }
         }
     }
 
@@ -30,7 +39,7 @@ class TimeRange {
     //
     
     toJSON() {
-        return this._range.toJSON();
+        return [this.begin().getTime(), this.end().getTime()];
     }
 
     toString() {

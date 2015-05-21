@@ -9,19 +9,28 @@ var Immutable = require("immutable");
 var moment = require("moment");
 
 var TimeRange = (function () {
-    function TimeRange(b, e) {
+    function TimeRange(arg1, arg2) {
         _classCallCheck(this, TimeRange);
 
-        if (b instanceof TimeRange) {
-            this._range = b._range;
-        } else if (b instanceof Immutable.List) {
-            this._range = b;
-        } else if (_.isDate(b) && _.isDate(e)) {
-            this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
-        } else if (moment.isMoment(b) && moment.isMoment(e)) {
-            this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
-        } else if (_.isNumber(b) && _.isNumber(e)) {
-            this._range = Immutable.List([new Date(b), new Date(e)]);
+        if (arg1 instanceof TimeRange) {
+            var other = arg1;
+            this._range = other._range;
+        } else if (arg1 instanceof Immutable.List) {
+            var rangeList = arg1;
+            this._range = rangeList;
+        } else if (_.isArray(arg1)) {
+            var rangeArray = arg1;
+            this._range = Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
+        } else {
+            var b = arg1;
+            var e = arg2;
+            if (_.isDate(b) && _.isDate(e)) {
+                this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
+            } else if (moment.isMoment(b) && moment.isMoment(e)) {
+                this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
+            } else if (_.isNumber(b) && _.isNumber(e)) {
+                this._range = Immutable.List([new Date(b), new Date(e)]);
+            }
         }
     }
 
@@ -43,7 +52,7 @@ var TimeRange = (function () {
             //
 
             value: function toJSON() {
-                return this._range.toJSON();
+                return [this.begin().getTime(), this.end().getTime()];
             }
         },
         toString: {
