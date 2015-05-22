@@ -167,7 +167,7 @@ var sept_2014_data = {
 
 describe("Series", function () {
 
-    var {TimeSeries} = require("../../src/modules/series.js");
+    var {Series, TimeSeries} = require("../../src/modules/series.js");
 
     describe("TimeSeries created with a javascript objects", function () {
         it("can create an series", function(done) {
@@ -222,12 +222,42 @@ describe("Series", function () {
     });
 
     describe("Timeseries with meta data can be created with a javascript object", function () {
-        it("can create an series", function(done) {
+        it("can create an series with meta data and get that data back", function(done) {
             var series = new TimeSeries(interface_data);
             var expected = '{"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud","name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]]}';            
             expect(series.toString()).to.equal(expected);
             expect(series.meta("interface")).to.equal("to_anl_ip-a_v4");
             expect(series.meta("bob")).to.be.undefined();
+            done();
+        });
+    });
+
+    describe("Compare series", function () {
+        it("can compare a series and a reference to a series as being equal", function(done) {
+            var series = new TimeSeries(data);
+            var refSeries = series;
+            expect(series).to.equal(refSeries);
+            done();
+        });
+
+        it("can use the equals() comparator to compare a series and a copy of the series as true", function(done) {
+            var series = new TimeSeries(data);
+            var copyOfSeries = new TimeSeries(series);
+            expect(TimeSeries.equal(series, copyOfSeries)).to.be.true;
+            done();
+        });
+
+        it("can use the equals() comparator to compare a series and a value equivalent series as false", function(done) {
+            var series = new TimeSeries(data);
+            var otherSeries = new TimeSeries(data);
+            expect(TimeSeries.equal(series, otherSeries)).to.be.false;
+            done();
+        });
+
+        it("can use the is() comparator to compare a series and a value equivalent series as true", function(done) {
+            var series = new TimeSeries(data);
+            var otherSeries = new TimeSeries(data);
+            expect(TimeSeries.is(series, otherSeries)).to.be.true;
             done();
         });
     });

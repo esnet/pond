@@ -46,7 +46,7 @@ class Series {
 
             let other = arg1;
 
-            this._name = other._names;
+            this._name = other._name;
             this._meta = other._meta;
             this._columns = other._columns;
             this._series = other._series;
@@ -179,6 +179,13 @@ class Series {
         });
         return min.get(c);
     }
+
+    static equal(series1, series2) {
+        return (series1._name === series2._name &&
+                series1._meta === series2._meta &&
+                series1._columns === series2._columns &&
+                series1._series === series2._series);
+    }
 }
 
 /** Internal function to find the unique keys of a bunch
@@ -229,7 +236,9 @@ class TimeSeries extends Series {
 
     constructor(arg1) {
 
-        if (arg1 instanceof Series) {
+        if (arg1 instanceof TimeSeries) {
+            
+            super();
 
             //
             // Copy constructor
@@ -237,7 +246,12 @@ class TimeSeries extends Series {
 
             //Construct the base series
             let other = arg1;
-            super(other._names, other._meta, other._columns, other._series);
+
+            this._name = other._name;
+            this._meta = other._meta;
+            this._columns = other._columns;
+            this._series = other._series;
+            this._times = other._times;
 
         } else if (_.isObject(arg1)) {
 
@@ -372,6 +386,24 @@ class TimeSeries extends Series {
 
     at(i) {
         return new Event(this._times.get(i), this._series.get(i));
+    }
+
+    static equal(series1, series2) {
+        console.log("TimeSeries compare")
+        return (series1._name === series2._name &&
+                series1._meta === series2._meta &&
+                series1._columns === series2._columns &&
+                series1._series === series2._series &&
+                series1._times === series2._times);
+    }
+    
+    static is(series1, series2) {
+        console.log("TimeSeries compare")
+        return (series1._name === series2._name &&
+                Immutable.is(series1._meta, series2._meta) &&
+                Immutable.is(series1._columns, series2._columns) &&
+                Immutable.is(series1._series, series2._series) &&
+                Immutable.is(series1._times, series2._times));
     }
 
 }

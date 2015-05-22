@@ -150,6 +150,11 @@ An event is a timestamp and some data, so to deconstruct the event you can use `
     var data = series.data(); // {"value":18}
     var timestamp = series.timestamp().getTime(); //1400425948000
 
+### Comparing series
+
+One of the nice things about the TimeSeries representation in Pond is that it is built on top of immutable data structures. As a result, determining if a series is different from before is trivial.
+
+A TimeSeries can be compared in two ways: with the `equals()` or `is()` static functions. `equals()` will check that the internal structures of the TimeSeries are the same reference. If you use the copy constructor, they will be the same. The `is()` function is perhaps more useful in that it will check to see if the structures, though perhaps being different references, have the same values.
 
 ### Aggregation
 
