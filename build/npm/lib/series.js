@@ -216,6 +216,11 @@ var Series = (function () {
             value: function equal(series1, series2) {
                 return series1._name === series2._name && series1._meta === series2._meta && series1._columns === series2._columns && series1._series === series2._series;
             }
+        },
+        is: {
+            value: function is(series1, series2) {
+                return series1._name === series2._name && Immutable.is(series1._meta, series2._meta) && Immutable.is(series1._columns, series2._columns) && Immutable.is(series1._series, series2._series);
+            }
         }
     });
 
@@ -507,13 +512,11 @@ var TimeSeries = (function (_Series) {
     }, {
         equal: {
             value: function equal(series1, series2) {
-                console.log("TimeSeries compare");
                 return series1._name === series2._name && series1._meta === series2._meta && series1._columns === series2._columns && series1._series === series2._series && series1._times === series2._times;
             }
         },
         is: {
             value: function is(series1, series2) {
-                console.log("TimeSeries compare");
                 return series1._name === series2._name && Immutable.is(series1._meta, series2._meta) && Immutable.is(series1._columns, series2._columns) && Immutable.is(series1._series, series2._series) && Immutable.is(series1._times, series2._times);
             }
         }

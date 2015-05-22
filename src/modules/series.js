@@ -186,6 +186,14 @@ class Series {
                 series1._columns === series2._columns &&
                 series1._series === series2._series);
     }
+    
+    static is(series1, series2) {
+        return (series1._name === series2._name &&
+                Immutable.is(series1._meta, series2._meta) &&
+                Immutable.is(series1._columns, series2._columns) &&
+                Immutable.is(series1._series, series2._series));
+    }
+
 }
 
 /** Internal function to find the unique keys of a bunch
@@ -389,7 +397,6 @@ class TimeSeries extends Series {
     }
 
     static equal(series1, series2) {
-        console.log("TimeSeries compare")
         return (series1._name === series2._name &&
                 series1._meta === series2._meta &&
                 series1._columns === series2._columns &&
@@ -398,7 +405,6 @@ class TimeSeries extends Series {
     }
     
     static is(series1, series2) {
-        console.log("TimeSeries compare")
         return (series1._name === series2._name &&
                 Immutable.is(series1._meta, series2._meta) &&
                 Immutable.is(series1._columns, series2._columns) &&
