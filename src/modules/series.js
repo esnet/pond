@@ -396,6 +396,12 @@ class TimeSeries extends Series {
         return new Event(this._times.get(i), this._series.get(i));
     }
 
+    * events() {
+        for (let i=0; i < this.size(); i++) {
+            yield this.at(i);
+        }
+    }
+
     static equal(series1, series2) {
         return (series1._name === series2._name &&
                 series1._meta === series2._meta &&
