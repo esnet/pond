@@ -1,8 +1,8 @@
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var moment = require("moment");
 var _ = require("underscore");
@@ -31,7 +31,7 @@ function dataFromArgs(arg1) {
     } else if (data instanceof Immutable.Map) {
         data = arg1;
     } else {
-        data = new Immutable.Map({ value: arg1 });
+        data = new Immutable.Map({ "value": arg1 });
     }
     return data;
 }
@@ -72,49 +72,48 @@ var Event = (function () {
         this._data = dataFromArgs(arg2);
     }
 
-    _createClass(Event, {
-        toJSON: {
-            value: function toJSON() {
-                return { time: this._time.getTime(), data: this._data.toJSON() };
-            }
-        },
-        toString: {
-            value: function toString() {
-                return JSON.stringify(this.toJSON());
-            }
-        },
-        timestampAsUTCString: {
-            value: function timestampAsUTCString() {
-                return this._time.toUTCString();
-            }
-        },
-        timestampAsLocalString: {
-            value: function timestampAsLocalString() {
-                return this._time.toString();
-            }
-        },
-        timestamp: {
-            value: function timestamp() {
-                return this._time;
-            }
-        },
-        data: {
-            value: function data() {
-                return this._data;
-            }
-        },
-        get: {
-            value: function get(key) {
-                var k = key || "value";
-                return this._data.get(k);
-            }
-        },
-        stringify: {
-            value: function stringify() {
-                return data.stringify(this._data);
-            }
+    _createClass(Event, [{
+        key: "toJSON",
+        value: function toJSON() {
+            return { time: this._time.getTime(), data: this._data.toJSON() };
         }
-    });
+    }, {
+        key: "toString",
+        value: function toString() {
+            return JSON.stringify(this.toJSON());
+        }
+    }, {
+        key: "timestampAsUTCString",
+        value: function timestampAsUTCString() {
+            return this._time.toUTCString();
+        }
+    }, {
+        key: "timestampAsLocalString",
+        value: function timestampAsLocalString() {
+            return this._time.toString();
+        }
+    }, {
+        key: "timestamp",
+        value: function timestamp() {
+            return this._time;
+        }
+    }, {
+        key: "data",
+        value: function data() {
+            return this._data;
+        }
+    }, {
+        key: "get",
+        value: function get(key) {
+            var k = key || "value";
+            return this._data.get(k);
+        }
+    }, {
+        key: "stringify",
+        value: function stringify() {
+            return data.stringify(this._data);
+        }
+    }]);
 
     return Event;
 })();
@@ -154,69 +153,68 @@ var TimeRangeEvent = (function () {
         this._data = dataFromArgs(arg2);
     }
 
-    _createClass(TimeRangeEvent, {
-        toJSON: {
-            value: function toJSON() {
-                return { timerange: this._range.toJSON(), data: this._data.toJSON() };
-            }
-        },
-        toString: {
-            value: function toString() {
-                return JSON.stringify(this.toJSON());
-            }
-        },
-        timerange: {
-
-            //
-            // Access the timerange represented by the index
-            //
-
-            value: function timerange() {
-                return this._range;
-            }
-        },
-        timerangeAsUTCString: {
-            value: function timerangeAsUTCString() {
-                return this.timerange().toUTCString();
-            }
-        },
-        timerangeAsLocalString: {
-            value: function timerangeAsLocalString() {
-                return this.timerange().toLocalString();
-            }
-        },
-        begin: {
-            value: function begin() {
-                return this._range.begin();
-            }
-        },
-        end: {
-            value: function end() {
-                return this._range.end();
-            }
-        },
-        humanizeDuration: {
-            value: function humanizeDuration() {
-                return this._range.humanizeDuration();
-            }
-        },
-        data: {
-
-            //
-            // Access the event data
-            //
-
-            value: function data() {
-                return this._data;
-            }
-        },
-        get: {
-            value: function get(key) {
-                var k = key || "value";
-                return this._data.get(k);
-            }
+    _createClass(TimeRangeEvent, [{
+        key: "toJSON",
+        value: function toJSON() {
+            return { timerange: this._range.toJSON(), data: this._data.toJSON() };
         }
-    });
+    }, {
+        key: "toString",
+        value: function toString() {
+            return JSON.stringify(this.toJSON());
+        }
+    }, {
+        key: "timerange",
+
+        //
+        // Access the timerange represented by the index
+        //
+
+        value: function timerange() {
+            return this._range;
+        }
+    }, {
+        key: "timerangeAsUTCString",
+        value: function timerangeAsUTCString() {
+            return this.timerange().toUTCString();
+        }
+    }, {
+        key: "timerangeAsLocalString",
+        value: function timerangeAsLocalString() {
+            return this.timerange().toLocalString();
+        }
+    }, {
+        key: "begin",
+        value: function begin() {
+            return this._range.begin();
+        }
+    }, {
+        key: "end",
+        value: function end() {
+            return this._range.end();
+        }
+    }, {
+        key: "humanizeDuration",
+        value: function humanizeDuration() {
+            return this._range.humanizeDuration();
+        }
+    }, {
+        key: "data",
+
+        //
+        // Access the event data
+        //
+
+        value: function data() {
+            return this._data;
+        }
+    }, {
+        key: "get",
+        value: function get(key) {
+            var k = key || "value";
+            return this._data.get(k);
+        }
+    }]);
 
     return TimeRangeEvent;
 })();
@@ -262,78 +260,77 @@ var IndexedEvent = (function () {
         } else if (data instanceof Immutable.Map) {
             this._data = data;
         } else {
-            this._data = new Immutable.Map({ value: data });
+            this._data = new Immutable.Map({ "value": data });
         }
     }
 
-    _createClass(IndexedEvent, {
-        toJSON: {
-            value: function toJSON() {
-                return { index: this._i.asString(), data: this._data.toJSON() };
-            }
-        },
-        toString: {
-            value: function toString() {
-                return JSON.stringify(this.toJSON());
-            }
-        },
-        index: {
-
-            //
-            // Access the index itself
-            //
-
-            value: function index() {
-                return this._i;
-            }
-        },
-        timerangeAsUTCString: {
-
-            //
-            // Access the timerange represented by the index
-            //
-
-            value: function timerangeAsUTCString() {
-                return this.timerange().toUTCString();
-            }
-        },
-        timerangeAsLocalString: {
-            value: function timerangeAsLocalString() {
-                return this.timerange().toLocalString();
-            }
-        },
-        timerange: {
-            value: function timerange() {
-                return this._i.asTimerange();
-            }
-        },
-        begin: {
-            value: function begin() {
-                return this.timerange().begin();
-            }
-        },
-        end: {
-            value: function end() {
-                return this.timerange().end();
-            }
-        },
-        data: {
-
-            //
-            // Access the event data
-            //
-
-            value: function data() {
-                return this._data;
-            }
-        },
-        get: {
-            value: function get(key) {
-                var k = key || "value";
-                return this._data.get(k);
-            }
+    _createClass(IndexedEvent, [{
+        key: "toJSON",
+        value: function toJSON() {
+            return { index: this._i.asString(), data: this._data.toJSON() };
         }
-    });
+    }, {
+        key: "toString",
+        value: function toString() {
+            return JSON.stringify(this.toJSON());
+        }
+    }, {
+        key: "index",
+
+        //
+        // Access the index itself
+        //
+
+        value: function index() {
+            return this._i;
+        }
+    }, {
+        key: "timerangeAsUTCString",
+
+        //
+        // Access the timerange represented by the index
+        //
+
+        value: function timerangeAsUTCString() {
+            return this.timerange().toUTCString();
+        }
+    }, {
+        key: "timerangeAsLocalString",
+        value: function timerangeAsLocalString() {
+            return this.timerange().toLocalString();
+        }
+    }, {
+        key: "timerange",
+        value: function timerange() {
+            return this._i.asTimerange();
+        }
+    }, {
+        key: "begin",
+        value: function begin() {
+            return this.timerange().begin();
+        }
+    }, {
+        key: "end",
+        value: function end() {
+            return this.timerange().end();
+        }
+    }, {
+        key: "data",
+
+        //
+        // Access the event data
+        //
+
+        value: function data() {
+            return this._data;
+        }
+    }, {
+        key: "get",
+        value: function get(key) {
+            var k = key || "value";
+            return this._data.get(k);
+        }
+    }]);
 
     return IndexedEvent;
 })();

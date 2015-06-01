@@ -1,8 +1,8 @@
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Generator = require("./generator");
 var _ = require("underscore");
@@ -19,81 +19,77 @@ var Collector = (function () {
         this._onEmit = observer;
     }
 
-    _createClass(Collector, {
-        bucket: {
+    _createClass(Collector, [{
+        key: "bucket",
 
-            /**
-             * Gets the current bucket or returns a new one.
-             *
-             * If a new bucket is generated the result of the old bucket is emitted
-             * automatically.
-             */
+        /**
+         * Gets the current bucket or returns a new one.
+         *
+         * If a new bucket is generated the result of the old bucket is emitted
+         * automatically.
+         */
+        value: function bucket(d) {
+            var _this = this;
 
-            value: function bucket(d) {
-                var _this = this;
+            var thisBucketIndex = this._generator.bucketIndex(d);
+            var currentBucketIndex = this._currentBucket ? this._currentBucket.index().asString() : "";
 
-                var thisBucketIndex = this._generator.bucketIndex(d);
-                var currentBucketIndex = this._currentBucket ? this._currentBucket.index().asString() : "";
-
-                if (thisBucketIndex !== currentBucketIndex) {
-                    if (this._currentBucket) {
-                        this._currentBucket.collect(function (series) {
-                            _this._onEmit && _this._onEmit(series);
-                        });
-                    }
-                    this._currentBucket = this._generator.bucket(d);
-                }
-
-                return this._currentBucket;
-            }
-        },
-        done: {
-
-            /**
-             * Forces the current bucket to emit
-             */
-
-            value: function done() {
-                var _this = this;
-
+            if (thisBucketIndex !== currentBucketIndex) {
                 if (this._currentBucket) {
                     this._currentBucket.collect(function (series) {
                         _this._onEmit && _this._onEmit(series);
-                        _this._currentBucket = null;
                     });
                 }
+                this._currentBucket = this._generator.bucket(d);
             }
-        },
-        addEvent: {
 
-            /**
-             * Add an event, which will be assigned to a bucket
-             */
+            return this._currentBucket;
+        }
+    }, {
+        key: "done",
 
-            value: function addEvent(event, cb) {
-                var t = event.timestamp();
-                var bucket = this.bucket(t);
+        /**
+         * Forces the current bucket to emit
+         */
+        value: function done() {
+            var _this2 = this;
 
-                //
-                // Adding the value to the bucket. This could be an async operation
-                // so the passed in callback to this function will be called when this
-                // is done.
-                //
-
-                bucket.addEvent(event, function (err) {
-                    if (err) {
-                        console.error("Could not add value to bucket:", err);
-                    }
-                    cb && cb(err);
+            if (this._currentBucket) {
+                this._currentBucket.collect(function (series) {
+                    _this2._onEmit && _this2._onEmit(series);
+                    _this2._currentBucket = null;
                 });
             }
-        },
-        onEmit: {
-            value: function onEmit(cb) {
-                this._onEmit = cb;
-            }
         }
-    });
+    }, {
+        key: "addEvent",
+
+        /**
+         * Add an event, which will be assigned to a bucket
+         */
+        value: function addEvent(event, cb) {
+            var t = event.timestamp();
+            var bucket = this.bucket(t);
+
+            //
+            // Adding the value to the bucket. This could be an async operation
+            // so the passed in callback to this function will be called when this
+            // is done.
+            //
+
+            bucket.addEvent(event, function (err) {
+                if (err) {
+                    console.error("Could not add value to bucket:", err);
+                }
+                cb && cb(err);
+            });
+        }
+    }, {
+        key: "onEmit",
+        value: function onEmit(cb) {
+            this._onEmit = cb;
+        }
+    }]);
 
     return Collector;
 })();
