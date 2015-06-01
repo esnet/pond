@@ -50,9 +50,7 @@ class Generator {
         return length;
     }
 
-
     static getBucketPosFromDate(date, length) {
-        //console.log("getBucketPosFromDate", date)
         var dd = moment.utc(date).valueOf();
         return parseInt(dd/=length, 10);
     }

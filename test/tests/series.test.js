@@ -239,7 +239,6 @@ describe("Series", function () {
             for (event of series.events()) {
                 results.push(event.get("in"));
             }
-            console.log("Results:", results.toString());
             expect(results).to.deep.equal([52,18,26,93]);
             done();
         });

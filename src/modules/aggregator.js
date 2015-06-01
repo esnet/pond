@@ -4,14 +4,13 @@ var Immutable = require("immutable");
 
 class Aggregator {
 
-    constructor(size, processor, selector, observer) {
+    constructor(size, processor, observer) {
         this._generator = new Generator(size);
         this._processor = processor;
-        this._selector = selector;
-        this._currentBucket = null;
+        this._bucket = null;
 
         //Callback
-        this._onEmit = observer;
+        this._observer = observer;
     }
 
     /**
@@ -22,30 +21,26 @@ class Aggregator {
      */
     bucket(d) {
         let thisBucketIndex = this._generator.bucketIndex(d);
-        let currentBucketIndex = this._currentBucket ?
-            this._currentBucket.index().asString() : "";
-
+        let currentBucketIndex = this._bucket ? this._bucket.index().asString() : "";
         if (thisBucketIndex !== currentBucketIndex) {
-            if (this._currentBucket) {
-                this._currentBucket.aggregate(this._processor, (event) => {
-                    this._onEmit && this._onEmit(this._currentBucket.index(), event);
+            if (this._bucket) {
+                this._bucket.aggregate(this._processor, event => {
+                    this._observer && this._observer(this._bucket.index(), event);
                 });
             }
-            this._currentBucket = this._generator.bucket(d);
+            this._bucket = this._generator.bucket(d);
         }
-
-        return this._currentBucket;
+        return this._bucket;
     }
 
     /**
      * Forces the current bucket to emit
      */
     done() {
-        if (this._currentBucket) {
-            this._currentBucket.aggregate(this._processor, (event) => {
-                this._onEmit && this._onEmit(this._currentBucket.index(),
-                                             event);
-                this._currentBucket = null;
+        if (this._bucket) {
+            this._bucket.aggregate(this._processor, event => {
+                this._observer && this._observer(this._bucket.index(), event);
+                this._bucket = null;
             });
         }
     }
@@ -63,7 +58,7 @@ class Aggregator {
         // is done.
         //
 
-        bucket.addEvent(event, this._aggregationFn, function(err) {
+        bucket.addEvent(event, err => {
             if (err) {
                 console.error("Could not add value to bucket:", err);
             }
@@ -71,8 +66,11 @@ class Aggregator {
         });
     }
 
+    /**
+     * Set the emit callback after the constructor
+     */
     onEmit(cb) {
-        this._onEmit = cb;
+        this._observer = cb;
     }
 }
 

@@ -337,6 +337,31 @@ describe("Buckets", () => {
             done();
         });
 
+        it('should calculate the correct count with inline emit', (done) => {
+            var incomingEvents = [];
+            var countEvents = {};
+
+            //Convert the series to events
+            _.each(sept_2014_data.points, (point) => {
+                incomingEvents.push(new Event(point[0], point[1]));
+            });
+
+            var CountAggregator = new Aggregator("1d", count, (index, event) => {
+                countEvents[index.asString()] = event;
+            });
+            
+            _.each(incomingEvents, (event) => {
+                CountAggregator.addEvent(event);
+            });
+
+            //Done
+            CountAggregator.done();
+
+            expect(countEvents["1d-16314"].get()).to.equal(24);
+            expect(countEvents["1d-16318"].get()).to.equal(20);
+            done();
+        });
+
     });
 
     describe("Aggregator tests for object events", function () {

@@ -13,10 +13,10 @@ var Collector = (function () {
         _classCallCheck(this, Collector);
 
         this._generator = new Generator(size);
-        this._currentBucket = null;
+        this._bucket = null;
 
         //Callback
-        this._onEmit = observer;
+        this._observer = observer;
     }
 
     _createClass(Collector, [{
@@ -31,19 +31,19 @@ var Collector = (function () {
         value: function bucket(d) {
             var _this = this;
 
-            var thisBucketIndex = this._generator.bucketIndex(d);
-            var currentBucketIndex = this._currentBucket ? this._currentBucket.index().asString() : "";
+            var newBucketIndex = this._generator.bucketIndex(d);
+            var bucketIndex = this._bucket ? this._bucket.index().asString() : "";
 
-            if (thisBucketIndex !== currentBucketIndex) {
-                if (this._currentBucket) {
-                    this._currentBucket.collect(function (series) {
-                        _this._onEmit && _this._onEmit(series);
+            if (newBucketIndex !== bucketIndex) {
+                if (this._bucket) {
+                    this._bucket.collect(function (series) {
+                        _this._observer && _this._observer(series);
                     });
                 }
-                this._currentBucket = this._generator.bucket(d);
+                this._bucket = this._generator.bucket(d);
             }
 
-            return this._currentBucket;
+            return this._bucket;
         }
     }, {
         key: "done",
@@ -54,10 +54,10 @@ var Collector = (function () {
         value: function done() {
             var _this2 = this;
 
-            if (this._currentBucket) {
-                this._currentBucket.collect(function (series) {
-                    _this2._onEmit && _this2._onEmit(series);
-                    _this2._currentBucket = null;
+            if (this._bucket) {
+                this._bucket.collect(function (series) {
+                    _this2._observer && _this2._observer(series);
+                    _this2._bucket = null;
                 });
             }
         }
@@ -87,7 +87,7 @@ var Collector = (function () {
     }, {
         key: "onEmit",
         value: function onEmit(cb) {
-            this._onEmit = cb;
+            this._observer = cb;
         }
     }]);
 

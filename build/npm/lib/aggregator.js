@@ -9,16 +9,15 @@ var _ = require("underscore");
 var Immutable = require("immutable");
 
 var Aggregator = (function () {
-    function Aggregator(size, processor, selector, observer) {
+    function Aggregator(size, processor, observer) {
         _classCallCheck(this, Aggregator);
 
         this._generator = new Generator(size);
         this._processor = processor;
-        this._selector = selector;
-        this._currentBucket = null;
+        this._bucket = null;
 
         //Callback
-        this._onEmit = observer;
+        this._observer = observer;
     }
 
     _createClass(Aggregator, [{
@@ -34,18 +33,16 @@ var Aggregator = (function () {
             var _this = this;
 
             var thisBucketIndex = this._generator.bucketIndex(d);
-            var currentBucketIndex = this._currentBucket ? this._currentBucket.index().asString() : "";
-
+            var currentBucketIndex = this._bucket ? this._bucket.index().asString() : "";
             if (thisBucketIndex !== currentBucketIndex) {
-                if (this._currentBucket) {
-                    this._currentBucket.aggregate(this._processor, function (event) {
-                        _this._onEmit && _this._onEmit(_this._currentBucket.index(), event);
+                if (this._bucket) {
+                    this._bucket.aggregate(this._processor, function (event) {
+                        _this._observer && _this._observer(_this._bucket.index(), event);
                     });
                 }
-                this._currentBucket = this._generator.bucket(d);
+                this._bucket = this._generator.bucket(d);
             }
-
-            return this._currentBucket;
+            return this._bucket;
         }
     }, {
         key: "done",
@@ -56,10 +53,10 @@ var Aggregator = (function () {
         value: function done() {
             var _this2 = this;
 
-            if (this._currentBucket) {
-                this._currentBucket.aggregate(this._processor, function (event) {
-                    _this2._onEmit && _this2._onEmit(_this2._currentBucket.index(), event);
-                    _this2._currentBucket = null;
+            if (this._bucket) {
+                this._bucket.aggregate(this._processor, function (event) {
+                    _this2._observer && _this2._observer(_this2._bucket.index(), event);
+                    _this2._bucket = null;
                 });
             }
         }
@@ -79,7 +76,7 @@ var Aggregator = (function () {
             // is done.
             //
 
-            bucket.addEvent(event, this._aggregationFn, function (err) {
+            bucket.addEvent(event, function (err) {
                 if (err) {
                     console.error("Could not add value to bucket:", err);
                 }
@@ -88,8 +85,12 @@ var Aggregator = (function () {
         }
     }, {
         key: "onEmit",
+
+        /**
+         * Set the emit callback after the constructor
+         */
         value: function onEmit(cb) {
-            this._onEmit = cb;
+            this._observer = cb;
         }
     }]);
 

@@ -70,10 +70,7 @@ describe("Time ranges", function () {
             done();
         });
         it('can display relative ranges as a human friendly string', function(done) {
-            //var beginTime = moment();
-            //var endTime =   beginTime.clone().subtract(30, "days");
             var range = Range.lastThirtyDays();
-            console.log(range.humanize())
             var expected = "a few seconds ago to a month ago"
             expect(range.relativeString()).to.equal(expected);
             done();

@@ -6,10 +6,10 @@ class Collector {
 
     constructor(size, observer) {
         this._generator = new Generator(size);
-        this._currentBucket = null;
+        this._bucket = null;
 
         //Callback
-        this._onEmit = observer;
+        this._observer = observer;
     }
 
     /**
@@ -19,30 +19,30 @@ class Collector {
      * automatically.
      */
     bucket(d) {
-        let thisBucketIndex = this._generator.bucketIndex(d);
-        let currentBucketIndex = this._currentBucket ?
-            this._currentBucket.index().asString() : "";
+        let newBucketIndex = this._generator.bucketIndex(d);
+        let bucketIndex = this._bucket ?
+            this._bucket.index().asString() : "";
 
-        if (thisBucketIndex !== currentBucketIndex) {
-            if (this._currentBucket) {
-                this._currentBucket.collect((series) => {
-                    this._onEmit && this._onEmit(series);
+        if (newBucketIndex !== bucketIndex) {
+            if (this._bucket) {
+                this._bucket.collect(series => {
+                    this._observer && this._observer(series);
                 });
             }
-            this._currentBucket = this._generator.bucket(d);
+            this._bucket = this._generator.bucket(d);
         }
 
-        return this._currentBucket;
+        return this._bucket;
     }
 
     /**
      * Forces the current bucket to emit
      */
     done() {
-        if (this._currentBucket) {
-            this._currentBucket.collect((series) => {
-                this._onEmit && this._onEmit(series);
-                this._currentBucket = null;
+        if (this._bucket) {
+            this._bucket.collect(series => {
+                this._observer && this._observer(series);
+                this._bucket = null;
             });
         }
     }
@@ -69,7 +69,7 @@ class Collector {
     }
 
     onEmit(cb) {
-        this._onEmit = cb;
+        this._observer = cb;
     }
 }
 
