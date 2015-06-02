@@ -166,6 +166,10 @@ class TimeRangeEvent {
         return this._range.end();
     }
 
+    timestamp() {
+        return this.begin();
+    }
+
     humanizeDuration() {
         return this._range.humanizeDuration();
     }
@@ -268,6 +272,10 @@ class IndexedEvent {
         return this.timerange().end();
     }
 
+    timestamp() {
+        return this.begin();
+    }
+    
     //
     // Access the event data
     //

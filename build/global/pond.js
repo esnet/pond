@@ -659,6 +659,11 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	            return this._range.end();
 	        }
 	    }, {
+	        key: "timestamp",
+	        value: function timestamp() {
+	            return this.begin();
+	        }
+	    }, {
 	        key: "humanizeDuration",
 	        value: function humanizeDuration() {
 	            return this._range.humanizeDuration();
@@ -778,6 +783,11 @@ ESnet = typeof ESnet === "object" ? ESnet : {}; ESnet["Pond"] =
 	        key: "end",
 	        value: function end() {
 	            return this.timerange().end();
+	        }
+	    }, {
+	        key: "timestamp",
+	        value: function timestamp() {
+	            return this.begin();
 	        }
 	    }, {
 	        key: "data",
