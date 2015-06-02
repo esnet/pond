@@ -179,6 +179,12 @@ The we hook up the hourlyAverage event emitted so we can collect the result (or 
 
     hourlyAverage.onEmit((index, event) => { outputEvents[index.asString()] = event;});
 
+Note that you can combine the constructor and the emit hookup as well:
+
+    var hourlyAverage = new Aggregator("1h", avg, (index, event) => {
+        outputEvents[index.asString()] = event;
+    });
+
 Then we can add events as long as we want, forever even:
 
     _.each(incomingEvents, event => { hourlyAverage.addEvent(event); });
