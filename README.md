@@ -266,7 +266,7 @@ For 2/14/2014 8am-9am:
 
 ## Combining aggregation and collection
 
-In this example we have a series of 30sec events and we want to create daily blocks of data, each containing hourly max values. To do this we'll use an aggregator to take our 30sec events and output averages for each hour. Then we'll use a collector to collect together those events into daily series.
+In this example we have a series of 30sec events and we want to create daily blocks of data, each containing hourly avg values. To do this we'll use an aggregator to take our 30sec events and output averages for each hour. Then we'll use a collector to collect together those events into daily series.
 
 First we construct a Collector called `dailyCollection` which will hold the hourly averages for that day (all 24 of them).
 
