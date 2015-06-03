@@ -264,6 +264,37 @@ For 2/14/2014 8am-9am:
         ]
     }
 
+## Combining aggregation and collection
+
+In this example we have a series of 30sec events and we want to create daily blocks of data, each containing hourly max values. To do this we'll use an aggregator to take our 30sec events and output averages for each hour. Then we'll use a collector to collect together those events into daily series.
+
+First we construct a Collector called `dailyCollection` which will hold the hourly averages for that day (all 24 of them).
+
+    let dailyCollector = new Collector("1d", (series) => {
+        console.log(series.toString());
+    });
+
+Each hourly average is calculated from all the 30sec events within that hour. To aggregate the data within each hour we create a new hourly (`1h`) Aggregator called `hourlyAggregator`, which will use the avg function:
+
+    let hourlyAggregator = new Aggregator("1h", avg, (index, event) => {
+        dailyCollector.addEvent(event);
+    });
+
+As the hourly aggregator emits events, each one the avg of all the 30sec events fed into it for that hour, we catch those and feed them into the `dailyCollector`.
+
+Once this is setup we are ready to start feeding in our actual events. In this case we'll pull them from a TimeSeries we built from some data, but equally they could be coming in one by one from some queue or other source.
+
+We loop over all the events in the series and add each on to the aggregator we just created:
+
+    const series = new TimeSeries({name: name,
+                                   columns: ["time", "in", "out"],
+                                   points: points});
+
+    for (const event of series.events()) {
+        hourlyAggregator.addEvent(event);
+    }
+
+
 # Tests
 
 The library has Mocha tests. To run the tests, use:

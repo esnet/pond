@@ -1,15 +1,13 @@
-var moment = require("moment");
-var _ = require("underscore");
+import moment from "moment";
 
-var util = require("./util");
-var TimeRange = require("./range");
+import TimeRange from "./range";
 
-var units = {
+const units = {
     "s": {"label": "seconds", "length": 1},
     "m": {"label": "minutes", "length": 60},
-    "h": {"label": "hours", "length": 60*60},
-    "d": {"label": "days", "length": 60*60*24}
-}
+    "h": {"label": "hours", "length": 60 * 60},
+    "d": {"label": "days", "length": 60 * 60 * 24}
+};
 
 /**
  * An index that represents as a string a range of time.
@@ -19,7 +17,7 @@ var units = {
  *
  * The original string representation can be found with toString().
  */
-class Index {
+export default class Index {
 
     constructor(s) {
         this._s = s;
@@ -27,25 +25,26 @@ class Index {
     }
 
     _rangeFromIndexString(s) {
-        var parts = s.split("-");
-        var size = parts[0];
+        const parts = s.split("-");
+        const size = parts[0];
+        let length;
 
-        //Position should be an int
-        var pos = parseInt(parts[1], 10);
+        // Position should be an int
+        const pos = parseInt(parts[1], 10);
 
-        //size should be two parts, a number and a letter
-        var re = /([0-9]+)([smhd])/;
+        // Size should be two parts, a number and a letter
+        const re = /([0-9]+)([smhd])/;
 
-        var sizeParts = re.exec(size);
+        const sizeParts = re.exec(size);
         if (sizeParts && sizeParts.length >= 3) {
-            var num = parseInt(sizeParts[1]);
-            var unit = sizeParts[2];
-            var length = num * units[unit].length * 1000;
+            const num = parseInt(sizeParts[1], 10);
+            const unit = sizeParts[2];
+            length = num * units[unit].length * 1000;
         }
 
-        var beginTime = moment.utc(pos*length);
-        var endTime = moment.utc((pos+1)*length);
-        
+        const beginTime = moment.utc(pos * length);
+        const endTime = moment.utc((pos + 1) * length);
+
         return new TimeRange(beginTime, endTime);
     }
 
@@ -57,15 +56,12 @@ class Index {
         return this._s;
     }
 
+    // Alias for toString()
     asString() {
-        return this.toString(); //alias
+        return this.toString();
     }
 
     asTimerange() {
         return this._r;
     }
 }
-
-
-module.exports = Index;
-

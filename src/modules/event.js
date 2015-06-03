@@ -1,13 +1,16 @@
-var moment = require("moment");
-var _ = require("underscore");
-var Immutable = require("immutable");
+import moment from "moment";
+import _ from "underscore";
+import Immutable from "immutable";
 
-var util = require("./util");
-var Index = require("./index");
-var TimeRange = require("./range");
+import Index from "./index";
+import TimeRange from "./range";
+
+//
+// Util
+//
 
 function timestampFromArgs(arg1) {
-    var timestamp = undefined;
+    let timestamp;
     if (_.isNumber(arg1)) {
         timestamp = new Date(arg1);
     } else if (_.isDate(arg1)) {
@@ -19,7 +22,7 @@ function timestampFromArgs(arg1) {
 }
 
 function dataFromArgs(arg1) {
-    var data = {};
+    let data = {};
     if (_.isObject(arg1)) {
         data = new Immutable.Map(arg1);
     } else if (data instanceof Immutable.Map) {
@@ -46,11 +49,10 @@ function dataFromArgs(arg1) {
  * the Event object to mutate the Event timestamp after it is created.
  *
  */
-class Event {
+export class Event {
 
     constructor(arg1, arg2) {
-
-        //Copy constructor
+        // Copy constructor
         if (arg1 instanceof Event) {
             let other = arg1;
             this._time = other._time;
@@ -58,10 +60,10 @@ class Event {
             return;
         }
 
-        //Timestamp
+        // Timestamp
         this._time = timestampFromArgs(arg1);
 
-        //Data
+        // Data
         this._data = dataFromArgs(arg2);
     }
 
@@ -90,12 +92,12 @@ class Event {
     }
 
     get(key) {
-        var k = key || "value";
+        const k = key || "value";
         return this._data.get(k);
     }
 
     stringify() {
-        return data.stringify(this._data);
+        return JSON.stringify(this._data);
     }
 }
 
@@ -119,17 +121,16 @@ class Event {
  * representation of the data, while toString() will serialize the event to a string.
  *
  */
-class TimeRangeEvent {
+export class TimeRangeEvent {
 
     constructor(arg1, arg2) {
-
-        //Timerange
+        // Timerange
         if (arg1 instanceof TimeRange) {
             let timerange = arg1;
             this._range = timerange;
         }
 
-        //Data
+        // Data
         this._data = dataFromArgs(arg2);
     }
 
@@ -183,10 +184,9 @@ class TimeRangeEvent {
     }
 
     get(key) {
-        var k = key || "value";
+        const k = key || "value";
         return this._data.get(k);
     }
-
 }
 
 /**
@@ -212,17 +212,17 @@ class TimeRangeEvent {
  * The get the data out of an IndexedEvent instance use data(). It will return an
  * Immutable.Map.
  */
-class IndexedEvent {
+export class IndexedEvent {
 
     constructor(index, data) {
-        //Index
+        // Index
         if (_.isString(index)) {
-            this._i = new Index(index);
+            this._index = new Index(index);
         } else if (index instanceof Index) {
-            this._i = index;
+            this._index = index;
         }
 
-        //Data
+        // Data
         if (_.isObject(data)) {
             this._data = new Immutable.Map(data);
         } else if (data instanceof Immutable.Map) {
@@ -233,7 +233,7 @@ class IndexedEvent {
     }
 
     toJSON() {
-        return {index: this._i.asString(), data: this._data.toJSON()};
+        return {index: this._index.asString(), data: this._data.toJSON()};
     }
 
     toString() {
@@ -245,7 +245,7 @@ class IndexedEvent {
     //
 
     index() {
-        return this._i;
+        return this._index;
     }
 
     //
@@ -261,7 +261,7 @@ class IndexedEvent {
     }
 
     timerange() {
-        return this._i.asTimerange();
+        return this._index.asTimerange();
     }
 
     begin() {
@@ -275,7 +275,7 @@ class IndexedEvent {
     timestamp() {
         return this.begin();
     }
-    
+
     //
     // Access the event data
     //
@@ -285,12 +285,7 @@ class IndexedEvent {
     }
 
     get(key) {
-        var k = key || "value";
+        const k = key || "value";
         return this._data.get(k);
     }
-
 }
-
-module.exports.Event = Event;
-module.exports.TimeRangeEvent = TimeRangeEvent;
-module.exports.IndexedEvent = IndexedEvent;

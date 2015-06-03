@@ -1,15 +1,11 @@
-var Generator = require("./generator");
-var _ = require("underscore");
-var Immutable = require("immutable");
+import Generator from "./generator";
 
-class Aggregator {
+export default class Aggregator {
 
     constructor(size, processor, observer) {
         this._generator = new Generator(size);
         this._processor = processor;
         this._bucket = null;
-
-        //Callback
         this._observer = observer;
     }
 
@@ -20,12 +16,14 @@ class Aggregator {
      * automatically.
      */
     bucket(d) {
-        let thisBucketIndex = this._generator.bucketIndex(d);
-        let currentBucketIndex = this._bucket ? this._bucket.index().asString() : "";
+        const thisBucketIndex = this._generator.bucketIndex(d);
+        const currentBucketIndex = this._bucket ? this._bucket.index().asString() : "";
         if (thisBucketIndex !== currentBucketIndex) {
             if (this._bucket) {
                 this._bucket.aggregate(this._processor, event => {
-                    this._observer && this._observer(this._bucket.index(), event);
+                    if (this._observer) {
+                        this._observer(this._bucket.index(), event);
+                    }
                 });
             }
             this._bucket = this._generator.bucket(d);
@@ -39,7 +37,9 @@ class Aggregator {
     done() {
         if (this._bucket) {
             this._bucket.aggregate(this._processor, event => {
-                this._observer && this._observer(this._bucket.index(), event);
+                if (this._observer) {
+                    this._observer(this._bucket.index(), event);
+                }
                 this._bucket = null;
             });
         }
@@ -62,7 +62,9 @@ class Aggregator {
             if (err) {
                 console.error("Could not add value to bucket:", err);
             }
-            cb && cb(err);
+            if (cb) {
+                cb(err);
+            }
         });
     }
 
@@ -73,5 +75,3 @@ class Aggregator {
         this._observer = cb;
     }
 }
-
-module.exports = Aggregator;

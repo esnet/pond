@@ -1,21 +1,20 @@
-var moment = require("moment");
-var Immutable = require("immutable");
-var _ = require("underscore");
+import Immutable from "immutable";
+import _ from "underscore";
 
-var {IndexedEvent} = require("./event");
-var {IndexedSeries} = require("./series.js");
-var Index = require("./index");
-var TimeRange = require("./range");
+import {IndexedEvent} from "./event";
+import {IndexedSeries} from "./series.js";
+import Index from "./index";
 
-/** Internal function to fund the unique keys of a bunch
-  * of immutable maps objects. There's probably a more elegent way
-  * to do this.
-  */
+/**
+ * Internal function to fund the unique keys of a bunch
+ * of immutable maps objects. There's probably a more elegent way
+ * to do this.
+ */
 function uniqueKeys(events) {
-    var arrayOfKeys = []
+    var arrayOfKeys = [];
     for (let e of events) {
         for (let k of e.data().keySeq()) {
-            arrayOfKeys.push(k)
+            arrayOfKeys.push(k);
         }
     }
     return new Immutable.Set(arrayOfKeys);
@@ -40,17 +39,18 @@ function uniqueKeys(events) {
  * refers to a block of time 1 day long, starting 1673 days after
  * the beginning of 1970.
  */
-class Bucket {
+export default class Bucket {
 
     constructor(index) {
-        //Index
+        // Index
         if (_.isString(index)) {
             this._index = new Index(index);
         } else if (index instanceof Index) {
             this._index = index;
         }
 
-        this._cache = [];  // Mutable internal list
+        // Mutable internal list
+        this._cache = [];
     }
 
     index() {
@@ -91,11 +91,11 @@ class Bucket {
 
     _pushToCache(event, cb) {
         this._cache.push(event);
-        cb && cb(null);
+        if (cb) cb(null);
     }
 
     _readFromCache(cb) {
-        cb && cb(this._cache);
+        if (cb) cb(this._cache);
     }
 
     //
@@ -103,7 +103,7 @@ class Bucket {
     //
 
     addEvent(event, cb) {
-        this._pushToCache(event, (err) => {cb && cb(err)});
+        this._pushToCache(event, (err) => { if (cb) cb(err); });
     }
 
     /**
@@ -119,8 +119,8 @@ class Bucket {
                 let vals = _.map(events, (v) => { return v.get(k); });
                 result[k] = operator.call(this, this._index, vals, k);
             });
-            var event = new IndexedEvent(this._index, result);
-            cb && cb(event);
+            const event = new IndexedEvent(this._index, result);
+            if (cb) cb(event);
         });
     }
 
@@ -135,9 +135,7 @@ class Bucket {
                 "name": this._index.toString(),
                 "events": events
             });
-            cb && cb(series);
+            if (cb) cb(series);
         });
     }
 }
-
-module.exports = Bucket;

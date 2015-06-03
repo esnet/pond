@@ -1,14 +1,12 @@
-var Generator = require("./generator");
-var _ = require("underscore");
-var Immutable = require("immutable");
+import Generator from "./generator";
 
-class Collector {
+export default class Collector {
 
     constructor(size, observer) {
         this._generator = new Generator(size);
         this._bucket = null;
 
-        //Callback
+        // Callback
         this._observer = observer;
     }
 
@@ -19,19 +17,16 @@ class Collector {
      * automatically.
      */
     bucket(d) {
-        let newBucketIndex = this._generator.bucketIndex(d);
-        let bucketIndex = this._bucket ?
-            this._bucket.index().asString() : "";
-
+        const newBucketIndex = this._generator.bucketIndex(d);
+        const bucketIndex = this._bucket ? this._bucket.index().asString() : "";
         if (newBucketIndex !== bucketIndex) {
             if (this._bucket) {
                 this._bucket.collect(series => {
-                    this._observer && this._observer(series);
+                    if (this._observer) this._observer(series);
                 });
             }
             this._bucket = this._generator.bucket(d);
         }
-
         return this._bucket;
     }
 
@@ -41,7 +36,7 @@ class Collector {
     done() {
         if (this._bucket) {
             this._bucket.collect(series => {
-                this._observer && this._observer(series);
+                if (this._observer) this._observer(series);
                 this._bucket = null;
             });
         }
@@ -51,20 +46,13 @@ class Collector {
      * Add an event, which will be assigned to a bucket
      */
     addEvent(event, cb) {
-        let t = event.timestamp();
-        let bucket = this.bucket(t);
-
-        //
-        // Adding the value to the bucket. This could be an async operation
-        // so the passed in callback to this function will be called when this
-        // is done.
-        //
-
+        const t = event.timestamp();
+        const bucket = this.bucket(t);
         bucket.addEvent(event, function(err) {
             if (err) {
                 console.error("Could not add value to bucket:", err);
             }
-            cb && cb(err);
+            if (cb) cb(err);
         });
     }
 
@@ -72,5 +60,3 @@ class Collector {
         this._observer = cb;
     }
 }
-
-module.exports = Collector;

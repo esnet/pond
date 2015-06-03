@@ -1,14 +1,22 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var moment = require("moment");
-var _ = require("underscore");
+var _moment = require("moment");
 
-var TimeRange = require("./range");
-var Bucket = require("./bucket");
+var _moment2 = _interopRequireDefault(_moment);
+
+var _bucket = require("./bucket");
+
+var _bucket2 = _interopRequireDefault(_bucket);
 
 var units = {
     "s": { "label": "seconds", "length": 1 },
@@ -33,15 +41,15 @@ var Generator = (function () {
     function Generator(size) {
         _classCallCheck(this, Generator);
 
-        this.size = size;
-        this.length = Generator.getLengthFromSize(size);
+        this._size = size;
+        this._length = Generator.getLengthFromSize(size);
     }
 
     _createClass(Generator, [{
         key: "bucketIndex",
         value: function bucketIndex(date) {
-            var pos = Generator.getBucketPosFromDate(date, this.length);
-            var index = this.size + "-" + pos;
+            var pos = Generator.getBucketPosFromDate(date, this._length);
+            var index = this._size + "-" + pos;
             return index;
         }
     }, {
@@ -55,7 +63,7 @@ var Generator = (function () {
          */
         value: function bucket(date) {
             var index = this.bucketIndex(date);
-            return new Bucket(index);
+            return new _bucket2["default"](index);
         }
     }], [{
         key: "getLengthFromSize",
@@ -65,15 +73,15 @@ var Generator = (function () {
          * of the bucket in ms.
          */
         value: function getLengthFromSize(size) {
-            var num, unit, length;
+            var length = undefined;
 
-            //size should be two parts, a number and a letter. From the size
-            //we can get the length
+            // Size should be two parts, a number and a letter. From the size
+            // we can get the length
             var re = /([0-9]+)([smhd])/;
             var parts = re.exec(size);
             if (parts && parts.length >= 3) {
-                num = parseInt(parts[1]);
-                unit = parts[2];
+                var num = parseInt(parts[1], 10);
+                var unit = parts[2];
                 length = num * units[unit].length * 1000;
             }
             return length;
@@ -81,7 +89,7 @@ var Generator = (function () {
     }, {
         key: "getBucketPosFromDate",
         value: function getBucketPosFromDate(date, length) {
-            var dd = moment.utc(date).valueOf();
+            var dd = _moment2["default"].utc(date).valueOf();
             return parseInt(dd /= length, 10);
         }
     }]);
@@ -89,4 +97,5 @@ var Generator = (function () {
     return Generator;
 })();
 
-module.exports = Generator;
+exports["default"] = Generator;
+module.exports = exports["default"];

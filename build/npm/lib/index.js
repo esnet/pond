@@ -1,14 +1,22 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var moment = require("moment");
-var _ = require("underscore");
+var _moment = require("moment");
 
-var util = require("./util");
-var TimeRange = require("./range");
+var _moment2 = _interopRequireDefault(_moment);
+
+var _range = require("./range");
+
+var _range2 = _interopRequireDefault(_range);
 
 var units = {
     "s": { "label": "seconds", "length": 1 },
@@ -39,24 +47,25 @@ var Index = (function () {
         value: function _rangeFromIndexString(s) {
             var parts = s.split("-");
             var size = parts[0];
+            var length = undefined;
 
-            //Position should be an int
+            // Position should be an int
             var pos = parseInt(parts[1], 10);
 
-            //size should be two parts, a number and a letter
+            // Size should be two parts, a number and a letter
             var re = /([0-9]+)([smhd])/;
 
             var sizeParts = re.exec(size);
             if (sizeParts && sizeParts.length >= 3) {
-                var num = parseInt(sizeParts[1]);
+                var num = parseInt(sizeParts[1], 10);
                 var unit = sizeParts[2];
-                var length = num * units[unit].length * 1000;
+                length = num * units[unit].length * 1000;
             }
 
-            var beginTime = moment.utc(pos * length);
-            var endTime = moment.utc((pos + 1) * length);
+            var beginTime = _moment2["default"].utc(pos * length);
+            var endTime = _moment2["default"].utc((pos + 1) * length);
 
-            return new TimeRange(beginTime, endTime);
+            return new _range2["default"](beginTime, endTime);
         }
     }, {
         key: "toJSON",
@@ -70,8 +79,10 @@ var Index = (function () {
         }
     }, {
         key: "asString",
+
+        // Alias for toString()
         value: function asString() {
-            return this.toString(); //alias
+            return this.toString();
         }
     }, {
         key: "asTimerange",
@@ -83,4 +94,5 @@ var Index = (function () {
     return Index;
 })();
 
-module.exports = Index;
+exports["default"] = Index;
+module.exports = exports["default"];

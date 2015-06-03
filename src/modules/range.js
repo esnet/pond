@@ -1,28 +1,28 @@
-var _ = require("underscore");
-var Immutable = require("immutable");
-var moment = require("moment");
+import _ from "underscore";
+import Immutable from "immutable";
+import moment from "moment";
 
-class TimeRange {
+export default class TimeRange {
 
     constructor(arg1, arg2) {
         if (arg1 instanceof TimeRange) {
-            let other = arg1;
+            const other = arg1;
             this._range = other._range;
         } else if (arg1 instanceof Immutable.List) {
-            let rangeList = arg1;
+            const rangeList = arg1;
             this._range = rangeList;
         } else if (_.isArray(arg1)) {
-            let rangeArray = arg1;
-            this._range = Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
+            const rangeArray = arg1;
+            this._range = new Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
         } else {
-            let b = arg1;
-            let e = arg2;
+            const b = arg1;
+            const e = arg2;
             if (_.isDate(b) && _.isDate(e)) {
-                this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
+                this._range = new Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
             } else if (moment.isMoment(b) && moment.isMoment(e)) {
-                this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
+                this._range = new Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
             } else if (_.isNumber(b) && _.isNumber(e)) {
-                this._range = Immutable.List([new Date(b), new Date(e)]);
+                this._range = new Immutable.List([new Date(b), new Date(e)]);
             }
         }
     }
@@ -37,7 +37,7 @@ class TimeRange {
     //
     // Serialize
     //
-    
+
     toJSON() {
         return [this.begin().getTime(), this.end().getTime()];
     }
@@ -47,22 +47,22 @@ class TimeRange {
     }
 
     toLocalString() {
-        return "[" + this.begin().toString() + ", " +  this.end().toString() + "]";
+        return `[${this.begin()}, ${this.end()}]`;
     }
 
     toUTCString() {
-        return "[" + this.begin().toUTCString() + ", " +  this.end().toUTCString() + "]";
+        return `[${this.begin().toUTCString()}, ${this.end().toUTCString()}]`;
     }
 
     humanize() {
-        let begin = new moment(this.begin());
-        let end = new moment(this.end());
+        const begin = moment(this.begin());
+        const end = moment(this.end());
         return `${begin.format("MMM D, YYYY hh:mm:ss a")} to ${end.format("MMM D, YYYY hh:mm:ss a")}`;
     }
 
     relativeString() {
-        let begin = new moment(this.begin());
-        let end = new moment(this.end());
+        const begin = moment(this.begin());
+        const end = moment(this.end());
         return `${begin.fromNow()} to ${end.fromNow()}`;
     }
 
@@ -152,8 +152,8 @@ class TimeRange {
     * @returns {TimeRange} Returns a new Range that is the union of this and other.
     */
     extents(other) {
-        var b = this.begin() < other.begin() ? this.begin() : other.begin();
-        var e = this.end() > other.end() ? this.end() : other.end();
+        const b = this.begin() < other.begin() ? this.begin() : other.begin();
+        const e = this.end() > other.end() ? this.end() : other.end();
         return new TimeRange(new Date(b.getTime()), new Date(e.getTime()));
     }
 
@@ -167,8 +167,8 @@ class TimeRange {
         if (this.disjoint(other)) {
             return undefined;
         }
-        var b = this.begin() > other.begin() ? this.begin() : other.begin();
-        var e = this.end() < other.end() ? this.end() : other.end();
+        const b = this.begin() > other.begin() ? this.begin() : other.begin();
+        const e = this.end() < other.end() ? this.end() : other.end();
         return new TimeRange(new Date(b.getTime()),
                              new Date(e.getTime()));
     }
@@ -185,30 +185,27 @@ class TimeRange {
     // Static TimeRange creators
     //
 
-    static lastDay(thing) {
-        var beginTime = moment();
-        var endTime =   beginTime.clone().subtract(24, "hours");
+    static lastDay() {
+        const beginTime = moment();
+        const endTime = beginTime.clone().subtract(24, "hours");
         return new TimeRange(beginTime, endTime);
     }
 
-    static lastSevenDays(thing) {
-        var beginTime = moment();
-        var endTime =   beginTime.clone().subtract(7, "days");
+    static lastSevenDays() {
+        const beginTime = moment();
+        const endTime = beginTime.clone().subtract(7, "days");
         return new TimeRange(beginTime, endTime);
     }
 
-    static lastThirtyDays(thing) {
-        var beginTime = moment();
-        var endTime =   beginTime.clone().subtract(30, "days");
+    static lastThirtyDays() {
+        const beginTime = moment();
+        const endTime = beginTime.clone().subtract(30, "days");
         return new TimeRange(beginTime, endTime);
     }
 
-    static lastNinetyDays(thing) {
-        var beginTime = moment();
-        var endTime =   beginTime.clone().subtract(90, "days");
+    static lastNinetyDays() {
+        const beginTime = moment();
+        const endTime = beginTime.clone().subtract(90, "days");
         return new TimeRange(beginTime, endTime);
     }
-
 }
-
-module.exports = TimeRange;

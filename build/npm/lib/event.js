@@ -1,24 +1,46 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var moment = require("moment");
-var _ = require("underscore");
-var Immutable = require("immutable");
+var _moment = require("moment");
 
-var util = require("./util");
-var Index = require("./index");
-var TimeRange = require("./range");
+var _moment2 = _interopRequireDefault(_moment);
+
+var _underscore = require("underscore");
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _immutable = require("immutable");
+
+var _immutable2 = _interopRequireDefault(_immutable);
+
+var _index = require("./index");
+
+var _index2 = _interopRequireDefault(_index);
+
+var _range = require("./range");
+
+var _range2 = _interopRequireDefault(_range);
+
+//
+// Util
+//
 
 function timestampFromArgs(arg1) {
     var timestamp = undefined;
-    if (_.isNumber(arg1)) {
+    if (_underscore2["default"].isNumber(arg1)) {
         timestamp = new Date(arg1);
-    } else if (_.isDate(arg1)) {
+    } else if (_underscore2["default"].isDate(arg1)) {
         timestamp = new Date(arg1.getTime());
-    } else if (moment.isMoment(arg1)) {
+    } else if (_moment2["default"].isMoment(arg1)) {
         timestamp = new Date(arg1.valueOf());
     }
     return timestamp;
@@ -26,12 +48,12 @@ function timestampFromArgs(arg1) {
 
 function dataFromArgs(arg1) {
     var data = {};
-    if (_.isObject(arg1)) {
-        data = new Immutable.Map(arg1);
-    } else if (data instanceof Immutable.Map) {
+    if (_underscore2["default"].isObject(arg1)) {
+        data = new _immutable2["default"].Map(arg1);
+    } else if (data instanceof _immutable2["default"].Map) {
         data = arg1;
     } else {
-        data = new Immutable.Map({ "value": arg1 });
+        data = new _immutable2["default"].Map({ "value": arg1 });
     }
     return data;
 }
@@ -57,7 +79,7 @@ var Event = (function () {
     function Event(arg1, arg2) {
         _classCallCheck(this, Event);
 
-        //Copy constructor
+        // Copy constructor
         if (arg1 instanceof Event) {
             var other = arg1;
             this._time = other._time;
@@ -65,10 +87,10 @@ var Event = (function () {
             return;
         }
 
-        //Timestamp
+        // Timestamp
         this._time = timestampFromArgs(arg1);
 
-        //Data
+        // Data
         this._data = dataFromArgs(arg2);
     }
 
@@ -111,12 +133,14 @@ var Event = (function () {
     }, {
         key: "stringify",
         value: function stringify() {
-            return data.stringify(this._data);
+            return JSON.stringify(this._data);
         }
     }]);
 
     return Event;
 })();
+
+exports.Event = Event;
 
 /**
  * An time range event uses a TimeRange to specify the range over which the event occurs
@@ -143,13 +167,13 @@ var TimeRangeEvent = (function () {
     function TimeRangeEvent(arg1, arg2) {
         _classCallCheck(this, TimeRangeEvent);
 
-        //Timerange
-        if (arg1 instanceof TimeRange) {
+        // Timerange
+        if (arg1 instanceof _range2["default"]) {
             var timerange = arg1;
             this._range = timerange;
         }
 
-        //Data
+        // Data
         this._data = dataFromArgs(arg2);
     }
 
@@ -224,6 +248,8 @@ var TimeRangeEvent = (function () {
     return TimeRangeEvent;
 })();
 
+exports.TimeRangeEvent = TimeRangeEvent;
+
 /**
  * An indexed event uses a Index to specify a timerange over which the event occurs
  * and maps that to a data object representing some measurement of metric during
@@ -252,27 +278,27 @@ var IndexedEvent = (function () {
     function IndexedEvent(index, data) {
         _classCallCheck(this, IndexedEvent);
 
-        //Index
-        if (_.isString(index)) {
-            this._i = new Index(index);
-        } else if (index instanceof Index) {
-            this._i = index;
+        // Index
+        if (_underscore2["default"].isString(index)) {
+            this._index = new _index2["default"](index);
+        } else if (index instanceof _index2["default"]) {
+            this._index = index;
         }
 
-        //Data
-        if (_.isObject(data)) {
-            this._data = new Immutable.Map(data);
-        } else if (data instanceof Immutable.Map) {
+        // Data
+        if (_underscore2["default"].isObject(data)) {
+            this._data = new _immutable2["default"].Map(data);
+        } else if (data instanceof _immutable2["default"].Map) {
             this._data = data;
         } else {
-            this._data = new Immutable.Map({ "value": data });
+            this._data = new _immutable2["default"].Map({ "value": data });
         }
     }
 
     _createClass(IndexedEvent, [{
         key: "toJSON",
         value: function toJSON() {
-            return { index: this._i.asString(), data: this._data.toJSON() };
+            return { index: this._index.asString(), data: this._data.toJSON() };
         }
     }, {
         key: "toString",
@@ -287,7 +313,7 @@ var IndexedEvent = (function () {
         //
 
         value: function index() {
-            return this._i;
+            return this._index;
         }
     }, {
         key: "timerangeAsUTCString",
@@ -307,7 +333,7 @@ var IndexedEvent = (function () {
     }, {
         key: "timerange",
         value: function timerange() {
-            return this._i.asTimerange();
+            return this._index.asTimerange();
         }
     }, {
         key: "begin",
@@ -345,6 +371,4 @@ var IndexedEvent = (function () {
     return IndexedEvent;
 })();
 
-module.exports.Event = Event;
-module.exports.TimeRangeEvent = TimeRangeEvent;
-module.exports.IndexedEvent = IndexedEvent;
+exports.IndexedEvent = IndexedEvent;

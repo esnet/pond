@@ -1,12 +1,26 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _ = require("underscore");
-var Immutable = require("immutable");
-var moment = require("moment");
+var _underscore = require("underscore");
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _immutable = require("immutable");
+
+var _immutable2 = _interopRequireDefault(_immutable);
+
+var _moment = require("moment");
+
+var _moment2 = _interopRequireDefault(_moment);
 
 var TimeRange = (function () {
     function TimeRange(arg1, arg2) {
@@ -15,21 +29,21 @@ var TimeRange = (function () {
         if (arg1 instanceof TimeRange) {
             var other = arg1;
             this._range = other._range;
-        } else if (arg1 instanceof Immutable.List) {
+        } else if (arg1 instanceof _immutable2["default"].List) {
             var rangeList = arg1;
             this._range = rangeList;
-        } else if (_.isArray(arg1)) {
+        } else if (_underscore2["default"].isArray(arg1)) {
             var rangeArray = arg1;
-            this._range = Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
+            this._range = new _immutable2["default"].List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
         } else {
             var b = arg1;
             var e = arg2;
-            if (_.isDate(b) && _.isDate(e)) {
-                this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
-            } else if (moment.isMoment(b) && moment.isMoment(e)) {
-                this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
-            } else if (_.isNumber(b) && _.isNumber(e)) {
-                this._range = Immutable.List([new Date(b), new Date(e)]);
+            if (_underscore2["default"].isDate(b) && _underscore2["default"].isDate(e)) {
+                this._range = new _immutable2["default"].List([new Date(b.getTime()), new Date(e.getTime())]);
+            } else if (_moment2["default"].isMoment(b) && _moment2["default"].isMoment(e)) {
+                this._range = new _immutable2["default"].List([new Date(b.valueOf()), new Date(e.valueOf())]);
+            } else if (_underscore2["default"].isNumber(b) && _underscore2["default"].isNumber(e)) {
+                this._range = new _immutable2["default"].List([new Date(b), new Date(e)]);
             }
         }
     }
@@ -61,7 +75,7 @@ var TimeRange = (function () {
     }, {
         key: "toLocalString",
         value: function toLocalString() {
-            return "[" + this.begin().toString() + ", " + this.end().toString() + "]";
+            return "[" + this.begin() + ", " + this.end() + "]";
         }
     }, {
         key: "toUTCString",
@@ -71,15 +85,15 @@ var TimeRange = (function () {
     }, {
         key: "humanize",
         value: function humanize() {
-            var begin = new moment(this.begin());
-            var end = new moment(this.end());
+            var begin = (0, _moment2["default"])(this.begin());
+            var end = (0, _moment2["default"])(this.end());
             return "" + begin.format("MMM D, YYYY hh:mm:ss a") + " to " + end.format("MMM D, YYYY hh:mm:ss a");
         }
     }, {
         key: "relativeString",
         value: function relativeString() {
-            var begin = new moment(this.begin());
-            var end = new moment(this.end());
+            var begin = (0, _moment2["default"])(this.begin());
+            var end = (0, _moment2["default"])(this.end());
             return "" + begin.fromNow() + " to " + end.fromNow();
         }
     }, {
@@ -132,7 +146,7 @@ var TimeRange = (function () {
          * @returns {boolean} Returns true if other is completely inside this.
          */
         value: function contains(other) {
-            if (_.isDate(other)) {
+            if (_underscore2["default"].isDate(other)) {
                 return this.begin() <= other && this.end() >= other;
             } else {
                 return this.begin() <= other.begin() && this.end() >= other.end();
@@ -213,7 +227,7 @@ var TimeRange = (function () {
     }, {
         key: "humanizeDuration",
         value: function humanizeDuration() {
-            return moment.duration(this.duration()).humanize();
+            return _moment2["default"].duration(this.duration()).humanize();
         }
     }], [{
         key: "lastDay",
@@ -222,29 +236,29 @@ var TimeRange = (function () {
         // Static TimeRange creators
         //
 
-        value: function lastDay(thing) {
-            var beginTime = moment();
+        value: function lastDay() {
+            var beginTime = (0, _moment2["default"])();
             var endTime = beginTime.clone().subtract(24, "hours");
             return new TimeRange(beginTime, endTime);
         }
     }, {
         key: "lastSevenDays",
-        value: function lastSevenDays(thing) {
-            var beginTime = moment();
+        value: function lastSevenDays() {
+            var beginTime = (0, _moment2["default"])();
             var endTime = beginTime.clone().subtract(7, "days");
             return new TimeRange(beginTime, endTime);
         }
     }, {
         key: "lastThirtyDays",
-        value: function lastThirtyDays(thing) {
-            var beginTime = moment();
+        value: function lastThirtyDays() {
+            var beginTime = (0, _moment2["default"])();
             var endTime = beginTime.clone().subtract(30, "days");
             return new TimeRange(beginTime, endTime);
         }
     }, {
         key: "lastNinetyDays",
-        value: function lastNinetyDays(thing) {
-            var beginTime = moment();
+        value: function lastNinetyDays() {
+            var beginTime = (0, _moment2["default"])();
             var endTime = beginTime.clone().subtract(90, "days");
             return new TimeRange(beginTime, endTime);
         }
@@ -253,4 +267,5 @@ var TimeRange = (function () {
     return TimeRange;
 })();
 
-module.exports = TimeRange;
+exports["default"] = TimeRange;
+module.exports = exports["default"];

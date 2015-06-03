@@ -1,28 +1,36 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var moment = require("moment");
-var Immutable = require("immutable");
-var _ = require("underscore");
+var _immutable = require("immutable");
 
-var _require = require("./event");
+var _immutable2 = _interopRequireDefault(_immutable);
 
-var IndexedEvent = _require.IndexedEvent;
+var _underscore = require("underscore");
 
-var _require2 = require("./series.js");
+var _underscore2 = _interopRequireDefault(_underscore);
 
-var IndexedSeries = _require2.IndexedSeries;
+var _event = require("./event");
 
-var Index = require("./index");
-var TimeRange = require("./range");
+var _seriesJs = require("./series.js");
 
-/** Internal function to fund the unique keys of a bunch
-  * of immutable maps objects. There's probably a more elegent way
-  * to do this.
-  */
+var _index = require("./index");
+
+var _index2 = _interopRequireDefault(_index);
+
+/**
+ * Internal function to fund the unique keys of a bunch
+ * of immutable maps objects. There's probably a more elegent way
+ * to do this.
+ */
 function uniqueKeys(events) {
     var arrayOfKeys = [];
     var _iteratorNormalCompletion = true;
@@ -72,7 +80,7 @@ function uniqueKeys(events) {
         }
     }
 
-    return new Immutable.Set(arrayOfKeys);
+    return new _immutable2["default"].Set(arrayOfKeys);
 }
 
 /**
@@ -99,14 +107,15 @@ var Bucket = (function () {
     function Bucket(index) {
         _classCallCheck(this, Bucket);
 
-        //Index
-        if (_.isString(index)) {
-            this._index = new Index(index);
-        } else if (index instanceof Index) {
+        // Index
+        if (_underscore2["default"].isString(index)) {
+            this._index = new _index2["default"](index);
+        } else if (index instanceof _index2["default"]) {
             this._index = index;
         }
 
-        this._cache = []; // Mutable internal list
+        // Mutable internal list
+        this._cache = [];
     }
 
     _createClass(Bucket, [{
@@ -157,12 +166,12 @@ var Bucket = (function () {
 
         value: function _pushToCache(event, cb) {
             this._cache.push(event);
-            cb && cb(null);
+            if (cb) cb(null);
         }
     }, {
         key: "_readFromCache",
         value: function _readFromCache(cb) {
-            cb && cb(this._cache);
+            if (cb) cb(this._cache);
         }
     }, {
         key: "addEvent",
@@ -173,7 +182,7 @@ var Bucket = (function () {
 
         value: function addEvent(event, cb) {
             this._pushToCache(event, function (err) {
-                cb && cb(err);
+                if (cb) cb(err);
             });
         }
     }, {
@@ -190,14 +199,14 @@ var Bucket = (function () {
             this._readFromCache(function (events) {
                 var keys = uniqueKeys(events);
                 var result = {};
-                _.each(keys.toJS(), function (k) {
-                    var vals = _.map(events, function (v) {
+                _underscore2["default"].each(keys.toJS(), function (k) {
+                    var vals = _underscore2["default"].map(events, function (v) {
                         return v.get(k);
                     });
                     result[k] = operator.call(_this, _this._index, vals, k);
                 });
-                var event = new IndexedEvent(_this._index, result);
-                cb && cb(event);
+                var event = new _event.IndexedEvent(_this._index, result);
+                if (cb) cb(event);
             });
         }
     }, {
@@ -212,11 +221,11 @@ var Bucket = (function () {
             var _this2 = this;
 
             this._readFromCache(function (events) {
-                var series = new IndexedSeries(_this2._index, {
+                var series = new _seriesJs.IndexedSeries(_this2._index, {
                     "name": _this2._index.toString(),
                     "events": events
                 });
-                cb && cb(series);
+                if (cb) cb(series);
             });
         }
     }]);
@@ -224,4 +233,5 @@ var Bucket = (function () {
     return Bucket;
 })();
 
-module.exports = Bucket;
+exports["default"] = Bucket;
+module.exports = exports["default"];

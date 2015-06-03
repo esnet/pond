@@ -23,6 +23,9 @@
     "webpack": "^1.7.3",
     "webpack-dev-server": "^1.6.5",
     "json-loader": "^0.5.1",
-    "babel": "^5.4.7"
+    "babel": "^5.4.7",
+    "eslint": "^0.22.1",
+    "babel-eslint": "^3.1.10",
+    "eslint-plugin-react": "^2.4.0"
   }
 }
