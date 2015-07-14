@@ -40,7 +40,32 @@ Pond is a library for handling time related stucture, so the most basic of eleme
 
 ### Timerange
 
-TODO
+A timerange is a simple represention of a begin and end time, used to maintain consistency across an application. You can define a TimeRange with moments, JS Date objects or ms since UNIX epoch.
+
+    var fmt = "YYYY-MM-DD HH:mm";
+    var beginTime = moment("2012-01-11 11:11", fmt);
+    var endTime =   moment("2012-02-22 12:12", fmt);
+    var range = new TimeRange(beginTime, endTime);
+
+or
+
+    var range = new TimeRange([1326309060000, 1329941520000]);
+
+There is also a copy constuctor.
+
+To get data back from a TimeRange use `begin()` and `end()` on it.
+
+TimeRange also supports a full set of comparison operators, allowing you to determine if one TimeRanges `equals()`, `contains()`, is `within()`, `overlaps()` with, or is `disjoint()` from another TimeRange.
+
+You can also get the `extents()` of a TimeRange with another, returning you a new TimeRange which spans them both.
+
+A TimeRange can also return its `duration` in ms, or a human friendly string that represents the same with `humanizeDuration`.
+
+A TimeRange can serialize to string with `toString` or simple JSON with `toJSON()`. It can also print itself as local time with `toLocalSring()` and in UTC time with `toUTCString()`.
+
+There is also a humanized version that can be expressed as a range `humanize()` (e.g. "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am") or as a range relative to now `relativeString()` (e.g. "a few seconds ago to a month ago").
+
+TimeRange also has several static methods to return common timeranges. So far these include: `lastDay()`, `lastSevenDays()`, `lastThirtyDays` and `lastNinetyDays`, though one could imagine expanding these.
 
 ### Index
 
@@ -52,7 +77,7 @@ Is a 1 hour timerange that corresponds to 30th Oct 2003 (GMT). In fact, it is th
 
 An Index is a nice representation of certain types of time intervals because it can be cached with its string representation as a key.
 
-The Index has a basic interface to find the TimeRange it as well as get back the original string.
+The Index has a basic interface to find the TimeRange it represents using `asTimerange()`, as well as get back the original string with `asString()` (or `toString()`). You can also get a simple JSON object with `toJSON()`.
 
 Currently only the above type of Index representation is implemented, however in the future something like 2015-04 could be used to represent April 2015.
 

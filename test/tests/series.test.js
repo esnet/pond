@@ -14,6 +14,22 @@ var data = {
     ]
 };
 
+var statsData = {
+    "name": "stats",
+    "columns": ["time", "value"],
+    "points": [
+        [1400425941000, 13],
+        [1400425942000, 18],
+        [1400425943000, 13],
+        [1400425944000, 14],
+        [1400425945000, 13],
+        [1400425946000, 16],
+        [1400425947000, 14],
+        [1400425948000, 21],
+        [1400425948000, 13]
+    ]
+};
+
 var interface_data = {
     "name": "star-cr5:to_anl_ip-a_v4",
     "description": "star-cr5->anl(as683):100ge:site-ex:show:intercloud",
@@ -294,18 +310,6 @@ describe("Series", function () {
             done();
         });
 
-        it("can avg the series", function(done) {
-            var series = new TimeSeries(data);
-            expect(series.avg()).to.equal(47.25);
-            done();
-        });
-
-        it("can avg the series", function(done) {
-            var series = new TimeSeries(data);
-            expect(series.avg()).to.equal(47.25);
-            done();
-        });
-
         it("can find the max of the series", function(done) {
             var series = new TimeSeries(data);
             expect(series.max()).to.equal(93);
@@ -317,6 +321,41 @@ describe("Series", function () {
             expect(series.min()).to.equal(18);
             done();
         });
+
+    });
+
+    describe("Series can be reduced to stats", function () {
+
+        it("can avg the series", function(done) {
+            var series = new TimeSeries(statsData);
+            expect(series.avg()).to.equal(15);
+            done();
+        });
+
+        it("can mean of the series (the avg)", function(done) {
+            var series = new TimeSeries(statsData);
+            expect(series.mean()).to.equal(15);
+            done();
+        });
+
+        it("can find the mean of the series", function(done) {
+            var series = new TimeSeries(statsData);
+            expect(series.mean()).to.equal(15);
+            done();
+        });
+
+        it("can find the medium of the series", function(done) {
+            var series = new TimeSeries(statsData);
+            expect(series.medium()).to.equal(14);
+            done();
+        });
+
+        it("can find the standard deviation of the series", function(done) {
+            var series = new TimeSeries(statsData);
+            expect(series.stdev()).to.equal(2.6666666666666665);
+            done();
+        });
+
     });
 
 });

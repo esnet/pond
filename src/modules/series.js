@@ -178,6 +178,34 @@ export class Series {
         return min.get(c);
     }
 
+    mean(column) {
+        return this.avg(column);
+    }
+
+    medium(column) {
+        console.log("Medium....")
+        const c = column || "value";
+        if (!this._columns.contains(c)) {
+            return undefined;
+        }
+        const sorted = this._series.sortBy((event) => event.get(c));
+        return sorted.get(Math.floor(sorted.size/2)).get(c);
+    }
+
+    stdev(column) {
+        const c = column || "value";
+        if (!this._columns.contains(c)) {
+            return undefined;
+        }
+
+        const mean = this.mean();
+        return Math.sqrt(this._series.reduce((memo, event) => {
+            console.log(Math.pow(event.get(c)-mean, 2))
+            return Math.pow(event.get(c)-mean, 2) + memo
+        }
+        , 0) / this.size());
+    }
+
     static equal(series1, series2) {
         return (series1._name === series2._name &&
                 series1._meta === series2._meta &&
