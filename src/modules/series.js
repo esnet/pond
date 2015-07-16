@@ -4,6 +4,7 @@ import Immutable from "immutable";
 import Index from "./index";
 import TimeRange from "./range";
 import {Event} from "./event";
+import {rangeFromIndexString, niceIndexString} from "./util";
 
 /**
  * Base class for a series of events.
@@ -38,6 +39,7 @@ export class Series {
     
     constructor(arg1, arg2, arg3, arg4) {
 
+        // Series(Series other) - copy
         if (arg1 instanceof Series) {
             
             //
@@ -51,6 +53,7 @@ export class Series {
             this._columns = other._columns;
             this._series = other._series;
 
+        // Series(string name, object meta, list columns, list | ImmutableList points)
         } else if (_.isString(arg1) &&
                    _.isObject(arg2) &&
                    _.isArray(arg3) &&
@@ -258,10 +261,23 @@ function uniqueKeys(events) {
  * Alternatively, the TimeSeries may be constructed from a list of Events.
  *
  * Internaly the above series is represented as two lists, one of times and
- * one of data associated with those times. The index of the list links them
- * together. You can fetch the full item at index n using get(n). This returns
- * the item as an Event. Note that the internal data of the Event will be
- * a reference to the immutable Map in the series list, so there's no copying. 
+ * one of data associated with those times. The position in the list links them
+ * together. For each position, therefore, you have a time and an event:
+ *
+ * 'time'  -->  Event
+ *
+ * The time may be of several forms:
+ *
+ *   - a time
+ *   - an index (which represents a timerange)
+ *   - a timerange
+ *
+ * The event itself is stored is an Immutable Map. Requesting a particular
+ * position in the list will return an Event that will in fact internally reference
+ * the Immutable Map within the series, making it efficient to get back items
+ * within the TimeSeries.
+ *
+ * You can fetch the full item at index n using get(n).
  *
  * The timerange associated with a TimeSeries is simply the bounds of the
  * events within it (i.e. the min and max times).
@@ -270,6 +286,7 @@ export class TimeSeries extends Series {
 
     constructor(arg1) {
 
+        // TimeSeries(TimeSeries other)
         if (arg1 instanceof TimeSeries) {
             
             super();
@@ -283,10 +300,14 @@ export class TimeSeries extends Series {
 
             this._name = other._name;
             this._meta = other._meta;
+            this._index = other._index;
             this._columns = other._columns;
             this._series = other._series;
             this._times = other._times;
 
+        // TimeSeries(object data) where data may be
+        //    {"events": Event list} or
+        //    {"columns": string list, "points": value list}
         } else if (_.isObject(arg1)) {
 
             //
@@ -312,13 +333,22 @@ export class TimeSeries extends Series {
                 // of Event objects
                 //
                 
-                const {events, name, ...meta} = obj;
+                const {events, index, name, ...meta} = obj;
 
                 columns = uniqueKeys(events).toJSON();
                 _.each(events, event => {
                     times.push(event.timestamp());
                     data.push(event.data());
                 });
+
+                // Optional index associated with this TimeSeries
+                if (index) {
+                    if (_.isString(index)) {
+                        this._index = new Index(index);
+                    } else if (index instanceof(Index)) {
+                        this._index = index;
+                    }
+                }
 
                 //Construct the base series
                 super(name, meta, columns, new Immutable.List(data));
@@ -328,7 +358,7 @@ export class TimeSeries extends Series {
 
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
 
-                const {name, points, columns, ...meta} = obj;
+                const {name, index, points, columns, ...meta} = obj;
                 const seriesPoints = points || [];
                 const seriesName = name || "";
                 const seriesMeta = meta || {};
@@ -350,7 +380,16 @@ export class TimeSeries extends Series {
 
                 super(seriesName, seriesMeta, seriesColumns, data);
 
-                //List of times, as Immutable List
+                // Optional index associated with this TimeSeries
+                if (index) {
+                    if (_.isString(index)) {
+                        this._index = new Index(index);
+                    } else if (index instanceof(Index)) {
+                        this._index = index;
+                    }
+                }
+
+                // List of times, as Immutable List
                 this._times = Immutable.fromJS(times);
             }
         }
@@ -365,6 +404,7 @@ export class TimeSeries extends Series {
      */
     toJSON() {
         const name = this._name;
+        const index = this._index;
         const cols = this._columns;
         const series = this._series;
         const times = this._times;
@@ -379,11 +419,24 @@ export class TimeSeries extends Series {
         const columns = ["time"];
         cols.forEach((column) => {columns.push(column)});
 
-        return _.extend(this._meta.toJSON(), {
-            name: name,
+        let result = {
+            name: name
+        };
+
+        if (index) {
+            result.index = index.toString();
+        }
+
+        result = _.extend(result, {
             columns: columns,
             points: points
         });
+
+        result = _.extend(result, this._meta.toJSON());
+
+        console.log(result)
+
+        return result;
     }
 
     /**
@@ -398,7 +451,21 @@ export class TimeSeries extends Series {
     //
 
     range() {
-        return new TimeRange(this._times.min(), this._times.max());
+        let min;
+        let max;
+        this._times.forEach((time) => {
+            if (_.isString(time)) {
+                const index = rangeFromIndexString(time);
+                if (!min || index.begin() < min) min = index.begin();
+                if (!max || index.end() > max) max = index.end();
+                console.log("     -- ", index.toString(), new Date(index.begin()), new Date(index.end()));
+            } else if (_.isNumber(time)) {
+                if (!min || time < min) min = time;
+                if (!max || time > max) max = time;
+            }
+        });
+
+        return new TimeRange(min, max);
     }
 
     begin() {
@@ -410,10 +477,33 @@ export class TimeSeries extends Series {
     }
 
     /**
+     * Access the Index, if this TimeSeries has one
+     */
+
+    index() {
+        return this._index;
+    }
+
+    indexAsString() {
+        return this._index ? this._index.asString() : undefined;
+    }
+
+    indexAsRange() {
+        console.log(">>> indexAsRange", this._index.asTimerange())
+        return this._index ? this._index.asTimerange() : undefined;
+    }
+
+    /**
      * Access the series data via index. The result is an Event.
      */
     at(i) {
-        return new Event(this._times.get(i), this._series.get(i));
+        const time = this._times.get(i);
+        if (_.isString(time)) {
+            const index = time;
+            return new IndexedEvent(index, this._series.get(i));
+        } else {
+            return new Event(time, this._series.get(i));
+        }
     }
 
     /**
@@ -442,91 +532,3 @@ export class TimeSeries extends Series {
     }
 }
 
-/**
- * TODO
- */
-export class TimeRangeSeries extends Series {
-    constructor(index, data) {
-        super(data);
-    }
-
-    at(i) {
-        return new TimeRangeEvent(this._times.get(i), this._series.get(i));
-    }
-}
-
-/**
- * EXPERIMENTAL
- *
- * An IndexSeries is a timeseries, like a Series, only the timerange associated with it
- * comes from an Index rather than a specific time range.
- *
- * The use for this would be in an indexed cache:
- *
- * Insert into cache by taking a IndexSeries, indexedSeries, getting the key (s.indexAsString()) and
- * insering it as cache[indexedSeries.indexAsString] = indexedSeries;
- *
- * A range of indexes can easily be generated for a timerange (we need a utility for this). Using each
- * index in that range we can pull data from the cache (if it's there) or request it if it isn't.
- *
- */
-
-export class IndexedSeries extends TimeSeries {
-
-    constructor(index, data) {
-        super(data);
-
-        if (_.isString(index)) {
-            this._index = new Index(index);
-        } else if (index instanceof Index) {
-            this._index = index;
-        }
-    }
-
-    //
-    // Serialize
-    //
-
-    toJSON() {
-        const cols = this._columns;
-        const series = this._series;
-        const times = this._times;
-
-        //The JSON output has 'time' as the first column
-        let columns = ["time"];
-        cols.forEach(column => {columns.push(column)});
-
-        return _.extend(this._meta.toJSON(), {
-            name: this._name,
-            index: this.indexAsString(),
-            columns: columns,
-            points: series.map((value, i) => {
-                let data = [times.get(i)];
-                cols.forEach((column, j) => {
-                    data.push(value.get(column));
-                });
-                return data;
-            })
-        });
-    }
-
-    toString() {
-        return JSON.stringify(this.toJSON());
-    }
-
-    //
-    // Convenience access the series range and index
-    //
-
-    index() {
-        return this._index;
-    }
-
-    indexAsString() {
-        return this._index.asString();
-    }
-
-    range() {
-        return this._index.asTimerange();
-    }
-}

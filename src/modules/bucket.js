@@ -2,7 +2,7 @@ import Immutable from "immutable";
 import _ from "underscore";
 
 import {IndexedEvent} from "./event";
-import {IndexedSeries} from "./series.js";
+import {TimeSeries} from "./series";
 import Index from "./index";
 
 /**
@@ -131,8 +131,9 @@ export default class Bucket {
      */
     collect(cb) {
         this._readFromCache((events) => {
-            var series = new IndexedSeries(this._index, {
+            var series = new TimeSeries({
                 "name": this._index.toString(),
+                "index": this._index,
                 "events": events
             });
             if (cb) cb(series);

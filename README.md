@@ -69,17 +69,23 @@ TimeRange also has several static methods to return common timeranges. So far th
 
 ### Index
 
-An index is simply a string a range of time. For example:
+An index is simply a string that represents a fixed range of time. There are two basic types: The first represents the number of some unit of time (hours, days etc) since the UNIX epoch. The second represents a calendar range, such as Oct 2014.
 
-    1d-12355
+For the first type, an example might be:
 
-Is a 1 hour timerange that corresponds to 30th Oct 2003 (GMT). In fact, it is the 12355th day since the UNIX epoch.
+    1d-12355      //  30th Oct 2003 (GMT), the 12355th day since the UNIX epoch
+
+You can also use seconds (e.g. 30s), minutes (e.g. 5m), hours (e.g. 1h) or days (e.g. 7d).
+
+Here are several examples of the second type:
+
+    2003-10-30    // 30th Oct 2003
+    2014-09       // Sept 2014
+    2015          // All of the year 2015
 
 An Index is a nice representation of certain types of time intervals because it can be cached with its string representation as a key.
 
-The Index has a basic interface to find the TimeRange it represents using `asTimerange()`, as well as get back the original string with `asString()` (or `toString()`). You can also get a simple JSON object with `toJSON()`.
-
-Currently only the above type of Index representation is implemented, however in the future something like 2015-04 could be used to represent April 2015.
+The Index has a basic interface to find the TimeRange it represents using `asTimerange()`, or with `begin()` and `end()`, as well as get back the original string with `asString()` (or `toString()`). You can also get a simple JSON object with `toJSON()`.
 
 Example:
 
@@ -100,9 +106,9 @@ To specify the data you can supply a Javascript object of key/values, a
 Immutable Map, or a simple type such as an integer. In the case of the simple
 type this is a shorthand for supplying {"value": v}.
  
- Example:
+Example:
 
- Given some source of data that looks like this:
+Given some source of data that looks like this:
 
     {
         "start_time": "2015-04-22T03:30:00Z",
@@ -144,7 +150,7 @@ to fetch the whole data object, which will be an Immutable Map.
 
 ### TimeSeries
 
-Suppose you have some timeseries data that looks like this:
+Currently you can initialize a TimeSeries with either a list of events, or with a data format that looks like this:
 
     var data = {
         "name": "traffic",
@@ -158,22 +164,53 @@ Suppose you have some timeseries data that looks like this:
         ]
     };
 
-In fact, if you get your data from InfluxDB, this is exactly what your data will look like.
-
-Now you want to create a Series object from that. To do that simply use the constructor:
+To create a new TimeSeries object from that simply use the constructor:
 
     var series = new Series(data);
 
-To get how many rows there are in a `Series` use `size()`.
+The name is somewhat optional, but a good practice. Columns are necessary and refer to the data in the points. And points are and array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels. As just hinted at, the time column may actually be either a time or a timerange, reprsented by an Index. By using an Index it's possible to refer to a specific month for example.
 
-To get a particular row back out of the `Series`, use `at(i)`. It will return the row and an `Event`. like this:
+    var availabilityData = {
+        "name": "Last 3 months availability",
+        "columns": ["time", "uptime"],
+        "points": [
+            ["2015-06", "100%"],   // <-- 2015-06 specified here represents June 2015
+            ["2015-05", "92%"],
+            ["2015-04", "87%"],
+        ]
+    };
+
+You may also optionally associate the TimeSeries with an Index. This is very helpful when caching different TimeSeries.
+
+    var indexedData = {
+        "index": "1d-625",        // <-- Index specified here
+        "name": "traffic",
+        "columns": ["time", "temp"],
+        "points": [
+            [1400425947000, 26.2],
+            [1400425948000, 27.6],
+            [1400425949000, 28.9],
+            [1400425950000, 29.1],
+        ]
+    };
+
+You can read the index back with `index()`, or as a string (more likely for caching) `indexAsString()`, or as a TimeRange with `indexAsRange()`.
+
+To get how many rows there are in a `Series` use `size()`, while to get a particular row back out of the `Series`, use `at(i)`. It will return the row and an `Event`. like this:
 
     var event = series.at(1);
 
-An event is a timestamp and some data, so to deconstruct the event you can use `timestamp()` and `data()` methods:
+You can also use ES6 to iterate over the data:
 
-    var data = series.data(); // {"value":18}
-    var timestamp = series.timestamp().getTime(); //1400425948000
+    var series = new Series(data);
+    for (event of series.events()) {
+        console.log(event.toString());  // prints the event
+    }
+
+An event is a timestamp or timerange and some data, so to deconstruct the event you can use `timestamp()` and `data()` methods:
+
+    var data = event.data(); // {"value":18}
+    var timestamp = event.timestamp().getTime(); //1400425948000
 
 ### Comparing series
 
@@ -181,9 +218,9 @@ One of the nice things about the TimeSeries representation in Pond is that it is
 
 A TimeSeries can be compared in two ways: with the `equals()` or `is()` static functions. `equals()` will check that the internal structures of the TimeSeries are the same reference. If you use the copy constructor, they will be the same. The `is()` function is perhaps more useful in that it will check to see if the structures, though perhaps being different references, have the same values.
 
-### Aggregation
+### Aggregation (Very experimental)
 
-Say you have an incoming stream of Events and you want to aggregate them together. Pond can help with that. Here's an example. Lets create some events on 2/14/2015 that cross over the hour 7:57am, 7:58am, 7:59am, 8:00am and 8:01am. The values for these events are [3, 9, 6, 4, 5]:
+Say you have an incoming stream of Events and you want to aggregate them together. Pond can help with that. Here's an example. Lets create some events on 2/14/2015 that cross over the hour: 7:57am, 7:58am, 7:59am, 8:00am and 8:01am. The values for these events are [3, 9, 6, 4, 5]:
 
     var incomingEvents = [];
     incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 57, 0), 3));
@@ -192,19 +229,18 @@ Say you have an incoming stream of Events and you want to aggregate them togethe
     incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  0, 0), 4));
     incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  1, 0), 5));
 
-Now lets find the avg value in each of the hours. To do this we setup an Aggregator that's indexed on the hour ("1h") and will use an average function "avg", like this:
+Now lets find the avg value in each of the hours. To do this we setup an Aggregator that is indexed on the hour ("1h") and will use an average function "avg", like this:
 
-    var Pond = require("pond");
     var {Aggregator, Functions} = require("pond");
     var {max, avg, sum, count} = Functions;
     
     var hourlyAverage = new Aggregator("1h", avg);
 
-The we hook up the hourlyAverage event emitted so we can collect the result (or pass it on to another aggregator). Here we'll just put them into a map using the index (or the hour) as a key:
+The we hook up the hourlyAverage event emitted so we can collect the result (or pass it on to another aggregator or collector). Here we'll just put them into a map using the index (or the hour) as a key:
 
     hourlyAverage.onEmit((index, event) => { outputEvents[index.asString()] = event;});
 
-Note that you can combine the constructor and the emit hookup as well:
+Note that you can alternatively combine the constructor and the emit hookup as well:
 
     var hourlyAverage = new Aggregator("1h", avg, (index, event) => {
         outputEvents[index.asString()] = event;
@@ -214,14 +250,14 @@ Then we can add events as long as we want, forever even:
 
     _.each(incomingEvents, event => { hourlyAverage.addEvent(event); });
 
-Knowing when to be done with a bucket that we're aggregating into depends on the situation. If this is a continuous stream of events then the code currenly considers it done with a bucket when an event comes in that fits into another bucket. In this example the first event will create the first bucket. Then next two events also fit into this bucket. The 4th event is in the following hour so the old bucket is aggregated based on the aggregation function, and event is emitted with that value, and a new bucket is created for the 4th event. The 5th event goes into the same bucket. In this case we want to flush the bucket after the 5th event, so we call:
+Knowing when to be done with a bucket that we're aggregating into depends on the situation. If this is a continuous stream of events then the code currenly considers it done with a bucket when an event comes in that fits into another bucket. In this example the first event will create the first bucket. Then next two events also fit into this bucket. The 4th event is in the following hour so the old bucket is aggregated based on the aggregation function and an event is emitted with that aggregated value. A new bucket is then created for the 4th event. The 5th event goes into that same bucket. In this case we want to flush the bucket after the 5th event, so we call:
 
     hourlyAverage.done();
 
-After this our `outputEvents` object will contain two entries:
+This will force an event to be emitted. After this our `outputEvents` object will contain two entries:
 
     outputEvents["1h-396206"].get();   // 6
-    outputEvents["1h-396207"].get();  // 4.5
+    outputEvents["1h-396207"].get();   // 4.5
 
 Events may also be more complex, with entries like this:
 
@@ -231,7 +267,7 @@ Aggregation events will keep the same structure.
 
 ### Collection
 
-A close relative of aggregation is collection. A collection object can be used to assemble IndexedTimeSeries by feeding events to the Collector. This is probably best explained with an example.
+A close relative of aggregation is collection. A collection object can be used to assemble a TimeSeries by feeding events it. This is probably best explained with an example.
 
 First, lets make some events:
 
@@ -246,7 +282,7 @@ Similarly to constructing a Aggregator, we build a Collector:
 
     var hourlyCollector = new Collector("1h");
 
-Then we catch emitted IndexedTimeSeries:
+Then we setup a handler to catch the emitted TimeSeries. Here we'll just console.log the result:
 
     hourlyCollector.onEmit((series) => {
         console.log(series);
@@ -254,15 +290,13 @@ Then we catch emitted IndexedTimeSeries:
 
 And then as in the Aggregator, we feed it our events, and call done() to flush at then end:
 
-    //Add events
     _.each(events, (event) => {
         hourlyCollector.addEvent(event);
     });
 
-    //Done
     hourlyCollector.done();
 
-The result will be an emitted timeseries object containing all events within each indexed hour.
+The result will be two emitted timeseries objects containing all events within each indexed hour.
 
 For 2/14/2014 7am-8am:
 

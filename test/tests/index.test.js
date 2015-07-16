@@ -36,6 +36,58 @@ describe("Indexes", function () {
             expect(index.asTimerange().humanizeDuration()).to.equal("a few seconds");
             done();
         });
-    });
 
+        it('can create a year index', function(done) {
+            var index = new Index("2014");
+            var expected = "[Wed, 01 Jan 2014 00:00:00 GMT, Wed, 31 Dec 2014 23:59:59 GMT]";
+            expect(index.asTimerange().toUTCString()).to.equal(expected);
+            expect(index.asTimerange().humanizeDuration()).to.equal("a year");
+            done();
+        });
+    
+        it('can create a month index', function(done) {
+            var index = new Index("2014-09");
+            var expected = "[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]";
+            expect(index.asTimerange().toUTCString()).to.equal(expected);
+            expect(index.asTimerange().humanizeDuration()).to.equal("a month");
+            done();
+        });
+
+        it('can create a day index', function(done) {
+            var index = new Index("2014-09-17");
+            var expected = "[Wed, 17 Sep 2014 00:00:00 GMT, Wed, 17 Sep 2014 23:59:59 GMT]";
+            expect(index.asTimerange().toUTCString()).to.equal(expected);
+            expect(index.asTimerange().humanizeDuration()).to.equal("a day");
+            done();
+        });
+
+    });
+    describe("Index nice names", function () {
+        it('can create a year index', function(done) {
+            var index = new Index("2014");
+            var expected = "2014";
+            expect(index.toNiceString()).to.equal(expected);
+            done();
+        });
+    
+        it('can create a month index..', function(done) {
+            var index = new Index("2014-09");
+            var expected = "September";
+            expect(index.toNiceString()).to.equal(expected);
+            done();
+        });
+
+        it('can create a day index', function(done) {
+            var index = new Index("2014-09-17");
+            var expected = "September 17th 2014";
+            expect(index.toNiceString()).to.equal(expected);
+            done();
+        });
+        it('can create a day index', function(done) {
+            var index = new Index("2014-09-17");
+            var expected = "17 Sep 2014";
+            expect(index.toNiceString("DD MMM YYYY")).to.equal(expected);
+            done();
+        });
+    });
 });

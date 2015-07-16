@@ -14,6 +14,18 @@ var data = {
     ]
 };
 
+var indexedData = {
+    "index": "1d-625",
+    "name": "traffic",
+    "columns": ["time", "value", "status"],
+    "points": [
+        [1400425947000, 52, "ok"],
+        [1400425948000, 18, "ok"],
+        [1400425949000, 26, "fail"],
+        [1400425950000, 93, "offline"],
+    ]
+};
+
 var statsData = {
     "name": "stats",
     "columns": ["time", "value"],
@@ -27,6 +39,25 @@ var statsData = {
         [1400425947000, 14],
         [1400425948000, 21],
         [1400425948000, 13]
+    ]
+};
+
+var availabilityData = {
+    "name": "availability",
+    "columns": ["time", "uptime"],
+    "points": [
+        ["2015-06", "100%"],
+        ["2015-05", "92%"],
+        ["2015-04", "87%"],
+        ["2015-03", "99%"],
+        ["2015-02", "92%"],
+        ["2015-01", "100%"],
+        ["2014-12", "99%"],
+        ["2014-11", "91%"],
+        ["2014-10", "99%"],
+        ["2014-09", "95%"],
+        ["2014-08", "88%"],
+        ["2014-07", "100%"]
     ]
 };
 
@@ -240,7 +271,7 @@ describe("Series", function () {
     describe("Timeseries with meta data can be created with a javascript object", function () {
         it("can create an series with meta data and get that data back", function(done) {
             var series = new TimeSeries(interface_data);
-            var expected = '{"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud","name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]]}';            
+            var expected = '{"name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]],"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud"}';
             expect(series.toString()).to.equal(expected);
             expect(series.meta("interface")).to.equal("to_anl_ip-a_v4");
             expect(series.meta("bob")).to.be.undefined();
@@ -360,50 +391,51 @@ describe("Series", function () {
 
 });
 
+/**
+ * A TimeSeries should be able to have an Index associated with it, for instance
+ * if the series represents june 2014 then the Index might be "2014-06", or the
+ * 123rd day since the epoch would be "1d-123"
+ */
+describe("Indexed TimeSeries", function () {
 
-describe("IndexedSeries", function () {
-
-    var {IndexedSeries} = require("../../src/modules/series.js");
+    var {TimeSeries} = require("../../src/modules/series.js");
 
     describe("Series created with a javascript object", function () {
-        it("can create an series", function(done) {
-            var series = new IndexedSeries(data);
-            expect(series).to.be.ok;
-            done();
-        });
-
-        it("can return the size of the series", function(done) {
-            var series = new IndexedSeries("1d-1234", data);
-            expect(series.size()).to.equal(4);
-            done();
-        });
-
-        it("can return an item in the series as an event", function(done) {
-            var series = new IndexedSeries("1d-1234", data);
-            var event = series.at(1);
-            expect(event).to.be.an.instanceof(Event);
-            done();
-        });
-
-        it("can return an item in the series with the correct data", function(done) {
-            var series = new IndexedSeries("1d-1234", data);
-            var event = series.at(1);
-            expect(JSON.stringify(event.data())).to.equal('{"value":18,"status":"ok"}');
-            expect(event.timestamp().getTime()).to.equal(1400425948000);
-            done();
-        });
 
         it("can serialize to a string", function(done) {
-            var series = new IndexedSeries("1d-1234", data);
-            var expectedString = '{"name":"traffic","index":"1d-1234","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}';
+            var series = new TimeSeries(indexedData);
+            var expectedString = '{"name":"traffic","index":"1d-625","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}';
             expect(series.toString()).to.equal(expectedString);
             done();
         });
 
         it("can return the time range of the series", function(done) {
-            var series = new IndexedSeries("1d-10234", data);
-            var expectedString = "[Wed Jan 07 1998 16:00:00 GMT-0800 (PST), Thu Jan 08 1998 16:00:00 GMT-0800 (PST)]";
-            expect(series.range().toLocalString()).to.equal(expectedString);
+            console.log("TEST")
+            var series = new TimeSeries(indexedData);
+            console.log("...", series.indexAsRange())
+            var expectedString = "[Fri Sep 17 1971 17:00:00 GMT-0700 (PDT), Sat Sep 18 1971 17:00:00 GMT-0700 (PDT)]";
+            expect(series.indexAsRange().toLocalString()).to.equal(expectedString);
+            done();
+        });
+    });
+});
+
+
+/**
+ * A series should be able to have an Index associated with it, for instance
+ * if the series represents june 2014 then the Index might be "2014-06", or the
+ * 123rd day since the epoch would be "1d-123"
+ */
+describe("Timeseries containing indexed timeranges", function () {
+
+    var {TimeSeries} = require("../../src/modules/series.js");
+
+    describe("Series created with a javascript object", function () {
+        it("can create an series", function(done) {
+            var series = new TimeSeries(availabilityData);
+            console.log(series.toString())
+            console.log(series.range())
+            expect(series).to.be.ok;
             done();
         });
     });

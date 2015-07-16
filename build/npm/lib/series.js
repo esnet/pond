@@ -36,6 +36,8 @@ var _range2 = _interopRequireDefault(_range);
 
 var _event = require("./event");
 
+var _util = require("./util");
+
 /**
  * Base class for a series of events.
  *
@@ -72,6 +74,7 @@ var Series = (function () {
 
         _classCallCheck(this, Series);
 
+        // Series(Series other) - copy
         if (arg1 instanceof Series) {
 
             //
@@ -84,6 +87,8 @@ var Series = (function () {
             this._meta = other._meta;
             this._columns = other._columns;
             this._series = other._series;
+
+            // Series(string name, object meta, list columns, list | ImmutableList points)
         } else if (_underscore2["default"].isString(arg1) && _underscore2["default"].isObject(arg2) && _underscore2["default"].isArray(arg3) && (_underscore2["default"].isArray(arg4) || _immutable2["default"].List.isList(arg4))) {
             (function () {
 
@@ -224,6 +229,38 @@ var Series = (function () {
             });
             return min.get(c);
         }
+    }, {
+        key: "mean",
+        value: function mean(column) {
+            return this.avg(column);
+        }
+    }, {
+        key: "medium",
+        value: function medium(column) {
+            console.log("Medium....");
+            var c = column || "value";
+            if (!this._columns.contains(c)) {
+                return undefined;
+            }
+            var sorted = this._series.sortBy(function (event) {
+                return event.get(c);
+            });
+            return sorted.get(Math.floor(sorted.size / 2)).get(c);
+        }
+    }, {
+        key: "stdev",
+        value: function stdev(column) {
+            var c = column || "value";
+            if (!this._columns.contains(c)) {
+                return undefined;
+            }
+
+            var mean = this.mean();
+            return Math.sqrt(this._series.reduce(function (memo, event) {
+                console.log(Math.pow(event.get(c) - mean, 2));
+                return Math.pow(event.get(c) - mean, 2) + memo;
+            }, 0) / this.size());
+        }
     }], [{
         key: "equal",
         value: function equal(series1, series2) {
@@ -319,10 +356,23 @@ function uniqueKeys(events) {
  * Alternatively, the TimeSeries may be constructed from a list of Events.
  *
  * Internaly the above series is represented as two lists, one of times and
- * one of data associated with those times. The index of the list links them
- * together. You can fetch the full item at index n using get(n). This returns
- * the item as an Event. Note that the internal data of the Event will be
- * a reference to the immutable Map in the series list, so there's no copying. 
+ * one of data associated with those times. The position in the list links them
+ * together. For each position, therefore, you have a time and an event:
+ *
+ * 'time'  -->  Event
+ *
+ * The time may be of several forms:
+ *
+ *   - a time
+ *   - an index (which represents a timerange)
+ *   - a timerange
+ *
+ * The event itself is stored is an Immutable Map. Requesting a particular
+ * position in the list will return an Event that will in fact internally reference
+ * the Immutable Map within the series, making it efficient to get back items
+ * within the TimeSeries.
+ *
+ * You can fetch the full item at index n using get(n).
  *
  * The timerange associated with a TimeSeries is simply the bounds of the
  * events within it (i.e. the min and max times).
@@ -334,6 +384,7 @@ var TimeSeries = (function (_Series) {
 
         _classCallCheck(this, TimeSeries);
 
+        // TimeSeries(TimeSeries other)
         if (arg1 instanceof TimeSeries) {
 
             _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", this).call(this);
@@ -347,9 +398,14 @@ var TimeSeries = (function (_Series) {
 
             this._name = other._name;
             this._meta = other._meta;
+            this._index = other._index;
             this._columns = other._columns;
             this._series = other._series;
             this._times = other._times;
+
+            // TimeSeries(object data) where data may be
+            //    {"events": Event list} or
+            //    {"columns": string list, "points": value list}
         } else if (_underscore2["default"].isObject(arg1)) {
             (function () {
 
@@ -377,15 +433,25 @@ var TimeSeries = (function (_Series) {
                     //
 
                     var events = obj.events;
+                    var index = obj.index;
                     var _name = obj.name;
 
-                    var meta = _objectWithoutProperties(obj, ["events", "name"]);
+                    var meta = _objectWithoutProperties(obj, ["events", "index", "name"]);
 
                     columns = uniqueKeys(events).toJSON();
                     _underscore2["default"].each(events, function (event) {
                         times.push(event.timestamp());
                         data.push(event.data());
                     });
+
+                    // Optional index associated with this TimeSeries
+                    if (index) {
+                        if (_underscore2["default"].isString(index)) {
+                            _this2._index = new _index2["default"](index);
+                        } else if (index instanceof _index2["default"]) {
+                            _this2._index = index;
+                        }
+                    }
 
                     //Construct the base series
                     _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this2).call(_this2, _name, meta, columns, new _immutable2["default"].List(data));
@@ -394,10 +460,11 @@ var TimeSeries = (function (_Series) {
                     _this2._times = new _immutable2["default"].List(times);
                 } else if (_underscore2["default"].has(obj, "columns") && _underscore2["default"].has(obj, "points")) {
                     var _name2 = obj.name;
+                    var index = obj.index;
                     var points = obj.points;
                     var _columns = obj.columns;
 
-                    var meta = _objectWithoutProperties(obj, ["name", "points", "columns"]);
+                    var meta = _objectWithoutProperties(obj, ["name", "index", "points", "columns"]);
 
                     var seriesPoints = points || [];
                     var seriesName = _name2 || "";
@@ -425,7 +492,16 @@ var TimeSeries = (function (_Series) {
 
                     _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this2).call(_this2, seriesName, seriesMeta, seriesColumns, data);
 
-                    //List of times, as Immutable List
+                    // Optional index associated with this TimeSeries
+                    if (index) {
+                        if (_underscore2["default"].isString(index)) {
+                            _this2._index = new _index2["default"](index);
+                        } else if (index instanceof _index2["default"]) {
+                            _this2._index = index;
+                        }
+                    }
+
+                    // List of times, as Immutable List
                     _this2._times = _immutable2["default"].fromJS(times);
                 }
             })();
@@ -446,6 +522,7 @@ var TimeSeries = (function (_Series) {
          */
         value: function toJSON() {
             var name = this._name;
+            var index = this._index;
             var cols = this._columns;
             var series = this._series;
             var times = this._times;
@@ -464,11 +541,24 @@ var TimeSeries = (function (_Series) {
                 columns.push(column);
             });
 
-            return _underscore2["default"].extend(this._meta.toJSON(), {
-                name: name,
+            var result = {
+                name: name
+            };
+
+            if (index) {
+                result.index = index.toString();
+            }
+
+            result = _underscore2["default"].extend(result, {
                 columns: columns,
                 points: points
             });
+
+            result = _underscore2["default"].extend(result, this._meta.toJSON());
+
+            console.log(result);
+
+            return result;
         }
     }, {
         key: "toString",
@@ -487,7 +577,21 @@ var TimeSeries = (function (_Series) {
         //
 
         value: function range() {
-            return new _range2["default"](this._times.min(), this._times.max());
+            var min = undefined;
+            var max = undefined;
+            this._times.forEach(function (time) {
+                if (_underscore2["default"].isString(time)) {
+                    var index = (0, _util.rangeFromIndexString)(time);
+                    if (!min || index.begin() < min) min = index.begin();
+                    if (!max || index.end() > max) max = index.end();
+                    console.log("     -- ", index.toString(), new Date(index.begin()), new Date(index.end()));
+                } else if (_underscore2["default"].isNumber(time)) {
+                    if (!min || time < min) min = time;
+                    if (!max || time > max) max = time;
+                }
+            });
+
+            return new _range2["default"](min, max);
         }
     }, {
         key: "begin",
@@ -500,13 +604,40 @@ var TimeSeries = (function (_Series) {
             return this.range().end();
         }
     }, {
+        key: "index",
+
+        /**
+         * Access the Index, if this TimeSeries has one
+         */
+
+        value: function index() {
+            return this._index;
+        }
+    }, {
+        key: "indexAsString",
+        value: function indexAsString() {
+            return this._index ? this._index.asString() : undefined;
+        }
+    }, {
+        key: "indexAsRange",
+        value: function indexAsRange() {
+            console.log(">>> indexAsRange", this._index.asTimerange());
+            return this._index ? this._index.asTimerange() : undefined;
+        }
+    }, {
         key: "at",
 
         /**
          * Access the series data via index. The result is an Event.
          */
         value: function at(i) {
-            return new _event.Event(this._times.get(i), this._series.get(i));
+            var time = this._times.get(i);
+            if (_underscore2["default"].isString(time)) {
+                var index = time;
+                return new IndexedEvent(index, this._series.get(i));
+            } else {
+                return new _event.Event(time, this._series.get(i));
+            }
         }
     }, {
         key: "events",
@@ -557,122 +688,3 @@ var TimeSeries = (function (_Series) {
 })(Series);
 
 exports.TimeSeries = TimeSeries;
-
-/**
- * TODO
- */
-
-var TimeRangeSeries = (function (_Series2) {
-    function TimeRangeSeries(index, data) {
-        _classCallCheck(this, TimeRangeSeries);
-
-        _get(Object.getPrototypeOf(TimeRangeSeries.prototype), "constructor", this).call(this, data);
-    }
-
-    _inherits(TimeRangeSeries, _Series2);
-
-    _createClass(TimeRangeSeries, [{
-        key: "at",
-        value: function at(i) {
-            return new TimeRangeEvent(this._times.get(i), this._series.get(i));
-        }
-    }]);
-
-    return TimeRangeSeries;
-})(Series);
-
-exports.TimeRangeSeries = TimeRangeSeries;
-
-/**
- * EXPERIMENTAL
- *
- * An IndexSeries is a timeseries, like a Series, only the timerange associated with it
- * comes from an Index rather than a specific time range.
- *
- * The use for this would be in an indexed cache:
- *
- * Insert into cache by taking a IndexSeries, indexedSeries, getting the key (s.indexAsString()) and
- * insering it as cache[indexedSeries.indexAsString] = indexedSeries;
- *
- * A range of indexes can easily be generated for a timerange (we need a utility for this). Using each
- * index in that range we can pull data from the cache (if it's there) or request it if it isn't.
- *
- */
-
-var IndexedSeries = (function (_TimeSeries) {
-    function IndexedSeries(index, data) {
-        _classCallCheck(this, IndexedSeries);
-
-        _get(Object.getPrototypeOf(IndexedSeries.prototype), "constructor", this).call(this, data);
-
-        if (_underscore2["default"].isString(index)) {
-            this._index = new _index2["default"](index);
-        } else if (index instanceof _index2["default"]) {
-            this._index = index;
-        }
-    }
-
-    _inherits(IndexedSeries, _TimeSeries);
-
-    _createClass(IndexedSeries, [{
-        key: "toJSON",
-
-        //
-        // Serialize
-        //
-
-        value: function toJSON() {
-            var cols = this._columns;
-            var series = this._series;
-            var times = this._times;
-
-            //The JSON output has 'time' as the first column
-            var columns = ["time"];
-            cols.forEach(function (column) {
-                columns.push(column);
-            });
-
-            return _underscore2["default"].extend(this._meta.toJSON(), {
-                name: this._name,
-                index: this.indexAsString(),
-                columns: columns,
-                points: series.map(function (value, i) {
-                    var data = [times.get(i)];
-                    cols.forEach(function (column, j) {
-                        data.push(value.get(column));
-                    });
-                    return data;
-                })
-            });
-        }
-    }, {
-        key: "toString",
-        value: function toString() {
-            return JSON.stringify(this.toJSON());
-        }
-    }, {
-        key: "index",
-
-        //
-        // Convenience access the series range and index
-        //
-
-        value: function index() {
-            return this._index;
-        }
-    }, {
-        key: "indexAsString",
-        value: function indexAsString() {
-            return this._index.asString();
-        }
-    }, {
-        key: "range",
-        value: function range() {
-            return this._index.asTimerange();
-        }
-    }]);
-
-    return IndexedSeries;
-})(TimeSeries);
-
-exports.IndexedSeries = IndexedSeries;

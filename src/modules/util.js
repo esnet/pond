@@ -1,4 +1,5 @@
 import moment from "moment";
+import _ from "underscore";
 
 import TimeRange from "./range";
 
@@ -10,28 +11,118 @@ const units = {
 };
 
 /**
- * This function will take an index such as 1d-278 and
+ * This function will take an index, which may be of two forms:
+ *     2015-07-14  (day)
+ *     2015-07     (month)
+ *     2015        (year)
+ *     1d-278      (range, in n x days, hours, minutes or seconds)
  * return a TimeRange for that time
  */
 export function rangeFromIndexString(index) {
-    let length;
+    let beginTime;
+    let endTime;
+
     const parts = index.split("-");
-    const size = parts[0];
 
-    // Position should be an int
-    const pos = parseInt(parts[1], 10);
+    switch (parts.length) {
+        case 3:
+            if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1])) && !_.isNaN(parseInt(parts[2]))) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const day = parseInt(parts[2]);
+                beginTime = moment.utc([year, month - 1, day]);
+                endTime = moment.utc(beginTime).endOf('day');
+            }
+        break;
 
-    // Size should be two parts, a number and a letter
-    const re = /([0-9]+)([smhd])/;
-    const sizeParts = re.exec(size);
-    if (sizeParts && sizeParts.length >= 3) {
-        const num = parseInt(sizeParts[1], 10);
-        const unit = sizeParts[2];
-        length = num * units[unit].length * 1000;
+        case 2:
+            // Size should be two parts, a number and a letter if it's a range
+            // based index, e.g 1h-23478
+            const rangeRegex = /([0-9]+)([smhd])/;
+            const sizeParts = rangeRegex.exec(parts[0]);
+            if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1]))) {
+                const pos = parseInt(parts[1], 10);
+                const num = parseInt(sizeParts[1], 10);
+                const unit = sizeParts[2];
+                const length = num * units[unit].length * 1000;
+                beginTime = moment.utc(pos * length);
+                endTime = moment.utc((pos + 1) * length);
+
+            } else if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1]))) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                beginTime = moment.utc([year, month - 1]);
+                endTime = moment.utc(beginTime).endOf('month');
+            }
+        break;
+
+        case 1:
+            const year = parts[0];
+            beginTime = moment.utc([year]);
+            endTime = moment.utc(beginTime).endOf('year');
+        break;
     }
+    if (beginTime && beginTime.isValid() && endTime && endTime.isValid()) {
+        return new TimeRange(beginTime, endTime);
+    } else {
+        return undefined;
+    }
+}
 
-    const beginTime = moment.utc(pos * length);
-    const endTime = moment.utc((pos + 1) * length);
+/**
+ * Returns a nice string for the index. If the index is of the form 1d-2345 then
+ * just that string is returned (there's not nice way to put it), but if it
+ * represents a day, month, or year (e.g. 2015-07) then a nice string like "July"
+ * will be returned. It's also possible to pass in the format of the reply for
+ * these types of strings. See moment's format naming conventions:
+ * http://momentjs.com/docs/#/displaying/format/
+ */
+export function niceIndexString(index, format) {
+    let t;
 
-    return new TimeRange(beginTime, endTime);
+    const parts = index.split("-");
+    switch (parts.length) {
+        case 3:
+            if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1])) && !_.isNaN(parseInt(parts[2]))) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const day = parseInt(parts[2]);
+                t = moment.utc([year, month - 1, day]);
+                if (format) {
+                    return t.format(format);
+                } else {
+                    return t.format("MMMM Do YYYY");
+                }
+
+            }
+        break;
+
+        case 2:
+            const rangeRegex = /([0-9]+)([smhd])/;
+            const sizeParts = rangeRegex.exec(parts[0]);
+            if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1]))) {
+                return index;
+            } else if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1]))) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                t = moment.utc([year, month - 1]);
+                if (format) {
+                    return t.format(format);
+                } else {
+                    return t.format("MMMM");
+                }
+            }
+        break;
+
+        case 1:
+            const year = parts[0];
+            t = moment.utc([year]);
+            if (format) {
+                return t.format(format);
+            } else {
+                return t.format("YYYY");
+            }
+        break;
+    }
+    return index;
 }

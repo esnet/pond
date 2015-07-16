@@ -1,4 +1,4 @@
-import {rangeFromIndexString} from "./util";
+import {rangeFromIndexString, niceIndexString} from "./util";
 
 /**
  * An index that represents as a string a range of time.
@@ -27,6 +27,10 @@ export default class Index {
         return this._s;
     }
 
+    toNiceString(format) {
+        return niceIndexString(this._s, format);
+    }
+
     // Alias for toString()
     asString() {
         return this.toString();
@@ -34,5 +38,13 @@ export default class Index {
 
     asTimerange() {
         return this._r;
+    }
+
+    begin() {
+        return this._r.begin();
+    }
+
+    end() {
+        return this._r.end();
     }
 }

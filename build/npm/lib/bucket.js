@@ -20,7 +20,7 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 var _event = require("./event");
 
-var _seriesJs = require("./series.js");
+var _series = require("./series");
 
 var _index = require("./index");
 
@@ -221,8 +221,9 @@ var Bucket = (function () {
             var _this2 = this;
 
             this._readFromCache(function (events) {
-                var series = new _seriesJs.IndexedSeries(_this2._index, {
+                var series = new _series.TimeSeries({
                     "name": _this2._index.toString(),
+                    "index": _this2._index,
                     "events": events
                 });
                 if (cb) cb(series);
