@@ -166,7 +166,7 @@ Currently you can initialize a TimeSeries with either a list of events, or with 
 
 To create a new TimeSeries object from that simply use the constructor:
 
-    var series = new Series(data);
+    var series = new TimeSeries(data);
 
 The name is somewhat optional, but a good practice. Columns are necessary and refer to the data in the points. And points are and array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels. As just hinted at, the time column may actually be either a time or a timerange, reprsented by an Index. By using an Index it's possible to refer to a specific month for example.
 
