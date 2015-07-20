@@ -1,42 +1,40 @@
 "use strict";
 
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _toArray = function (arr) { return Array.isArray(arr) ? arr : Array.from(arr); };
+
+var _objectWithoutProperties = function (obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; };
+
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _ = _interopRequire(require("underscore"));
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var Immutable = _interopRequire(require("immutable"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var Index = _interopRequire(require("./index"));
 
-function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
-
-function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _underscore = require("underscore");
-
-var _underscore2 = _interopRequireDefault(_underscore);
-
-var _immutable = require("immutable");
-
-var _immutable2 = _interopRequireDefault(_immutable);
-
-var _index = require("./index");
-
-var _index2 = _interopRequireDefault(_index);
-
-var _range = require("./range");
-
-var _range2 = _interopRequireDefault(_range);
+var TimeRange = _interopRequire(require("./range"));
 
 var _event = require("./event");
 
+var IndexedEvent = _event.IndexedEvent;
+var Event = _event.Event;
+
 var _util = require("./util");
+
+var rangeFromIndexString = _util.rangeFromIndexString;
+var niceIndexString = _util.niceIndexString;
 
 /**
  * Base class for a series of events.
@@ -46,7 +44,7 @@ var _util = require("./util");
  *
  */
 
-var Series = (function () {
+var Series = exports.Series = (function () {
 
     /**
      * A Series is constructed by either:
@@ -89,7 +87,7 @@ var Series = (function () {
             this._series = other._series;
 
             // Series(string name, object meta, list columns, list | ImmutableList points)
-        } else if (_underscore2["default"].isString(arg1) && _underscore2["default"].isObject(arg2) && _underscore2["default"].isArray(arg3) && (_underscore2["default"].isArray(arg4) || _immutable2["default"].List.isList(arg4))) {
+        } else if (_.isString(arg1) && _.isObject(arg2) && _.isArray(arg3) && (_.isArray(arg4) || Immutable.List.isList(arg4))) {
             (function () {
 
                 //
@@ -102,15 +100,15 @@ var Series = (function () {
                 var data = arg4;
 
                 _this._name = name;
-                _this._meta = _immutable2["default"].fromJS(meta);
-                _this._columns = _immutable2["default"].fromJS(columns);
+                _this._meta = Immutable.fromJS(meta);
+                _this._columns = Immutable.fromJS(columns);
 
-                if (_immutable2["default"].List.isList(data)) {
+                if (Immutable.List.isList(data)) {
                     _this._series = data;
                 } else {
-                    _this._series = _immutable2["default"].fromJS(_underscore2["default"].map(data, function (d) {
+                    _this._series = Immutable.fromJS(_.map(data, function (d) {
                         var pointMap = {};
-                        _underscore2["default"].each(d, function (p, i) {
+                        _.each(d, function (p, i) {
                             pointMap[columns[i]] = p;
                         });
                         return pointMap;
@@ -120,163 +118,163 @@ var Series = (function () {
         }
     }
 
-    _createClass(Series, [{
-        key: "toJSON",
+    _createClass(Series, {
+        toJSON: {
 
-        //
-        // Serialize
-        //
+            //
+            // Serialize
+            //
 
-        value: function toJSON() {
-            var cols = this._columns;
-            var series = this._series;
-            return {
-                name: this._name,
-                columns: cols.toJSON(),
-                points: series.map(function (value) {
-                    return cols.map(function (column) {
-                        data.push(value.get(column));
-                    });
-                })
-            };
-        }
-    }, {
-        key: "toString",
-        value: function toString() {
-            return JSON.stringify(this.toJSON());
-        }
-    }, {
-        key: "name",
-
-        //
-        // Access meta data about the series
-        //
-
-        value: function name() {
-            return this._name;
-        }
-    }, {
-        key: "meta",
-        value: function meta(key) {
-            return this._meta.get(key);
-        }
-    }, {
-        key: "size",
-
-        //
-        // Access the series itself
-        //
-
-        value: function size() {
-            return this._series.size;
-        }
-    }, {
-        key: "count",
-        value: function count() {
-            return this.size();
-        }
-    }, {
-        key: "at",
-        value: function at(i) {
-            return this._series.get(i);
-        }
-    }, {
-        key: "sum",
-
-        //
-        // Aggregate the series
-        //
-
-        value: function sum(column) {
-            var c = column || "value";
-            if (!this._columns.contains(c)) {
-                return undefined;
+            value: function toJSON() {
+                var cols = this._columns;
+                var series = this._series;
+                return {
+                    name: this._name,
+                    columns: cols.toJSON(),
+                    points: series.map(function (value) {
+                        return cols.map(function (column) {
+                            data.push(value.get(column));
+                        });
+                    })
+                };
             }
-            return this._series.reduce(function (memo, data) {
-                return data.get(c) + memo;
-            }, 0);
-        }
-    }, {
-        key: "avg",
-        value: function avg(column) {
-            var c = column || "value";
-            if (!this._columns.contains(c)) {
-                return undefined;
+        },
+        toString: {
+            value: function toString() {
+                return JSON.stringify(this.toJSON());
             }
-            return this.sum(column) / this.size();
-        }
-    }, {
-        key: "max",
-        value: function max(column) {
-            var c = column || "value";
-            if (!this._columns.contains(c)) {
-                return undefined;
-            }
-            var max = this._series.maxBy(function (a) {
-                return a.get(c);
-            });
-            return max.get(c);
-        }
-    }, {
-        key: "min",
-        value: function min(column) {
-            var c = column || "value";
-            if (!this._columns.contains(c)) {
-                return undefined;
-            }
-            var min = this._series.minBy(function (a) {
-                return a.get(c);
-            });
-            return min.get(c);
-        }
-    }, {
-        key: "mean",
-        value: function mean(column) {
-            return this.avg(column);
-        }
-    }, {
-        key: "medium",
-        value: function medium(column) {
-            console.log("Medium....");
-            var c = column || "value";
-            if (!this._columns.contains(c)) {
-                return undefined;
-            }
-            var sorted = this._series.sortBy(function (event) {
-                return event.get(c);
-            });
-            return sorted.get(Math.floor(sorted.size / 2)).get(c);
-        }
-    }, {
-        key: "stdev",
-        value: function stdev(column) {
-            var c = column || "value";
-            if (!this._columns.contains(c)) {
-                return undefined;
-            }
+        },
+        name: {
 
-            var mean = this.mean();
-            return Math.sqrt(this._series.reduce(function (memo, event) {
-                console.log(Math.pow(event.get(c) - mean, 2));
-                return Math.pow(event.get(c) - mean, 2) + memo;
-            }, 0) / this.size());
-        }
-    }], [{
-        key: "equal",
-        value: function equal(series1, series2) {
-            return series1._name === series2._name && series1._meta === series2._meta && series1._columns === series2._columns && series1._series === series2._series;
+            //
+            // Access meta data about the series
+            //
+
+            value: function name() {
+                return this._name;
+            }
+        },
+        meta: {
+            value: function meta(key) {
+                return this._meta.get(key);
+            }
+        },
+        size: {
+
+            //
+            // Access the series itself
+            //
+
+            value: function size() {
+                return this._series.size;
+            }
+        },
+        count: {
+            value: function count() {
+                return this.size();
+            }
+        },
+        at: {
+            value: function at(i) {
+                return this._series.get(i);
+            }
+        },
+        sum: {
+
+            //
+            // Aggregate the series
+            //
+
+            value: function sum(column) {
+                var c = column || "value";
+                if (!this._columns.contains(c)) {
+                    return undefined;
+                }
+                return this._series.reduce(function (memo, data) {
+                    return data.get(c) + memo;
+                }, 0);
+            }
+        },
+        avg: {
+            value: function avg(column) {
+                var c = column || "value";
+                if (!this._columns.contains(c)) {
+                    return undefined;
+                }
+                return this.sum(column) / this.size();
+            }
+        },
+        max: {
+            value: function max(column) {
+                var c = column || "value";
+                if (!this._columns.contains(c)) {
+                    return undefined;
+                }
+                var max = this._series.maxBy(function (a) {
+                    return a.get(c);
+                });
+                return max.get(c);
+            }
+        },
+        min: {
+            value: function min(column) {
+                var c = column || "value";
+                if (!this._columns.contains(c)) {
+                    return undefined;
+                }
+                var min = this._series.minBy(function (a) {
+                    return a.get(c);
+                });
+                return min.get(c);
+            }
+        },
+        mean: {
+            value: function mean(column) {
+                return this.avg(column);
+            }
+        },
+        medium: {
+            value: function medium(column) {
+                console.log("Medium....");
+                var c = column || "value";
+                if (!this._columns.contains(c)) {
+                    return undefined;
+                }
+                var sorted = this._series.sortBy(function (event) {
+                    return event.get(c);
+                });
+                return sorted.get(Math.floor(sorted.size / 2)).get(c);
+            }
+        },
+        stdev: {
+            value: function stdev(column) {
+                var c = column || "value";
+                if (!this._columns.contains(c)) {
+                    return undefined;
+                }
+
+                var mean = this.mean();
+                return Math.sqrt(this._series.reduce(function (memo, event) {
+                    console.log(Math.pow(event.get(c) - mean, 2));
+                    return Math.pow(event.get(c) - mean, 2) + memo;
+                }, 0) / this.size());
+            }
         }
     }, {
-        key: "is",
-        value: function is(series1, series2) {
-            return series1._name === series2._name && _immutable2["default"].is(series1._meta, series2._meta) && _immutable2["default"].is(series1._columns, series2._columns) && _immutable2["default"].is(series1._series, series2._series);
+        equal: {
+            value: function equal(series1, series2) {
+                return series1._name === series2._name && series1._meta === series2._meta && series1._columns === series2._columns && series1._series === series2._series;
+            }
+        },
+        is: {
+            value: function is(series1, series2) {
+                return series1._name === series2._name && Immutable.is(series1._meta, series2._meta) && Immutable.is(series1._columns, series2._columns) && Immutable.is(series1._series, series2._series);
+            }
         }
-    }]);
+    });
 
     return Series;
 })();
-
-exports.Series = Series;
 
 /** Internal function to find the unique keys of a bunch
   * of immutable maps objects. There's probably a more elegent way
@@ -331,7 +329,7 @@ function uniqueKeys(events) {
         }
     }
 
-    return new _immutable2["default"].Set(arrayOfKeys);
+    return new Immutable.Set(arrayOfKeys);
 }
 
 /**
@@ -378,9 +376,9 @@ function uniqueKeys(events) {
  * events within it (i.e. the min and max times).
  */
 
-var TimeSeries = (function (_Series) {
+var TimeSeries = exports.TimeSeries = (function (_Series) {
     function TimeSeries(arg1) {
-        var _this2 = this;
+        var _this = this;
 
         _classCallCheck(this, TimeSeries);
 
@@ -406,7 +404,7 @@ var TimeSeries = (function (_Series) {
             // TimeSeries(object data) where data may be
             //    {"events": Event list} or
             //    {"columns": string list, "points": value list}
-        } else if (_underscore2["default"].isObject(arg1)) {
+        } else if (_.isObject(arg1)) {
             (function () {
 
                 //
@@ -425,7 +423,7 @@ var TimeSeries = (function (_Series) {
                 var times = [];
                 var data = [];
 
-                if (_underscore2["default"].has(obj, "events")) {
+                if (_.has(obj, "events")) {
 
                     //
                     // If events is passed in, then we construct the series out of a list
@@ -439,26 +437,26 @@ var TimeSeries = (function (_Series) {
                     var meta = _objectWithoutProperties(obj, ["events", "index", "name"]);
 
                     columns = uniqueKeys(events).toJSON();
-                    _underscore2["default"].each(events, function (event) {
+                    _.each(events, function (event) {
                         times.push(event.timestamp());
                         data.push(event.data());
                     });
 
                     // Optional index associated with this TimeSeries
                     if (index) {
-                        if (_underscore2["default"].isString(index)) {
-                            _this2._index = new _index2["default"](index);
-                        } else if (index instanceof _index2["default"]) {
-                            _this2._index = index;
+                        if (_.isString(index)) {
+                            _this._index = new Index(index);
+                        } else if (index instanceof Index) {
+                            _this._index = index;
                         }
                     }
 
                     //Construct the base series
-                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this2).call(_this2, _name, meta, columns, new _immutable2["default"].List(data));
+                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, _name, meta, columns, new Immutable.List(data));
 
                     //List of times, as Immutable List
-                    _this2._times = new _immutable2["default"].List(times);
-                } else if (_underscore2["default"].has(obj, "columns") && _underscore2["default"].has(obj, "points")) {
+                    _this._times = new Immutable.List(times);
+                } else if (_.has(obj, "columns") && _.has(obj, "points")) {
                     var _name2 = obj.name;
                     var index = obj.index;
                     var points = obj.points;
@@ -479,7 +477,7 @@ var TimeSeries = (function (_Series) {
                     //
                     // TODO: check to see if the first item is the time
 
-                    _underscore2["default"].each(seriesPoints, function (point) {
+                    _.each(seriesPoints, function (point) {
                         var _point = _toArray(point);
 
                         var time = _point[0];
@@ -490,19 +488,19 @@ var TimeSeries = (function (_Series) {
                         data.push(others);
                     });
 
-                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this2).call(_this2, seriesName, seriesMeta, seriesColumns, data);
+                    _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this).call(_this, seriesName, seriesMeta, seriesColumns, data);
 
                     // Optional index associated with this TimeSeries
                     if (index) {
-                        if (_underscore2["default"].isString(index)) {
-                            _this2._index = new _index2["default"](index);
-                        } else if (index instanceof _index2["default"]) {
-                            _this2._index = index;
+                        if (_.isString(index)) {
+                            _this._index = new Index(index);
+                        } else if (index instanceof Index) {
+                            _this._index = index;
                         }
                     }
 
                     // List of times, as Immutable List
-                    _this2._times = _immutable2["default"].fromJS(times);
+                    _this._times = Immutable.fromJS(times);
                 }
             })();
         }
@@ -510,181 +508,187 @@ var TimeSeries = (function (_Series) {
 
     _inherits(TimeSeries, _Series);
 
-    _createClass(TimeSeries, [{
-        key: "toJSON",
+    _createClass(TimeSeries, {
+        toJSON: {
 
-        //
-        // Serialize
-        //
+            //
+            // Serialize
+            //
 
-        /**
-         * Turn the TimeSeries into regular javascript objects
-         */
-        value: function toJSON() {
-            var name = this._name;
-            var index = this._index;
-            var cols = this._columns;
-            var series = this._series;
-            var times = this._times;
+            /**
+             * Turn the TimeSeries into regular javascript objects
+             */
 
-            var points = series.map(function (value, i) {
-                var data = [times.get(i)]; // time
-                cols.forEach(function (column, j) {
-                    data.push(value.get(column));
-                }); //values
-                return data;
-            }).toJSON();
+            value: function toJSON() {
+                var name = this._name;
+                var index = this._index;
+                var cols = this._columns;
+                var series = this._series;
+                var times = this._times;
 
-            //The JSON output has 'time' as the first column
-            var columns = ["time"];
-            cols.forEach(function (column) {
-                columns.push(column);
-            });
+                var points = series.map(function (value, i) {
+                    var data = [times.get(i)]; // time
+                    cols.forEach(function (column, j) {
+                        data.push(value.get(column));
+                    }); //values
+                    return data;
+                }).toJSON();
 
-            var result = {
-                name: name
-            };
+                //The JSON output has 'time' as the first column
+                var columns = ["time"];
+                cols.forEach(function (column) {
+                    columns.push(column);
+                });
 
-            if (index) {
-                result.index = index.toString();
-            }
+                var result = {
+                    name: name
+                };
 
-            result = _underscore2["default"].extend(result, {
-                columns: columns,
-                points: points
-            });
-
-            result = _underscore2["default"].extend(result, this._meta.toJSON());
-
-            console.log(result);
-
-            return result;
-        }
-    }, {
-        key: "toString",
-
-        /**
-         * Represent the TimeSeries as a string
-         */
-        value: function toString() {
-            return JSON.stringify(this.toJSON());
-        }
-    }, {
-        key: "range",
-
-        //
-        // Series range
-        //
-
-        value: function range() {
-            var min = undefined;
-            var max = undefined;
-            this._times.forEach(function (time) {
-                if (_underscore2["default"].isString(time)) {
-                    var index = (0, _util.rangeFromIndexString)(time);
-                    if (!min || index.begin() < min) min = index.begin();
-                    if (!max || index.end() > max) max = index.end();
-                    console.log("     -- ", index.toString(), new Date(index.begin()), new Date(index.end()));
-                } else if (_underscore2["default"].isNumber(time)) {
-                    if (!min || time < min) min = time;
-                    if (!max || time > max) max = time;
+                if (index) {
+                    result.index = index.toString();
                 }
-            });
 
-            return new _range2["default"](min, max);
-        }
-    }, {
-        key: "begin",
-        value: function begin() {
-            return this.range().begin();
-        }
-    }, {
-        key: "end",
-        value: function end() {
-            return this.range().end();
-        }
-    }, {
-        key: "index",
+                result = _.extend(result, {
+                    columns: columns,
+                    points: points
+                });
 
-        /**
-         * Access the Index, if this TimeSeries has one
-         */
+                result = _.extend(result, this._meta.toJSON());
 
-        value: function index() {
-            return this._index;
-        }
-    }, {
-        key: "indexAsString",
-        value: function indexAsString() {
-            return this._index ? this._index.asString() : undefined;
-        }
-    }, {
-        key: "indexAsRange",
-        value: function indexAsRange() {
-            console.log(">>> indexAsRange", this._index.asTimerange());
-            return this._index ? this._index.asTimerange() : undefined;
-        }
-    }, {
-        key: "at",
+                console.log(result);
 
-        /**
-         * Access the series data via index. The result is an Event.
-         */
-        value: function at(i) {
-            var time = this._times.get(i);
-            if (_underscore2["default"].isString(time)) {
-                var index = time;
-                return new IndexedEvent(index, this._series.get(i));
-            } else {
-                return new _event.Event(time, this._series.get(i));
+                return result;
             }
-        }
-    }, {
-        key: "events",
+        },
+        toString: {
 
-        /**
-         *  Generator to allow for..of loops over series.events()
-         */
-        value: regeneratorRuntime.mark(function events() {
-            var i;
-            return regeneratorRuntime.wrap(function events$(context$2$0) {
-                while (1) switch (context$2$0.prev = context$2$0.next) {
-                    case 0:
-                        i = 0;
+            /**
+             * Represent the TimeSeries as a string
+             */
 
-                    case 1:
-                        if (!(i < this.size())) {
-                            context$2$0.next = 7;
+            value: function toString() {
+                return JSON.stringify(this.toJSON());
+            }
+        },
+        range: {
+
+            //
+            // Series range
+            //
+
+            value: function range() {
+                var min = undefined;
+                var max = undefined;
+                this._times.forEach(function (time) {
+                    if (_.isString(time)) {
+                        var index = rangeFromIndexString(time);
+                        if (!min || index.begin() < min) min = index.begin();
+                        if (!max || index.end() > max) max = index.end();
+                        console.log("     -- ", index.toString(), new Date(index.begin()), new Date(index.end()));
+                    } else if (_.isNumber(time)) {
+                        if (!min || time < min) min = time;
+                        if (!max || time > max) max = time;
+                    }
+                });
+
+                return new TimeRange(min, max);
+            }
+        },
+        begin: {
+            value: function begin() {
+                return this.range().begin();
+            }
+        },
+        end: {
+            value: function end() {
+                return this.range().end();
+            }
+        },
+        index: {
+
+            /**
+             * Access the Index, if this TimeSeries has one
+             */
+
+            value: function index() {
+                return this._index;
+            }
+        },
+        indexAsString: {
+            value: function indexAsString() {
+                return this._index ? this._index.asString() : undefined;
+            }
+        },
+        indexAsRange: {
+            value: function indexAsRange() {
+                console.log(">>> indexAsRange", this._index.asTimerange());
+                return this._index ? this._index.asTimerange() : undefined;
+            }
+        },
+        at: {
+
+            /**
+             * Access the series data via index. The result is an Event.
+             */
+
+            value: function at(i) {
+                var time = this._times.get(i);
+                if (_.isString(time)) {
+                    var index = time;
+                    return new IndexedEvent(index, this._series.get(i));
+                } else {
+                    return new Event(time, this._series.get(i));
+                }
+            }
+        },
+        events: {
+
+            /**
+             *  Generator to allow for..of loops over series.events()
+             */
+
+            value: regeneratorRuntime.mark(function events() {
+                var _this = this;
+
+                var i;
+                return regeneratorRuntime.wrap(function events$(context$2$0) {
+                    while (1) switch (context$2$0.prev = context$2$0.next) {
+                        case 0:
+                            i = 0;
+
+                        case 1:
+                            if (!(i < _this.size())) {
+                                context$2$0.next = 7;
+                                break;
+                            }
+
+                            context$2$0.next = 4;
+                            return _this.at(i);
+
+                        case 4:
+                            i++;
+                            context$2$0.next = 1;
                             break;
-                        }
 
-                        context$2$0.next = 4;
-                        return this.at(i);
-
-                    case 4:
-                        i++;
-                        context$2$0.next = 1;
-                        break;
-
-                    case 7:
-                    case "end":
-                        return context$2$0.stop();
-                }
-            }, events, this);
-        })
-    }], [{
-        key: "equal",
-        value: function equal(series1, series2) {
-            return series1._name === series2._name && series1._meta === series2._meta && series1._columns === series2._columns && series1._series === series2._series && series1._times === series2._times;
+                        case 7:
+                        case "end":
+                            return context$2$0.stop();
+                    }
+                }, events, this);
+            })
         }
     }, {
-        key: "is",
-        value: function is(series1, series2) {
-            return series1._name === series2._name && _immutable2["default"].is(series1._meta, series2._meta) && _immutable2["default"].is(series1._columns, series2._columns) && _immutable2["default"].is(series1._series, series2._series) && _immutable2["default"].is(series1._times, series2._times);
+        equal: {
+            value: function equal(series1, series2) {
+                return series1._name === series2._name && series1._meta === series2._meta && series1._columns === series2._columns && series1._series === series2._series && series1._times === series2._times;
+            }
+        },
+        is: {
+            value: function is(series1, series2) {
+                return series1._name === series2._name && Immutable.is(series1._meta, series2._meta) && Immutable.is(series1._columns, series2._columns) && Immutable.is(series1._series, series2._series) && Immutable.is(series1._times, series2._times);
+            }
         }
-    }]);
+    });
 
     return TimeSeries;
 })(Series);
-
-exports.TimeSeries = TimeSeries;

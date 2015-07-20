@@ -1,34 +1,24 @@
 "use strict";
 
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var moment = _interopRequire(require("moment"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _ = _interopRequire(require("underscore"));
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var Immutable = _interopRequire(require("immutable"));
 
-var _moment = require("moment");
+var Index = _interopRequire(require("./index"));
 
-var _moment2 = _interopRequireDefault(_moment);
-
-var _underscore = require("underscore");
-
-var _underscore2 = _interopRequireDefault(_underscore);
-
-var _immutable = require("immutable");
-
-var _immutable2 = _interopRequireDefault(_immutable);
-
-var _index = require("./index");
-
-var _index2 = _interopRequireDefault(_index);
-
-var _range = require("./range");
-
-var _range2 = _interopRequireDefault(_range);
+var TimeRange = _interopRequire(require("./range"));
 
 //
 // Util
@@ -36,11 +26,11 @@ var _range2 = _interopRequireDefault(_range);
 
 function timestampFromArgs(arg1) {
     var timestamp = undefined;
-    if (_underscore2["default"].isNumber(arg1)) {
+    if (_.isNumber(arg1)) {
         timestamp = new Date(arg1);
-    } else if (_underscore2["default"].isDate(arg1)) {
+    } else if (_.isDate(arg1)) {
         timestamp = new Date(arg1.getTime());
-    } else if (_moment2["default"].isMoment(arg1)) {
+    } else if (moment.isMoment(arg1)) {
         timestamp = new Date(arg1.valueOf());
     }
     return timestamp;
@@ -48,12 +38,12 @@ function timestampFromArgs(arg1) {
 
 function dataFromArgs(arg1) {
     var data = {};
-    if (_underscore2["default"].isObject(arg1)) {
-        data = new _immutable2["default"].Map(arg1);
-    } else if (data instanceof _immutable2["default"].Map) {
+    if (_.isObject(arg1)) {
+        data = new Immutable.Map(arg1);
+    } else if (data instanceof Immutable.Map) {
         data = arg1;
     } else {
-        data = new _immutable2["default"].Map({ "value": arg1 });
+        data = new Immutable.Map({ value: arg1 });
     }
     return data;
 }
@@ -75,7 +65,7 @@ function dataFromArgs(arg1) {
  *
  */
 
-var Event = (function () {
+var Event = exports.Event = (function () {
     function Event(arg1, arg2) {
         _classCallCheck(this, Event);
 
@@ -94,53 +84,52 @@ var Event = (function () {
         this._data = dataFromArgs(arg2);
     }
 
-    _createClass(Event, [{
-        key: "toJSON",
-        value: function toJSON() {
-            return { time: this._time.getTime(), data: this._data.toJSON() };
+    _createClass(Event, {
+        toJSON: {
+            value: function toJSON() {
+                return { time: this._time.getTime(), data: this._data.toJSON() };
+            }
+        },
+        toString: {
+            value: function toString() {
+                return JSON.stringify(this.toJSON());
+            }
+        },
+        timestampAsUTCString: {
+            value: function timestampAsUTCString() {
+                return this._time.toUTCString();
+            }
+        },
+        timestampAsLocalString: {
+            value: function timestampAsLocalString() {
+                return this._time.toString();
+            }
+        },
+        timestamp: {
+            value: function timestamp() {
+                return this._time;
+            }
+        },
+        data: {
+            value: function data() {
+                return this._data;
+            }
+        },
+        get: {
+            value: function get(key) {
+                var k = key || "value";
+                return this._data.get(k);
+            }
+        },
+        stringify: {
+            value: function stringify() {
+                return JSON.stringify(this._data);
+            }
         }
-    }, {
-        key: "toString",
-        value: function toString() {
-            return JSON.stringify(this.toJSON());
-        }
-    }, {
-        key: "timestampAsUTCString",
-        value: function timestampAsUTCString() {
-            return this._time.toUTCString();
-        }
-    }, {
-        key: "timestampAsLocalString",
-        value: function timestampAsLocalString() {
-            return this._time.toString();
-        }
-    }, {
-        key: "timestamp",
-        value: function timestamp() {
-            return this._time;
-        }
-    }, {
-        key: "data",
-        value: function data() {
-            return this._data;
-        }
-    }, {
-        key: "get",
-        value: function get(key) {
-            var k = key || "value";
-            return this._data.get(k);
-        }
-    }, {
-        key: "stringify",
-        value: function stringify() {
-            return JSON.stringify(this._data);
-        }
-    }]);
+    });
 
     return Event;
 })();
-
-exports.Event = Event;
 
 /**
  * An time range event uses a TimeRange to specify the range over which the event occurs
@@ -163,12 +152,12 @@ exports.Event = Event;
  *
  */
 
-var TimeRangeEvent = (function () {
+var TimeRangeEvent = exports.TimeRangeEvent = (function () {
     function TimeRangeEvent(arg1, arg2) {
         _classCallCheck(this, TimeRangeEvent);
 
         // Timerange
-        if (arg1 instanceof _range2["default"]) {
+        if (arg1 instanceof TimeRange) {
             var timerange = arg1;
             this._range = timerange;
         }
@@ -177,78 +166,77 @@ var TimeRangeEvent = (function () {
         this._data = dataFromArgs(arg2);
     }
 
-    _createClass(TimeRangeEvent, [{
-        key: "toJSON",
-        value: function toJSON() {
-            return { timerange: this._range.toJSON(), data: this._data.toJSON() };
-        }
-    }, {
-        key: "toString",
-        value: function toString() {
-            return JSON.stringify(this.toJSON());
-        }
-    }, {
-        key: "timerange",
+    _createClass(TimeRangeEvent, {
+        toJSON: {
+            value: function toJSON() {
+                return { timerange: this._range.toJSON(), data: this._data.toJSON() };
+            }
+        },
+        toString: {
+            value: function toString() {
+                return JSON.stringify(this.toJSON());
+            }
+        },
+        timerange: {
 
-        //
-        // Access the timerange represented by the index
-        //
+            //
+            // Access the timerange represented by the index
+            //
 
-        value: function timerange() {
-            return this._range;
-        }
-    }, {
-        key: "timerangeAsUTCString",
-        value: function timerangeAsUTCString() {
-            return this.timerange().toUTCString();
-        }
-    }, {
-        key: "timerangeAsLocalString",
-        value: function timerangeAsLocalString() {
-            return this.timerange().toLocalString();
-        }
-    }, {
-        key: "begin",
-        value: function begin() {
-            return this._range.begin();
-        }
-    }, {
-        key: "end",
-        value: function end() {
-            return this._range.end();
-        }
-    }, {
-        key: "timestamp",
-        value: function timestamp() {
-            return this.begin();
-        }
-    }, {
-        key: "humanizeDuration",
-        value: function humanizeDuration() {
-            return this._range.humanizeDuration();
-        }
-    }, {
-        key: "data",
+            value: function timerange() {
+                return this._range;
+            }
+        },
+        timerangeAsUTCString: {
+            value: function timerangeAsUTCString() {
+                return this.timerange().toUTCString();
+            }
+        },
+        timerangeAsLocalString: {
+            value: function timerangeAsLocalString() {
+                return this.timerange().toLocalString();
+            }
+        },
+        begin: {
+            value: function begin() {
+                return this._range.begin();
+            }
+        },
+        end: {
+            value: function end() {
+                return this._range.end();
+            }
+        },
+        timestamp: {
+            value: function timestamp() {
+                return this.begin();
+            }
+        },
+        humanizeDuration: {
+            value: function humanizeDuration() {
+                return this._range.humanizeDuration();
+            }
+        },
+        data: {
 
-        //
-        // Access the event data
-        //
+            //
+            // Access the event data
+            //
 
-        value: function data() {
-            return this._data;
+            value: function data() {
+                return this._data;
+            }
+        },
+        get: {
+            value: function get(key) {
+                var k = key || "value";
+                return this._data.get(k);
+            }
         }
-    }, {
-        key: "get",
-        value: function get(key) {
-            var k = key || "value";
-            return this._data.get(k);
-        }
-    }]);
+    });
 
     return TimeRangeEvent;
 })();
-
-exports.TimeRangeEvent = TimeRangeEvent;
 
 /**
  * An indexed event uses a Index to specify a timerange over which the event occurs
@@ -274,101 +262,100 @@ exports.TimeRangeEvent = TimeRangeEvent;
  * Immutable.Map.
  */
 
-var IndexedEvent = (function () {
+var IndexedEvent = exports.IndexedEvent = (function () {
     function IndexedEvent(index, data) {
         _classCallCheck(this, IndexedEvent);
 
         // Index
-        if (_underscore2["default"].isString(index)) {
-            this._index = new _index2["default"](index);
-        } else if (index instanceof _index2["default"]) {
+        if (_.isString(index)) {
+            this._index = new Index(index);
+        } else if (index instanceof Index) {
             this._index = index;
         }
 
         // Data
-        if (_underscore2["default"].isObject(data)) {
-            this._data = new _immutable2["default"].Map(data);
-        } else if (data instanceof _immutable2["default"].Map) {
+        if (_.isObject(data)) {
+            this._data = new Immutable.Map(data);
+        } else if (data instanceof Immutable.Map) {
             this._data = data;
         } else {
-            this._data = new _immutable2["default"].Map({ "value": data });
+            this._data = new Immutable.Map({ value: data });
         }
     }
 
-    _createClass(IndexedEvent, [{
-        key: "toJSON",
-        value: function toJSON() {
-            return { index: this._index.asString(), data: this._data.toJSON() };
-        }
-    }, {
-        key: "toString",
-        value: function toString() {
-            return JSON.stringify(this.toJSON());
-        }
-    }, {
-        key: "index",
+    _createClass(IndexedEvent, {
+        toJSON: {
+            value: function toJSON() {
+                return { index: this._index.asString(), data: this._data.toJSON() };
+            }
+        },
+        toString: {
+            value: function toString() {
+                return JSON.stringify(this.toJSON());
+            }
+        },
+        index: {
 
-        //
-        // Access the index itself
-        //
+            //
+            // Access the index itself
+            //
 
-        value: function index() {
-            return this._index;
-        }
-    }, {
-        key: "timerangeAsUTCString",
+            value: function index() {
+                return this._index;
+            }
+        },
+        timerangeAsUTCString: {
 
-        //
-        // Access the timerange represented by the index
-        //
+            //
+            // Access the timerange represented by the index
+            //
 
-        value: function timerangeAsUTCString() {
-            return this.timerange().toUTCString();
-        }
-    }, {
-        key: "timerangeAsLocalString",
-        value: function timerangeAsLocalString() {
-            return this.timerange().toLocalString();
-        }
-    }, {
-        key: "timerange",
-        value: function timerange() {
-            return this._index.asTimerange();
-        }
-    }, {
-        key: "begin",
-        value: function begin() {
-            return this.timerange().begin();
-        }
-    }, {
-        key: "end",
-        value: function end() {
-            return this.timerange().end();
-        }
-    }, {
-        key: "timestamp",
-        value: function timestamp() {
-            return this.begin();
-        }
-    }, {
-        key: "data",
+            value: function timerangeAsUTCString() {
+                return this.timerange().toUTCString();
+            }
+        },
+        timerangeAsLocalString: {
+            value: function timerangeAsLocalString() {
+                return this.timerange().toLocalString();
+            }
+        },
+        timerange: {
+            value: function timerange() {
+                return this._index.asTimerange();
+            }
+        },
+        begin: {
+            value: function begin() {
+                return this.timerange().begin();
+            }
+        },
+        end: {
+            value: function end() {
+                return this.timerange().end();
+            }
+        },
+        timestamp: {
+            value: function timestamp() {
+                return this.begin();
+            }
+        },
+        data: {
 
-        //
-        // Access the event data
-        //
+            //
+            // Access the event data
+            //
 
-        value: function data() {
-            return this._data;
+            value: function data() {
+                return this._data;
+            }
+        },
+        get: {
+            value: function get(key) {
+                var k = key || "value";
+                return this._data.get(k);
+            }
         }
-    }, {
-        key: "get",
-        value: function get(key) {
-            var k = key || "value";
-            return this._data.get(k);
-        }
-    }]);
+    });
 
     return IndexedEvent;
 })();
-
-exports.IndexedEvent = IndexedEvent;

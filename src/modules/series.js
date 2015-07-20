@@ -3,7 +3,7 @@ import Immutable from "immutable";
 
 import Index from "./index";
 import TimeRange from "./range";
-import {Event} from "./event";
+import {IndexedEvent, Event} from "./event";
 import {rangeFromIndexString, niceIndexString} from "./util";
 
 /**
