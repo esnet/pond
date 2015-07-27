@@ -1,46 +1,45 @@
 # Pond
 
-A library build on top of immutable.js to provide basic timeseries functionality within ESnet tools.
+A library build on top of immutable.js to provide basic timeseries functionality within ESnet tools. It is in a very early stage of development.
 
-## Why
+## Why?
 
-Because we use timeseries data throughout our network visualization application, especially on the client, but potentially on the server. We would like a library to do this is a consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated than they need to be. Not only do we need to deal with different formats at the UI layer, we also repeat our processing code over and over.
+Because we consume timeseries data throughout our network visualization applications, especially on the client, but potentially on the server. We would like a library to do this in a consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated than they need to be. Not only do we need to deal with different formats at the UI layer, we also repeat our processing code over and over. 
 
 ## What does it do?
 
 Pond is built on several primitives:
 
 * Time - these are basic Javascript Date objects. We refer to these as timestamps.
-* Timerange - a begin and end time, packaged together.
-* Index - A timerange denoted by a string, for example 5m-1234 is a 5 minute timerange.
+* TimeRange - a begin and end time, packaged together.
+* Index - A time range denoted by a string, for example 5m-1234 is a 5 minute timerange, or 2014-09 is September 2014.
 
 Building on these, we have Events:
 
 * Event - These are a timestamp and a data object packaged together.
 * IndexedEvent - An index (timerange) and a data object packaged together. e.g. 1hr sample
-* TimerangeEvent - A timerange and a data object packaged together. e.g. outage event [TODO]
+* TimeRangeEvent - A timerange and a data object packaged together. e.g. outage event
 
-And forming together a series of events, we have a timeseries:
+And forming together a collection of events, we have a series:
 
 * Series - Conceptually a sequence of Events.
-* IndexedSeries - A sequence of Events  within a timerange denoted by an Index.
-* TimerangeSeries - A sequence of Events within a timerange bounded by a begin and end time [TODO]
+* TimeSeries - A sequence of Events associated with a list of times or time ranges (Indexes).
 
 And then high level helper functions to:
 
-* Create timerange bound buckets and aggregate events into those buckets
-* Create Series objects from Event streams [TODO]
-* Resampling [TODO]
+* Aggregators - Create time range bound buckets and aggregate events into those buckets
+* Collectors - Create TimeSeries objects from Event streams
+* Resampling and other higher level processing operations [TODO]
 
 ## Primitives
 
 ### Time
 
-Pond is a library for handling time related stucture, so the most basic of elements is time itself. Pond don't wrap any specific representation. Instead constructors of other primitives will generally accept either ms since UNIX epoch, a Javascript Date object or a Moment.
+Pond is a library for handling time related stuctures, so the most basic of elements is time itself. Pond doesn't wrap any specific representation. Instead constructors of other primitives will generally accept either: ms since UNIX epoch, a Javascript Date object or a Moment.
 
 ### Timerange
 
-A timerange is a simple represention of a begin and end time, used to maintain consistency across an application. You can define a TimeRange with moments, JS Date objects or ms since UNIX epoch.
+A time range is a simple represention of a begin and end time, used to maintain consistency across an application. You can define a TimeRange with moments, Javascript Date objects or ms since UNIX epoch. Here we construct one with two moments:
 
     var fmt = "YYYY-MM-DD HH:mm";
     var beginTime = moment("2012-01-11 11:11", fmt);
@@ -55,15 +54,15 @@ There is also a copy constuctor.
 
 To get data back from a TimeRange use `begin()` and `end()` on it.
 
-TimeRange also supports a full set of comparison operators, allowing you to determine if one TimeRanges `equals()`, `contains()`, is `within()`, `overlaps()` with, or is `disjoint()` from another TimeRange.
+TimeRange also supports a full set of comparison operators, allowing you to determine if one TimeRange `equals()`, `contains()`, is `within()`, `overlaps()` with, or is `disjoint()` from another TimeRange.
 
 You can also get the `extents()` of a TimeRange with another, returning you a new TimeRange which spans them both.
 
-A TimeRange can also return its `duration` in ms, or a human friendly string that represents the same with `humanizeDuration`.
+A TimeRange can also return its `duration` in ms, or a human friendly string that represents the same with `humanizeDuration()`.
 
-A TimeRange can serialize to string with `toString` or simple JSON with `toJSON()`. It can also print itself as local time with `toLocalSring()` and in UTC time with `toUTCString()`.
+A TimeRange can serialize to a string with `toString()` or simple JSON with `toJSON()`. It can also print itself as local time with `toLocalSring()` and in UTC time with `toUTCString()`.
 
-There is also a humanized version that can be expressed as a range `humanize()` (e.g. "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am") or as a range relative to now `relativeString()` (e.g. "a few seconds ago to a month ago").
+There is also a humanized version that can be expressed as a range, using `humanize()` (e.g. "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am") or as a range relative to now using `relativeString()` (e.g. "a few seconds ago to a month ago").
 
 TimeRange also has several static methods to return common timeranges. So far these include: `lastDay()`, `lastSevenDays()`, `lastThirtyDays` and `lastNinetyDays`, though one could imagine expanding these.
 
@@ -83,16 +82,16 @@ Here are several examples of the second type:
     2014-09       // Sept 2014
     2015          // All of the year 2015
 
-An Index is a nice representation of certain types of time intervals because it can be cached with its string representation as a key.
+An Index is a nice representation of certain types of time intervals because it can be cached with its string representation as a key or data for a specific chunk of time can be looked up based on that string. It also allows us to represent things like months, which have variable length.
 
-The Index has a basic interface to find the TimeRange it represents using `asTimerange()`, or with `begin()` and `end()`, as well as get back the original string with `asString()` (or `toString()`). You can also get a simple JSON object with `toJSON()`.
+The Index has a basic interface to find the TimeRange it represents using `asTimerange()`, or with `begin()` and `end()` to get the bounding times directly. You can also get back the original string with `asString()` (or `toString()`). You can also get a simple JSON object with `toJSON()`.
 
 Example:
 
     var index = new Index("1h-123554");
     index.asTimerange().humanizeDuration() // "an hour"
 
-### Events
+## Events
 
 There are three types of events in Pond:
 
@@ -100,7 +99,7 @@ There are three types of events in Pond:
     2) TimeRangeEvent - Assoicates a TimeRange with some data
     3) IndexedEvent - Assoicates a time range specified as an Index
 
-The creation of an Event is done with two parts, the timestamp and the data. To specify the timestamp you may use a Javascript Date object, a Moment, or the number of ms since the UNIX epoch.
+The creation of an Event is done by combining two parts: the timestamp (or time range) and the data. To specify the timestamp you may use a Javascript Date object, a Moment, or the number of ms since the UNIX epoch.
 
 To specify the data you can supply a Javascript object of key/values, a
 Immutable Map, or a simple type such as an integer. In the case of the simple
@@ -130,7 +129,7 @@ We first extract the begin and end times to build a TimeRange:
 
 Then we combine the TimeRange and the event itself to create the Event.
 
-    let event = new TimeRangeEvent(timerange, sampleEvent);
+    let outageEvent = new TimeRangeEvent(timerange, sampleEvent);
 
 Once we have an event we can get access the time range with:
 
@@ -147,6 +146,8 @@ Or use:
     event.data()
 
 to fetch the whole data object, which will be an Immutable Map.
+
+## Series
 
 ### TimeSeries
 
@@ -166,7 +167,7 @@ Currently you can initialize a TimeSeries with either a list of events, or with 
 
 To create a new TimeSeries object from that simply use the constructor:
 
-    var series = new Series(data);
+    var series = new TimeSeries(data);
 
 The name is somewhat optional, but a good practice. Columns are necessary and refer to the data in the points. And points are and array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels. As just hinted at, the time column may actually be either a time or a timerange, reprsented by an Index. By using an Index it's possible to refer to a specific month for example.
 
@@ -219,6 +220,8 @@ Although the TimeSeries is immuatable itself, you can `slice(begin, end)` the Ti
 One of the nice things about the TimeSeries representation in Pond is that it is built on top of immutable data structures. As a result, determining if a series is different from before is trivial.
 
 A TimeSeries can be compared in two ways: with the `equals()` or `is()` static functions. `equals()` will check that the internal structures of the TimeSeries are the same reference. If you use the copy constructor, they will be the same. The `is()` function is perhaps more useful in that it will check to see if the structures, though perhaps being different references, have the same values.
+
+## Higher level functions
 
 ### Aggregation (Very experimental)
 
