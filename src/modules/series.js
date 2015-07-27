@@ -3,7 +3,7 @@ import Immutable from "immutable";
 
 import Index from "./index";
 import TimeRange from "./range";
-import {Event} from "./event";
+import {Event, IndexedEvent} from "./event";
 import {rangeFromIndexString, niceIndexString} from "./util";
 
 /**
@@ -186,7 +186,6 @@ export class Series {
     }
 
     medium(column) {
-        console.log("Medium....")
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
@@ -203,7 +202,6 @@ export class Series {
 
         const mean = this.mean();
         return Math.sqrt(this._series.reduce((memo, event) => {
-            console.log(Math.pow(event.get(c)-mean, 2))
             return Math.pow(event.get(c)-mean, 2) + memo
         }
         , 0) / this.size());
@@ -237,6 +235,23 @@ function uniqueKeys(events) {
         }
     }
     return new Immutable.Set(arrayOfKeys);
+}
+
+/**
+ * Functions used to determine slice indexes. Copied from immutable.js.
+ */
+function resolveBegin(begin, size) {
+  return resolveIndex(begin, size, 0);
+}
+
+function resolveEnd(end, size) {
+  return resolveIndex(end, size, size);
+}
+
+function resolveIndex(index, size, defaultIndex) {
+    return index === undefined ?
+        defaultIndex : index < 0 ?
+            Math.max(0, size + index) : size === undefined ? index : Math.min(size, index);
 }
 
 /**
@@ -333,7 +348,7 @@ export class TimeSeries extends Series {
                 // of Event objects
                 //
                 
-                const {events, index, name, ...meta} = obj;
+                const {events, index, name, meta} = obj;
 
                 columns = uniqueKeys(events).toJSON();
                 _.each(events, event => {
@@ -434,8 +449,6 @@ export class TimeSeries extends Series {
 
         result = _.extend(result, this._meta.toJSON());
 
-        console.log(result)
-
         return result;
     }
 
@@ -458,7 +471,6 @@ export class TimeSeries extends Series {
                 const index = rangeFromIndexString(time);
                 if (!min || index.begin() < min) min = index.begin();
                 if (!max || index.end() > max) max = index.end();
-                console.log("     -- ", index.toString(), new Date(index.begin()), new Date(index.end()));
             } else if (_.isNumber(time)) {
                 if (!min || time < min) min = time;
                 if (!max || time > max) max = time;
@@ -489,7 +501,6 @@ export class TimeSeries extends Series {
     }
 
     indexAsRange() {
-        console.log(">>> indexAsRange", this._index.asTimerange())
         return this._index ? this._index.asTimerange() : undefined;
     }
 
@@ -504,6 +515,30 @@ export class TimeSeries extends Series {
         } else {
             return new Event(time, this._series.get(i));
         }
+    }
+
+    /**
+     * Perform a slice of events within the TimeSeries, returns a new TimeSeries
+     * representing a portion of this TimeSeries from begin up to but not including end.
+     */
+    slice(begin, end) {
+        const size = this.size();
+        const b = resolveBegin(begin, size);
+        const e = resolveEnd(end, size);
+
+        if (begin === 0 && end === size - 1) {
+            return this;
+        }
+
+        let events = [];
+        for (let i = b; i < e; i++) {
+            events.push(this.at(i));
+        }
+
+        return new TimeSeries({"name": this._name,
+                               "index": this._index,
+                               "meta": this._meta,
+                               "events": events});
     }
 
     /**

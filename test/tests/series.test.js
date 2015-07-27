@@ -410,9 +410,7 @@ describe("Indexed TimeSeries", function () {
         });
 
         it("can return the time range of the series", function(done) {
-            console.log("TEST")
             var series = new TimeSeries(indexedData);
-            console.log("...", series.indexAsRange())
             var expectedString = "[Fri Sep 17 1971 17:00:00 GMT-0700 (PDT), Sat Sep 18 1971 17:00:00 GMT-0700 (PDT)]";
             expect(series.indexAsRange().toLocalString()).to.equal(expectedString);
             done();
@@ -433,10 +431,33 @@ describe("Timeseries containing indexed timeranges", function () {
     describe("Series created with a javascript object", function () {
         it("can create an series", function(done) {
             var series = new TimeSeries(availabilityData);
-            console.log(series.toString())
-            console.log(series.range())
             expect(series).to.be.ok;
             done();
         });
     });
 });
+
+/**
+ * A series should be able to be mutated, producing another TimeSeries as a result
+ */
+describe("Mutation of timeseries", function () {
+
+    var {TimeSeries} = require("../../src/modules/series.js");
+
+    describe("Series created with a javascript object", function () {
+        it("can create an series", function(done) {
+            var series = new TimeSeries(availabilityData);
+
+            var expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08-01T00:00:00.000Z","88%"],["2014-07-01T00:00:00.000Z","100%"]]}`;
+            var lastTwo = series.slice(-2);
+            expect(lastTwo.toString()).to.equal(expectedLastTwo);
+
+            var expectedFirstThree = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06-01T00:00:00.000Z","100%"],["2015-05-01T00:00:00.000Z","92%"],["2015-04-01T00:00:00.000Z","87%"]]}`;
+            var firstThree = series.slice(0, 3);
+            expect(firstThree.toString()).to.equal(expectedFirstThree);
+
+            done();
+        });
+    });
+
+})

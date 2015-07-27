@@ -237,7 +237,6 @@ var Series = (function () {
     }, {
         key: "medium",
         value: function medium(column) {
-            console.log("Medium....");
             var c = column || "value";
             if (!this._columns.contains(c)) {
                 return undefined;
@@ -257,7 +256,6 @@ var Series = (function () {
 
             var mean = this.mean();
             return Math.sqrt(this._series.reduce(function (memo, event) {
-                console.log(Math.pow(event.get(c) - mean, 2));
                 return Math.pow(event.get(c) - mean, 2) + memo;
             }, 0) / this.size());
         }
@@ -332,6 +330,21 @@ function uniqueKeys(events) {
     }
 
     return new _immutable2["default"].Set(arrayOfKeys);
+}
+
+/**
+ * Functions used to determine slice indexes. Copied from immutable.js.
+ */
+function resolveBegin(begin, size) {
+    return resolveIndex(begin, size, 0);
+}
+
+function resolveEnd(end, size) {
+    return resolveIndex(end, size, size);
+}
+
+function resolveIndex(index, size, defaultIndex) {
+    return index === undefined ? defaultIndex : index < 0 ? Math.max(0, size + index) : size === undefined ? index : Math.min(size, index);
 }
 
 /**
@@ -435,8 +448,7 @@ var TimeSeries = (function (_Series) {
                     var events = obj.events;
                     var index = obj.index;
                     var _name = obj.name;
-
-                    var meta = _objectWithoutProperties(obj, ["events", "index", "name"]);
+                    var meta = obj.meta;
 
                     columns = uniqueKeys(events).toJSON();
                     _underscore2["default"].each(events, function (event) {
@@ -556,8 +568,6 @@ var TimeSeries = (function (_Series) {
 
             result = _underscore2["default"].extend(result, this._meta.toJSON());
 
-            console.log(result);
-
             return result;
         }
     }, {
@@ -584,7 +594,6 @@ var TimeSeries = (function (_Series) {
                     var index = (0, _util.rangeFromIndexString)(time);
                     if (!min || index.begin() < min) min = index.begin();
                     if (!max || index.end() > max) max = index.end();
-                    console.log("     -- ", index.toString(), new Date(index.begin()), new Date(index.end()));
                 } else if (_underscore2["default"].isNumber(time)) {
                     if (!min || time < min) min = time;
                     if (!max || time > max) max = time;
@@ -621,7 +630,6 @@ var TimeSeries = (function (_Series) {
     }, {
         key: "indexAsRange",
         value: function indexAsRange() {
-            console.log(">>> indexAsRange", this._index.asTimerange());
             return this._index ? this._index.asTimerange() : undefined;
         }
     }, {
@@ -634,10 +642,36 @@ var TimeSeries = (function (_Series) {
             var time = this._times.get(i);
             if (_underscore2["default"].isString(time)) {
                 var index = time;
-                return new IndexedEvent(index, this._series.get(i));
+                return new _event.IndexedEvent(index, this._series.get(i));
             } else {
                 return new _event.Event(time, this._series.get(i));
             }
+        }
+    }, {
+        key: "slice",
+
+        /**
+         * Perform a slice of events within the TimeSeries, returns a new TimeSeries
+         * representing a portion of this TimeSeries from begin up to but not including end.
+         */
+        value: function slice(begin, end) {
+            var size = this.size();
+            var b = resolveBegin(begin, size);
+            var e = resolveEnd(end, size);
+
+            if (begin === 0 && end === size - 1) {
+                return this;
+            }
+
+            var events = [];
+            for (var i = b; i < e; i++) {
+                events.push(this.at(i));
+            }
+
+            return new TimeSeries({ "name": this._name,
+                "index": this._index,
+                "meta": this._meta,
+                "events": events });
         }
     }, {
         key: "events",

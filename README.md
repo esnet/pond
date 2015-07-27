@@ -212,6 +212,8 @@ An event is a timestamp or timerange and some data, so to deconstruct the event 
     var data = event.data(); // {"value":18}
     var timestamp = event.timestamp().getTime(); //1400425948000
 
+Although the TimeSeries is immuatable itself, you can `slice(begin, end)` the TimeSeries. It will return a new TimeSeries with reference just to the Events that were left after the slice. The result represents a portion of this TimeSeries from begin up to but not including end.
+
 ### Comparing series
 
 One of the nice things about the TimeSeries representation in Pond is that it is built on top of immutable data structures. As a result, determining if a series is different from before is trivial.
