@@ -1,92 +1,95 @@
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var Generator = _interopRequire(require("./generator"));
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _generator = require("./generator");
+
+var _generator2 = _interopRequireDefault(_generator);
 
 var Collector = (function () {
     function Collector(size, observer) {
         _classCallCheck(this, Collector);
 
-        this._generator = new Generator(size);
+        this._generator = new _generator2["default"](size);
         this._bucket = null;
 
         // Callback
         this._observer = observer;
     }
 
-    _createClass(Collector, {
-        bucket: {
+    _createClass(Collector, [{
+        key: "bucket",
 
-            /**
-             * Gets the current bucket or returns a new one.
-             *
-             * If a new bucket is generated the result of the old bucket is emitted
-             * automatically.
-             */
+        /**
+         * Gets the current bucket or returns a new one.
+         *
+         * If a new bucket is generated the result of the old bucket is emitted
+         * automatically.
+         */
+        value: function bucket(d) {
+            var _this = this;
 
-            value: function bucket(d) {
-                var _this = this;
-
-                var newBucketIndex = this._generator.bucketIndex(d);
-                var bucketIndex = this._bucket ? this._bucket.index().asString() : "";
-                if (newBucketIndex !== bucketIndex) {
-                    if (this._bucket) {
-                        this._bucket.collect(function (series) {
-                            if (_this._observer) _this._observer(series);
-                        });
-                    }
-                    this._bucket = this._generator.bucket(d);
-                }
-                return this._bucket;
-            }
-        },
-        done: {
-
-            /**
-             * Forces the current bucket to emit
-             */
-
-            value: function done() {
-                var _this = this;
-
+            var newBucketIndex = this._generator.bucketIndex(d);
+            var bucketIndex = this._bucket ? this._bucket.index().asString() : "";
+            if (newBucketIndex !== bucketIndex) {
                 if (this._bucket) {
                     this._bucket.collect(function (series) {
                         if (_this._observer) _this._observer(series);
-                        _this._bucket = null;
                     });
                 }
+                this._bucket = this._generator.bucket(d);
             }
-        },
-        addEvent: {
+            return this._bucket;
+        }
+    }, {
+        key: "done",
 
-            /**
-             * Add an event, which will be assigned to a bucket
-             */
+        /**
+         * Forces the current bucket to emit
+         */
+        value: function done() {
+            var _this2 = this;
 
-            value: function addEvent(event, cb) {
-                var t = event.timestamp();
-                var bucket = this.bucket(t);
-                bucket.addEvent(event, function (err) {
-                    if (err) {
-                        console.error("Could not add value to bucket:", err);
-                    }
-                    if (cb) cb(err);
+            if (this._bucket) {
+                this._bucket.collect(function (series) {
+                    if (_this2._observer) _this2._observer(series);
+                    _this2._bucket = null;
                 });
             }
-        },
-        onEmit: {
-            value: function onEmit(cb) {
-                this._observer = cb;
-            }
         }
-    });
+    }, {
+        key: "addEvent",
+
+        /**
+         * Add an event, which will be assigned to a bucket
+         */
+        value: function addEvent(event, cb) {
+            var t = event.timestamp();
+            var bucket = this.bucket(t);
+            bucket.addEvent(event, function (err) {
+                if (err) {
+                    console.error("Could not add value to bucket:", err);
+                }
+                if (cb) cb(err);
+            });
+        }
+    }, {
+        key: "onEmit",
+        value: function onEmit(cb) {
+            this._observer = cb;
+        }
+    }]);
 
     return Collector;
 })();
 
-module.exports = Collector;
+exports["default"] = Collector;
+module.exports = exports["default"];

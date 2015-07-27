@@ -456,6 +456,11 @@ describe("Mutation of timeseries", function () {
             var firstThree = series.slice(0, 3);
             expect(firstThree.toString()).to.equal(expectedFirstThree);
 
+            console.log("alll")
+            var expectedAll = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
+            var sliceAll = series.slice();
+            expect(sliceAll.toString()).to.equal(expectedAll);
+
             done();
         });
     });

@@ -1,13 +1,14 @@
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _util = require("./util");
-
-var rangeFromIndexString = _util.rangeFromIndexString;
-var niceIndexString = _util.niceIndexString;
 
 /**
  * An index that represents as a string a range of time.
@@ -26,53 +27,52 @@ var Index = (function () {
         this._r = this._rangeFromIndexString(s);
     }
 
-    _createClass(Index, {
-        _rangeFromIndexString: {
-            value: function _rangeFromIndexString(s) {
-                return rangeFromIndexString(s);
-            }
-        },
-        toJSON: {
-            value: function toJSON() {
-                return this._s;
-            }
-        },
-        toString: {
-            value: function toString() {
-                return this._s;
-            }
-        },
-        toNiceString: {
-            value: function toNiceString(format) {
-                return niceIndexString(this._s, format);
-            }
-        },
-        asString: {
-
-            // Alias for toString()
-
-            value: function asString() {
-                return this.toString();
-            }
-        },
-        asTimerange: {
-            value: function asTimerange() {
-                return this._r;
-            }
-        },
-        begin: {
-            value: function begin() {
-                return this._r.begin();
-            }
-        },
-        end: {
-            value: function end() {
-                return this._r.end();
-            }
+    _createClass(Index, [{
+        key: "_rangeFromIndexString",
+        value: function _rangeFromIndexString(s) {
+            return (0, _util.rangeFromIndexString)(s);
         }
-    });
+    }, {
+        key: "toJSON",
+        value: function toJSON() {
+            return this._s;
+        }
+    }, {
+        key: "toString",
+        value: function toString() {
+            return this._s;
+        }
+    }, {
+        key: "toNiceString",
+        value: function toNiceString(format) {
+            return (0, _util.niceIndexString)(this._s, format);
+        }
+    }, {
+        key: "asString",
+
+        // Alias for toString()
+        value: function asString() {
+            return this.toString();
+        }
+    }, {
+        key: "asTimerange",
+        value: function asTimerange() {
+            return this._r;
+        }
+    }, {
+        key: "begin",
+        value: function begin() {
+            return this._r.begin();
+        }
+    }, {
+        key: "end",
+        value: function end() {
+            return this._r.end();
+        }
+    }]);
 
     return Index;
 })();
 
-module.exports = Index;
+exports["default"] = Index;
+module.exports = exports["default"];

@@ -526,7 +526,7 @@ export class TimeSeries extends Series {
         const b = resolveBegin(begin, size);
         const e = resolveEnd(end, size);
 
-        if (begin === 0 && end === size - 1) {
+        if (b === 0 && e === size ) {
             return this;
         }
 

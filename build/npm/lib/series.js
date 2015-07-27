@@ -659,7 +659,7 @@ var TimeSeries = (function (_Series) {
             var b = resolveBegin(begin, size);
             var e = resolveEnd(end, size);
 
-            if (begin === 0 && end === size - 1) {
+            if (b === 0 && e === size) {
                 return this;
             }
 

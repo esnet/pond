@@ -1,20 +1,30 @@
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var Immutable = _interopRequire(require("immutable"));
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _ = _interopRequire(require("underscore"));
+var _immutable = require("immutable");
 
-var IndexedEvent = require("./event").IndexedEvent;
+var _immutable2 = _interopRequireDefault(_immutable);
 
-var TimeSeries = require("./series").TimeSeries;
+var _underscore = require("underscore");
 
-var Index = _interopRequire(require("./index"));
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _event = require("./event");
+
+var _series = require("./series");
+
+var _index = require("./index");
+
+var _index2 = _interopRequireDefault(_index);
 
 /**
  * Internal function to fund the unique keys of a bunch
@@ -70,7 +80,7 @@ function uniqueKeys(events) {
         }
     }
 
-    return new Immutable.Set(arrayOfKeys);
+    return new _immutable2["default"].Set(arrayOfKeys);
 }
 
 /**
@@ -98,9 +108,9 @@ var Bucket = (function () {
         _classCallCheck(this, Bucket);
 
         // Index
-        if (_.isString(index)) {
-            this._index = new Index(index);
-        } else if (index instanceof Index) {
+        if (_underscore2["default"].isString(index)) {
+            this._index = new _index2["default"](index);
+        } else if (index instanceof _index2["default"]) {
             this._index = index;
         }
 
@@ -108,123 +118,121 @@ var Bucket = (function () {
         this._cache = [];
     }
 
-    _createClass(Bucket, {
-        index: {
-            value: function index() {
-                return this._index;
-            }
-        },
-        toUTCString: {
-            value: function toUTCString() {
-                return this.index().asString() + ": " + this.range().toUTCString();
-            }
-        },
-        toLocalString: {
-            value: function toLocalString() {
-                return this.index().asString() + ": " + this.range().toLocalString();
-            }
-        },
-        range: {
-
-            //
-            // Convenience access the bucket range
-            //
-
-            value: function range() {
-                return this._index.asTimerange();
-            }
-        },
-        begin: {
-            value: function begin() {
-                return this.range().begin();
-            }
-        },
-        end: {
-            value: function end() {
-                return this.range().end();
-            }
-        },
-        _pushToCache: {
-
-            //
-            // Bucket cache, which could potentially be redis or something
-            // so pushing to the cache takes a callback, which will be called
-            // when the event is added to the cache.
-            //
-            // TODO: This should be stategy based.
-            //
-
-            value: function _pushToCache(event, cb) {
-                this._cache.push(event);
-                if (cb) cb(null);
-            }
-        },
-        _readFromCache: {
-            value: function _readFromCache(cb) {
-                if (cb) cb(this._cache);
-            }
-        },
-        addEvent: {
-
-            //
-            // Add values to the bucket
-            //
-
-            value: function addEvent(event, cb) {
-                this._pushToCache(event, function (err) {
-                    if (cb) cb(err);
-                });
-            }
-        },
-        aggregate: {
-
-            /**
-             * Takes the values within the bucket and aggregates them together
-             * into a new IndexedEvent using the operator supplied. Then result
-             * or error is passed to the callback.
-             */
-
-            value: function aggregate(operator, cb) {
-                var _this = this;
-
-                this._readFromCache(function (events) {
-                    var keys = uniqueKeys(events);
-                    var result = {};
-                    _.each(keys.toJS(), function (k) {
-                        var vals = _.map(events, function (v) {
-                            return v.get(k);
-                        });
-                        result[k] = operator.call(_this, _this._index, vals, k);
-                    });
-                    var event = new IndexedEvent(_this._index, result);
-                    if (cb) cb(event);
-                });
-            }
-        },
-        collect: {
-
-            /**
-             * Takes the values within the bucket and collects them together
-             * into a new IndexedSeries using the operator supplied. Then result
-             * or error is passed to the callback.
-             */
-
-            value: function collect(cb) {
-                var _this = this;
-
-                this._readFromCache(function (events) {
-                    var series = new TimeSeries({
-                        name: _this._index.toString(),
-                        index: _this._index,
-                        events: events
-                    });
-                    if (cb) cb(series);
-                });
-            }
+    _createClass(Bucket, [{
+        key: "index",
+        value: function index() {
+            return this._index;
         }
-    });
+    }, {
+        key: "toUTCString",
+        value: function toUTCString() {
+            return this.index().asString() + ": " + this.range().toUTCString();
+        }
+    }, {
+        key: "toLocalString",
+        value: function toLocalString() {
+            return this.index().asString() + ": " + this.range().toLocalString();
+        }
+    }, {
+        key: "range",
+
+        //
+        // Convenience access the bucket range
+        //
+
+        value: function range() {
+            return this._index.asTimerange();
+        }
+    }, {
+        key: "begin",
+        value: function begin() {
+            return this.range().begin();
+        }
+    }, {
+        key: "end",
+        value: function end() {
+            return this.range().end();
+        }
+    }, {
+        key: "_pushToCache",
+
+        //
+        // Bucket cache, which could potentially be redis or something
+        // so pushing to the cache takes a callback, which will be called
+        // when the event is added to the cache.
+        //
+        // TODO: This should be stategy based.
+        //
+
+        value: function _pushToCache(event, cb) {
+            this._cache.push(event);
+            if (cb) cb(null);
+        }
+    }, {
+        key: "_readFromCache",
+        value: function _readFromCache(cb) {
+            if (cb) cb(this._cache);
+        }
+    }, {
+        key: "addEvent",
+
+        //
+        // Add values to the bucket
+        //
+
+        value: function addEvent(event, cb) {
+            this._pushToCache(event, function (err) {
+                if (cb) cb(err);
+            });
+        }
+    }, {
+        key: "aggregate",
+
+        /**
+         * Takes the values within the bucket and aggregates them together
+         * into a new IndexedEvent using the operator supplied. Then result
+         * or error is passed to the callback.
+         */
+        value: function aggregate(operator, cb) {
+            var _this = this;
+
+            this._readFromCache(function (events) {
+                var keys = uniqueKeys(events);
+                var result = {};
+                _underscore2["default"].each(keys.toJS(), function (k) {
+                    var vals = _underscore2["default"].map(events, function (v) {
+                        return v.get(k);
+                    });
+                    result[k] = operator.call(_this, _this._index, vals, k);
+                });
+                var event = new _event.IndexedEvent(_this._index, result);
+                if (cb) cb(event);
+            });
+        }
+    }, {
+        key: "collect",
+
+        /**
+         * Takes the values within the bucket and collects them together
+         * into a new IndexedSeries using the operator supplied. Then result
+         * or error is passed to the callback.
+         */
+        value: function collect(cb) {
+            var _this2 = this;
+
+            this._readFromCache(function (events) {
+                var series = new _series.TimeSeries({
+                    "name": _this2._index.toString(),
+                    "index": _this2._index,
+                    "events": events
+                });
+                if (cb) cb(series);
+            });
+        }
+    }]);
 
     return Bucket;
 })();
 
-module.exports = Bucket;
+exports["default"] = Bucket;
+module.exports = exports["default"];
