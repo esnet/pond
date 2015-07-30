@@ -136,7 +136,7 @@ var TimeRange = (function () {
          *                    in that they have the same times.
          */
         value: function equals(other) {
-            return this.begin() === other.begin() && this.end() === other.end();
+            return this.begin().getTime() === other.begin().getTime() && this.end().getTime() === other.end().getTime();
         }
     }, {
         key: "contains",

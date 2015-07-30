@@ -97,7 +97,8 @@ export default class TimeRange {
      *                    in that they have the same times.
      */
     equals(other) {
-        return this.begin() === other.begin() && this.end() === other.end();
+        return this.begin().getTime() === other.begin().getTime() &&
+               this.end().getTime() === other.end().getTime();
     }
 
     /**
