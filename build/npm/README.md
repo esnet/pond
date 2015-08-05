@@ -358,6 +358,7 @@ We loop over all the events in the series and add each on to the aggregator we j
         hourlyAggregator.addEvent(event);
     }
 
+
 # Tests
 
 The library has Mocha tests. To run the tests, use:

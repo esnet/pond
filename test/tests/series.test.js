@@ -448,16 +448,22 @@ describe("Timeseries containing indexed timeranges", function () {
 
     var {TimeSeries} = require("../../src/series.js");
 
-    describe("Series created with a javascript object", function () {
+    describe("Series created with indexed data in the default UTC time", function () {
         it("can create an series with indexed data (in UTC time)", function(done) {
             var series = new TimeSeries(availabilityData);
+            var event = series.at(2);
+            expect(event.timerangeAsUTCString()).to.equal("[Wed, 01 Apr 2015 00:00:00 GMT, Thu, 30 Apr 2015 23:59:59 GMT]");
             expect(series.range().begin().getTime()).to.equal(1404172800000);
             expect(series.range().end().getTime()).to.equal(1435708799999);
             done();
         });
+    });
 
+    describe("Series created with indexed data in local time", function () {
         it("can create an series with indexed data in local time", function(done) {
             var series = new TimeSeries(availabilityDataLocalTime);
+            var event = series.at(2);
+            expect(event.timerangeAsUTCString()).to.equal("[Wed, 01 Apr 2015 07:00:00 GMT, Fri, 01 May 2015 06:59:59 GMT]");
             expect(series.range().begin().getTime()).to.equal(1404198000000);
             expect(series.range().end().getTime()).to.equal(1435733999999);
             done();
@@ -484,7 +490,6 @@ describe("Mutation of timeseries", function () {
             var firstThree = series.slice(0, 3);
             expect(firstThree.toString()).to.equal(expectedFirstThree);
 
-            console.log("alll")
             var expectedAll = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
             var sliceAll = series.slice();
             expect(sliceAll.toString()).to.equal(expectedAll);

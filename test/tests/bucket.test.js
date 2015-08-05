@@ -433,8 +433,6 @@ describe("Buckets", () => {
             var expected1 = '{"name":"1h-396206","index":"1h-396206","columns":["time","cpu1","cpu2"],"points":[["2015-03-14T14:57:00.000Z",23.4,55.1],["2015-03-14T14:58:00.000Z",36.2,45.6],["2015-03-14T14:59:00.000Z",38.6,65.2]]}';
             var expected2 = '{"name":"1h-396207","index":"1h-396207","columns":["time","cpu1","cpu2"],"points":[["2015-03-14T15:00:00.000Z",24.5,85.2],["2015-03-14T15:01:00.000Z",45.2,91.6]]}';
 
-            console.log(collection["1h-396206"].toString())
-
             expect(collection["1h-396206"].indexAsString()).to.equal("1h-396206");
             expect(collection["1h-396207"].indexAsString()).to.equal("1h-396207");
 

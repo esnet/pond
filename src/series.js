@@ -4,7 +4,7 @@ import Immutable from "immutable";
 import Index from "./index";
 import TimeRange from "./range";
 import {Event, IndexedEvent} from "./event";
-import {rangeFromIndexString, niceIndexString} from "./util";
+import util from "./util";
 
 /**
  * Base class for a series of events.
@@ -482,7 +482,7 @@ export class TimeSeries extends Series {
         let max;
         this._times.forEach((time) => {
             if (_.isString(time)) {
-                const r = rangeFromIndexString(time, this.isUTC());
+                const r = util.rangeFromIndexString(time, this.isUTC());
                 if (!min || r.begin() < min) min = r.begin();
                 if (!max || r.end() > max) max = r.end();
             } else if (_.isNumber(time)) {

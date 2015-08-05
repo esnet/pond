@@ -38,6 +38,8 @@ var _event = require("./event");
 
 var _util = require("./util");
 
+var _util2 = _interopRequireDefault(_util);
+
 /**
  * Base class for a series of events.
  *
@@ -610,7 +612,7 @@ var TimeSeries = (function (_Series) {
             var max = undefined;
             this._times.forEach(function (time) {
                 if (_underscore2["default"].isString(time)) {
-                    var r = (0, _util.rangeFromIndexString)(time, _this3.isUTC());
+                    var r = _util2["default"].rangeFromIndexString(time, _this3.isUTC());
                     if (!min || r.begin() < min) min = r.begin();
                     if (!max || r.end() > max) max = r.end();
                 } else if (_underscore2["default"].isNumber(time)) {
