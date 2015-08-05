@@ -358,7 +358,6 @@ We loop over all the events in the series and add each on to the aggregator we j
         hourlyAggregator.addEvent(event);
     }
 
-
 # Tests
 
 The library has Mocha tests. To run the tests, use:
@@ -371,7 +370,7 @@ Then point your browser to:
 
 # Copyright
 
-ESnet Timeseries Library ("timeseries-pond"), Copyright (c) 2015, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+ESnet Timeseries Library ("Pond"), Copyright (c) 2015, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
  
 If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's Innovation & Partnerships Office at  IPO@lbl.gov.
  
