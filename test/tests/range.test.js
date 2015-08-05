@@ -6,7 +6,7 @@ var fmt2 = "YYYY-MM-DD HH:mm:ss";
 
 describe("Time ranges", function () {
 
-    var TimeRange = require("../../src/modules/range.js");
+    var TimeRange = require("../../src/range.js");
 
     describe("TimeRange creation", function () {
         it('can create a new range with a begin and end time', function(done) {

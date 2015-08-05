@@ -1,9 +1,9 @@
 {
-  "name": "pond",
+  "name": "timeseries-pond",
   "version": "0.1.0",
-  "description": "A timeseries library",
+  "description": "A timeseries library build on top of immutable.js",
   "author": "",
-  "license": "MIT",
+  "license": "Modified BSD License",
   "dependencies": {
     "immutable": "^3.6.4",
     "moment": "^2.9.0",

@@ -1,7 +1,7 @@
 var moment = require("moment");
 var expect = require("chai").expect;
 
-var {Event} = require("../../src/modules/event.js");
+var {Event} = require("../../src/event.js");
 
 var data = {
     "name": "traffic",
@@ -44,6 +44,26 @@ var statsData = {
 
 var availabilityData = {
     "name": "availability",
+    "columns": ["time", "uptime"],
+    "points": [
+        ["2015-06", "100%"],
+        ["2015-05", "92%"],
+        ["2015-04", "87%"],
+        ["2015-03", "99%"],
+        ["2015-02", "92%"],
+        ["2015-01", "100%"],
+        ["2014-12", "99%"],
+        ["2014-11", "91%"],
+        ["2014-10", "99%"],
+        ["2014-09", "95%"],
+        ["2014-08", "88%"],
+        ["2014-07", "100%"]
+    ]
+};
+
+var availabilityDataLocalTime = {
+    "name": "availability",
+    "utc": false,
     "columns": ["time", "uptime"],
     "points": [
         ["2015-06", "100%"],
@@ -214,7 +234,7 @@ var sept_2014_data = {
 
 describe("Series", function () {
 
-    var {Series, TimeSeries} = require("../../src/modules/series.js");
+    var {Series, TimeSeries} = require("../../src/series.js");
 
     describe("TimeSeries created with a javascript objects", function () {
         it("can create an series", function(done) {
@@ -398,7 +418,7 @@ describe("Series", function () {
  */
 describe("Indexed TimeSeries", function () {
 
-    var {TimeSeries} = require("../../src/modules/series.js");
+    var {TimeSeries} = require("../../src/series.js");
 
     describe("Series created with a javascript object", function () {
 
@@ -426,12 +446,20 @@ describe("Indexed TimeSeries", function () {
  */
 describe("Timeseries containing indexed timeranges", function () {
 
-    var {TimeSeries} = require("../../src/modules/series.js");
+    var {TimeSeries} = require("../../src/series.js");
 
     describe("Series created with a javascript object", function () {
-        it("can create an series", function(done) {
+        it("can create an series with indexed data (in UTC time)", function(done) {
             var series = new TimeSeries(availabilityData);
-            expect(series).to.be.ok;
+            expect(series.range().begin().getTime()).to.equal(1404172800000);
+            expect(series.range().end().getTime()).to.equal(1435708799999);
+            done();
+        });
+
+        it("can create an series with indexed data in local time", function(done) {
+            var series = new TimeSeries(availabilityDataLocalTime);
+            expect(series.range().begin().getTime()).to.equal(1404198000000);
+            expect(series.range().end().getTime()).to.equal(1435733999999);
             done();
         });
     });
@@ -442,7 +470,7 @@ describe("Timeseries containing indexed timeranges", function () {
  */
 describe("Mutation of timeseries", function () {
 
-    var {TimeSeries} = require("../../src/modules/series.js");
+    var {TimeSeries} = require("../../src/series.js");
 
     describe("Series created with a javascript object", function () {
         it("can create an series", function(done) {

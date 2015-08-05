@@ -39,6 +39,8 @@ export class Series {
     
     constructor(arg1, arg2, arg3, arg4) {
 
+        console.log("       ...args", arg1, arg2, arg3, arg4)
+
         // Series(Series other) - copy
         if (arg1 instanceof Series) {
             
@@ -85,6 +87,7 @@ export class Series {
                     })
                 );
             }
+
         }
     }
 
@@ -114,6 +117,10 @@ export class Series {
 
     name() {
         return this._name;
+    }
+
+    columns() {
+        return this._columns.toJSON();
     }
 
     meta(key) {
@@ -315,6 +322,7 @@ export class TimeSeries extends Series {
 
             this._name = other._name;
             this._meta = other._meta;
+            this._utc = other._utc;
             this._index = other._index;
             this._columns = other._columns;
             this._series = other._series;
@@ -343,12 +351,14 @@ export class TimeSeries extends Series {
 
             if (_.has(obj, "events")) {
 
+                console.log("...from events", arg1)
+
                 //
                 // If events is passed in, then we construct the series out of a list
                 // of Event objects
                 //
                 
-                const {events, index, name, meta} = obj;
+                const {events, utc, index, name, meta} = obj;
 
                 columns = uniqueKeys(events).toJSON();
                 _.each(events, event => {
@@ -365,6 +375,13 @@ export class TimeSeries extends Series {
                     }
                 }
 
+                this._utc = true;
+                if (_.isBoolean(utc)) {
+                    this._utc = utc;
+                }
+
+                console.log("   ...dd", data)
+
                 //Construct the base series
                 super(name, meta, columns, new Immutable.List(data));
 
@@ -373,11 +390,12 @@ export class TimeSeries extends Series {
 
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
 
-                const {name, index, points, columns, ...meta} = obj;
+                const {name, index, utc, points, columns, ...meta} = obj;
                 const seriesPoints = points || [];
                 const seriesName = name || "";
                 const seriesMeta = meta || {};
                 const seriesColumns = columns.slice(1) || [];
+                const seriesUTC = _.isBoolean(utc) ? utc : true;
 
                 //
                 // If columns and points are passed in, then we construct the series
@@ -403,6 +421,9 @@ export class TimeSeries extends Series {
                         this._index = index;
                     }
                 }
+
+                //Is this data in UTC or local?
+                this._utc = seriesUTC;
 
                 // List of times, as Immutable List
                 this._times = Immutable.fromJS(times);
@@ -467,15 +488,19 @@ export class TimeSeries extends Series {
         let min;
         let max;
         this._times.forEach((time) => {
+            console.log("-", time)
             if (_.isString(time)) {
-                const index = rangeFromIndexString(time);
-                if (!min || index.begin() < min) min = index.begin();
-                if (!max || index.end() > max) max = index.end();
+                const r = rangeFromIndexString(time, this.isUTC());
+                console.log("   - range", r.toLocalString())
+                if (!min || r.begin() < min) min = r.begin();
+                if (!max || r.end() > max) max = r.end();
             } else if (_.isNumber(time)) {
                 if (!min || time < min) min = time;
                 if (!max || time > max) max = time;
             }
         });
+
+        console.log(min, max);
 
         return new TimeRange(min, max);
     }
@@ -505,13 +530,20 @@ export class TimeSeries extends Series {
     }
 
     /**
+     * Is the data in UTC or Local?
+     */
+    isUTC() {
+        return this._utc;
+    }
+
+    /**
      * Access the series data via index. The result is an Event.
      */
     at(i) {
         const time = this._times.get(i);
         if (_.isString(time)) {
             const index = time;
-            return new IndexedEvent(index, this._series.get(i));
+            return new IndexedEvent(index, this._series.get(i), this._utc);
         } else {
             return new Event(time, this._series.get(i));
         }
@@ -537,6 +569,7 @@ export class TimeSeries extends Series {
 
         return new TimeSeries({"name": this._name,
                                "index": this._index,
+                               "utc": this._utc,
                                "meta": this._meta,
                                "events": events});
     }
@@ -553,6 +586,7 @@ export class TimeSeries extends Series {
     static equal(series1, series2) {
         return (series1._name === series2._name &&
                 series1._meta === series2._meta &&
+                series1._utc === series2._utc &&
                 series1._columns === series2._columns &&
                 series1._series === series2._series &&
                 series1._times === series2._times);
@@ -560,6 +594,7 @@ export class TimeSeries extends Series {
     
     static is(series1, series2) {
         return (series1._name === series2._name &&
+                series1._utc === series2._utc &&
                 Immutable.is(series1._meta, series2._meta) &&
                 Immutable.is(series1._columns, series2._columns) &&
                 Immutable.is(series1._series, series2._series) &&

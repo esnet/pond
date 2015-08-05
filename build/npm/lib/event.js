@@ -275,12 +275,12 @@ exports.TimeRangeEvent = TimeRangeEvent;
  */
 
 var IndexedEvent = (function () {
-    function IndexedEvent(index, data) {
+    function IndexedEvent(index, data, utc) {
         _classCallCheck(this, IndexedEvent);
 
         // Index
         if (_underscore2["default"].isString(index)) {
-            this._index = new _index2["default"](index);
+            this._index = new _index2["default"](index, utc);
         } else if (index instanceof _index2["default"]) {
             this._index = index;
         }

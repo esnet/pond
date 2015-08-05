@@ -3,7 +3,7 @@ var expect = require('chai').expect;
 
 describe("Indexes", function () {
 
-    var Index = require("../../src/modules/index.js");
+    var Index = require("../../src/index.js");
 
     describe("Index creation", function () {
         it('can create a daily index', function(done) {

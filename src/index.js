@@ -1,3 +1,4 @@
+import _ from "underscore";
 import {rangeFromIndexString, niceIndexString} from "./util";
 
 /**
@@ -10,9 +11,13 @@ import {rangeFromIndexString, niceIndexString} from "./util";
  */
 export default class Index {
 
-    constructor(s) {
+    constructor(s, utc) {
+        let isUTC = true;
+        if (_.isBoolean(utc)) {
+            isUTC = utc;
+        }
         this._s = s;
-        this._r = this._rangeFromIndexString(s);
+        this._r = this._rangeFromIndexString(s, isUTC);
     }
 
     _rangeFromIndexString(s) {

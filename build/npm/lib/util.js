@@ -32,30 +32,36 @@ var units = {
  *     2015-07-14  (day)
  *     2015-07     (month)
  *     2015        (year)
+ * or:
  *     1d-278      (range, in n x days, hours, minutes or seconds)
- * return a TimeRange for that time
+ *
+ * and return a TimeRange for that time. The TimeRange may be considered to be
+ * local time or UTC time, depending on the utc flag passed in.
  */
 
-function rangeFromIndexString(index) {
+function rangeFromIndexString(index, utc) {
+    var isUTC = !_underscore2["default"].isUndefined(utc) ? utc : true;
+    var parts = index.split("-");
+
     var beginTime = undefined;
     var endTime = undefined;
 
-    var parts = index.split("-");
+    console.log("!!!", isUTC, utc);
 
     switch (parts.length) {
         case 3:
+            // A day, month and year e.g. 2014-10-24
             if (!_underscore2["default"].isNaN(parseInt(parts[0])) && !_underscore2["default"].isNaN(parseInt(parts[1])) && !_underscore2["default"].isNaN(parseInt(parts[2]))) {
                 var _year = parseInt(parts[0]);
                 var month = parseInt(parts[1]);
                 var day = parseInt(parts[2]);
-                beginTime = _moment2["default"].utc([_year, month - 1, day]);
-                endTime = _moment2["default"].utc(beginTime).endOf("day");
+                beginTime = isUTC ? _moment2["default"].utc([_year, month - 1, day]) : (0, _moment2["default"])([_year, month - 1, day]);
+                endTime = isUTC ? _moment2["default"].utc(beginTime).endOf("day") : (0, _moment2["default"])(beginTime).endOf("day");
             }
             break;
 
         case 2:
-            // Size should be two parts, a number and a letter if it's a range
-            // based index, e.g 1h-23478
+            // Size should be two parts, a number and a letter if it's a range based index, e.g 1h-23478
             var rangeRegex = /([0-9]+)([smhd])/;
             var sizeParts = rangeRegex.exec(parts[0]);
             if (sizeParts && sizeParts.length >= 3 && !_underscore2["default"].isNaN(parseInt(parts[1]))) {
@@ -63,22 +69,29 @@ function rangeFromIndexString(index) {
                 var num = parseInt(sizeParts[1], 10);
                 var unit = sizeParts[2];
                 var _length = num * units[unit].length * 1000;
-                beginTime = _moment2["default"].utc(pos * _length);
-                endTime = _moment2["default"].utc((pos + 1) * _length);
+
+                beginTime = isUTC ? _moment2["default"].utc(pos * _length) : (0, _moment2["default"])(pos * _length);
+                endTime = isUTC ? _moment2["default"].utc((pos + 1) * _length) : (0, _moment2["default"])((pos + 1) * _length);
+
+                // A month and year e.g 2015-09
             } else if (!_underscore2["default"].isNaN(parseInt(parts[0])) && !_underscore2["default"].isNaN(parseInt(parts[1]))) {
                 var _year2 = parseInt(parts[0]);
                 var month = parseInt(parts[1]);
-                beginTime = _moment2["default"].utc([_year2, month - 1]);
-                endTime = _moment2["default"].utc(beginTime).endOf("month");
+                beginTime = isUTC ? _moment2["default"].utc([_year2, month - 1]) : (0, _moment2["default"])([_year2, month - 1]);
+                endTime = isUTC ? _moment2["default"].utc(beginTime).endOf("month") : (0, _moment2["default"])(beginTime).endOf("month");
             }
             break;
 
+        // A year e.g. 2015
         case 1:
             var year = parts[0];
-            beginTime = _moment2["default"].utc([year]);
-            endTime = _moment2["default"].utc(beginTime).endOf("year");
+            beginTime = isUTC ? _moment2["default"].utc([year]) : _moment2["default"].utc([year]);
+            endTime = isUTC ? _moment2["default"].utc(beginTime).endOf("year") : (0, _moment2["default"])(beginTime).endOf("year");
             break;
     }
+
+    console.log("           *", beginTime, endTime);
+
     if (beginTime && beginTime.isValid() && endTime && endTime.isValid()) {
         return new _range2["default"](beginTime, endTime);
     } else {

@@ -133,6 +133,7 @@ export default class Bucket {
         this._readFromCache((events) => {
             var series = new TimeSeries({
                 "name": this._index.toString(),
+                "meta": {},
                 "index": this._index,
                 "events": events
             });

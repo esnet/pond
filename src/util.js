@@ -15,29 +15,37 @@ const units = {
  *     2015-07-14  (day)
  *     2015-07     (month)
  *     2015        (year)
+ * or:
  *     1d-278      (range, in n x days, hours, minutes or seconds)
- * return a TimeRange for that time
+ *
+ * and return a TimeRange for that time. The TimeRange may be considered to be
+ * local time or UTC time, depending on the utc flag passed in.
  */
-export function rangeFromIndexString(index) {
+export function rangeFromIndexString(index, utc) {
+    const isUTC = !_.isUndefined(utc) ? utc : true;
+    const parts = index.split("-");
+
     let beginTime;
     let endTime;
 
-    const parts = index.split("-");
+    console.log("!!!", isUTC, utc)
 
     switch (parts.length) {
         case 3:
+            // A day, month and year e.g. 2014-10-24
             if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1])) && !_.isNaN(parseInt(parts[2]))) {
                 const year = parseInt(parts[0]);
                 const month = parseInt(parts[1]);
                 const day = parseInt(parts[2]);
-                beginTime = moment.utc([year, month - 1, day]);
-                endTime = moment.utc(beginTime).endOf('day');
+                beginTime = isUTC ? moment.utc([year, month - 1, day]) :
+                                    moment([year, month - 1, day]);
+                endTime = isUTC ? moment.utc(beginTime).endOf("day") :
+                                  moment(beginTime).endOf("day");
             }
         break;
 
         case 2:
-            // Size should be two parts, a number and a letter if it's a range
-            // based index, e.g 1h-23478
+            // Size should be two parts, a number and a letter if it's a range based index, e.g 1h-23478
             const rangeRegex = /([0-9]+)([smhd])/;
             const sizeParts = rangeRegex.exec(parts[0]);
             if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1]))) {
@@ -45,23 +53,35 @@ export function rangeFromIndexString(index) {
                 const num = parseInt(sizeParts[1], 10);
                 const unit = sizeParts[2];
                 const length = num * units[unit].length * 1000;
-                beginTime = moment.utc(pos * length);
-                endTime = moment.utc((pos + 1) * length);
 
+                beginTime = isUTC ? moment.utc(pos * length) :
+                                    moment(pos * length);
+                endTime = isUTC ? moment.utc((pos + 1) * length) :
+                                  moment((pos + 1) * length);
+
+            // A month and year e.g 2015-09
             } else if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1]))) {
                 const year = parseInt(parts[0]);
                 const month = parseInt(parts[1]);
-                beginTime = moment.utc([year, month - 1]);
-                endTime = moment.utc(beginTime).endOf('month');
+                beginTime = isUTC ? moment.utc([year, month - 1]) :
+                                    moment([year, month - 1]);
+                endTime = isUTC ? moment.utc(beginTime).endOf("month") :
+                                  moment(beginTime).endOf("month");
             }
         break;
 
+        // A year e.g. 2015
         case 1:
             const year = parts[0];
-            beginTime = moment.utc([year]);
-            endTime = moment.utc(beginTime).endOf('year');
+            beginTime = isUTC ? moment.utc([year]) :
+                                moment.utc([year]);
+            endTime = isUTC ? moment.utc(beginTime).endOf("year") :
+                              moment(beginTime).endOf("year");
         break;
     }
+
+    console.log("           *", beginTime, endTime);
+
     if (beginTime && beginTime.isValid() && endTime && endTime.isValid()) {
         return new TimeRange(beginTime, endTime);
     } else {

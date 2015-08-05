@@ -74,6 +74,8 @@ var Series = (function () {
 
         _classCallCheck(this, Series);
 
+        console.log("       ...args", arg1, arg2, arg3, arg4);
+
         // Series(Series other) - copy
         if (arg1 instanceof Series) {
 
@@ -154,6 +156,11 @@ var Series = (function () {
 
         value: function name() {
             return this._name;
+        }
+    }, {
+        key: "columns",
+        value: function columns() {
+            return this._columns.toJSON();
         }
     }, {
         key: "meta",
@@ -411,6 +418,7 @@ var TimeSeries = (function (_Series) {
 
             this._name = other._name;
             this._meta = other._meta;
+            this._utc = other._utc;
             this._index = other._index;
             this._columns = other._columns;
             this._series = other._series;
@@ -440,12 +448,15 @@ var TimeSeries = (function (_Series) {
 
                 if (_underscore2["default"].has(obj, "events")) {
 
+                    console.log("...from events", arg1);
+
                     //
                     // If events is passed in, then we construct the series out of a list
                     // of Event objects
                     //
 
                     var events = obj.events;
+                    var utc = obj.utc;
                     var index = obj.index;
                     var _name = obj.name;
                     var meta = obj.meta;
@@ -465,6 +476,13 @@ var TimeSeries = (function (_Series) {
                         }
                     }
 
+                    _this2._utc = true;
+                    if (_underscore2["default"].isBoolean(utc)) {
+                        _this2._utc = utc;
+                    }
+
+                    console.log("   ...dd", data);
+
                     //Construct the base series
                     _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this2).call(_this2, _name, meta, columns, new _immutable2["default"].List(data));
 
@@ -473,15 +491,17 @@ var TimeSeries = (function (_Series) {
                 } else if (_underscore2["default"].has(obj, "columns") && _underscore2["default"].has(obj, "points")) {
                     var _name2 = obj.name;
                     var index = obj.index;
+                    var utc = obj.utc;
                     var points = obj.points;
                     var _columns = obj.columns;
 
-                    var meta = _objectWithoutProperties(obj, ["name", "index", "points", "columns"]);
+                    var meta = _objectWithoutProperties(obj, ["name", "index", "utc", "points", "columns"]);
 
                     var seriesPoints = points || [];
                     var seriesName = _name2 || "";
                     var seriesMeta = meta || {};
                     var seriesColumns = _columns.slice(1) || [];
+                    var seriesUTC = _underscore2["default"].isBoolean(utc) ? utc : true;
 
                     //
                     // If columns and points are passed in, then we construct the series
@@ -512,6 +532,9 @@ var TimeSeries = (function (_Series) {
                             _this2._index = index;
                         }
                     }
+
+                    //Is this data in UTC or local?
+                    _this2._utc = seriesUTC;
 
                     // List of times, as Immutable List
                     _this2._times = _immutable2["default"].fromJS(times);
@@ -587,18 +610,24 @@ var TimeSeries = (function (_Series) {
         //
 
         value: function range() {
+            var _this3 = this;
+
             var min = undefined;
             var max = undefined;
             this._times.forEach(function (time) {
+                console.log("-", time);
                 if (_underscore2["default"].isString(time)) {
-                    var index = (0, _util.rangeFromIndexString)(time);
-                    if (!min || index.begin() < min) min = index.begin();
-                    if (!max || index.end() > max) max = index.end();
+                    var r = (0, _util.rangeFromIndexString)(time, _this3.isUTC());
+                    console.log("   - range", r.toLocalString());
+                    if (!min || r.begin() < min) min = r.begin();
+                    if (!max || r.end() > max) max = r.end();
                 } else if (_underscore2["default"].isNumber(time)) {
                     if (!min || time < min) min = time;
                     if (!max || time > max) max = time;
                 }
             });
+
+            console.log(min, max);
 
             return new _range2["default"](min, max);
         }
@@ -633,6 +662,15 @@ var TimeSeries = (function (_Series) {
             return this._index ? this._index.asTimerange() : undefined;
         }
     }, {
+        key: "isUTC",
+
+        /**
+         * Is the data in UTC or Local?
+         */
+        value: function isUTC() {
+            return this._utc;
+        }
+    }, {
         key: "at",
 
         /**
@@ -642,7 +680,7 @@ var TimeSeries = (function (_Series) {
             var time = this._times.get(i);
             if (_underscore2["default"].isString(time)) {
                 var index = time;
-                return new _event.IndexedEvent(index, this._series.get(i));
+                return new _event.IndexedEvent(index, this._series.get(i), this._utc);
             } else {
                 return new _event.Event(time, this._series.get(i));
             }
@@ -670,6 +708,7 @@ var TimeSeries = (function (_Series) {
 
             return new TimeSeries({ "name": this._name,
                 "index": this._index,
+                "utc": this._utc,
                 "meta": this._meta,
                 "events": events });
         }
@@ -709,12 +748,12 @@ var TimeSeries = (function (_Series) {
     }], [{
         key: "equal",
         value: function equal(series1, series2) {
-            return series1._name === series2._name && series1._meta === series2._meta && series1._columns === series2._columns && series1._series === series2._series && series1._times === series2._times;
+            return series1._name === series2._name && series1._meta === series2._meta && series1._utc === series2._utc && series1._columns === series2._columns && series1._series === series2._series && series1._times === series2._times;
         }
     }, {
         key: "is",
         value: function is(series1, series2) {
-            return series1._name === series2._name && _immutable2["default"].is(series1._meta, series2._meta) && _immutable2["default"].is(series1._columns, series2._columns) && _immutable2["default"].is(series1._series, series2._series) && _immutable2["default"].is(series1._times, series2._times);
+            return series1._name === series2._name && series1._utc === series2._utc && _immutable2["default"].is(series1._meta, series2._meta) && _immutable2["default"].is(series1._columns, series2._columns) && _immutable2["default"].is(series1._series, series2._series) && _immutable2["default"].is(series1._times, series2._times);
         }
     }]);
 

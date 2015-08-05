@@ -44,9 +44,9 @@ var outageList = {
 
 describe("Events", function () {
 
-    var {Event, TimeRangeEvent, IndexedEvent}  = require("../../src/modules/event.js");
-    var TimeRange = require("../../src/modules/range.js");
-    var Index = require("../../src/modules/index.js");
+    var {Event, TimeRangeEvent, IndexedEvent}  = require("../../src/event.js");
+    var TimeRange = require("../../src/range.js");
+    var Index = require("../../src/index.js");
 
     describe("Event", function () {
 

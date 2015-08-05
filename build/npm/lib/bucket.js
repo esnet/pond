@@ -223,6 +223,7 @@ var Bucket = (function () {
             this._readFromCache(function (events) {
                 var series = new _series.TimeSeries({
                     "name": _this2._index.toString(),
+                    "meta": {},
                     "index": _this2._index,
                     "events": events
                 });

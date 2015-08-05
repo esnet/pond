@@ -214,10 +214,10 @@ export class TimeRangeEvent {
  */
 export class IndexedEvent {
 
-    constructor(index, data) {
+    constructor(index, data, utc) {
         // Index
         if (_.isString(index)) {
-            this._index = new Index(index);
+            this._index = new Index(index, utc);
         } else if (index instanceof Index) {
             this._index = index;
         }
