@@ -46,8 +46,6 @@ function rangeFromIndexString(index, utc) {
     var beginTime = undefined;
     var endTime = undefined;
 
-    console.log("!!!", isUTC, utc);
-
     switch (parts.length) {
         case 3:
             // A day, month and year e.g. 2014-10-24
@@ -89,8 +87,6 @@ function rangeFromIndexString(index, utc) {
             endTime = isUTC ? _moment2["default"].utc(beginTime).endOf("year") : (0, _moment2["default"])(beginTime).endOf("year");
             break;
     }
-
-    console.log("           *", beginTime, endTime);
 
     if (beginTime && beginTime.isValid() && endTime && endTime.isValid()) {
         return new _range2["default"](beginTime, endTime);

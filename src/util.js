@@ -28,8 +28,6 @@ export function rangeFromIndexString(index, utc) {
     let beginTime;
     let endTime;
 
-    console.log("!!!", isUTC, utc)
-
     switch (parts.length) {
         case 3:
             // A day, month and year e.g. 2014-10-24
@@ -79,8 +77,6 @@ export function rangeFromIndexString(index, utc) {
                               moment(beginTime).endOf("year");
         break;
     }
-
-    console.log("           *", beginTime, endTime);
 
     if (beginTime && beginTime.isValid() && endTime && endTime.isValid()) {
         return new TimeRange(beginTime, endTime);

@@ -38,9 +38,6 @@ export class Series {
      */
     
     constructor(arg1, arg2, arg3, arg4) {
-
-        console.log("       ...args", arg1, arg2, arg3, arg4)
-
         // Series(Series other) - copy
         if (arg1 instanceof Series) {
             
@@ -351,8 +348,6 @@ export class TimeSeries extends Series {
 
             if (_.has(obj, "events")) {
 
-                console.log("...from events", arg1)
-
                 //
                 // If events is passed in, then we construct the series out of a list
                 // of Event objects
@@ -379,8 +374,6 @@ export class TimeSeries extends Series {
                 if (_.isBoolean(utc)) {
                     this._utc = utc;
                 }
-
-                console.log("   ...dd", data)
 
                 //Construct the base series
                 super(name, meta, columns, new Immutable.List(data));
@@ -488,10 +481,8 @@ export class TimeSeries extends Series {
         let min;
         let max;
         this._times.forEach((time) => {
-            console.log("-", time)
             if (_.isString(time)) {
                 const r = rangeFromIndexString(time, this.isUTC());
-                console.log("   - range", r.toLocalString())
                 if (!min || r.begin() < min) min = r.begin();
                 if (!max || r.end() > max) max = r.end();
             } else if (_.isNumber(time)) {
@@ -499,8 +490,6 @@ export class TimeSeries extends Series {
                 if (!max || time > max) max = time;
             }
         });
-
-        console.log(min, max);
 
         return new TimeRange(min, max);
     }

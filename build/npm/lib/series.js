@@ -74,8 +74,6 @@ var Series = (function () {
 
         _classCallCheck(this, Series);
 
-        console.log("       ...args", arg1, arg2, arg3, arg4);
-
         // Series(Series other) - copy
         if (arg1 instanceof Series) {
 
@@ -448,8 +446,6 @@ var TimeSeries = (function (_Series) {
 
                 if (_underscore2["default"].has(obj, "events")) {
 
-                    console.log("...from events", arg1);
-
                     //
                     // If events is passed in, then we construct the series out of a list
                     // of Event objects
@@ -480,8 +476,6 @@ var TimeSeries = (function (_Series) {
                     if (_underscore2["default"].isBoolean(utc)) {
                         _this2._utc = utc;
                     }
-
-                    console.log("   ...dd", data);
 
                     //Construct the base series
                     _get(Object.getPrototypeOf(TimeSeries.prototype), "constructor", _this2).call(_this2, _name, meta, columns, new _immutable2["default"].List(data));
@@ -615,10 +609,8 @@ var TimeSeries = (function (_Series) {
             var min = undefined;
             var max = undefined;
             this._times.forEach(function (time) {
-                console.log("-", time);
                 if (_underscore2["default"].isString(time)) {
                     var r = (0, _util.rangeFromIndexString)(time, _this3.isUTC());
-                    console.log("   - range", r.toLocalString());
                     if (!min || r.begin() < min) min = r.begin();
                     if (!max || r.end() > max) max = r.end();
                 } else if (_underscore2["default"].isNumber(time)) {
@@ -626,8 +618,6 @@ var TimeSeries = (function (_Series) {
                     if (!max || time > max) max = time;
                 }
             });
-
-            console.log(min, max);
 
             return new _range2["default"](min, max);
         }
