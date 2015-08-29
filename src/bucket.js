@@ -53,6 +53,14 @@ export default class Bucket {
         this._cache = [];
     }
 
+    name() {
+        return this._index.asString();
+    }
+
+    timerange() {
+        return this._index.asTimerange();
+    }
+
     index() {
         return this._index;
     }
@@ -113,14 +121,18 @@ export default class Bucket {
      */
     aggregate(operator, cb) {
         this._readFromCache((events) => {
-            let keys = uniqueKeys(events);
-            let result = {};
-            _.each(keys.toJS(), k => {
-                let vals = _.map(events, (v) => { return v.get(k); });
-                result[k] = operator.call(this, this._index, vals, k);
-            });
-            const event = new IndexedEvent(this._index, result);
-            if (cb) cb(event);
+            if (events.length) {
+                let keys = uniqueKeys(events);
+                let result = {};
+                _.each(keys.toJS(), k => {
+                    let vals = _.map(events, (v) => { return v.get(k); });
+                    result[k] = operator.call(this, this._index, vals, k);
+                });
+                const event = new IndexedEvent(this._index, result);
+                if (cb) cb(event);
+            } else {
+                if (cb) cb();
+            }
         });
     }
 

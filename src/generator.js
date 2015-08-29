@@ -1,4 +1,5 @@
 import moment from "moment";
+import _ from "underscore";
 
 import Bucket from "./bucket";
 
@@ -51,10 +52,23 @@ export default class Generator {
         return parseInt(dd /= length, 10);
     }
 
+
     bucketIndex(date) {
         const pos = Generator.getBucketPosFromDate(date, this._length);
-        const index = this._size + "-" + pos;
+        const index = `${this._size}-${pos}`;
         return index;
+    }
+
+    bucketIndexList(date1, date2) {
+        const pos1 = Generator.getBucketPosFromDate(date1, this._length);
+        const pos2 = Generator.getBucketPosFromDate(date2, this._length);
+        let indexList = [];
+        if (pos1 <= pos2) {
+            for (let pos = pos1; pos <= pos2; pos++) {
+                indexList.push(`${this._size}-${pos}`)
+            }
+        }
+        return indexList;
     }
 
     /**
@@ -66,5 +80,10 @@ export default class Generator {
     bucket(date) {
         const index = this.bucketIndex(date);
         return new Bucket(index);
+    }
+
+    bucketList(date1, date2) {
+        const indexList = this.bucketIndexList(date1, date2);
+        return _.map(indexList, (index) => new Bucket(index));
     }
 }

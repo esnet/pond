@@ -126,6 +126,37 @@ var sept_2014_data = {
 
 describe("Buckets", () => {
 
+    describe("Generator tests", () => {
+
+        var Generator = require("../../src/generator.js");
+
+        //Test date: Sat Mar 14 2015 07:32:22 GMT-0700 (PDT)
+        var d = new Date(2015, 2, 14,  7,32,22);
+        var generator = new Generator("5m");
+        it('should have the correct index', (done) => {
+            var b = generator.bucket(d);
+            var expected = "5m-4754478";
+            expect(b.index().asString()).to.equal(expected);
+            done();
+        });
+
+        var d1 = new Date(2015, 2, 14,  7,30,0);
+        var d2 = new Date(2015, 2, 14,  8,29,59);
+
+        it('should have the correct index list for a date range', (done) => {
+            var bucketList = generator.bucketList(d1, d2);
+            var expectedBegin = "5m-4754478";
+            var expectedEnd = "5m-4754489";
+            //_.each(bucketList, (b) => {
+            //    console.log("   -", b.index().asString(), b.index().asTimerange().humanize())
+            //})
+            expect(bucketList.length).to.equal(12);
+            expect(bucketList[0].index().asString()).to.equal(expectedBegin);
+            expect(bucketList[bucketList.length-1].index().asString()).to.equal(expectedEnd);
+            done();
+        });
+    });
+
     describe("5min bucket tests", () => {
 
         var BucketGenerator = require("../../src/generator.js");
@@ -446,4 +477,188 @@ describe("Buckets", () => {
         });
     });
 
+});
+
+describe("Resample bin fitting", () => {
+
+    describe("Differences", function () {
+        let {Event, IndexedEvent} = require("../../src/event");
+        var {difference} = require("../../src/functions");
+        let Binner = require("../../src/binner");
+
+        // 0               100            |   v
+        // |               |              |
+        // 0              30              |   t ->
+        // |               |              |
+        // |<- 100 ------->|<- 0 -------->|   result (with flush)
+
+        it("should calculate the correct fitted data for two boundry aligned values", (done) => {
+            const input = [
+                new Event(0, 0),
+                new Event(30000, 100),
+            ];
+
+            let result = {};
+            let binner = new Binner("30s", difference, (event) => {
+                const key = event.index().asString();
+                result[key] = event;
+            });
+
+            //Feed events
+            _.each(input, event => binner.addEvent(event));
+            binner.flush();
+
+            expect(result["30s-0"].get()).to.equal(100);
+            expect(result["30s-1"].get()).to.equal(0);
+            done();
+        });
+
+        //In this case, there is no middle buckets at all
+        //
+        //     |   100         |   213        |   v
+        //     |   |           |   |          |
+        //    30  31          60  62         90   t ->
+        //     |               |              |
+        //     |<- 0           |<- 7.3 ------>|   result (with flush)
+        //         30s-1           30s-2
+        //
+        
+        it("should calculate the correct fitted data for no middle buckets with flush", (done) => {
+            const input = [
+                new Event(31000, 100),
+                new Event(62000, 213),
+            ];
+
+            let result = {};
+            let binner = new Binner("30s", difference, (event) => {
+                const key = event.index().asString();
+                result[key] = event;
+            });
+
+            //Feed events
+            _.each(input, event => binner.addEvent(event));
+            binner.flush();
+
+            expect(result["30s-1"]).to.be.undefined;
+            expect(result["30s-2"].get()).to.equal(7.2903225806451815);
+            expect(result["30s-3"]).to.be.undefined;
+            done();
+        });
+
+        //     100             |    200       |   v
+        //     |               |    |         |
+        //    90             120  121       150  t ->
+        //     |               |              |
+        //     |<- 96.7 ------>| ?            |   result
+        
+        it("should calculate the correct fitted data for no middle buckets that isn't flushed", (done) => {
+            const input = [
+                new Event(90000, 100),
+                new Event(121000, 200),
+            ];
+
+            let result = {};
+            let binner = new Binner("30s", difference, (event) => {
+                const key = event.index().asString();
+                result[key] = event;
+            });
+
+            _.each(input, event => binner.addEvent(event));
+
+            expect(result["30s-2"]).to.be.undefined;
+            expect(result["30s-3"].get()).to.equal(96.7741935483871);
+            expect(result["30s-4"]).to.be.undefined;
+            done();
+        });
+
+        //     |           100 |              |              |              |   200       |   v
+        //     |           |   |              |              |              |   |         |
+        //    60          89  90            120            150            180 181       210   t ->
+        //     |               |              |              |              |             |
+        //     |<- ? --------->|<- 32.6 ----->|<- 32.6 ----->|<- 32.6 ----->|<- ? ------->|   result
+        
+        it("should calculate the correct values for a sequence of middle buckets", (done) => {
+            const input = [
+                new Event(89000, 100),
+                new Event(181000, 200),
+            ];
+
+            let result = {};
+            let binner = new Binner("30s", difference, (event) => {
+                const key = event.index().asString();
+                result[key] = event;
+            });
+
+            _.each(input, event => binner.addEvent(event));
+
+            expect(result["30s-2"]).to.be.undefined;
+            expect(result["30s-3"].get()).to.equal(32.608695652173935);
+            expect(result["30s-4"].get()).to.equal(32.60869565217388);
+            expect(result["30s-5"].get()).to.equal(32.608695652173935);
+            expect(result["30s-6"]).to.be.undefined;
+            done();
+        });
+
+        //r = fit_to_bins(30000, 1386369693000, 141368641534364, 1386369719000, 141368891281597)
+        //self.assertEqual({1386369690000: 249747233}, r)
+        
+        it("should not return a result for two points in the same bucket", (done) => {
+            const input = [
+                new Event(1386369693000, 141368641534364),
+                new Event(1386369719000, 141368891281597),
+            ];
+
+            let result = {};
+            let binner = new Binner("30s", difference, (event) => {
+                console.log("XXXX")
+                const key = event.index().asString();
+                result[key] = event;
+            });
+
+            _.each(input, event => binner.addEvent(event));
+            //binner.flush();
+
+            console.log(result)
+
+            //_.each(result, event => console.log(event.toString()));
+
+            expect(result["30s-46212323"]).to.be.undefined;
+            done();
+        });
+
+    });
+
+    describe("Derivatives", function () {
+        let {Event, IndexedEvent} = require("../../src/event");
+        var {derivative} = require("../../src/functions");
+        let Binner = require("../../src/binner");
+
+        //     |           100 |              |              |              |   200       |   v
+        //     |           |   |              |              |              |   |         |
+        //    60          89  90            120            150            180 181       210   t ->
+        //     |               |              |              |              |             |
+        //     |<- ? --------->|<- 1.08/s --->|<- 1.08/s --->|<- 1.08/s --->|<- ? ------->|   result
+        //
+        it("should calculate the correct derivative", (done) => {
+            const input = [
+                new Event(89000, 100),
+                new Event(181000, 200),
+            ];
+
+            let result = {};
+            let binner = new Binner("30s", derivative, (event) => {
+                const key = event.index().asString();
+                result[key] = event;
+            });
+
+            _.each(input, event => binner.addEvent(event));
+
+            expect(result["30s-2"]).to.be.undefined;
+            expect(result["30s-3"].get()).to.equal(1.0869565217391313);
+            expect(result["30s-4"].get()).to.equal(1.0869565217391293);
+            expect(result["30s-5"].get()).to.equal(1.0869565217391313);
+            expect(result["30s-6"]).to.be.undefined;
+            done();
+        });
+    });
 });
