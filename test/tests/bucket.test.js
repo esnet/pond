@@ -470,9 +470,6 @@ describe("Buckets", () => {
             expect(collection["1h-396206"].size()).to.equal(3);
             expect(collection["1h-396207"].size()).to.equal(2);
 
-            //expect(collection["1h-396206"].toString()).to.equal(expected1);
-            //expect(collection["1h-396207"].toString()).to.equal(expected2);
-
             done();
         });
     });
@@ -491,12 +488,8 @@ describe("Resample bin fitting", () => {
         // 0              30              |   t ->
         // |               |              |
         // |<- 100 ------->|<- 0 -------->|   result (with flush)
-
         it("should calculate the correct fitted data for two boundry aligned values", (done) => {
-            const input = [
-                new Event(0, 0),
-                new Event(30000, 100),
-            ];
+            const input = [new Event(0, 0), new Event(30000, 100)];
 
             let result = {};
             let binner = new Binner("30s", difference, (event) => {
@@ -522,12 +515,8 @@ describe("Resample bin fitting", () => {
         //     |<- 0           |<- 7.3 ------>|   result (with flush)
         //         30s-1           30s-2
         //
-        
         it("should calculate the correct fitted data for no middle buckets with flush", (done) => {
-            const input = [
-                new Event(31000, 100),
-                new Event(62000, 213),
-            ];
+            const input = [new Event(31000, 100), new Event(62000, 213)];
 
             let result = {};
             let binner = new Binner("30s", difference, (event) => {
@@ -550,12 +539,8 @@ describe("Resample bin fitting", () => {
         //    90             120  121       150  t ->
         //     |               |              |
         //     |<- 96.7 ------>| ?            |   result
-        
         it("should calculate the correct fitted data for no middle buckets that isn't flushed", (done) => {
-            const input = [
-                new Event(90000, 100),
-                new Event(121000, 200),
-            ];
+            const input = [new Event(90000, 100), new Event(121000, 200)];
 
             let result = {};
             let binner = new Binner("30s", difference, (event) => {
@@ -576,12 +561,8 @@ describe("Resample bin fitting", () => {
         //    60          89  90            120            150            180 181       210   t ->
         //     |               |              |              |              |             |
         //     |<- ? --------->|<- 32.6 ----->|<- 32.6 ----->|<- 32.6 ----->|<- ? ------->|   result
-        
         it("should calculate the correct values for a sequence of middle buckets", (done) => {
-            const input = [
-                new Event(89000, 100),
-                new Event(181000, 200),
-            ];
+            const input = [new Event(89000, 100), new Event(181000, 200)];
 
             let result = {};
             let binner = new Binner("30s", difference, (event) => {
@@ -599,9 +580,6 @@ describe("Resample bin fitting", () => {
             done();
         });
 
-        //r = fit_to_bins(30000, 1386369693000, 141368641534364, 1386369719000, 141368891281597)
-        //self.assertEqual({1386369690000: 249747233}, r)
-        
         it("should not return a result for two points in the same bucket", (done) => {
             const input = [
                 new Event(1386369693000, 141368641534364),
@@ -610,17 +588,11 @@ describe("Resample bin fitting", () => {
 
             let result = {};
             let binner = new Binner("30s", difference, (event) => {
-                console.log("XXXX")
                 const key = event.index().asString();
                 result[key] = event;
             });
 
             _.each(input, event => binner.addEvent(event));
-            //binner.flush();
-
-            console.log(result)
-
-            //_.each(result, event => console.log(event.toString()));
 
             expect(result["30s-46212323"]).to.be.undefined;
             done();
