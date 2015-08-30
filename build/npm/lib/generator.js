@@ -14,6 +14,10 @@ var _moment = require("moment");
 
 var _moment2 = _interopRequireDefault(_moment);
 
+var _underscore = require("underscore");
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _bucket = require("./bucket");
 
 var _bucket2 = _interopRequireDefault(_bucket);
@@ -49,8 +53,21 @@ var Generator = (function () {
         key: "bucketIndex",
         value: function bucketIndex(date) {
             var pos = Generator.getBucketPosFromDate(date, this._length);
-            var index = this._size + "-" + pos;
+            var index = "" + this._size + "-" + pos;
             return index;
+        }
+    }, {
+        key: "bucketIndexList",
+        value: function bucketIndexList(date1, date2) {
+            var pos1 = Generator.getBucketPosFromDate(date1, this._length);
+            var pos2 = Generator.getBucketPosFromDate(date2, this._length);
+            var indexList = [];
+            if (pos1 <= pos2) {
+                for (var pos = pos1; pos <= pos2; pos++) {
+                    indexList.push("" + this._size + "-" + pos);
+                }
+            }
+            return indexList;
         }
     }, {
         key: "bucket",
@@ -64,6 +81,14 @@ var Generator = (function () {
         value: function bucket(date) {
             var index = this.bucketIndex(date);
             return new _bucket2["default"](index);
+        }
+    }, {
+        key: "bucketList",
+        value: function bucketList(date1, date2) {
+            var indexList = this.bucketIndexList(date1, date2);
+            return _underscore2["default"].map(indexList, function (index) {
+                return new _bucket2["default"](index);
+            });
         }
     }], [{
         key: "getLengthFromSize",

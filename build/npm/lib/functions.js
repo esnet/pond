@@ -25,8 +25,23 @@ exports["default"] = {
     "max": function max(index, values) {
         return _underscore2["default"].max(values);
     },
+    "min": function min(index, values) {
+        return _underscore2["default"].min(values);
+    },
     "count": function count(index, values) {
         return values.length;
+    },
+    "first": function first(index, values) {
+        return values.length ? values[0] : undefined;
+    },
+    "last": function last(index, values) {
+        return values.length ? values[values.length - 1] : undefined;
+    },
+    "difference": function difference(index, values) {
+        return _underscore2["default"].max(values) - _underscore2["default"].min(values);
+    },
+    "derivative": function derivative(index, values) {
+        return values.length ? (values[values.length - 1] - values[0]) / (index.asTimerange().duration() / 1000) : undefined;
     }
 };
 module.exports = exports["default"];
