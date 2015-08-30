@@ -101,7 +101,6 @@ var Binner = (function () {
 
             // Process the active bundle list
             _underscore2["default"].each(this._activeBucketList, function (bucket) {
-                console.log("Buckets:", bucket.name(), bucket.timerange().toString());
                 var bucketTimeRange = bucket.index().asTimerange();
                 var pointsTimeRange = new _range2["default"](_this2._lastTime, time);
                 var intersection = pointsTimeRange.intersection(bucketTimeRange);
@@ -122,7 +121,6 @@ var Binner = (function () {
                 if (bucket.end() < time) {
                     bucket.aggregate(_this2._processor, function (event) {
                         if (!_underscore2["default"].isUndefined(event) && _this2._observer) {
-                            console.log(">>> Emit event", event, _this2._observer);
                             _this2._observer(event);
                         }
                         deleteList.push(key);

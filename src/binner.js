@@ -68,7 +68,6 @@ export default class Binner {
 
         // Process the active bundle list
         _.each(this._activeBucketList, (bucket) => {
-            console.log("Buckets:", bucket.name(), bucket.timerange().toString());
             const bucketTimeRange = bucket.index().asTimerange();
             const pointsTimeRange = new TimeRange(this._lastTime, time);
             let intersection = pointsTimeRange.intersection(bucketTimeRange);
@@ -85,7 +84,6 @@ export default class Binner {
             if (bucket.end() < time) {
                 bucket.aggregate(this._processor, event => {
                     if (!_.isUndefined(event) && this._observer) {
-                        console.log(">>> Emit event", event, this._observer)
                         this._observer(event);
                     }
                     deleteList.push(key);
