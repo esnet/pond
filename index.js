@@ -1,23 +1,24 @@
 
 //Prims
-exports.Index = require("./build/npm/lib/index.js");
-exports.TimeRange = require("./build/npm/lib/range.js");
+exports.Index = require("./lib/index.js");
+exports.TimeRange = require("./lib/range.js");
 
 //Events
-exports.Event = require("./build/npm/lib/event.js").Event;
-exports.TimeRangeEvent = require("./build/npm/lib/event.js").TimeRangeEvent;
-exports.IndexedEvent = require("./build/npm/lib/event.js").IndexedEvent;
+exports.Event = require("./lib/event.js").Event;
+exports.TimeRangeEvent = require("./lib/event.js").TimeRangeEvent;
+exports.IndexedEvent = require("./lib/event.js").IndexedEvent;
 
 //Series
-exports.Series = require("./build/npm/lib/series.js").Series;
-exports.TimeSeries = require("./build/npm/lib/series.js").TimeSeries;
-exports.IndexedSeries = require("./build/npm/lib/series.js").IndexedSeries;
+exports.Series = require("./lib/series.js").Series;
+exports.TimeSeries = require("./lib/series.js").TimeSeries;
+exports.IndexedSeries = require("./lib/series.js").IndexedSeries;
 
 //Builder
-exports.Bucket = require("./build/npm/lib/bucket.js");
-exports.Generator = require("./build/npm/lib/generator.js");
-exports.Aggregator = require("./build/npm/lib/aggregator.js");
-exports.Collector = require("./build/npm/lib/collector.js");
+exports.Bucket = require("./lib/bucket.js");
+exports.Generator = require("./lib/generator.js");
+exports.Aggregator = require("./lib/aggregator.js");
+exports.Collector = require("./lib/collector.js");
+exports.Binner = require("./lib/binner.js");
 
 //Util
-exports.Functions = require("./build/npm/lib/functions.js");
+exports.Functions = require("./lib/functions.js");

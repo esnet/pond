@@ -6,6 +6,16 @@ Pond will run in node.js or in the browser. Install from npm:
 
 Currently Pond requires the use of the Babel runtime, since it has some generator code in it. We are reevaluating whether this is worth it. Below are instructions for getting Pond working in different environments.
 
+### Client
+
+On the browser you should use webpack or similar. Since Pond requires the babel runtime, you will need to install Babel.
+
+    npm install -g babel
+
+And then include the following line at the beginning of your application:
+
+    import "babel/register";
+
 ### Server
 
 On the server, it's best to use babel-node. Here's a simple example:
@@ -31,16 +41,6 @@ On the server, it's best to use babel-node. Here's a simple example:
     for (let event of series.events()) {
         console.log(event.toString());
     }
-
-### Client
-
-On the browser you should use webpack or similar. Since Pond requires the babel runtime, you will need to install Babel.
-
-    npm install -g babel
-
-And then include the following line at the beginning of your application:
-
-    import "babel/register";
 
 For straight up node.js (rather than babel-node), it is possible to use Pond, you just need to include the babel runtime.
 
@@ -70,4 +70,3 @@ After this you will need a single require line. The above ES6 code can be rewrit
     for (var i=0; i < series.size(); i++) {
         console.log(series.at(i).toString());
     }
-

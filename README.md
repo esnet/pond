@@ -38,7 +38,7 @@ Pond will run in node.js (ideally using babel-node) or in the browser (ideally v
 
     npm install @esnet/pond --save
 
-For further information see the [Getting started](http://software.es.net/pond/#gettingstarted) guide.
+For further information see the [Getting started](http://software.es.net/pond/#/start) guide.
 
 # Tests
 
