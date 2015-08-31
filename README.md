@@ -32,6 +32,14 @@ And then high level helper functions to:
 * **Bin** - Fit data into regular intervals
 * **Resample** [TODO]
 
+# Getting started
+
+Pond will run in node.js (ideally using babel-node) or in the browser (ideally via webpack). Install from npm:
+
+    npm install @esnet/pond --save
+
+For further information see the [Getting started](http://software.es.net/pond/#gettingstarted) guide.
+
 # Tests
 
 The library has Mocha tests. To run the tests, use:
@@ -41,6 +49,10 @@ The library has Mocha tests. To run the tests, use:
 Then point your browser to:
 
     http://localhost:9500/webpack-dev-server/tests
+
+# Licence
+
+This code is distributed under a BSD style license, see the LICENSE file for complete information.
 
 # Copyright
 
