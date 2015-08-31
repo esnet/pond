@@ -6,6 +6,7 @@ import Router from "react-router";
 
 import App from "./app.jsx";
 import Intro from "./intro.jsx";
+import Start from "./start.jsx";
 
 import Time from "./time.jsx";
 import TimeRange from "./timerange.jsx";
@@ -25,7 +26,7 @@ const {Route, DefaultRoute, RouteHandler, Link} = Router;
 const routes = (
     <Route path="/" handler={App}>
         <DefaultRoute name="intro" handler={Intro} />
-
+        <Route name="start" handler={Start} />
         <Route name="time" handler={Time} />
         <Route name="timerange" handler={TimeRange} />
         <Route name="index" handler={Index} />

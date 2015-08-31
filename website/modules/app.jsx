@@ -38,6 +38,7 @@ export default React.createClass({
               <div className="docs-sidebar">
                   <ul className="docs-sidenav nav">
                     <li><Link to="intro">Introduction</Link></li>
+                    <li><Link to="start">Getting started</Link></li>
 
                     <hr />
 
