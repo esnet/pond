@@ -299,18 +299,6 @@ describe("Series", function () {
         });
     });
 
-    describe("Timeseries has a generator", function () {
-        it("can create an series with meta data and get that data back with the generator", function(done) {
-            var series = new TimeSeries(interface_data);
-            var results = [];
-            for (event of series.events()) {
-                results.push(event.get("in"));
-            }
-            expect(results).to.deep.equal([52,18,26,93]);
-            done();
-        });
-    });
-
     describe("Compare series", function () {
         it("can compare a series and a reference to a series as being equal", function(done) {
             var series = new TimeSeries(data);

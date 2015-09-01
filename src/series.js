@@ -566,11 +566,19 @@ export class TimeSeries extends Series {
     /**
      *  Generator to allow for..of loops over series.events()
      */
+    
     * events() {
-        for (let i=0; i < this.size(); i++) {
-            yield this.at(i);
-        }
+       for (let i=0; i < this.size(); i++) {
+           yield this.at(i);
+       }
     }
+
+    // events() {
+    //     let events = [];
+    //     for (let i=0; i < this.size(); i++) {
+    //         events.push(this.at(i));
+    //     }
+    // }
 
     static equal(series1, series2) {
         return (series1._name === series2._name &&

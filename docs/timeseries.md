@@ -46,16 +46,9 @@ You may also optionally associate the TimeSeries with an Index. This is very hel
 
 You can read the index back with `index()`, or as a string (more likely for caching) `indexAsString()`, or as a TimeRange with `indexAsRange()`.
 
-To get how many rows there are in a `Series` use `size()`, while to get a particular row back out of the `Series`, use `at(i)`. It will return the row and an `Event`. like this:
+To get how many rows there are in a `TimeSeries` use `size()`, while to get a particular row back out of the `Series`, use `at(i)`. It will return the row and an `Event`. like this:
 
     var event = series.at(1);
-
-You can also use ES6 to iterate over the data:
-
-    var series = new Series(data);
-    for (event of series.events()) {
-        console.log(event.toString());  // prints the event
-    }
 
 An event is a timestamp or timerange and some data, so to deconstruct the event you can use `timestamp()` and `data()` methods:
 
