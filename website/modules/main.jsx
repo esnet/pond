@@ -14,7 +14,6 @@ import Index from "./index.jsx";
 
 import Events from "./events.jsx";
 
-import Series from "./series.jsx";
 import TimeSeries from "./timeseries.jsx";
 
 import Aggregators from "./aggregators.jsx";
