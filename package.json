@@ -1,6 +1,6 @@
 {
   "name": "pond",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A timeseries library build on top of immutable.js",
   "scripts": {
     "build": "rm -rf lib/* && babel src --optional runtime --stage 0 --out-dir lib",
