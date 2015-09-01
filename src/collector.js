@@ -22,7 +22,9 @@ export default class Collector {
         if (newBucketIndex !== bucketIndex) {
             if (this._bucket) {
                 this._bucket.collect(series => {
-                    if (this._observer) this._observer(series);
+                    if (this._observer) {
+                        this._observer(series);
+                    }
                 });
             }
             this._bucket = this._generator.bucket(d);
@@ -36,7 +38,9 @@ export default class Collector {
     done() {
         if (this._bucket) {
             this._bucket.collect(series => {
-                if (this._observer) this._observer(series);
+                if (this._observer) {
+                    this._observer(series);
+                }
                 this._bucket = null;
             });
         }
@@ -48,11 +52,13 @@ export default class Collector {
     addEvent(event, cb) {
         const t = event.timestamp();
         const bucket = this.bucket(t);
-        bucket.addEvent(event, function(err) {
+        bucket.addEvent(event, function (err) {
             if (err) {
                 console.error("Could not add value to bucket:", err);
             }
-            if (cb) cb(err);
+            if (cb) {
+                cb(err);
+            }
         });
     }
 

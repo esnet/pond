@@ -13,14 +13,17 @@ export default class TimeRange {
             this._range = rangeList;
         } else if (_.isArray(arg1)) {
             const rangeArray = arg1;
-            this._range = new Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
+            this._range = new Immutable.List([new Date(rangeArray[0]),
+                                              new Date(rangeArray[1])]);
         } else {
             const b = arg1;
             const e = arg2;
             if (_.isDate(b) && _.isDate(e)) {
-                this._range = new Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
+                this._range = new Immutable.List([new Date(b.getTime()),
+                                                  new Date(e.getTime())]);
             } else if (moment.isMoment(b) && moment.isMoment(e)) {
-                this._range = new Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
+                this._range = new Immutable.List([new Date(b.valueOf()),
+                                                  new Date(e.valueOf())]);
             } else if (_.isNumber(b) && _.isNumber(e)) {
                 this._range = new Immutable.List([new Date(b), new Date(e)]);
             }
@@ -28,7 +31,8 @@ export default class TimeRange {
     }
 
     /**
-     * Returns the internal range, which is an Immutable List containing begin and end keys
+     * Returns the internal range, which is an Immutable List containing
+     * begin and end keys
      */
     range() {
         return this._range;
@@ -57,7 +61,10 @@ export default class TimeRange {
     humanize() {
         const begin = moment(this.begin());
         const end = moment(this.end());
-        return `${begin.format("MMM D, YYYY hh:mm:ss a")} to ${end.format("MMM D, YYYY hh:mm:ss a")}`;
+        const beginStr = begin.format("MMM D, YYYY hh:mm:ss a");
+        const endStr = end.format("MMM D, YYYY hh:mm:ss a");
+
+        return `${beginStr} to ${endStr}`;
     }
 
     relativeString() {
@@ -75,9 +82,8 @@ export default class TimeRange {
     }
 
     /**
-     * Sets a new begin time on the TimeRange. The result will be a new TimeRange.
-     *
-     * @param {Date} - The begin time to set the start of the Timerange to.
+     * Sets a new begin time on the TimeRange. The result will be
+     * a new TimeRange.
      */
     setBegin(t) {
         return new TimeRange(this._range.set(0, t));
@@ -85,16 +91,14 @@ export default class TimeRange {
 
     /**
      * Sets a new end time on the TimeRange. The result will be a new TimeRange.
-     *
-     * @param {Date} - The time to set the end of the Timerange to.
      */
     setEnd(t) {
         return new TimeRange(this._range.set(1, t));
     }
 
     /**
-     * @returns {boolean} Returns if the two TimeRanges can be considered equal,
-     *                    in that they have the same times.
+     * Returns if the two TimeRanges can be considered equal,
+     * in that they have the same times.
      */
     equals(other) {
         return this.begin().getTime() === other.begin().getTime() &&
@@ -102,8 +106,7 @@ export default class TimeRange {
     }
 
     /**
-     * @param {TimeRange|Date} - The other Range or Date to compare this to.
-     * @returns {boolean} Returns true if other is completely inside this.
+     * Returns true if other is completely inside this.
      */
     contains(other) {
         if (_.isDate(other)) {
@@ -116,8 +119,8 @@ export default class TimeRange {
     }
 
     /**
-     * @param - The other Range to compare this to.
-     * @returns {boolean} Returns true if this TimeRange is completely within the supplied other TimeRange.
+     * Returns true if this TimeRange is completely within the supplied
+     * other TimeRange.
      */
     within(other) {
         return this.begin() >= other.begin() &&
@@ -125,8 +128,7 @@ export default class TimeRange {
     }
 
     /**
-     * @param - The other Range to compare this to.
-     * @returns {boolean} Returns true if the passed in other TimeRange overlaps this time Range.
+     * Returns true if the passed in other TimeRange overlaps this time Range.
      */
     overlaps(other) {
         if (this.contains(other.begin()) && !this.contains(other.end()) ||
@@ -147,10 +149,8 @@ export default class TimeRange {
     }
 
     /**
-    * Returns a new Timerange which covers the extents of this and other combined.
-    *
-    * @param - The other Range to take the Union with.
-    * @returns {TimeRange} Returns a new Range that is the union of this and other.
+    * Returns a new Timerange which covers the extents of this and
+    * other combined.
     */
     extents(other) {
         const b = this.begin() < other.begin() ? this.begin() : other.begin();
@@ -159,9 +159,7 @@ export default class TimeRange {
     }
 
     /**
-    * Returns a new TimeRange which is the intersection of this and other.
-    * @param - The other TimeRange to take the intersection with.
-    * @returns {TimeRange} Returns a new TimeRange which represents the intersection
+    * Returns a new TimeRange which represents the intersection
     * (overlapping) part of this and other.
     */
     intersection(other) {

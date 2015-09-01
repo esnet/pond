@@ -15,7 +15,7 @@ import util from "./util";
 export default class Index {
 
     constructor(s, utc) {
-        this._utc =  _.isBoolean(utc) ? utc : true;
+        this._utc = _.isBoolean(utc) ? utc : true;
         this._string = s;
         this._timerange = util.rangeFromIndexString(s, this._utc);
     }

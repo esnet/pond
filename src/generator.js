@@ -4,10 +4,10 @@ import _ from "underscore";
 import Bucket from "./bucket";
 
 var units = {
-    "s": {"label": "seconds", "length": 1},
-    "m": {"label": "minutes", "length": 60},
-    "h": {"label": "hours", "length": 60 * 60},
-    "d": {"label": "days", "length": 60 * 60 * 24}
+    s: {label: "seconds", length: 1},
+    m: {label: "minutes", length: 60},
+    h: {label: "hours", length: 60 * 60},
+    d: {label: "days", length: 60 * 60 * 24}
 };
 
 /**
@@ -65,7 +65,7 @@ export default class Generator {
         let indexList = [];
         if (pos1 <= pos2) {
             for (let pos = pos1; pos <= pos2; pos++) {
-                indexList.push(`${this._size}-${pos}`)
+                indexList.push(`${this._size}-${pos}`);
             }
         }
         return indexList;

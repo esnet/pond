@@ -4,10 +4,10 @@ import _ from "underscore";
 import TimeRange from "./range";
 
 const units = {
-    "s": {"label": "seconds", "length": 1},
-    "m": {"label": "minutes", "length": 60},
-    "h": {"label": "hours", "length": 60 * 60},
-    "d": {"label": "days", "length": 60 * 60 * 24}
+    s: {label: "seconds", length: 1},
+    m: {label: "minutes", length: 60},
+    h: {label: "hours", length: 60 * 60},
+    d: {label: "days", length: 60 * 60 * 24}
 };
 
 /**
@@ -23,7 +23,7 @@ const units = {
  */
 export default {
 
-    rangeFromIndexString: function(index, utc) {
+    rangeFromIndexString: function (index, utc) {
         const isUTC = !_.isUndefined(utc) ? utc : true;
         const parts = index.split("-");
 
@@ -33,10 +33,12 @@ export default {
         switch (parts.length) {
             case 3:
                 // A day, month and year e.g. 2014-10-24
-                if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1])) && !_.isNaN(parseInt(parts[2]))) {
-                    const year = parseInt(parts[0]);
-                    const month = parseInt(parts[1]);
-                    const day = parseInt(parts[2]);
+                if (!_.isNaN(parseInt(parts[0], 10)) &&
+                    !_.isNaN(parseInt(parts[1], 10)) &&
+                    !_.isNaN(parseInt(parts[2], 10))) {
+                    const year = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10);
+                    const day = parseInt(parts[2], 10);
                     beginTime = isUTC ? moment.utc([year, month - 1, day]) :
                                         moment([year, month - 1, day]);
                     endTime = isUTC ? moment.utc(beginTime).endOf("day") :
@@ -45,10 +47,12 @@ export default {
             break;
 
             case 2:
-                // Size should be two parts, a number and a letter if it's a range based index, e.g 1h-23478
+                // Size should be two parts, a number and a letter if it's a
+                // range based index, e.g 1h-23478
                 const rangeRegex = /([0-9]+)([smhd])/;
                 const sizeParts = rangeRegex.exec(parts[0]);
-                if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1]))) {
+                if (sizeParts && sizeParts.length >= 3 &&
+                    !_.isNaN(parseInt(parts[1], 10))) {
                     const pos = parseInt(parts[1], 10);
                     const num = parseInt(sizeParts[1], 10);
                     const unit = sizeParts[2];
@@ -60,9 +64,10 @@ export default {
                                       moment((pos + 1) * length);
 
                 // A month and year e.g 2015-09
-                } else if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1]))) {
-                    const year = parseInt(parts[0]);
-                    const month = parseInt(parts[1]);
+                } else if (!_.isNaN(parseInt(parts[0], 10)) &&
+                    !_.isNaN(parseInt(parts[1], 10))) {
+                    const year = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10);
                     beginTime = isUTC ? moment.utc([year, month - 1]) :
                                         moment([year, month - 1]);
                     endTime = isUTC ? moment.utc(beginTime).endOf("month") :
@@ -88,23 +93,26 @@ export default {
     },
 
     /**
-     * Returns a nice string for the index. If the index is of the form 1d-2345 then
-     * just that string is returned (there's not nice way to put it), but if it
-     * represents a day, month, or year (e.g. 2015-07) then a nice string like "July"
-     * will be returned. It's also possible to pass in the format of the reply for
-     * these types of strings. See moment's format naming conventions:
+     * Returns a nice string for the index. If the index is of the form
+     * 1d-2345 then just that string is returned (there's not nice way to put
+     * it), but if it represents a day, month, or year (e.g. 2015-07) then a
+     * nice string like "July" will be returned. It's also possible to pass in
+     * the format of the reply for these types of strings. See moment's format
+     * naming conventions:
      * http://momentjs.com/docs/#/displaying/format/
      */
-    niceIndexString: function(index, format) {
+    niceIndexString: function (index, format) {
         let t;
 
         const parts = index.split("-");
         switch (parts.length) {
             case 3:
-                if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1])) && !_.isNaN(parseInt(parts[2]))) {
-                    const year = parseInt(parts[0]);
-                    const month = parseInt(parts[1]);
-                    const day = parseInt(parts[2]);
+                if (!_.isNaN(parseInt(parts[0], 10)) &&
+                    !_.isNaN(parseInt(parts[1], 10)) &&
+                    !_.isNaN(parseInt(parts[2], 10))) {
+                    const year = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10);
+                    const day = parseInt(parts[2], 10);
                     t = moment.utc([year, month - 1, day]);
                     if (format) {
                         return t.format(format);
@@ -118,11 +126,13 @@ export default {
             case 2:
                 const rangeRegex = /([0-9]+)([smhd])/;
                 const sizeParts = rangeRegex.exec(parts[0]);
-                if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1]))) {
+                if (sizeParts && sizeParts.length >= 3 &&
+                    !_.isNaN(parseInt(parts[1], 10))) {
                     return index;
-                } else if (!_.isNaN(parseInt(parts[0])) && !_.isNaN(parseInt(parts[1]))) {
-                    const year = parseInt(parts[0]);
-                    const month = parseInt(parts[1]);
+                } else if (!_.isNaN(parseInt(parts[0], 10)) &&
+                    !_.isNaN(parseInt(parts[1], 10))) {
+                    const year = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10);
                     t = moment.utc([year, month - 1]);
                     if (format) {
                         return t.format(format);
@@ -144,4 +154,4 @@ export default {
         }
         return index;
     }
-}
+};

@@ -99,11 +99,15 @@ export default class Bucket {
 
     _pushToCache(event, cb) {
         this._cache.push(event);
-        if (cb) cb(null);
+        if (cb) {
+            cb(null);
+        }
     }
 
     _readFromCache(cb) {
-        if (cb) cb(this._cache);
+        if (cb) {
+            cb(this._cache);
+        }
     }
 
     //
@@ -111,7 +115,11 @@ export default class Bucket {
     //
 
     addEvent(event, cb) {
-        this._pushToCache(event, (err) => { if (cb) cb(err); });
+        this._pushToCache(event, (err) => {
+            if (cb) {
+                cb(err);
+            }
+        });
     }
 
     /**
@@ -129,9 +137,11 @@ export default class Bucket {
                     result[k] = operator.call(this, this._index, vals, k);
                 });
                 const event = new IndexedEvent(this._index, result);
-                if (cb) cb(event);
-            } else {
-                if (cb) cb();
+                if (cb) {
+                    cb(event);
+                }
+            } else if (cb) {
+                cb();
             }
         });
     }
@@ -144,12 +154,14 @@ export default class Bucket {
     collect(cb) {
         this._readFromCache((events) => {
             var series = new TimeSeries({
-                "name": this._index.toString(),
-                "meta": {},
-                "index": this._index,
-                "events": events
+                name: this._index.toString(),
+                meta: {},
+                index: this._index,
+                events: events
             });
-            if (cb) cb(series);
+            if (cb) {
+                cb(series);
+            }
         });
     }
 }

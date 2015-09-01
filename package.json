@@ -2,13 +2,25 @@
   "name": "@esnet/pond",
   "version": "0.1.2",
   "description": "A timeseries library build on top of immutable.js",
+  "options": {
+    "mocha": "--require scripts/mochaboot test/*.js"
+  },
   "scripts": {
+    "prepublish": "npm test && npm run build",
+    "lint": "eslint src",
+    "test": "npm run lint && mocha $npm_package_options_mocha",
+    "test-only": "mocha $npm_package_options_mocha",
     "build": "rm -rf lib/* && babel src --optional runtime --stage 0 --out-dir lib",
     "build-website": "webpack --config webpack.website.config.js",
-    "start": "webpack-dev-server  --config webpack.website.config.js",
-    "test": "webpack-dev-server --config webpack.test.config.js --content-base ./devserver --port 9500 --colors"
+    "start-website": "webpack-dev-server  --config webpack.website.config.js",
+    "start-tester": "webpack-dev-server --config webpack.test.config.js --content-base ./devserver --port 9500 --colors"
   },
-  "author": "",
+  "babel": {
+    "optional": [
+      "runtime",
+      "es7.objectRestSpread"
+    ]
+  },
   "license": "Modified BSD License",
   "dependencies": {
     "immutable": "^3.6.4",
@@ -31,13 +43,12 @@
     "babel": "^5.8.3",
     "babel-loader": "^5.0.0",
     "babel-core": "^5.1.13",
-    "babel-eslint": "^3.1.10",
-    "chai": "^1.9.1",
-    "mocha": "^1.15.1",
-    "mocha-loader": "^0.6.5",
+    "babel-eslint": "4.0.5",
+    "chai": "^3.0.0",
+    "mocha": "^2.2.5",
+    "mocha-loader": "^0.7.1",
     "webpack": "^1.7.3",
     "webpack-dev-server": "^1.6.5",
-    "eslint": "^0.22.1",
-    "eslint-plugin-react": "^2.4.0"
+    "eslint": "^0.24.0"
   }
 }

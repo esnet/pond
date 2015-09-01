@@ -28,7 +28,7 @@ function dataFromArgs(arg1) {
     } else if (data instanceof Immutable.Map) {
         data = arg1;
     } else {
-        data = new Immutable.Map({"value": arg1});
+        data = new Immutable.Map({value: arg1});
     }
     return data;
 }
@@ -102,9 +102,9 @@ export class Event {
 }
 
 /**
- * An time range event uses a TimeRange to specify the range over which the event occurs
- * and maps that to a data object representing some measurements or metrics during
- * that time range.
+ * An time range event uses a TimeRange to specify the range over
+ * which the event occurs and maps that to a data object representing some
+ * measurements or metrics during that time range.
  *
  * You supply the timerange as a TimeRange object.
  *
@@ -112,14 +112,15 @@ export class Event {
  *  1) a Javascript object or simple type
  *  2) an Immutable.Map.
  *
- * If an Javascript object is provided it will be stored internally as an Immutable Map.
- * If the data provided is some other simple type (such as an integer) then it will be
- * equivalent to supplying an object of {value: data}. Data may also be undefined.
+ * If an Javascript object is provided it will be stored internally as an
+ * Immutable Map. If the data provided is some other simple type (such as an
+ * integer) then it will be equivalent to supplying an object of {value: data}.
+ * Data may also be undefined.
  *
- * The get the data out of an IndexedEvent instance use data(). It will return an
- * Immutable.Map. Alternatively you can call toJSON() to return a Javascript object
- * representation of the data, while toString() will serialize the event to a string.
- *
+ * The get the data out of an IndexedEvent instance use data(). It will return
+ * an Immutable.Map. Alternatively you can call toJSON() to return a Javascript
+ * object representation of the data, while toString() will serialize the event
+ * to a string.
  */
 export class TimeRangeEvent {
 
@@ -190,9 +191,9 @@ export class TimeRangeEvent {
 }
 
 /**
- * An indexed event uses a Index to specify a timerange over which the event occurs
- * and maps that to a data object representing some measurement of metric during
- * that time range.
+ * An indexed event uses a Index to specify a timerange over which the event
+ * occurs and maps that to a data object representing some measurement of metric
+ * during that time range.
  *
  * You can supply the index as a string or as an Index object.
  *
@@ -200,17 +201,19 @@ export class TimeRangeEvent {
  *     - 1d-156 is the entire duration of the 156th day since the UNIX epoch
  *     - 12:Mar:2014 is the entire duration of march in 2014 [not supported yet]
  *
- * The range, as expressed by the Index, is provided by the convenience method range(),
- * which returns a TimeRange instance. Alternatively the begin and end times represented
- * by the Index can be found with begin() and end() respectively.
+ * The range, as expressed by the Index, is provided by the convenience method
+ * range(), which returns a TimeRange instance. Alternatively the begin and end
+ * times represented by the Index can be found with begin() and end()
+ * respectively.
  *
- * The data is also specified during construction, and is generally expected to be an
- * object or an Immutable.Map. If an object is provided it will be stored internally as
- * an ImmutableMap. If the data provided is some other type then it will be equivalent to
- * supplying an object of {value: data}. Data may be undefined.
+ * The data is also specified during construction, and is generally expected to
+ * be an object or an Immutable.Map. If an object is provided it will be stored
+ * internally as an ImmutableMap. If the data provided is some other type then
+ * it will be equivalent to supplying an object of {value: data}. Data may be
+ * undefined.
  *
- * The get the data out of an IndexedEvent instance use data(). It will return an
- * Immutable.Map.
+ * The get the data out of an IndexedEvent instance use data(). It will return
+ * an Immutable.Map.
  */
 export class IndexedEvent {
 
@@ -228,7 +231,7 @@ export class IndexedEvent {
         } else if (data instanceof Immutable.Map) {
             this._data = data;
         } else {
-            this._data = new Immutable.Map({"value": data});
+            this._data = new Immutable.Map({value: data});
         }
     }
 

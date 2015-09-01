@@ -2,35 +2,31 @@
 
 Say you have an incoming stream of Events and you want to aggregate them together. Pond can help with that. Here's an example. Lets create some events on 2/14/2015 that cross over the hour: 7:57am, 7:58am, 7:59am, 8:00am and 8:01am. The values for these events are [3, 9, 6, 4, 5]:
 
-    var incomingEvents = [];
-    incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 57, 0), 3));
-    incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 58, 0), 9));
-    incomingEvents.push(new Event(new Date(2015, 2, 14, 7, 59, 0), 6));
-    incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  0, 0), 4));
-    incomingEvents.push(new Event(new Date(2015, 2, 14, 8,  1, 0), 5));
+    var events = [];
+    events.push(new Event(new Date(2015, 2, 14, 7, 57, 0), 3));
+    events.push(new Event(new Date(2015, 2, 14, 7, 58, 0), 9));
+    events.push(new Event(new Date(2015, 2, 14, 7, 59, 0), 6));
+    events.push(new Event(new Date(2015, 2, 14, 8,  0, 0), 4));
+    events.push(new Event(new Date(2015, 2, 14, 8,  1, 0), 5));
 
 Now lets find the avg value in each of the hours. To do this we setup an Aggregator that is indexed on the hour ("1h") and will use an average function "avg", like this:
 
     var {Aggregator, Functions} = require("pond");
-    var {max, avg, sum, count} = Functions;
+    var {avg} = Functions;
     
-    var hourlyAverage = new Aggregator("1h", avg);
-
-The we hook up the hourlyAverage event emitted so we can collect the result (or pass it on to another aggregator or collector). Here we'll just put them into a map using the index (or the hour) as a key:
-
-    hourlyAverage.onEmit((index, event) => { outputEvents[index.asString()] = event;});
-
-Note that you can alternatively combine the constructor and the emit hookup as well:
-
     var hourlyAverage = new Aggregator("1h", avg, (index, event) => {
         outputEvents[index.asString()] = event;
     });
 
-Then we can add events as long as we want, forever even:
+In addition, we add a callback to collect the hourlyAverage events emitted. Here we collect the result but of course we could pass it on to another aggregator or collector.
 
-    _.each(incomingEvents, event => { hourlyAverage.addEvent(event); });
+Now that our aggregator is setup we can add events as long as we want:
 
-Knowing when to be done with a bucket that we're aggregating into depends on the situation. If this is a continuous stream of events then the code currenly considers it done with a bucket when an event comes in that fits into another bucket. In this example the first event will create the first bucket. Then next two events also fit into this bucket. The 4th event is in the following hour so the old bucket is aggregated based on the aggregation function and an event is emitted with that aggregated value. A new bucket is then created for the 4th event. The 5th event goes into that same bucket. In this case we want to flush the bucket after the 5th event, so we call:
+    _.each(events, event => { hourlyAverage.addEvent(event); });
+
+Knowing when to be done with a bucket that we're aggregating into depends on the situation. If this is a continuous stream of events then the code currenly considers that it is done with a bucket when an event comes in that fits into another bucket. In this example the first event will create the first bucket (7am-8am). Then next two events also fit into this bucket. The 4th event is in the following hour so the old bucket is aggregated based on the aggregation function and an event is emitted with that aggregated value. A new bucket is then created (8am-9am) for the 4th event. The 5th event goes into that same bucket.
+
+In this case we want to flush the bucket after the 5th event, so we call:
 
     hourlyAverage.done();
 

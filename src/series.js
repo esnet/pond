@@ -28,31 +28,25 @@ export class Series {
      *               a) An Immutable.List of Immutable.Map data objects
      *               b) An array of objects
      *
-     * Internally a Series is List of Maps. Each item in the list is one data map,
-     * and is stored as an Immutable Map, where the keys are the column names
-     * and the value is the data for that column at that index.
+     * Internally a Series is List of Maps. Each item in the list is one data
+     * map, and is stored as an Immutable Map, where the keys are the column
+     * names and the value is the data for that column at that index.
      *
-     * This enables efficient extraction of Events, since the internal data of the
-     * Event can be simply a reference to the Immutable Map in this Series, combined
-     * with the time, Timerange or Index.
+     * This enables efficient extraction of Events, since the internal data
+     * of the Event can be simply a reference to the Immutable Map in this
+     * Series, combined with the time, Timerange or Index.
      */
-    
     constructor(arg1, arg2, arg3, arg4) {
         // Series(Series other) - copy
         if (arg1 instanceof Series) {
-            
-            //
-            // Copy constructor
-            //
-
             const other = arg1;
-
             this._name = other._name;
             this._meta = other._meta;
             this._columns = other._columns;
             this._series = other._series;
 
-        // Series(string name, object meta, list columns, list | ImmutableList points)
+        // Series(string name, object meta, list columns, list | ImmutableList
+        // points)
         } else if (_.isString(arg1) &&
                    _.isObject(arg2) &&
                    _.isArray(arg3) &&
@@ -64,9 +58,9 @@ export class Series {
 
             const name = arg1;
             const meta = arg2;
-            const columns = arg3
+            const columns = arg3;
             const data = arg4;
-            
+
             this._name = name;
             this._meta = Immutable.fromJS(meta);
             this._columns = Immutable.fromJS(columns);
@@ -75,9 +69,9 @@ export class Series {
                 this._series = data;
             } else {
                 this._series = Immutable.fromJS(
-                    _.map(data, function(d) {
+                    _.map(data, function (d) {
                         let pointMap = {};
-                        _.each(d, function(p, i) {
+                        _.each(d, function (p, i) {
                             pointMap[columns[i]] = p;
                         });
                         return pointMap;
@@ -99,9 +93,11 @@ export class Series {
             name: this._name,
             columns: cols.toJSON(),
             points: series.map(value => {
-                return cols.map(column => { data.push(value.get(column)); });
+                return cols.map(column => {
+                    return value.get(column);
+                });
             })
-        }
+        };
     }
 
     toString() {
@@ -195,7 +191,7 @@ export class Series {
             return undefined;
         }
         const sorted = this._series.sortBy((event) => event.get(c));
-        return sorted.get(Math.floor(sorted.size/2)).get(c);
+        return sorted.get(Math.floor(sorted.size / 2)).get(c);
     }
 
     stdev(column) {
@@ -206,7 +202,7 @@ export class Series {
 
         const mean = this.mean();
         return Math.sqrt(this._series.reduce((memo, event) => {
-            return Math.pow(event.get(c)-mean, 2) + memo
+            return Math.pow(event.get(c) - mean, 2) + memo;
         }
         , 0) / this.size());
     }
@@ -217,7 +213,7 @@ export class Series {
                 series1._columns === series2._columns &&
                 series1._series === series2._series);
     }
-    
+
     static is(series1, series2) {
         return (series1._name === series2._name &&
                 Immutable.is(series1._meta, series2._meta) &&
@@ -232,10 +228,10 @@ export class Series {
   * to do this.
   */
 function uniqueKeys(events) {
-    let arrayOfKeys = []
+    let arrayOfKeys = [];
     for (let e of events) {
         for (let k of e.data().keySeq()) {
-            arrayOfKeys.push(k)
+            arrayOfKeys.push(k);
         }
     }
     return new Immutable.Set(arrayOfKeys);
@@ -245,25 +241,26 @@ function uniqueKeys(events) {
  * Functions used to determine slice indexes. Copied from immutable.js.
  */
 function resolveBegin(begin, size) {
-  return resolveIndex(begin, size, 0);
+    return resolveIndex(begin, size, 0);
 }
 
 function resolveEnd(end, size) {
-  return resolveIndex(end, size, size);
+    return resolveIndex(end, size, size);
 }
 
 function resolveIndex(index, size, defaultIndex) {
     return index === undefined ?
         defaultIndex : index < 0 ?
-            Math.max(0, size + index) : size === undefined ? index : Math.min(size, index);
+            Math.max(0, size + index) : size === undefined ?
+                index : Math.min(size, index);
 }
 
 /**
  * A TimeSeries is a a Series where each event is an association of a timestamp
  * and some associated data.
  *
- * Data passed into it may have the following format, which corresponds to InfluxDB's
- * wire format:
+ * Data passed into it may have the following format, which corresponds to
+ * InfluxDB's wire format:
  *
  *   {
  *     "name": "traffic",
@@ -292,9 +289,9 @@ function resolveIndex(index, size, defaultIndex) {
  *   - a timerange
  *
  * The event itself is stored is an Immutable Map. Requesting a particular
- * position in the list will return an Event that will in fact internally reference
- * the Immutable Map within the series, making it efficient to get back items
- * within the TimeSeries.
+ * position in the list will return an Event that will in fact internally
+ * reference the Immutable Map within the series, making it efficient to get
+ * back items within the TimeSeries.
  *
  * You can fetch the full item at index n using get(n).
  *
@@ -307,14 +304,13 @@ export class TimeSeries extends Series {
 
         // TimeSeries(TimeSeries other)
         if (arg1 instanceof TimeSeries) {
-            
             super();
 
             //
             // Copy constructor
             //
 
-            //Construct the base series
+            // Construct the base series
             let other = arg1;
 
             this._name = other._name;
@@ -342,20 +338,19 @@ export class TimeSeries extends Series {
 
             const obj = arg1;
 
-            let columns = [];
             let times = [];
             let data = [];
 
             if (_.has(obj, "events")) {
 
                 //
-                // If events is passed in, then we construct the series out of a list
-                // of Event objects
+                // If events is passed in, then we construct the series out of
+                // a list of Event objects
                 //
-                
+
                 const {events, utc, index, name, meta} = obj;
 
-                columns = uniqueKeys(events).toJSON();
+                const columns = uniqueKeys(events).toJSON();
                 _.each(events, event => {
                     times.push(event.timestamp());
                     data.push(event.data());
@@ -375,10 +370,10 @@ export class TimeSeries extends Series {
                     this._utc = utc;
                 }
 
-                //Construct the base series
+                // Construct the base series
                 super(name, meta, columns, new Immutable.List(data));
 
-                //List of times, as Immutable List
+                // List of times, as Immutable List
                 this._times = new Immutable.List(times);
 
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
@@ -391,13 +386,13 @@ export class TimeSeries extends Series {
                 const seriesUTC = _.isBoolean(utc) ? utc : true;
 
                 //
-                // If columns and points are passed in, then we construct the series
-                // out of those, assuming the format of each point is:
+                // If columns and points are passed in, then we construct the
+                // series out of those, assuming the format of each point is:
                 //
                 //   [time, col1, col2, col3]
                 //
                 // TODO: check to see if the first item is the time
-                
+
                 _.each(seriesPoints, point => {
                     const [time, ...others] = point;
                     times.push(time);
@@ -415,7 +410,7 @@ export class TimeSeries extends Series {
                     }
                 }
 
-                //Is this data in UTC or local?
+                // Is this data in UTC or local?
                 this._utc = seriesUTC;
 
                 // List of times, as Immutable List
@@ -440,13 +435,17 @@ export class TimeSeries extends Series {
 
         const points = series.map((value, i) => {
             const data = [times.get(i)]; // time
-            cols.forEach((column, j) => {data.push(value.get(column))}); //values
+            cols.forEach((column) => {
+                data.push(value.get(column));
+            });
             return data;
         }).toJSON();
 
-        //The JSON output has 'time' as the first column
+        // The JSON output has 'time' as the first column
         const columns = ["time"];
-        cols.forEach((column) => {columns.push(column)});
+        cols.forEach((column) => {
+            columns.push(column);
+        });
 
         let result = {
             name: name
@@ -483,14 +482,21 @@ export class TimeSeries extends Series {
         this._times.forEach((time) => {
             if (_.isString(time)) {
                 const r = util.rangeFromIndexString(time, this.isUTC());
-                if (!min || r.begin() < min) min = r.begin();
-                if (!max || r.end() > max) max = r.end();
+                if (!min || r.begin() < min) {
+                    min = r.begin();
+                }
+                if (!max || r.end() > max) {
+                    max = r.end();
+                }
             } else if (_.isNumber(time)) {
-                if (!min || time < min) min = time;
-                if (!max || time > max) max = time;
+                if (!min || time < min) {
+                    min = time;
+                }
+                if (!max || time > max) {
+                    max = time;
+                }
             }
         });
-
         return new TimeRange(min, max);
     }
 
@@ -539,8 +545,9 @@ export class TimeSeries extends Series {
     }
 
     /**
-     * Perform a slice of events within the TimeSeries, returns a new TimeSeries
-     * representing a portion of this TimeSeries from begin up to but not including end.
+     * Perform a slice of events within the TimeSeries, returns a new
+     * TimeSeries representing a portion of this TimeSeries from begin up to
+     * but not including end.
      */
     slice(begin, end) {
         const size = this.size();
@@ -556,29 +563,21 @@ export class TimeSeries extends Series {
             events.push(this.at(i));
         }
 
-        return new TimeSeries({"name": this._name,
-                               "index": this._index,
-                               "utc": this._utc,
-                               "meta": this._meta,
-                               "events": events});
+        return new TimeSeries({name: this._name,
+                               index: this._index,
+                               utc: this._utc,
+                               meta: this._meta,
+                               events: events});
     }
 
     /**
      *  Generator to allow for..of loops over series.events()
      */
-    
     * events() {
-       for (let i=0; i < this.size(); i++) {
-           yield this.at(i);
-       }
+        for (let i = 0; i < this.size(); i++) {
+            yield this.at(i);
+        }
     }
-
-    // events() {
-    //     let events = [];
-    //     for (let i=0; i < this.size(); i++) {
-    //         events.push(this.at(i));
-    //     }
-    // }
 
     static equal(series1, series2) {
         return (series1._name === series2._name &&
@@ -588,7 +587,7 @@ export class TimeSeries extends Series {
                 series1._series === series2._series &&
                 series1._times === series2._times);
     }
-    
+
     static is(series1, series2) {
         return (series1._name === series2._name &&
                 series1._utc === series2._utc &&
@@ -598,4 +597,3 @@ export class TimeSeries extends Series {
                 Immutable.is(series1._times, series2._times));
     }
 }
-

@@ -2,4 +2,7 @@ src
 test
 docs
 website
+scripts
+*-bundle.js
 *.config.js
+*.html

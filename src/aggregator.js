@@ -17,7 +17,8 @@ export default class Aggregator {
      */
     bucket(d) {
         const thisBucketIndex = this._generator.bucketIndex(d);
-        const currentBucketIndex = this._bucket ? this._bucket.index().asString() : "";
+        const currentBucketIndex = this._bucket ?
+            this._bucket.index().asString() : "";
         if (thisBucketIndex !== currentBucketIndex) {
             if (this._bucket) {
                 this._bucket.aggregate(this._processor, event => {

@@ -35,7 +35,7 @@ export default class Binner {
             if (!_.has(this._activeBucketList, b.index().asString())) {
                 this._activeBucketList[b.index().asString()] = b;
             }
-        })
+        });
         return bucketList;
     }
 
@@ -58,9 +58,11 @@ export default class Binner {
     }
 
     /**
-     * Add an event, which will be assigned to a bucket
+     * Add an event, which will be assigned to a bucket.
+     * TODO: If we make the cache more general we should pass
+     * in a callback here.
      */
-    addEvent(event, cb) {
+    addEvent(event) {
         const time = event.timestamp();
         const value = event.get();
 
@@ -68,25 +70,27 @@ export default class Binner {
 
         // Process the active bundle list
         _.each(this._activeBucketList, (bucket) => {
-            console.log("Buckets:", bucket.name(), bucket.timerange().toString());
             const bucketTimeRange = bucket.index().asTimerange();
             const pointsTimeRange = new TimeRange(this._lastTime, time);
             let intersection = pointsTimeRange.intersection(bucketTimeRange);
-            if (intersection && intersection.begin().getTime() === bucketTimeRange.begin().getTime()) {
-                const {va, vb} = this.getEdgeValues(pointsTimeRange, this._lastValue, value, intersection);
+            if (intersection && intersection.begin().getTime() ===
+                bucketTimeRange.begin().getTime()) {
+                const {va, vb} = this.getEdgeValues(pointsTimeRange,
+                                                    this._lastValue,
+                                                    value,
+                                                    intersection);
                 bucket.addEvent(new Event(bucketTimeRange.begin(), va));
                 bucket.addEvent(new Event(bucketTimeRange.end(), vb));
             }
         });
 
-        //Flush buckets
+        // Flush buckets
         let deleteList = [];
         _.each(this._activeBucketList, (bucket, key) => {
             if (bucket.end() < time) {
-                bucket.aggregate(this._processor, event => {
-                    if (!_.isUndefined(event) && this._observer) {
-                        console.log(">>> Emit event", event, this._observer)
-                        this._observer(event);
+                bucket.aggregate(this._processor, e => {
+                    if (!_.isUndefined(e) && this._observer) {
+                        this._observer(e);
                     }
                     deleteList.push(key);
                 });
@@ -102,10 +106,12 @@ export default class Binner {
      * Forces the current buckets to emit
      */
     flush() {
-        _.each(this._activeBucketList, (bucket, i) => {
+        _.each(this._activeBucketList, bucket => {
             bucket.aggregate(this._processor, event => {
                 if (event) {
-                    this._observer && this._observer(event);
+                    if (this._observer) {
+                        this._observer(event);
+                    }
                 }
             });
         });
