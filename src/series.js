@@ -545,9 +545,10 @@ export class TimeSeries extends Series {
     }
 
     /**
-     * Finds the index that is just less than the time t supplied. In other words
-     * every event at the returned index or less has a time before the supplied t,
-     * and every sample after the index has a time later than the supplied t.
+     * Finds the index that is just less than the time t supplied.
+     * In other words every event at the returned index or less
+     * has a time before the supplied t, and every sample after the
+     * index has a time later than the supplied t.
      *
      * Optionally supply a begin index to start searching from.
      */
