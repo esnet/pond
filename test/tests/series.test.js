@@ -232,6 +232,22 @@ var sept_2014_data = {
     ]
 };
 
+const fmt = "YYYY-MM-DD HH:mm";
+const bisectTestData = {
+    "name": "test",
+    "columns": ["time", "value"],
+    "points": [
+        [moment("2012-01-11 01:00", fmt).valueOf(), 22],
+        [moment("2012-01-11 02:00", fmt).valueOf(), 33],
+        [moment("2012-01-11 03:00", fmt).valueOf(), 44],
+        [moment("2012-01-11 04:00", fmt).valueOf(), 55],
+        [moment("2012-01-11 05:00", fmt).valueOf(), 66],
+        [moment("2012-01-11 06:00", fmt).valueOf(), 77],
+        [moment("2012-01-11 07:00", fmt).valueOf(), 88],
+    ]
+};
+
+
 describe("Series", function () {
 
     var {Series, TimeSeries} = require("../../src/series.js");
@@ -398,6 +414,32 @@ describe("Series", function () {
 
     });
 
+    describe("Series index can be found with bisect", function () {
+
+        it("can find the bisect starting from 0", function(done) {
+            const series = new TimeSeries(bisectTestData);
+            expect(series.bisect(moment("2012-01-11 00:30", fmt).toDate())).to.equal(0);
+            expect(series.bisect(moment("2012-01-11 03:00", fmt).toDate())).to.equal(2);
+            expect(series.bisect(moment("2012-01-11 03:30", fmt).toDate())).to.equal(2);
+            expect(series.bisect(moment("2012-01-11 08:00", fmt).toDate())).to.equal(6);
+            done();
+        });
+
+        it("can find the bisect starting from an begin index", function(done) {
+            const series = new TimeSeries(bisectTestData);
+
+            expect(series.bisect(moment("2012-01-11 03:00", fmt).toDate(), 2)).to.equal(2);
+            expect(series.bisect(moment("2012-01-11 03:30", fmt).toDate(), 3)).to.equal(2);
+            expect(series.bisect(moment("2012-01-11 03:30", fmt).toDate(), 4)).to.equal(3);
+
+            const first = series.bisect(moment("2012-01-11 03:30", fmt).toDate());
+            const second = series.bisect(moment("2012-01-11 04:30", fmt).toDate(), first);
+            expect(series.at(first).get()).to.equal(44);
+            expect(series.at(second).get()).to.equal(55);
+
+            done();
+        });
+    });
 });
 
 /**

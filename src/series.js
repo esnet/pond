@@ -545,6 +545,33 @@ export class TimeSeries extends Series {
     }
 
     /**
+     * Finds the index that is just less than the time t supplied. In other words
+     * every event at the returned index or less has a time before the supplied t,
+     * and every sample after the index has a time later than the supplied t.
+     *
+     * Optionally supply a begin index to start searching from.
+     */
+    bisect(t, b) {
+        const tms = t.getTime();
+        const size = this.size();
+        let i = b || 0;
+
+        if (!size) {
+            return undefined;
+        }
+
+        for (; i < size; i++) {
+            let ts = this.at(i).timestamp().getTime();
+            if (ts > tms) {
+                return i - 1 >= 0 ? i - 1 : 0;
+            } else if (ts === tms) {
+                return i;
+            }
+        }
+        return i - 1;
+    }
+
+    /**
      * Perform a slice of events within the TimeSeries, returns a new
      * TimeSeries representing a portion of this TimeSeries from begin up to
      * but not including end.
