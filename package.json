@@ -1,6 +1,6 @@
 {
   "name": "@esnet/pond",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A timeseries library build on top of immutable.js",
   "options": {
     "mocha": "--require scripts/mochaboot test/*.js"
