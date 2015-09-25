@@ -1,5 +1,4 @@
-Pond [![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond)
-======
+# Pond [![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond)
 
 A library build on top of immutable.js to provide basic timeseries functionality within ESnet tools. It is in a very early stage of development.
 
