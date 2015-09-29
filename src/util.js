@@ -1,6 +1,5 @@
 import moment from "moment";
 import _ from "underscore";
-
 import TimeRange from "./range";
 
 const units = {

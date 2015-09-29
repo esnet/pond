@@ -1,6 +1,5 @@
 import Immutable from "immutable";
 import _ from "underscore";
-
 import {IndexedEvent} from "./event";
 import {TimeSeries} from "./series";
 import Index from "./index";

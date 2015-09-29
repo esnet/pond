@@ -1,4 +1,6 @@
-# Pond [![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond)
+[![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond)
+
+----
 
 A library build on top of immutable.js to provide basic timeseries functionality within ESnet tools. It is in a very early stage of development.
 
@@ -12,7 +14,7 @@ Pond is built on several primitives:
 
 * **Time** - these are basic Javascript Date objects. We refer to these as timestamps.
 * **TimeRange** - a begin and end time, packaged together.
-* **Index** - A time range denoted by a string, for example 5m-1234 is a 5 minute timerange, or 2014-09 is September 2014.
+* **Index** - A time range denoted by a string, for example "5m-1234" is a 5 minute timerange, or "2014-09" is September 2014.
 
 Building on these, we have Events:
 
@@ -20,7 +22,7 @@ Building on these, we have Events:
 * **IndexedEvent** - An index (timerange) and a data object packaged together. e.g. 1hr sample
 * **TimeRangeEvent** - A timerange and a data object packaged together. e.g. outage event
 
-And forming together a collection of events, we have a series:
+And forming together a collection of events, we have a Timeseries:
 
 * **Series** - Conceptually a sequence of Events.
 * **TimeSeries** - A sequence of Events associated with a list of times or time ranges (Indexes).
@@ -42,13 +44,17 @@ For further information see the [Getting started](http://software.es.net/pond/#/
 
 # Tests
 
-The library has Mocha tests. To run the tests, use:
+The library has Mocha tests. To run the tests interactively, use:
 
-    npm start
+    npm run start-tester
 
 Then point your browser to:
 
     http://localhost:9500/webpack-dev-server/tests
+
+Or to run the tests (and linting) on the command line:
+
+    npm test
 
 # Licence
 

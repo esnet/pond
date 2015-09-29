@@ -4,6 +4,14 @@ import moment from "moment";
 
 export default class TimeRange {
 
+    /**
+     * Builds a new TimeRange which may be of several different formats:
+     *   - Another TimeRange (copy constructor)
+     *   - An Immutable.List containing two Dates.
+     *   - A Javascript array containing two Date or ms timestamps
+     *   - Two arguments, begin and end, each of which may be a Data,
+     *     a Moment, or a ms timestamp.
+     */
     constructor(arg1, arg2) {
         if (arg1 instanceof TimeRange) {
             const other = arg1;
@@ -42,22 +50,44 @@ export default class TimeRange {
     // Serialize
     //
 
+    /**
+     * Returns the TimeRange as JSON, which will be a Javascript array
+     * of two ms timestamps.
+     * @return {number[]} JSON representation of the TimeRange
+     */
     toJSON() {
         return [this.begin().getTime(), this.end().getTime()];
     }
 
+    /**
+     * Returns the TimeRange as a string, useful for serialization.
+     * @return {string} String representation of the TimeRange
+     */
     toString() {
         return JSON.stringify(this.toJSON());
     }
 
+    /**
+     * Returns the TimeRange as a string expressed in local time
+     * @return {string} String representation of the TimeRange
+     */
     toLocalString() {
         return `[${this.begin()}, ${this.end()}]`;
     }
 
+    /**
+     * Returns the TimeRange as a string expressed in UTC time
+     * @return {string} String representation of the TimeRange
+     */
     toUTCString() {
         return `[${this.begin().toUTCString()}, ${this.end().toUTCString()}]`;
     }
 
+    /**
+     * Returns a human friendly version of the TimeRange, e.g.
+     * "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am"
+     * @return {string} Human friendly string representation of the TimeRange
+     */
     humanize() {
         const begin = moment(this.begin());
         const end = moment(this.end());
@@ -67,16 +97,29 @@ export default class TimeRange {
         return `${beginStr} to ${endStr}`;
     }
 
+    /**
+     * Returns a human friendly version of the TimeRange, e.g.
+     * e.g. "a few seconds ago to a month ago"
+     * @return {string} Human friendly string representation of the TimeRange
+     */
     relativeString() {
         const begin = moment(this.begin());
         const end = moment(this.end());
         return `${begin.fromNow()} to ${end.fromNow()}`;
     }
 
+    /**
+     * Returns the begin time of the TimeRange.
+     * @return {Date} Begin time
+     */
     begin() {
         return this._range.get(0);
     }
 
+    /**
+     * Returns the end time of the TimeRange.
+     * @return {Date} End time
+     */
     end() {
         return this._range.get(1);
     }
@@ -140,8 +183,7 @@ export default class TimeRange {
     }
 
     /**
-     * @param - The other Range to compare this to.
-     * @returns {boolean} Returns true if the passed in other Range in no way
+     * Returns true if the passed in other Range in no way
      * overlaps this time Range.
      */
     disjoint(other) {

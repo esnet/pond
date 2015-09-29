@@ -1,6 +1,5 @@
 import _ from "underscore";
 import Immutable from "immutable";
-
 import Index from "./index";
 import TimeRange from "./range";
 import {Event, IndexedEvent} from "./event";
@@ -86,6 +85,11 @@ export class Series {
     // Serialize
     //
 
+    /**
+     * Returns a JSON representation, the same format as accepted by the
+     * constructor.
+     * @return {Object} JSON representation
+     */
     toJSON() {
         const cols = this._columns;
         const series = this._series;
@@ -100,6 +104,10 @@ export class Series {
         };
     }
 
+    /**
+     * Return a string representation of the Series.
+     * @return {string} The Series, as a string.
+     */
     toString() {
         return JSON.stringify(this.toJSON());
     }
@@ -108,14 +116,26 @@ export class Series {
     // Access meta data about the series
     //
 
+    /**
+     * Returns the same of the series
+     * @return {string} The name
+     */
     name() {
         return this._name;
     }
 
+    /**
+     * Return the list of columns
+     * @return {string[]} The columns
+     */
     columns() {
         return this._columns.toJSON();
     }
 
+    /**
+     * Return the meta data associated with the Series. To use, supply
+     * the key and the get back the value matching that key.
+     */
     meta(key) {
         return this._meta.get(key);
     }
@@ -124,18 +144,28 @@ export class Series {
     // Access the series itself
     //
 
+    /**
+     * Returns the number of rows in the series.
+     * @return {number} Size of the series
+     */
     size() {
         return this._series.size;
     }
-
+    /**
+     * Returns the number of rows in the series. (Same as size())
+     * @return {number} Size of the series
+     */
     count() {
         return this.size();
     }
 
+    /**
+     * Returns the number of rows in the series.
+     * @return {number} Size of the series
+     */
     at(i) {
         return this._series.get(i);
     }
-
 
     //
     // Aggregate the series
@@ -476,6 +506,11 @@ export class TimeSeries extends Series {
     // Series range
     //
 
+    /**
+     * From the range of times, or Indexes within the TimeSeries, return
+     * the extents of the TimeSeries as a TimeRange.
+     * @return {TimeRange} The extents of the TimeSeries
+     */
     range() {
         let min;
         let max;
@@ -500,10 +535,27 @@ export class TimeSeries extends Series {
         return new TimeRange(min, max);
     }
 
+    /**
+     * From the range of times, or Indexes within the TimeSeries, return
+     * the extents of the TimeSeries as a TimeRange.
+     * @return {TimeRange} The extents of the TimeSeries
+     */
+    timerange() {
+        return this.range();
+    }
+
+    /**
+     * Gets the earliest time represented in the TimeSeries.
+     * @return {Date} Begin time
+     */
     begin() {
         return this.range().begin();
     }
 
+    /**
+     * Gets the latest time represented in the TimeSeries.
+     * @return {Date} End time
+     */
     end() {
         return this.range().end();
     }

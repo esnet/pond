@@ -6,8 +6,7 @@ Pond will run in node.js or in the browser. Install from npm:
 
 ### Client
 
-While Pond is written in ES6 the npm dist is transpiled to ES5 so it should run anywhere. To use in a browser
-you will need to install it with npm and and build your source with Webpack or something similar.
+While Pond is written in ES6 the npm dist is transpiled to ES5 so it should run anywhere. To use in a browser you will need to install it with npm and and build your source with Webpack or something similar.
 
 ### Server
 
