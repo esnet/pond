@@ -334,7 +334,7 @@ export class IndexedEvent {
     }
 
     toJSON() {
-        return {index: this._index.asString(), data: this._data.toJSON()};
+        return {index: this.indexAsString(), data: this.data().toJSON()};
     }
 
     toString() {
@@ -347,6 +347,14 @@ export class IndexedEvent {
      */
     index() {
         return this._index;
+    }
+
+    /**
+     * Returns the Index as a string, same as event.index().toString()
+     * @return {string} The Index
+     */
+    indexAsString() {
+        return this._index.asString();
     }
 
     /**
