@@ -46,8 +46,8 @@ export class Series {
 
         // Series(string name, object meta, list columns, list | ImmutableList
         // points)
-        } else if (_.isString(arg1) &&
-                   _.isObject(arg2) &&
+        } else if (_.isString(arg1) || _.isUndefined(arg1) &&
+                   _.isObject(arg2) || _.isUndefined(arg2) &&
                    _.isArray(arg3) &&
                   (_.isArray(arg4) || Immutable.List.isList(arg4))) {
 

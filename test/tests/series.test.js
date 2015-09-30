@@ -1,12 +1,16 @@
-var moment = require("moment");
-var expect = require("chai").expect;
+/*eslint-env node, mocha */
+/*eslint no-unused-expressions: 0 */
+/*eslint max-len: 0 */
 
-var {Event} = require("../../src/event.js");
+import moment from "moment";
+import {expect} from "chai";
+import {Event} from "../../src/event.js";
+import {TimeSeries} from "../../src/series.js";
 
-var data = {
-    "name": "traffic",
-    "columns": ["time", "value", "status"],
-    "points": [
+const data = {
+    name: "traffic",
+    columns: ["time", "value", "status"],
+    points: [
         [1400425947000, 52, "ok"],
         [1400425948000, 18, "ok"],
         [1400425949000, 26, "fail"],
@@ -14,11 +18,11 @@ var data = {
     ]
 };
 
-var indexedData = {
-    "index": "1d-625",
-    "name": "traffic",
-    "columns": ["time", "value", "status"],
-    "points": [
+const indexedData = {
+    index: "1d-625",
+    name: "traffic",
+    columns: ["time", "value", "status"],
+    points: [
         [1400425947000, 52, "ok"],
         [1400425948000, 18, "ok"],
         [1400425949000, 26, "fail"],
@@ -26,10 +30,10 @@ var indexedData = {
     ]
 };
 
-var statsData = {
-    "name": "stats",
-    "columns": ["time", "value"],
-    "points": [
+const statsData = {
+    name: "stats",
+    columns: ["time", "value"],
+    points: [
         [1400425941000, 13],
         [1400425942000, 18],
         [1400425943000, 13],
@@ -42,10 +46,10 @@ var statsData = {
     ]
 };
 
-var availabilityData = {
-    "name": "availability",
-    "columns": ["time", "uptime"],
-    "points": [
+const availabilityData = {
+    name: "availability",
+    columns: ["time", "uptime"],
+    points: [
         ["2015-06", "100%"],
         ["2015-05", "92%"],
         ["2015-04", "87%"],
@@ -61,11 +65,11 @@ var availabilityData = {
     ]
 };
 
-var availabilityDataLocalTime = {
-    "name": "availability",
-    "utc": false,
-    "columns": ["time", "uptime"],
-    "points": [
+const availabilityDataLocalTime = {
+    name: "availability",
+    utc: false,
+    columns: ["time", "uptime"],
+    points: [
         ["2015-06", "100%"],
         ["2015-05", "92%"],
         ["2015-04", "87%"],
@@ -81,23 +85,23 @@ var availabilityDataLocalTime = {
     ]
 };
 
-var interface_data = {
-    "name": "star-cr5:to_anl_ip-a_v4",
-    "description": "star-cr5->anl(as683):100ge:site-ex:show:intercloud",
-    "device": "star-cr5",
-    "id": 169,
-    "interface": "to_anl_ip-a_v4",
-    "is_ipv6": false,
-    "is_oscars": false,
-    "oscars_id": null,
-    "resource_uri": "",
-    "site": "anl",
-    "site_device": "noni",
-    "site_interface": "et-1/0/0",
-    "stats_type": "Standard",
-    "title": null,
-    "columns": ["time", "in", "out"],
-    "points": [
+const interfaceData = {
+    name: "star-cr5:to_anl_ip-a_v4",
+    description: "star-cr5->anl(as683):100ge:site-ex:show:intercloud",
+    device: "star-cr5",
+    id: 169,
+    interface: "to_anl_ip-a_v4",
+    is_ipv6: false,
+    is_oscars: false,
+    oscars_id: null,
+    resource_uri: "",
+    site: "anl",
+    site_device: "noni",
+    site_interface: "et-1/0/0",
+    stats_type: "Standard",
+    title: null,
+    columns: ["time", "in", "out"],
+    points: [
         [1400425947000, 52, 34],
         [1400425948000, 18, 13],
         [1400425949000, 26, 67],
@@ -105,10 +109,11 @@ var interface_data = {
     ]
 };
 
-var sept_2014_data = {
-    "name": "traffic",
-    "columns": ["time", "value"],
-    "points": [
+/*
+const sept2014Data = {
+    name: "traffic",
+    columns: ["time", "value"],
+    points: [
         [1409529600000, 80],
         [1409533200000, 88],
         [1409536800000, 52],
@@ -231,12 +236,13 @@ var sept_2014_data = {
         [1409958000000, 91],
     ]
 };
+*/
 
 const fmt = "YYYY-MM-DD HH:mm";
 const bisectTestData = {
-    "name": "test",
-    "columns": ["time", "value"],
-    "points": [
+    name: "test",
+    columns: ["time", "value"],
+    points: [
         [moment("2012-01-11 01:00", fmt).valueOf(), 22],
         [moment("2012-01-11 02:00", fmt).valueOf(), 33],
         [moment("2012-01-11 03:00", fmt).valueOf(), 44],
@@ -247,56 +253,75 @@ const bisectTestData = {
     ]
 };
 
-
-describe("Series", function () {
-
-    var {Series, TimeSeries} = require("../../src/series.js");
+describe("TimeSeries", function () {
 
     describe("TimeSeries created with a javascript objects", function () {
-        it("can create an series", function(done) {
-            var series = new TimeSeries(data);
+        it("can create an series", done => {
+            const series = new TimeSeries(data);
             expect(series).to.be.ok;
             done();
         });
     });
 
-    describe("Timeseries created with a javascript object", function () {
-        it("can create an series", function(done) {
+    describe("TimeSeries created with a list of events", function () {
+        it("can create an series", done => {
+            const events = [];
+            events.push(new Event(new Date(2015, 7, 1), {value: 27}));
+            events.push(new Event(new Date(2015, 8, 1), {value: 14}));
+            var series = new TimeSeries({
+                name: "events",
+                events: events
+            });
+            expect(series.size()).to.equal(2);
+            done();
+        });
+        it("can create an series with no events", done => {
+            const events = [];
+            var series = new TimeSeries({
+                name: "events",
+                events: events
+            });
+            expect(series.size()).to.equal(0);
+            done();
+        });
+    });
+
+    describe("Timeseries basic query", function () {
+        it("can create an series", done => {
             var series = new TimeSeries(data);
             expect(series).to.be.ok;
             done();
         });
 
-        it("can return the size of the series", function(done) {
+        it("can return the size of the series", done => {
             var series = new TimeSeries(data);
             expect(series.size()).to.equal(4);
             done();
         });
 
-        it("can return an item in the series as an event", function(done) {
+        it("can return an item in the series as an event", done => {
             var series = new TimeSeries(data);
             var event = series.at(1);
             expect(event).to.be.an.instanceof(Event);
             done();
         });
 
-        it("can return an item in the series with the correct data", function(done) {
+        it("can return an item in the series with the correct data", done => {
             var series = new TimeSeries(data);
             var event = series.at(1);
-            expect(JSON.stringify(event.data())).to.equal('{"value":18,"status":"ok"}');
+            expect(JSON.stringify(event.data())).to.equal(`{"value":18,"status":"ok"}`);
             expect(event.timestamp().getTime()).to.equal(1400425948000);
             done();
         });
 
-        it("can serialize to a string", function(done) {
+        it("can serialize to a string", done => {
             var series = new TimeSeries(data);
-            var event = series.at(1);
-            var expectedString = `{"name":"traffic","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`
+            var expectedString = `{"name":"traffic","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`;
             expect(series.toString()).to.equal(expectedString);
             done();
         });
 
-        it("can return the time range of the series", function(done) {
+        it("can return the time range of the series", done => {
             var series = new TimeSeries(data);
             var expectedString = "[Sun May 18 2014 08:12:27 GMT-0700 (PDT), Sun May 18 2014 08:12:30 GMT-0700 (PDT)]";
             expect(series.range().toLocalString()).to.equal(expectedString);
@@ -305,40 +330,38 @@ describe("Series", function () {
     });
 
     describe("Timeseries with meta data can be created with a javascript object", function () {
-        it("can create an series with meta data and get that data back", function(done) {
-            var series = new TimeSeries(interface_data);
-            var expected = '{"name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]],"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud"}';
+        it("can create an series with meta data and get that data back", done => {
+            var series = new TimeSeries(interfaceData);
+            var expected = `{"name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]],"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud"}`;
             expect(series.toString()).to.equal(expected);
             expect(series.meta("interface")).to.equal("to_anl_ip-a_v4");
-            //console.log(series.meta("bob"))
-            //expect(series.meta("bob")).to.be.undefined();
             done();
         });
     });
 
     describe("Compare series", function () {
-        it("can compare a series and a reference to a series as being equal", function(done) {
+        it("can compare a series and a reference to a series as being equal", done => {
             var series = new TimeSeries(data);
             var refSeries = series;
             expect(series).to.equal(refSeries);
             done();
         });
 
-        it("can use the equals() comparator to compare a series and a copy of the series as true", function(done) {
+        it("can use the equals() comparator to compare a series and a copy of the series as true", done => {
             var series = new TimeSeries(data);
             var copyOfSeries = new TimeSeries(series);
             expect(TimeSeries.equal(series, copyOfSeries)).to.be.true;
             done();
         });
 
-        it("can use the equals() comparator to compare a series and a value equivalent series as false", function(done) {
+        it("can use the equals() comparator to compare a series and a value equivalent series as false", done => {
             var series = new TimeSeries(data);
             var otherSeries = new TimeSeries(data);
             expect(TimeSeries.equal(series, otherSeries)).to.be.false;
             done();
         });
 
-        it("can use the is() comparator to compare a series and a value equivalent series as true", function(done) {
+        it("can use the is() comparator to compare a series and a value equivalent series as true", done => {
             var series = new TimeSeries(data);
             var otherSeries = new TimeSeries(data);
             expect(TimeSeries.is(series, otherSeries)).to.be.true;
@@ -348,31 +371,31 @@ describe("Series", function () {
 
     describe("Series can be reduced", function () {
 
-        it("can sum the series", function(done) {
+        it("can sum the series", done => {
             var series = new TimeSeries(data);
             expect(series.sum("value")).to.equal(189);
             done();
         });
 
-        it("can sum the series with no column name specified", function(done) {
+        it("can sum the series with no column name specified", done => {
             var series = new TimeSeries(data);
             expect(series.sum()).to.equal(189);
             done();
         });
 
-        it("can sum the series with a bogus column name and get undefined", function(done) {
+        it("can sum the series with a bogus column name and get undefined", done => {
             var series = new TimeSeries(data);
             expect(series.sum("invalid")).to.be.undefined;
             done();
         });
 
-        it("can find the max of the series", function(done) {
+        it("can find the max of the series", done => {
             var series = new TimeSeries(data);
             expect(series.max()).to.equal(93);
             done();
         });
 
-        it("can find the min of the series", function(done) {
+        it("can find the min of the series", done => {
             var series = new TimeSeries(data);
             expect(series.min()).to.equal(18);
             done();
@@ -382,31 +405,31 @@ describe("Series", function () {
 
     describe("Series can be reduced to stats", function () {
 
-        it("can avg the series", function(done) {
+        it("can avg the series", done => {
             var series = new TimeSeries(statsData);
             expect(series.avg()).to.equal(15);
             done();
         });
 
-        it("can mean of the series (the avg)", function(done) {
+        it("can mean of the series (the avg)", done => {
             var series = new TimeSeries(statsData);
             expect(series.mean()).to.equal(15);
             done();
         });
 
-        it("can find the mean of the series", function(done) {
+        it("can find the mean of the series", done => {
             var series = new TimeSeries(statsData);
             expect(series.mean()).to.equal(15);
             done();
         });
 
-        it("can find the medium of the series", function(done) {
+        it("can find the medium of the series", done => {
             var series = new TimeSeries(statsData);
             expect(series.medium()).to.equal(14);
             done();
         });
 
-        it("can find the standard deviation of the series", function(done) {
+        it("can find the standard deviation of the series", done => {
             var series = new TimeSeries(statsData);
             expect(series.stdev()).to.equal(2.6666666666666665);
             done();
@@ -416,7 +439,7 @@ describe("Series", function () {
 
     describe("Series index can be found with bisect", function () {
 
-        it("can find the bisect starting from 0", function(done) {
+        it("can find the bisect starting from 0", done => {
             const series = new TimeSeries(bisectTestData);
             expect(series.bisect(moment("2012-01-11 00:30", fmt).toDate())).to.equal(0);
             expect(series.bisect(moment("2012-01-11 03:00", fmt).toDate())).to.equal(2);
@@ -425,7 +448,7 @@ describe("Series", function () {
             done();
         });
 
-        it("can find the bisect starting from an begin index", function(done) {
+        it("can find the bisect starting from an begin index", done => {
             const series = new TimeSeries(bisectTestData);
 
             expect(series.bisect(moment("2012-01-11 03:00", fmt).toDate(), 2)).to.equal(2);
@@ -449,18 +472,16 @@ describe("Series", function () {
  */
 describe("Indexed TimeSeries", function () {
 
-    var {TimeSeries} = require("../../src/series.js");
-
     describe("Series created with a javascript object", function () {
 
-        it("can serialize to a string", function(done) {
+        it("can serialize to a string", done => {
             var series = new TimeSeries(indexedData);
-            var expectedString = '{"name":"traffic","index":"1d-625","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}';
+            var expectedString = `{"name":"traffic","index":"1d-625","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`;
             expect(series.toString()).to.equal(expectedString);
             done();
         });
 
-        it("can return the time range of the series", function(done) {
+        it("can return the time range of the series", done => {
             var series = new TimeSeries(indexedData);
             var expectedString = "[Fri Sep 17 1971 17:00:00 GMT-0700 (PDT), Sat Sep 18 1971 17:00:00 GMT-0700 (PDT)]";
             expect(series.indexAsRange().toLocalString()).to.equal(expectedString);
@@ -469,7 +490,6 @@ describe("Indexed TimeSeries", function () {
     });
 });
 
-
 /**
  * A series should be able to have an Index associated with it, for instance
  * if the series represents june 2014 then the Index might be "2014-06", or the
@@ -477,10 +497,8 @@ describe("Indexed TimeSeries", function () {
  */
 describe("Timeseries containing indexed timeranges", function () {
 
-    var {TimeSeries} = require("../../src/series.js");
-
     describe("Series created with indexed data in the default UTC time", function () {
-        it("can create an series with indexed data (in UTC time)", function(done) {
+        it("can create an series with indexed data (in UTC time)", done => {
             var series = new TimeSeries(availabilityData);
             var event = series.at(2);
             expect(event.timerangeAsUTCString()).to.equal("[Wed, 01 Apr 2015 00:00:00 GMT, Thu, 30 Apr 2015 23:59:59 GMT]");
@@ -491,7 +509,7 @@ describe("Timeseries containing indexed timeranges", function () {
     });
 
     describe("Series created with indexed data in local time", function () {
-        it("can create an series with indexed data in local time", function(done) {
+        it("can create an series with indexed data in local time", done => {
             var series = new TimeSeries(availabilityDataLocalTime);
             var event = series.at(2);
             expect(event.timerangeAsUTCString()).to.equal("[Wed, 01 Apr 2015 07:00:00 GMT, Fri, 01 May 2015 06:59:59 GMT]");
@@ -507,10 +525,8 @@ describe("Timeseries containing indexed timeranges", function () {
  */
 describe("Mutation of timeseries", function () {
 
-    var {TimeSeries} = require("../../src/series.js");
-
     describe("Series created with a javascript object", function () {
-        it("can create an series", function(done) {
+        it("can create an series", done => {
             var series = new TimeSeries(availabilityData);
 
             var expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08-01T00:00:00.000Z","88%"],["2014-07-01T00:00:00.000Z","100%"]]}`;
@@ -528,5 +544,4 @@ describe("Mutation of timeseries", function () {
             done();
         });
     });
-
-})
+});

@@ -150,7 +150,7 @@
     "camelcase": [
       2,
       {
-        "properties": "always"
+        "properties": "never"
       }
     ],
     "comma-spacing": 0,
