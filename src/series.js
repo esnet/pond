@@ -60,8 +60,8 @@ export class Series {
             const columns = arg3;
             const data = arg4;
 
-            this._name = name;
-            this._meta = Immutable.fromJS(meta);
+            this._name = name ? name : "";
+            this._meta = meta ? Immutable.fromJS(meta) : new Immutable.Map();
             this._columns = Immutable.fromJS(columns);
 
             if (Immutable.List.isList(data)) {
@@ -382,7 +382,11 @@ export class TimeSeries extends Series {
 
                 const columns = uniqueKeys(events).toJSON();
                 _.each(events, event => {
-                    times.push(event.timestamp());
+                    if (event instanceof IndexedEvent) {
+                        times.push(event.indexAsString());
+                    } else {
+                        times.push(event.timestamp());
+                    }
                     data.push(event.data());
                 });
 

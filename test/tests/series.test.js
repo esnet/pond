@@ -526,14 +526,14 @@ describe("Timeseries containing indexed timeranges", function () {
 describe("Mutation of timeseries", function () {
 
     describe("Series created with a javascript object", function () {
-        it("can create an series", done => {
+        it("can create an slice a series", done => {
             var series = new TimeSeries(availabilityData);
 
-            var expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08-01T00:00:00.000Z","88%"],["2014-07-01T00:00:00.000Z","100%"]]}`;
+            var expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08","88%"],["2014-07","100%"]]}`;
             var lastTwo = series.slice(-2);
             expect(lastTwo.toString()).to.equal(expectedLastTwo);
 
-            var expectedFirstThree = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06-01T00:00:00.000Z","100%"],["2015-05-01T00:00:00.000Z","92%"],["2015-04-01T00:00:00.000Z","87%"]]}`;
+            var expectedFirstThree = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"]]}`;
             var firstThree = series.slice(0, 3);
             expect(firstThree.toString()).to.equal(expectedFirstThree);
 
