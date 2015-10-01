@@ -2,7 +2,9 @@
 
 Pond will run in node.js or in the browser. Install from npm:
 
-    npm install @esnet/pond --save
+```cmdline
+npm install @esnet/pond --save
+```
 
 ### Client
 

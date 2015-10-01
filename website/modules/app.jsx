@@ -42,6 +42,12 @@ export default React.createClass({
 
                         <hr />
 
+                        Examples:
+                        <li><Link to="rollups">Rollups</Link></li>
+
+                        <hr />
+
+                        API:
                         <li><Link to="time">Time</Link></li>
                         <li><Link to="timerange">TimeRange</Link></li>
                         <li><Link to="index">Index</Link></li>

@@ -1,18 +1,27 @@
 import React from "react/addons";
-import _ from "underscore";
-
-import Markdown from "react-markdown-el";
+import Markdown from "react-markdown";
+import Highlighter from "./highlighter";
 
 var text = require("raw!../../docs/collectors.md");
 
 export default React.createClass({
 
-    render: function() {
+    mixins: [Highlighter],
+
+    getInitialState() {
+        return {
+            markdown: text
+        };
+    },
+
+    render() {
         return (
             <div>
+                <span className="label label-warning">Experimental</span>
+                <hr />
                 <div className="row">
                     <div className="col-md-12">
-                        <Markdown text={text}/>
+                        <Markdown source={this.state.markdown}/>
                     </div>
                 </div>
             </div>

@@ -24,41 +24,53 @@ Example:
 
 Given some source of data that looks like this:
 
-    const sampleEvent = {
-        "start_time": "2015-04-22T03:30:00Z",
-        "end_time": "2015-04-22T13:00:00Z",
-        "description": "At 13:33 pacific circuit 06519 went down.",
-        "title": "STAR-CR5 - Outage",
-        "completed": true,
-        "external_ticket": "",
-        "esnet_ticket": "ESNET-20150421-013",
-        "organization": "Internet2 / Level 3",
-        "type": "U"
-    }
+```json
+const sampleEvent = {
+    "start_time": "2015-04-22T03:30:00Z",
+    "end_time": "2015-04-22T13:00:00Z",
+    "description": "At 13:33 pacific circuit 06519 went down.",
+    "title": "STAR-CR5 - Outage",
+    "completed": true,
+    "external_ticket": "",
+    "esnet_ticket": "ESNET-20150421-013",
+    "organization": "Internet2 / Level 3",
+    "type": "U"
+}
+```
 
 We first extract the begin and end times to build a TimeRange:
 
-    let b = new Date(sampleEvent.start_time);
-    let e = new Date(sampleEvent.end_time);
-    let timerange = new TimeRange(b, e);
+```js
+let b = new Date(sampleEvent.start_time);
+let e = new Date(sampleEvent.end_time);
+let timerange = new TimeRange(b, e);
+```
 
 Then we combine the TimeRange and the event itself to create the Event.
 
-    let outageEvent = new TimeRangeEvent(timerange, sampleEvent);
+```js
+let outageEvent = new TimeRangeEvent(timerange, sampleEvent);
+```
 
 Once we have an event we can get access the time range with:
 
-    outageEvent.begin().getTime()   // 1429673400000
-    outageEvent.end().getTime())    // 1429707600000
-    outageEvent.humanizeDuration()) // "10 hours"
+```js
+outageEvent.begin().getTime()   // 1429673400000
+outageEvent.end().getTime())    // 1429707600000
+outageEvent.humanizeDuration()) // "10 hours"
+```
 
 And we can access the data like so:
 
-    outageEvent.get("title")  // "STAR-CR5 - Outage"
+```js
+outageEvent.get("title")  // "STAR-CR5 - Outage"
+```
 
 Or use:
 
-    outageEvent.data()
+```js
+outageEvent.data()
+```
 
 to fetch the whole data object, which will be an Immutable Map.
 
