@@ -6,7 +6,7 @@ A library build on top of immutable.js to provide basic timeseries functionality
 
 ## Why?
 
-Because we consume timeseries data throughout our network visualization applications, especially on the client, but potentially on the server. We would like a library to do this in a consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated than they need to be. Not only do we need to deal with different formats at the UI layer, we also repeat our processing code over and over. 
+Because we consume timeseries data throughout our network visualization applications, especially on the client, but potentially on the server. We would like a library to do this in a consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated than they need to be. Not only do we need to deal with different formats at the UI layer, we also repeat our processing code over and over.
 
 ## What does it do?
 

@@ -1,4 +1,4 @@
-//Import the require hook for babel runtime
+// Import the require hook for babel runtime
 import "babel/register";
 
 import React from "react/addons";
@@ -20,12 +20,17 @@ import Aggregators from "./aggregators.jsx";
 import Collectors from "./collectors.jsx";
 import Binners from "./binners.jsx";
 
-const {Route, DefaultRoute, RouteHandler, Link} = Router;
+import Rollup from "./rollup.jsx";
+
+const {Route, DefaultRoute} = Router;
 
 const routes = (
     <Route path="/" handler={App}>
         <DefaultRoute name="intro" handler={Intro} />
         <Route name="start" handler={Start} />
+
+        <Route name="rollups" handler={Rollup} />
+
         <Route name="time" handler={Time} />
         <Route name="timerange" handler={TimeRange} />
         <Route name="index" handler={Index} />

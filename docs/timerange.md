@@ -6,14 +6,18 @@ A time range is a simple representation of a begin and end time, used to maintai
 
 You can define a TimeRange with moments, Javascript Date objects or ms since UNIX epoch. Here we construct one with two moments:
 
-    var fmt = "YYYY-MM-DD HH:mm";
-    var beginTime = moment("2012-01-11 11:11", fmt);
-    var endTime =   moment("2012-02-22 12:12", fmt);
-    var range = new TimeRange(beginTime, endTime);
+```js
+var fmt = "YYYY-MM-DD HH:mm";
+var beginTime = moment("2012-01-11 11:11", fmt);
+var endTime =   moment("2012-02-22 12:12", fmt);
+var range = new TimeRange(beginTime, endTime);
+```
 
 or with ms times:
 
-    var range = new TimeRange([1326309060000, 1329941520000]);
+```js
+var range = new TimeRange([1326309060000, 1329941520000]);
+```
 
 There is also a copy constructor.
 

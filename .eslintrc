@@ -20,6 +20,10 @@
   "plugins": [
     "react"
   ],
+  "globals": {
+      "window": true,
+      "document": false
+  },
   "rules": {
     "comma-dangle": 0,
     "no-cond-assign": 2,
