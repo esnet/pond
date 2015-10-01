@@ -56,7 +56,7 @@ Or to run the tests (and linting) on the command line:
 
     npm test
 
-# Licence
+# License
 
 This code is distributed under a BSD style license, see the LICENSE file for complete information.
 
