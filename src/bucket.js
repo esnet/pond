@@ -19,6 +19,38 @@ function uniqueKeys(events) {
     return new Immutable.Set(arrayOfKeys);
 }
 
+class MemoryCacheStrategy {
+    constructor() {
+        this._cache = {};
+    }
+
+    init() {
+        // nothing for memory cache
+    }
+
+    addEvent(key, event, cb) {
+        if (!_.has(this._cache, key)) {
+            this._cache[key] = [];
+        }
+        this._cache[key].push(event);
+
+        // memory cache never fails (we assume)
+        cb(null);
+    }
+
+    getEvents(key, cb) {
+        if (_.has(this._cache, key)) {
+            cb(null, this._cache[key]);
+        } else {
+            cb("Unknown cache key", null);
+        }
+    }
+
+    shutdown() {
+        // nothing for memory cache
+    }
+}
+
 /**
  * A bucket is a mutable collection of values that is used to
  * accumulate aggregations over the index. The index may be an
@@ -40,16 +72,21 @@ function uniqueKeys(events) {
  */
 export default class Bucket {
 
-    constructor(index) {
+    constructor(index, strategy) {
+        // Caching strategy
+        if (!strategy) {
+            this._cacheStrategy = new MemoryCacheStrategy();
+            this._cacheStrategy.init();
+        } else {
+            this._cacheStrategy = strategy;
+        }
+
         // Index
         if (_.isString(index)) {
             this._index = new Index(index);
         } else if (index instanceof Index) {
             this._index = index;
         }
-
-        // Mutable internal list
-        this._cache = [];
     }
 
     name() {
@@ -65,11 +102,11 @@ export default class Bucket {
     }
 
     toUTCString() {
-        return this.index().asString() + ": " + this.range().toUTCString();
+        return `${this.index().asString()}: ${this.range().toUTCString()}`;
     }
 
     toLocalString() {
-        return this.index().asString() + ": " + this.range().toLocalString();
+        return `${this.index().asString()}: ${this.range().toLocalString()}`;
     }
 
     //
@@ -97,16 +134,19 @@ export default class Bucket {
     //
 
     _pushToCache(event, cb) {
-        this._cache.push(event);
-        if (cb) {
-            cb(null);
-        }
+        this._cacheStrategy.addEvent(this.name(), event, (err) => {
+            if (cb) {
+                cb(err);
+            }
+        });
     }
 
     _readFromCache(cb) {
-        if (cb) {
-            cb(this._cache);
-        }
+        this._cacheStrategy.getEvents(this.name(), (err, events) => {
+            if (cb) {
+                cb(err, events);
+            }
+        });
     }
 
     //
@@ -127,17 +167,21 @@ export default class Bucket {
      * or error is passed to the callback.
      */
     aggregate(operator, cb) {
-        this._readFromCache((events) => {
-            if (events.length) {
-                let keys = uniqueKeys(events);
-                let result = {};
-                _.each(keys.toJS(), k => {
-                    let vals = _.map(events, (v) => { return v.get(k); });
-                    result[k] = operator.call(this, this._index, vals, k);
-                });
-                const event = new IndexedEvent(this._index, result);
-                if (cb) {
-                    cb(event);
+        this._readFromCache((err, events) => {
+            if (!err) {
+                if (events.length) {
+                    let keys = uniqueKeys(events);
+                    let result = {};
+                    _.each(keys.toJS(), k => {
+                        let vals = _.map(events, v => v.get(k));
+                        result[k] = operator.call(this, this._index, vals, k);
+                    });
+                    const event = new IndexedEvent(this._index, result);
+                    if (cb) {
+                        cb(event);
+                    }
+                } else if (cb) {
+                    cb();
                 }
             } else if (cb) {
                 cb();
@@ -151,15 +195,19 @@ export default class Bucket {
      * or error is passed to the callback.
      */
     collect(cb) {
-        this._readFromCache((events) => {
-            var series = new TimeSeries({
-                name: this._index.toString(),
-                meta: {},
-                index: this._index,
-                events: events
-            });
-            if (cb) {
-                cb(series);
+        this._readFromCache((err, events) => {
+            if (!err) {
+                var series = new TimeSeries({
+                    name: this._index.toString(),
+                    meta: {},
+                    index: this._index,
+                    events: events
+                });
+                if (cb) {
+                    cb(series);
+                }
+            } else if (cb) {
+                cb();
             }
         });
     }
