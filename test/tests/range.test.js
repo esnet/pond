@@ -44,17 +44,17 @@ describe("Time ranges", function () {
 
     describe("TimeRange serialization", function () {
         it('can output JSON in the correct format', function(done) {
-            var beginTime = moment("2012-01-11 11:11", fmt).toDate();
-            var endTime =   moment("2012-02-22 12:12", fmt).toDate();
+            var beginTime = moment("2012-01-11 11:11", fmt).utc().toDate();
+            var endTime =   moment("2012-02-22 12:12", fmt).utc().toDate();
             var range = new TimeRange(beginTime, endTime);
-            expect(range.toJSON()).to.deep.equal([1326309060000, 1329941520000]);
+            expect(range.toJSON()).to.deep.equal([1326298260000, 1329930720000]);
             done();
         });
         it('can output a string representation', function(done) {
-            var beginTime = moment("2012-01-11 11:11", fmt).toDate();
-            var endTime =   moment("2012-02-22 12:12", fmt).toDate();
+            var beginTime = moment("2012-01-11 11:11", fmt).utc().toDate();
+            var endTime =   moment("2012-02-22 12:12", fmt).utc().toDate();
             var range = new TimeRange(beginTime, endTime);
-            expect(range.toString()).to.equal('[1326309060000,1329941520000]');
+            expect(range.toString()).to.equal('[1326298260000,1329930720000]');
             done();
         });
 

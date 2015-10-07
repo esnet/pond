@@ -46,6 +46,33 @@ const statsData = {
     ]
 };
 
+const statsData2 = {
+    name: "stats",
+    columns: ["time", "value"],
+    points: [
+        [1400425941000, 26],
+        [1400425942000, 33],
+        [1400425943000, 65],
+        [1400425944000, 28],
+        [1400425945000, 34],
+        [1400425946000, 55],
+        [1400425947000, 25],
+        [1400425948000, 44],
+        [1400425949000, 50],
+        [1400425950000, 36],
+        [1400425951000, 26],
+        [1400425952000, 37],
+        [1400425953000, 43],
+        [1400425954000, 62],
+        [1400425955000, 35],
+        [1400425956000, 38],
+        [1400425957000, 45],
+        [1400425958000, 32],
+        [1400425959000, 28],
+        [1400425960000, 34]
+    ]
+};
+
 const availabilityData = {
     name: "availability",
     columns: ["time", "uptime"],
@@ -323,8 +350,8 @@ describe("TimeSeries", function () {
 
         it("can return the time range of the series", done => {
             var series = new TimeSeries(data);
-            var expectedString = "[Sun May 18 2014 08:12:27 GMT-0700 (PDT), Sun May 18 2014 08:12:30 GMT-0700 (PDT)]";
-            expect(series.range().toLocalString()).to.equal(expectedString);
+            var expectedString = "[Sun, 18 May 2014 15:12:27 GMT, Sun, 18 May 2014 15:12:30 GMT]";
+            expect(series.range().toUTCString()).to.equal(expectedString);
             done();
         });
     });
@@ -435,6 +462,12 @@ describe("TimeSeries", function () {
             done();
         });
 
+        it("can find the standard deviation and mean of another series", done => {
+            var series = new TimeSeries(statsData2);
+            expect(Math.round(series.mean() * 10) / 10).to.equal(38.8);
+            expect(Math.round(series.stdev() * 10) / 10).to.equal(11.4);
+            done();
+        });
     });
 
     describe("Series index can be found with bisect", function () {
@@ -483,8 +516,8 @@ describe("Indexed TimeSeries", function () {
 
         it("can return the time range of the series", done => {
             var series = new TimeSeries(indexedData);
-            var expectedString = "[Fri Sep 17 1971 17:00:00 GMT-0700 (PDT), Sat Sep 18 1971 17:00:00 GMT-0700 (PDT)]";
-            expect(series.indexAsRange().toLocalString()).to.equal(expectedString);
+            var expectedString = "[Sat, 18 Sep 1971 00:00:00 GMT, Sun, 19 Sep 1971 00:00:00 GMT]";
+            expect(series.indexAsRange().toUTCString()).to.equal(expectedString);
             done();
         });
     });
@@ -508,6 +541,10 @@ describe("Timeseries containing indexed timeranges", function () {
         });
     });
 
+    /**
+     * The problem is this test creates times in local time, but running the test in
+     * different timezones will produce a different timeseries.
+
     describe("Series created with indexed data in local time", function () {
         it("can create an series with indexed data in local time", done => {
             var series = new TimeSeries(availabilityDataLocalTime);
@@ -518,6 +555,8 @@ describe("Timeseries containing indexed timeranges", function () {
             done();
         });
     });
+
+    */
 });
 
 /**
