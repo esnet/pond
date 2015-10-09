@@ -11,6 +11,7 @@
     "test": "npm run lint && mocha $npm_package_options_mocha",
     "test-only": "mocha $npm_package_options_mocha",
     "build": "rm -rf lib/* && babel src --optional runtime --stage 0 --out-dir lib",
+    "build-website": "webpack --config webpack.website.config.js",
     "deploy-website": "gh-pages-deploy",
     "start": "webpack-dev-server --content-base website/ --config webpack.website.config.js",
     "start-tester": "webpack-dev-server --config webpack.test.config.js --content-base ./devserver --port 9500 --colors"
