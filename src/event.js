@@ -159,10 +159,9 @@ export class Event {
             _.each(d, (val, key) => {
                 if (_.has(data, key)) {
                     throw new Error(`Events being merged may not have the same key '${key}'`);
-                    return;
                 }
                 data[key] = val;
-            })
+            });
         });
 
         return new Event(t, data);
@@ -184,10 +183,9 @@ export class Event {
             _.each(d, (val, key) => {
                 if (_.has(data, key)) {
                     throw new Error(`Events being merged may not have the same key '${key}'`);
-                    return;
                 }
                 data[key] = val;
-            })
+            });
         });
 
         return new TimeRangeEvent(timerange, data);
@@ -209,10 +207,9 @@ export class Event {
             _.each(d, (val, key) => {
                 if (_.has(data, key)) {
                     throw new Error(`Events being merged may not have the same key '${key}'`);
-                    return;
                 }
                 data[key] = val;
-            })
+            });
         });
 
         return new IndexedEvent(index, data);

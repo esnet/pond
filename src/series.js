@@ -682,9 +682,6 @@ export class TimeSeries extends Series {
     }
 
     static merge(name, seriesList) {
-
-        console.log("Merge series", name, seriesList);
-
         // for each series, map events to the same timestamp/index
         const eventMap = {};
         _.each(seriesList, (series) => {
@@ -708,7 +705,7 @@ export class TimeSeries extends Series {
 
         // for each key, merge the events associated with that key
         const eventList = [];
-        _.each(eventMap, (events, key) => {
+        _.each(eventMap, (events) => {
             const event = Event.merge(events);
             eventList.push(event);
         });

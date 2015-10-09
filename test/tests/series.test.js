@@ -611,7 +611,6 @@ describe("Mutation of timeseries", function () {
             var inTraffic = new TimeSeries(trafficDataIn);
             var outTraffic = new TimeSeries(trafficDataOut);
             var trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
-            console.log("Merged series:", trafficSeries.toString());
             expect(trafficSeries.at(2).get("in")).to.equal(26);
             expect(trafficSeries.at(2).get("out")).to.equal(67);
             done();
