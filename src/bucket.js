@@ -1,3 +1,13 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import Immutable from "immutable";
 import _ from "underscore";
 import {IndexedEvent} from "./event";
@@ -10,9 +20,9 @@ import Index from "./index";
  * to do this.
  */
 function uniqueKeys(events) {
-    var arrayOfKeys = [];
-    for (let e of events) {
-        for (let k of e.data().keySeq()) {
+    const arrayOfKeys = [];
+    for (const e of events) {
+        for (const k of e.data().keySeq()) {
             arrayOfKeys.push(k);
         }
     }
@@ -170,10 +180,10 @@ export default class Bucket {
         this._readFromCache((err, events) => {
             if (!err) {
                 if (events.length) {
-                    let keys = uniqueKeys(events);
-                    let result = {};
+                    const keys = uniqueKeys(events);
+                    const result = {};
                     _.each(keys.toJS(), k => {
-                        let vals = _.map(events, v => v.get(k));
+                        const vals = _.map(events, v => v.get(k));
                         result[k] = operator.call(this, this._index, vals, k);
                     });
                     const event = new IndexedEvent(this._index, result);
@@ -197,7 +207,7 @@ export default class Bucket {
     collect(cb) {
         this._readFromCache((err, events) => {
             if (!err) {
-                var series = new TimeSeries({
+                const series = new TimeSeries({
                     name: this._index.toString(),
                     meta: {},
                     index: this._index,

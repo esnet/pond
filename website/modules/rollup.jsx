@@ -1,4 +1,14 @@
-import React from "react/addons";
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+import React from "react";
 import Highlighter from "./highlighter";
 import Markdown from "react-markdown";
 import Ring from "ringjs";
@@ -51,14 +61,15 @@ export default React.createClass({
         // Setup our aggregators
         //
 
-        this.fiveMinuteAggregator = new Aggregator("5m", avg, (index, event) => {
-            let events = this.state.fiveMinuteAvg;
-            events.push(event);
-            this.setState({fiveMinuteAvg: events});
-        });
+        this.fiveMinuteAggregator =
+            new Aggregator("5m", avg, (index, event) => {
+                const events = this.state.fiveMinuteAvg;
+                events.push(event);
+                this.setState({fiveMinuteAvg: events});
+            });
 
         this.hourlyAggregator = new Aggregator("1h", avg, (index, event) => {
-            let events = this.state.hourlyAvg;
+            const events = this.state.hourlyAvg;
             events.push(event);
             this.setState({hourlyAvg: events});
         });
@@ -116,9 +127,15 @@ export default React.createClass({
         const eventSeries =
             new TimeSeries({name: "raw", events: this.state.events.toArray()});
         const fiveMinuteSeries =
-            new TimeSeries({name: "five minute avg", events: this.state.fiveMinuteAvg.toArray()});
+            new TimeSeries({
+                name: "five minute avg",
+                events: this.state.fiveMinuteAvg.toArray()
+            });
         const hourlySeries =
-            new TimeSeries({name: "hourly", events: this.state.hourlyAvg.toArray()});
+            new TimeSeries({
+                name: "hourly",
+                events: this.state.hourlyAvg.toArray()
+            });
 
         // Timerange for the chart axis
         const initialBeginTime = new Date(2015, 0, 1);
@@ -136,9 +153,20 @@ export default React.createClass({
         // Charts (after a certain amount of time, just show hourly rollup)
         const charts = (
             <Charts>
-                <BarChart axis="y" series={fiveMinuteSeries} style={fiveMinuteStyle} columns={["value"]} />
-                <BarChart axis="y" series={hourlySeries} style={hourlyStyle} columns={["value"]} />
-                <ScatterChart axis="y" series={eventSeries} style={scatterStyle} />
+                <BarChart
+                    axis="y"
+                    series={fiveMinuteSeries}
+                    style={fiveMinuteStyle}
+                    columns={["value"]} />
+                <BarChart
+                    axis="y"
+                    series={hourlySeries}
+                    style={hourlyStyle}
+                    columns={["value"]} />
+                <ScatterChart
+                    axis="y"
+                    series={eventSeries}
+                    style={scatterStyle} />
             </Charts>
         );
 
@@ -154,7 +182,11 @@ export default React.createClass({
                         <Resizable>
                             <ChartContainer timeRange={timeRange}>
                                 <ChartRow height="150">
-                                    <YAxis id="y" label="Value" min={0} max={1500} width="70" type="linear"/>
+                                    <YAxis
+                                        id="y"
+                                        label="Value"
+                                        min={0} max={1500}
+                                        width="70" type="linear"/>
                                     {charts}
                                 </ChartRow>
                             </ChartContainer>

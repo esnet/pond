@@ -1,3 +1,13 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import _ from "underscore";
 import Immutable from "immutable";
 import Index from "./index";
@@ -68,9 +78,9 @@ export class Series {
                 this._series = data;
             } else {
                 this._series = Immutable.fromJS(
-                    _.map(data, function (d) {
-                        let pointMap = {};
-                        _.each(d, function (p, i) {
+                    _.map(data, d => {
+                        const pointMap = {};
+                        _.each(d, (p, i) => {
                             pointMap[columns[i]] = p;
                         });
                         return pointMap;
@@ -258,9 +268,9 @@ export class Series {
   * to do this.
   */
 function uniqueKeys(events) {
-    let arrayOfKeys = [];
-    for (let e of events) {
-        for (let k of e.data().keySeq()) {
+    const arrayOfKeys = [];
+    for (const e of events) {
+        for (const k of e.data().keySeq()) {
             arrayOfKeys.push(k);
         }
     }
@@ -341,7 +351,7 @@ export class TimeSeries extends Series {
             //
 
             // Construct the base series
-            let other = arg1;
+            const other = arg1;
 
             this._name = other._name;
             this._meta = other._meta;
@@ -368,8 +378,8 @@ export class TimeSeries extends Series {
 
             const obj = arg1;
 
-            let times = [];
-            let data = [];
+            const times = [];
+            const data = [];
 
             if (_.has(obj, "events")) {
 
@@ -618,7 +628,7 @@ export class TimeSeries extends Series {
         }
 
         for (; i < size; i++) {
-            let ts = this.at(i).timestamp().getTime();
+            const ts = this.at(i).timestamp().getTime();
             if (ts > tms) {
                 return i - 1 >= 0 ? i - 1 : 0;
             } else if (ts === tms) {
@@ -642,7 +652,7 @@ export class TimeSeries extends Series {
             return this;
         }
 
-        let events = [];
+        const events = [];
         for (let i = b; i < e; i++) {
             events.push(this.at(i));
         }
@@ -685,7 +695,7 @@ export class TimeSeries extends Series {
         // for each series, map events to the same timestamp/index
         const eventMap = {};
         _.each(seriesList, (series) => {
-            for (let event of series.events()) {
+            for (const event of series.events()) {
                 let key;
                 if (event instanceof Event) {
                     key = event.timestamp();

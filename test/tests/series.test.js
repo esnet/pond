@@ -1,6 +1,16 @@
-/*eslint-env node, mocha */
-/*eslint no-unused-expressions: 0 */
-/*eslint max-len: 0 */
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
+/* global it, describe */
+/* eslint no-unused-expressions: 0 */
+/* eslint-disable max-len */
 
 import moment from "moment";
 import {expect} from "chai";
@@ -92,6 +102,7 @@ const availabilityData = {
     ]
 };
 
+/*
 const availabilityDataLocalTime = {
     name: "availability",
     utc: false,
@@ -111,6 +122,7 @@ const availabilityDataLocalTime = {
         ["2014-07", "100%"]
     ]
 };
+*/
 
 const interfaceData = {
     name: "star-cr5:to_anl_ip-a_v4",
@@ -302,9 +314,9 @@ const trafficDataOut = {
     ]
 };
 
-describe("TimeSeries", function () {
+describe("TimeSeries", () => {
 
-    describe("TimeSeries created with a javascript objects", function () {
+    describe("TimeSeries created with a javascript objects", () => {
         it("can create an series", done => {
             const series = new TimeSeries(data);
             expect(series).to.be.ok;
@@ -312,12 +324,12 @@ describe("TimeSeries", function () {
         });
     });
 
-    describe("TimeSeries created with a list of events", function () {
+    describe("TimeSeries created with a list of events", () => {
         it("can create an series", done => {
             const events = [];
             events.push(new Event(new Date(2015, 7, 1), {value: 27}));
             events.push(new Event(new Date(2015, 8, 1), {value: 14}));
-            var series = new TimeSeries({
+            const series = new TimeSeries({
                 name: "events",
                 events: events
             });
@@ -326,7 +338,7 @@ describe("TimeSeries", function () {
         });
         it("can create an series with no events", done => {
             const events = [];
-            var series = new TimeSeries({
+            const series = new TimeSeries({
                 name: "events",
                 events: events
             });
@@ -335,164 +347,164 @@ describe("TimeSeries", function () {
         });
     });
 
-    describe("Timeseries basic query", function () {
+    describe("Timeseries basic query", () => {
         it("can create an series", done => {
-            var series = new TimeSeries(data);
+            const series = new TimeSeries(data);
             expect(series).to.be.ok;
             done();
         });
 
         it("can return the size of the series", done => {
-            var series = new TimeSeries(data);
+            const series = new TimeSeries(data);
             expect(series.size()).to.equal(4);
             done();
         });
 
         it("can return an item in the series as an event", done => {
-            var series = new TimeSeries(data);
-            var event = series.at(1);
+            const series = new TimeSeries(data);
+            const event = series.at(1);
             expect(event).to.be.an.instanceof(Event);
             done();
         });
 
         it("can return an item in the series with the correct data", done => {
-            var series = new TimeSeries(data);
-            var event = series.at(1);
+            const series = new TimeSeries(data);
+            const event = series.at(1);
             expect(JSON.stringify(event.data())).to.equal(`{"value":18,"status":"ok"}`);
             expect(event.timestamp().getTime()).to.equal(1400425948000);
             done();
         });
 
         it("can serialize to a string", done => {
-            var series = new TimeSeries(data);
-            var expectedString = `{"name":"traffic","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`;
+            const series = new TimeSeries(data);
+            const expectedString = `{"name":"traffic","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`;
             expect(series.toString()).to.equal(expectedString);
             done();
         });
 
         it("can return the time range of the series", done => {
-            var series = new TimeSeries(data);
-            var expectedString = "[Sun, 18 May 2014 15:12:27 GMT, Sun, 18 May 2014 15:12:30 GMT]";
+            const series = new TimeSeries(data);
+            const expectedString = "[Sun, 18 May 2014 15:12:27 GMT, Sun, 18 May 2014 15:12:30 GMT]";
             expect(series.range().toUTCString()).to.equal(expectedString);
             done();
         });
     });
 
-    describe("Timeseries with meta data can be created with a javascript object", function () {
+    describe("Timeseries with meta data can be created with a javascript object", () => {
         it("can create an series with meta data and get that data back", done => {
-            var series = new TimeSeries(interfaceData);
-            var expected = `{"name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]],"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud"}`;
+            const series = new TimeSeries(interfaceData);
+            const expected = `{"name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]],"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud"}`;
             expect(series.toString()).to.equal(expected);
             expect(series.meta("interface")).to.equal("to_anl_ip-a_v4");
             done();
         });
     });
 
-    describe("Compare series", function () {
+    describe("Compare series", () => {
         it("can compare a series and a reference to a series as being equal", done => {
-            var series = new TimeSeries(data);
-            var refSeries = series;
+            const series = new TimeSeries(data);
+            const refSeries = series;
             expect(series).to.equal(refSeries);
             done();
         });
 
         it("can use the equals() comparator to compare a series and a copy of the series as true", done => {
-            var series = new TimeSeries(data);
-            var copyOfSeries = new TimeSeries(series);
+            const series = new TimeSeries(data);
+            const copyOfSeries = new TimeSeries(series);
             expect(TimeSeries.equal(series, copyOfSeries)).to.be.true;
             done();
         });
 
         it("can use the equals() comparator to compare a series and a value equivalent series as false", done => {
-            var series = new TimeSeries(data);
-            var otherSeries = new TimeSeries(data);
+            const series = new TimeSeries(data);
+            const otherSeries = new TimeSeries(data);
             expect(TimeSeries.equal(series, otherSeries)).to.be.false;
             done();
         });
 
         it("can use the is() comparator to compare a series and a value equivalent series as true", done => {
-            var series = new TimeSeries(data);
-            var otherSeries = new TimeSeries(data);
+            const series = new TimeSeries(data);
+            const otherSeries = new TimeSeries(data);
             expect(TimeSeries.is(series, otherSeries)).to.be.true;
             done();
         });
     });
 
-    describe("Series can be reduced", function () {
+    describe("Series can be reduced", () => {
 
         it("can sum the series", done => {
-            var series = new TimeSeries(data);
+            const series = new TimeSeries(data);
             expect(series.sum("value")).to.equal(189);
             done();
         });
 
         it("can sum the series with no column name specified", done => {
-            var series = new TimeSeries(data);
+            const series = new TimeSeries(data);
             expect(series.sum()).to.equal(189);
             done();
         });
 
         it("can sum the series with a bogus column name and get undefined", done => {
-            var series = new TimeSeries(data);
+            const series = new TimeSeries(data);
             expect(series.sum("invalid")).to.be.undefined;
             done();
         });
 
         it("can find the max of the series", done => {
-            var series = new TimeSeries(data);
+            const series = new TimeSeries(data);
             expect(series.max()).to.equal(93);
             done();
         });
 
         it("can find the min of the series", done => {
-            var series = new TimeSeries(data);
+            const series = new TimeSeries(data);
             expect(series.min()).to.equal(18);
             done();
         });
 
     });
 
-    describe("Series can be reduced to stats", function () {
+    describe("Series can be reduced to stats", () => {
 
         it("can avg the series", done => {
-            var series = new TimeSeries(statsData);
+            const series = new TimeSeries(statsData);
             expect(series.avg()).to.equal(15);
             done();
         });
 
         it("can mean of the series (the avg)", done => {
-            var series = new TimeSeries(statsData);
+            const series = new TimeSeries(statsData);
             expect(series.mean()).to.equal(15);
             done();
         });
 
         it("can find the mean of the series", done => {
-            var series = new TimeSeries(statsData);
+            const series = new TimeSeries(statsData);
             expect(series.mean()).to.equal(15);
             done();
         });
 
         it("can find the medium of the series", done => {
-            var series = new TimeSeries(statsData);
+            const series = new TimeSeries(statsData);
             expect(series.medium()).to.equal(14);
             done();
         });
 
         it("can find the standard deviation of the series", done => {
-            var series = new TimeSeries(statsData);
+            const series = new TimeSeries(statsData);
             expect(series.stdev()).to.equal(2.6666666666666665);
             done();
         });
 
         it("can find the standard deviation and mean of another series", done => {
-            var series = new TimeSeries(statsData2);
+            const series = new TimeSeries(statsData2);
             expect(Math.round(series.mean() * 10) / 10).to.equal(38.8);
             expect(Math.round(series.stdev() * 10) / 10).to.equal(11.4);
             done();
         });
     });
 
-    describe("Series index can be found with bisect", function () {
+    describe("Series index can be found with bisect", () => {
 
         it("can find the bisect starting from 0", done => {
             const series = new TimeSeries(bisectTestData);
@@ -525,20 +537,20 @@ describe("TimeSeries", function () {
  * if the series represents june 2014 then the Index might be "2014-06", or the
  * 123rd day since the epoch would be "1d-123"
  */
-describe("Indexed TimeSeries", function () {
+describe("Indexed TimeSeries", () => {
 
-    describe("Series created with a javascript object", function () {
+    describe("Series created with a javascript object", () => {
 
         it("can serialize to a string", done => {
-            var series = new TimeSeries(indexedData);
-            var expectedString = `{"name":"traffic","index":"1d-625","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`;
+            const series = new TimeSeries(indexedData);
+            const expectedString = `{"name":"traffic","index":"1d-625","columns":["time","value","status"],"points":[[1400425947000,52,"ok"],[1400425948000,18,"ok"],[1400425949000,26,"fail"],[1400425950000,93,"offline"]]}`;
             expect(series.toString()).to.equal(expectedString);
             done();
         });
 
         it("can return the time range of the series", done => {
-            var series = new TimeSeries(indexedData);
-            var expectedString = "[Sat, 18 Sep 1971 00:00:00 GMT, Sun, 19 Sep 1971 00:00:00 GMT]";
+            const series = new TimeSeries(indexedData);
+            const expectedString = "[Sat, 18 Sep 1971 00:00:00 GMT, Sun, 19 Sep 1971 00:00:00 GMT]";
             expect(series.indexAsRange().toUTCString()).to.equal(expectedString);
             done();
         });
@@ -550,12 +562,12 @@ describe("Indexed TimeSeries", function () {
  * if the series represents june 2014 then the Index might be "2014-06", or the
  * 123rd day since the epoch would be "1d-123"
  */
-describe("Timeseries containing indexed timeranges", function () {
+describe("Timeseries containing indexed timeranges", () => {
 
-    describe("Series created with indexed data in the default UTC time", function () {
+    describe("Series created with indexed data in the default UTC time", () => {
         it("can create an series with indexed data (in UTC time)", done => {
-            var series = new TimeSeries(availabilityData);
-            var event = series.at(2);
+            const series = new TimeSeries(availabilityData);
+            const event = series.at(2);
             expect(event.timerangeAsUTCString()).to.equal("[Wed, 01 Apr 2015 00:00:00 GMT, Thu, 30 Apr 2015 23:59:59 GMT]");
             expect(series.range().begin().getTime()).to.equal(1404172800000);
             expect(series.range().end().getTime()).to.equal(1435708799999);
@@ -569,10 +581,10 @@ describe("Timeseries containing indexed timeranges", function () {
      * The problem is this test creates times in local time, but running the test in
      * different timezones will produce a different timeseries.
 
-    describe("Series created with indexed data in local time", function () {
+    describe("Series created with indexed data in local time", () => {
         it("can create an series with indexed data in local time", done => {
-            var series = new TimeSeries(availabilityDataLocalTime);
-            var event = series.at(2);
+            const series = new TimeSeries(availabilityDataLocalTime);
+            const event = series.at(2);
             expect(event.timerangeAsUTCString()).to.equal("[Wed, 01 Apr 2015 07:00:00 GMT, Fri, 01 May 2015 06:59:59 GMT]");
             expect(series.range().begin().getTime()).to.equal(1404198000000);
             expect(series.range().end().getTime()).to.equal(1435733999999);
@@ -586,31 +598,31 @@ describe("Timeseries containing indexed timeranges", function () {
 /**
  * A series should be able to be mutated, producing another TimeSeries as a result
  */
-describe("Mutation of timeseries", function () {
+describe("Mutation of timeseries", () => {
 
-    describe("Series created with a javascript object", function () {
+    describe("Series created with a javascript object", () => {
         it("can create an slice a series", done => {
-            var series = new TimeSeries(availabilityData);
+            const series = new TimeSeries(availabilityData);
 
-            var expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08","88%"],["2014-07","100%"]]}`;
-            var lastTwo = series.slice(-2);
+            const expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08","88%"],["2014-07","100%"]]}`;
+            const lastTwo = series.slice(-2);
             expect(lastTwo.toString()).to.equal(expectedLastTwo);
 
-            var expectedFirstThree = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"]]}`;
-            var firstThree = series.slice(0, 3);
+            const expectedFirstThree = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"]]}`;
+            const firstThree = series.slice(0, 3);
             expect(firstThree.toString()).to.equal(expectedFirstThree);
 
-            var expectedAll = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
-            var sliceAll = series.slice();
+            const expectedAll = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
+            const sliceAll = series.slice();
             expect(sliceAll.toString()).to.equal(expectedAll);
 
             done();
         });
 
         it("can merge two timeseries together", (done) => {
-            var inTraffic = new TimeSeries(trafficDataIn);
-            var outTraffic = new TimeSeries(trafficDataOut);
-            var trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
+            const inTraffic = new TimeSeries(trafficDataIn);
+            const outTraffic = new TimeSeries(trafficDataOut);
+            const trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
             expect(trafficSeries.at(2).get("in")).to.equal(26);
             expect(trafficSeries.at(2).get("out")).to.equal(67);
             done();

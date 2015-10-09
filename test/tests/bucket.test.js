@@ -1,10 +1,30 @@
-var expect = require("chai").expect;
-var _ = require("underscore");
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
 
-var sept_2014_data = {
-    "name": "traffic",
-    "columns": ["time", "value"],
-    "points": [
+/* global it, describe */
+/* eslint no-unused-expressions: 0 */
+/* eslint-disable max-len */
+
+import {expect} from "chai";
+import _ from "underscore";
+import {Event} from "../../src/event";
+import Generator from "../../src/generator.js";
+import Aggregator from "../../src/aggregator";
+import Collector from "../../src/collector";
+import Binner from "../../src/binner";
+import {max, avg, sum, count, difference, derivative} from "../../src/functions";
+
+const sept2014Data = {
+    name: "traffic",
+    columns: ["time", "value"],
+    points: [
         [1409529600000, 80],
         [1409533200000, 88],
         [1409536800000, 52],
@@ -127,134 +147,123 @@ var sept_2014_data = {
 describe("Buckets", () => {
 
     describe("Generator tests", () => {
-
-        var Generator = require("../../src/generator.js");
-
-        //Test date: Sat Mar 14 2015 07:32:22 GMT-0700 (PDT)
-        var d = Date.UTC(2015, 2, 14,  7,32,22);
-        var generator = new Generator("5m");
-        it('should have the correct index', (done) => {
-            var b = generator.bucket(d);
-            var expected = "5m-4754394";
+        // Test date: Sat Mar 14 2015 07:32:22 GMT-0700 (PDT)
+        const d = Date.UTC(2015, 2, 14, 7, 32, 22);
+        const generator = new Generator("5m");
+        it("should have the correct index", done => {
+            const b = generator.bucket(d);
+            const expected = "5m-4754394";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
-        var d1 = Date.UTC(2015, 2, 14,  7,30,0);
-        var d2 = Date.UTC(2015, 2, 14,  8,29,59);
+        const d1 = Date.UTC(2015, 2, 14, 7, 30, 0);
+        const d2 = Date.UTC(2015, 2, 14, 8, 29, 59);
 
-        it('should have the correct index list for a date range', (done) => {
-            var bucketList = generator.bucketList(d1, d2);
-            var expectedBegin = "5m-4754394";
-            var expectedEnd = "5m-4754405";
-            //_.each(bucketList, (b) => {
-            //    console.log("   -", b.index().asString(), b.index().asTimerange().humanize())
-            //})
+        it("should have the correct index list for a date range", done => {
+            const bucketList = generator.bucketList(d1, d2);
+            const expectedBegin = "5m-4754394";
+            const expectedEnd = "5m-4754405";
+            // _.each(bucketList, (b) => {
+            //     console.log("   -", b.index().asString(), b.index().asTimerange().humanize())
+            // })
             expect(bucketList.length).to.equal(12);
             expect(bucketList[0].index().asString()).to.equal(expectedBegin);
-            expect(bucketList[bucketList.length-1].index().asString()).to.equal(expectedEnd);
+            expect(bucketList[bucketList.length - 1].index().asString()).to.equal(expectedEnd);
             done();
         });
     });
 
     describe("5min bucket tests", () => {
 
-        var BucketGenerator = require("../../src/generator.js");
+        const BucketGenerator = require("../../src/generator.js");
 
-        //Test date: Sat Mar 14 2015 07:32:22 UTC
-        var d = Date.UTC(2015, 2, 14, 7, 32, 22);
-        var Buckets = new BucketGenerator("5m");
-        it('should have the correct index', (done) => {
-            var b = Buckets.bucket(d);
-            var expected = "5m-4754394";
+        // Test date: Sat Mar 14 2015 07:32:22 UTC
+        const d = Date.UTC(2015, 2, 14, 7, 32, 22);
+        const Buckets = new BucketGenerator("5m");
+        it("should have the correct index", done => {
+            const b = Buckets.bucket(d);
+            const expected = "5m-4754394";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
-        it('should have the correct UTC string', (done) => {
-            var b = Buckets.bucket(d);
-            var expected = "5m-4754394: [Sat, 14 Mar 2015 07:30:00 GMT, Sat, 14 Mar 2015 07:35:00 GMT]";
+        it("should have the correct UTC string", done => {
+            const b = Buckets.bucket(d);
+            const expected = "5m-4754394: [Sat, 14 Mar 2015 07:30:00 GMT, Sat, 14 Mar 2015 07:35:00 GMT]";
             expect(b.toUTCString()).to.equal(expected);
             done();
         });
     });
 
-    describe("Hourly bucket tests", function () {
+    describe("Hourly bucket tests", () => {
 
-        var BucketGenerator = require("../../src/generator.js");
+        const BucketGenerator = require("../../src/generator.js");
 
-        //Test date: Sat Mar 14 2015 07:32:22 UTC
-        var d = Date.UTC(2015, 2, 14, 7, 32, 22);
-        var Buckets = new BucketGenerator("1h");
-        
-        it('should have the correct index', (done) => {
-            var b = Buckets.bucket(d);
-            var expected = "1h-396199";
+        // Test date: Sat Mar 14 2015 07:32:22 UTC
+        const d = Date.UTC(2015, 2, 14, 7, 32, 22);
+        const Buckets = new BucketGenerator("1h");
+
+        it("should have the correct index", done => {
+            const b = Buckets.bucket(d);
+            const expected = "1h-396199";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
-        
-        it('should have the correct UTC string', (done) => {
-            var b = Buckets.bucket(d);
-            var expected = "1h-396199: [Sat, 14 Mar 2015 07:00:00 GMT, Sat, 14 Mar 2015 08:00:00 GMT]";
+
+        it("should have the correct UTC string", done => {
+            const b = Buckets.bucket(d);
+            const expected = "1h-396199: [Sat, 14 Mar 2015 07:00:00 GMT, Sat, 14 Mar 2015 08:00:00 GMT]";
             expect(b.toUTCString()).to.equal(expected);
             done();
         });
     });
 
-    describe("Daily bucket tests", function () {
+    describe("Daily bucket tests", () => {
+        const BucketGenerator = require("../../src/generator.js");
 
-        var BucketGenerator = require("../../src/generator.js");
+        // Test date: Sat Mar 14 2015 07:32:22 UTC
+        const d = new Date(2015, 2, 14, 7, 32, 22);
+        const Buckets = new BucketGenerator("1d");
 
-        //Test date: Sat Mar 14 2015 07:32:22 UTC
-        var d = new Date(2015, 2, 14, 7, 32, 22);
-        var Buckets = new BucketGenerator("1d");
-        
-        it('should have the correct index', (done) => {
-            var b = Buckets.bucket(d);
-            var expected = "1d-16508";
+        it("should have the correct index", done => {
+            const b = Buckets.bucket(d);
+            const expected = "1d-16508";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
-        it('should have the correct UTC string', (done) => {
-            var b = Buckets.bucket(d);
-            var expected = "1d-16508: [Sat, 14 Mar 2015 00:00:00 GMT, Sun, 15 Mar 2015 00:00:00 GMT]";
+        it("should have the correct UTC string", done => {
+            const b = Buckets.bucket(d);
+            const expected = "1d-16508: [Sat, 14 Mar 2015 00:00:00 GMT, Sun, 15 Mar 2015 00:00:00 GMT]";
             expect(b.toUTCString()).to.equal(expected);
             done();
         });
-
     });
 
-    describe("Aggregator", function () {
-
-        var {Event, IndexedEvent} = require("../../src/event");
-        var TimeRange = require("../../src/range");
-        var Aggregator = require("../../src/aggregator");
-        var {max, avg, sum, count} = require("../../src/functions");
-
-        var incomingEvents = [];
+    describe("Aggregator", () => {
+        const incomingEvents = [];
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), 9));
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), 6));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8,  0, 0), 4));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8,  1, 0), 5));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), 4));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), 5));
 
-        it('should calculate the correct max for the two 1hr buckets', (done) => {
-            var maxEvents = {};
+        it("should calculate the correct max for the two 1hr buckets", done => {
+            const maxEvents = {};
 
-            var MaxAggregator = new Aggregator("1h", max);
-            
+            const MaxAggregator = new Aggregator("1h", max);
+
             MaxAggregator.onEmit((index, event) => {
                 maxEvents[index.asString()] = event;
             });
 
-            //Add events
+            // Add events
             _.each(incomingEvents, (event) => {
                 MaxAggregator.addEvent(event);
             });
 
-            //Done
+            // Done
             MaxAggregator.done();
 
             expect(maxEvents["1h-396199"].get()).to.equal(9);
@@ -262,21 +271,21 @@ describe("Buckets", () => {
             done();
         });
 
-        it('should calculate the correct avg for the two 1hr buckets', (done) => {
-            var avgEvents = {};
+        it("should calculate the correct avg for the two 1hr buckets", done => {
+            const avgEvents = {};
 
-            var AvgAggregator = new Aggregator("1h", avg);
+            const AvgAggregator = new Aggregator("1h", avg);
 
             AvgAggregator.onEmit((index, event) => {
                 avgEvents[index.asString()] = event;
             });
 
-            //Add events
+            // Add events
             _.each(incomingEvents, (event) => {
                 AvgAggregator.addEvent(event);
             });
 
-            //Done
+            // Done
             AvgAggregator.done();
 
             expect(avgEvents["1h-396199"].get()).to.equal(6);
@@ -284,19 +293,19 @@ describe("Buckets", () => {
             done();
         });
 
-        it('should calculate the correct sum for the two 1hr buckets', (done) => {
-            var sumEvents = {};
-            var SumAggregator = new Aggregator("1h", sum);
+        it("should calculate the correct sum for the two 1hr buckets", done => {
+            const sumEvents = {};
+            const SumAggregator = new Aggregator("1h", sum);
             SumAggregator.onEmit((index, event) => {
                 sumEvents[index.asString()] = event;
             });
 
-            //Add events
+            // Add events
             _.each(incomingEvents, (event) => {
                 SumAggregator.addEvent(event);
             });
 
-            //Done
+            // Done
             SumAggregator.done();
 
             expect(sumEvents["1h-396199"].get("value")).to.equal(18);
@@ -304,9 +313,9 @@ describe("Buckets", () => {
             done();
         });
 
-        it('should calculate the correct count for the two 1hr buckets', (done) => {
-            var countEvents = {};
-            var CountAggregator = new Aggregator("1h", count);
+        it("should calculate the correct count for the two 1hr buckets", done => {
+            const countEvents = {};
+            const CountAggregator = new Aggregator("1h", count);
             CountAggregator.onEmit((index, event) => {
                 countEvents[index.asString()] = event;
             });
@@ -314,7 +323,7 @@ describe("Buckets", () => {
                 CountAggregator.addEvent(event);
             });
 
-            //Done
+            // Done
             CountAggregator.done();
 
             expect(countEvents["1h-396199"].get()).to.equal(3);
@@ -322,24 +331,23 @@ describe("Buckets", () => {
             done();
         });
 
-        it('should calculate the correct count for a series of points', (done) => {
-            var incomingEvents = [];
-            var countEvents = {};
+        it("should calculate the correct count for a series of points", done => {
+            const events = [];
+            const countEvents = {};
 
-            //Convert the series to events
-            _.each(sept_2014_data.points, (point) => {
-                incomingEvents.push(new Event(point[0], point[1]));
+            // Convert the series to events
+            _.each(sept2014Data.points, (point) => {
+                events.push(new Event(point[0], point[1]));
             });
 
-            var CountAggregator = new Aggregator("1d", count);
+            const CountAggregator = new Aggregator("1d", count);
             CountAggregator.onEmit((index, event) => {
                 countEvents[index.asString()] = event;
             });
-            _.each(incomingEvents, (event) => {
+            _.each(events, (event) => {
                 CountAggregator.addEvent(event);
             });
 
-            //Done
             CountAggregator.done();
 
             expect(countEvents["1d-16314"].get()).to.equal(24);
@@ -347,61 +355,53 @@ describe("Buckets", () => {
             done();
         });
 
-        it('should calculate the correct count with inline emit', (done) => {
-            var incomingEvents = [];
-            var countEvents = {};
+        it("should calculate the correct count with inline emit", done => {
+            const events = [];
+            const countEvents = {};
 
-            //Convert the series to events
-            _.each(sept_2014_data.points, (point) => {
-                incomingEvents.push(new Event(point[0], point[1]));
+            // Convert the series to events
+            _.each(sept2014Data.points, (point) => {
+                events.push(new Event(point[0], point[1]));
             });
 
-            var CountAggregator = new Aggregator("1d", count, (index, event) => {
+            const CountAggregator = new Aggregator("1d", count, (index, event) => {
                 countEvents[index.asString()] = event;
             });
-            
-            _.each(incomingEvents, (event) => {
+
+            _.each(events, (event) => {
                 CountAggregator.addEvent(event);
             });
 
-            //Done
+            // Done
             CountAggregator.done();
 
             expect(countEvents["1d-16314"].get()).to.equal(24);
             expect(countEvents["1d-16318"].get()).to.equal(20);
             done();
         });
-
     });
 
+    describe("Aggregator tests for object events", () => {
+        const incomingEvents = [];
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {cpu1: 23.4, cpu2: 55.1}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {cpu1: 36.2, cpu2: 45.6}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {cpu1: 38.6, cpu2: 65.2}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {cpu1: 24.5, cpu2: 85.2}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {cpu1: 45.2, cpu2: 91.6}));
 
-    describe("Aggregator tests for object events", function () {
-
-        var {Event, IndexedEvent} = require("../../src/event");
-        var TimeRange = require("../../src/range");
-        var Aggregator = require("../../src/aggregator");
-        var {max, avg, sum, count} = require("../../src/functions");
-
-        var incomingEvents = [];
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {"cpu1": 23.4, "cpu2": 55.1}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {"cpu1": 36.2, "cpu2": 45.6}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {"cpu1": 38.6, "cpu2": 65.2}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8,  0, 0), {"cpu1": 24.5, "cpu2": 85.2}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8,  1, 0), {"cpu1": 45.2, "cpu2": 91.6}));
-
-        it('should calculate the correct sum for the two 1hr buckets', (done) => {
-            var sumEvents = {};
-            var SumAggregator = new Aggregator("1h", sum);
+        it("should calculate the correct sum for the two 1hr buckets", done => {
+            const sumEvents = {};
+            const SumAggregator = new Aggregator("1h", sum);
             SumAggregator.onEmit((index, event) => {
                 sumEvents[index.asString()] = event;
             });
 
-            //Add events
+            // Add events
             _.each(incomingEvents, (event) => {
                 SumAggregator.addEvent(event);
             });
 
-            //Done
+            // Done
             SumAggregator.done();
 
             expect(sumEvents["1h-396199"].get("cpu1")).to.equal(98.2);
@@ -411,38 +411,29 @@ describe("Buckets", () => {
             done();
         });
     });
-   
-    describe("Collection tests", function () {
 
-        var {Event, IndexedEvent} = require("../../src/event");
-        var TimeRange = require("../../src/range");
-        var Collector = require("../../src/collector");
-        var {max, avg, sum, count} = require("../../src/functions");
+    describe("Collection tests", () => {
+        const incomingEvents = [];
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {cpu1: 23.4, cpu2: 55.1}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {cpu1: 36.2, cpu2: 45.6}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {cpu1: 38.6, cpu2: 65.2}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {cpu1: 24.5, cpu2: 85.2}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {cpu1: 45.2, cpu2: 91.6}));
 
-        var incomingEvents = [];
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {"cpu1": 23.4, "cpu2": 55.1}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {"cpu1": 36.2, "cpu2": 45.6}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {"cpu1": 38.6, "cpu2": 65.2}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8,  0, 0), {"cpu1": 24.5, "cpu2": 85.2}));
-        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8,  1, 0), {"cpu1": 45.2, "cpu2": 91.6}));
+        it("should calculate the correct sum for the two 1hr buckets", done => {
+            const collection = {};
 
-        it('should calculate the correct sum for the two 1hr buckets', (done) => {
-            var collection = {};
-
-            var hourlyCollection = new Collector("1h", (series) => {
+            const hourlyCollection = new Collector("1h", (series) => {
                 collection[series.index().asString()] = series;
             });
 
-            //Add events
+            // Add events
             _.each(incomingEvents, (event) => {
                 hourlyCollection.addEvent(event);
             });
 
-            //Done
+            // Done
             hourlyCollection.done();
-
-            var expected1 = '{"name":"1h-396206","index":"1h-396206","columns":["time","cpu1","cpu2"],"points":[["2015-03-14T14:57:00.000Z",23.4,55.1],["2015-03-14T14:58:00.000Z",36.2,45.6],["2015-03-14T14:59:00.000Z",38.6,65.2]]}';
-            var expected2 = '{"name":"1h-396207","index":"1h-396207","columns":["time","cpu1","cpu2"],"points":[["2015-03-14T15:00:00.000Z",24.5,85.2],["2015-03-14T15:01:00.000Z",45.2,91.6]]}';
 
             expect(collection["1h-396199"].indexAsString()).to.equal("1h-396199");
             expect(collection["1h-396200"].indexAsString()).to.equal("1h-396200");
@@ -458,26 +449,22 @@ describe("Buckets", () => {
 
 describe("Resample bin fitting", () => {
 
-    describe("Differences", function () {
-        let {Event, IndexedEvent} = require("../../src/event");
-        var {difference} = require("../../src/functions");
-        let Binner = require("../../src/binner");
+    describe("Differences", () => {
 
         // 0               100            |   v
         // |               |              |
         // 0              30              |   t ->
         // |               |              |
         // |<- 100 ------->|<- 0 -------->|   result (with flush)
-        it("should calculate the correct fitted data for two boundry aligned values", (done) => {
+        it("should calculate the correct fitted data for two boundry aligned values", done => {
             const input = [new Event(0, 0), new Event(30000, 100)];
-
-            let result = {};
-            let binner = new Binner("30s", difference, (event) => {
+            const result = {};
+            const binner = new Binner("30s", difference, (event) => {
                 const key = event.index().asString();
                 result[key] = event;
             });
 
-            //Feed events
+            // Feed events
             _.each(input, event => binner.addEvent(event));
             binner.flush();
 
@@ -486,7 +473,7 @@ describe("Resample bin fitting", () => {
             done();
         });
 
-        //In this case, there is no middle buckets at all
+        // In this case, there is no middle buckets at all
         //
         //     |   100         |   213        |   v
         //     |   |           |   |          |
@@ -495,16 +482,16 @@ describe("Resample bin fitting", () => {
         //     |<- 0           |<- 7.3 ------>|   result (with flush)
         //         30s-1           30s-2
         //
-        it("should calculate the correct fitted data for no middle buckets with flush", (done) => {
+        it("should calculate the correct fitted data for no middle buckets with flush", done => {
             const input = [new Event(31000, 100), new Event(62000, 213)];
 
-            let result = {};
-            let binner = new Binner("30s", difference, (event) => {
+            const result = {};
+            const binner = new Binner("30s", difference, (event) => {
                 const key = event.index().asString();
                 result[key] = event;
             });
 
-            //Feed events
+            // Feed events
             _.each(input, event => binner.addEvent(event));
             binner.flush();
 
@@ -519,11 +506,11 @@ describe("Resample bin fitting", () => {
         //    90             120  121       150  t ->
         //     |               |              |
         //     |<- 96.7 ------>| ?            |   result
-        it("should calculate the correct fitted data for no middle buckets that isn't flushed", (done) => {
+        it("should calculate the correct fitted data for no middle buckets that isn't flushed", done => {
             const input = [new Event(90000, 100), new Event(121000, 200)];
 
-            let result = {};
-            let binner = new Binner("30s", difference, (event) => {
+            const result = {};
+            const binner = new Binner("30s", difference, (event) => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -541,11 +528,11 @@ describe("Resample bin fitting", () => {
         //    60          89  90            120            150            180 181       210   t ->
         //     |               |              |              |              |             |
         //     |<- ? --------->|<- 32.6 ----->|<- 32.6 ----->|<- 32.6 ----->|<- ? ------->|   result
-        it("should calculate the correct values for a sequence of middle buckets", (done) => {
+        it("should calculate the correct values for a sequence of middle buckets", done => {
             const input = [new Event(89000, 100), new Event(181000, 200)];
 
-            let result = {};
-            let binner = new Binner("30s", difference, (event) => {
+            const result = {};
+            const binner = new Binner("30s", difference, (event) => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -560,14 +547,14 @@ describe("Resample bin fitting", () => {
             done();
         });
 
-        it("should not return a result for two points in the same bucket", (done) => {
+        it("should not return a result for two points in the same bucket", done => {
             const input = [
                 new Event(1386369693000, 141368641534364),
                 new Event(1386369719000, 141368891281597),
             ];
 
-            let result = {};
-            let binner = new Binner("30s", difference, (event) => {
+            const result = {};
+            const binner = new Binner("30s", difference, (event) => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -580,25 +567,21 @@ describe("Resample bin fitting", () => {
 
     });
 
-    describe("Derivatives", function () {
-        let {Event, IndexedEvent} = require("../../src/event");
-        var {derivative} = require("../../src/functions");
-        let Binner = require("../../src/binner");
-
+    describe("Derivatives", () => {
         //     |           100 |              |              |              |   200       |   v
         //     |           |   |              |              |              |   |         |
         //    60          89  90            120            150            180 181       210   t ->
         //     |               |              |              |              |             |
         //     |<- ? --------->|<- 1.08/s --->|<- 1.08/s --->|<- 1.08/s --->|<- ? ------->|   result
         //
-        it("should calculate the correct derivative", (done) => {
+        it("should calculate the correct derivative", done => {
             const input = [
                 new Event(89000, 100),
                 new Event(181000, 200),
             ];
 
-            let result = {};
-            let binner = new Binner("30s", derivative, (event) => {
+            const result = {};
+            const binner = new Binner("30s", derivative, (event) => {
                 const key = event.index().asString();
                 result[key] = event;
             });

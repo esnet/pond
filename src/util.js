@@ -1,3 +1,13 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import moment from "moment";
 import _ from "underscore";
 import TimeRange from "./range";
@@ -43,7 +53,7 @@ export default {
                     endTime = isUTC ? moment.utc(beginTime).endOf("day") :
                                       moment(beginTime).endOf("day");
                 }
-            break;
+                break;
 
             case 2:
                 // Size should be two parts, a number and a letter if it's a
@@ -72,7 +82,7 @@ export default {
                     endTime = isUTC ? moment.utc(beginTime).endOf("month") :
                                       moment(beginTime).endOf("month");
                 }
-            break;
+                break;
 
             // A year e.g. 2015
             case 1:
@@ -81,7 +91,7 @@ export default {
                                     moment.utc([year]);
                 endTime = isUTC ? moment.utc(beginTime).endOf("year") :
                                   moment(beginTime).endOf("year");
-            break;
+                break;
         }
 
         if (beginTime && beginTime.isValid() && endTime && endTime.isValid()) {
@@ -120,7 +130,7 @@ export default {
                     }
 
                 }
-            break;
+                break;
 
             case 2:
                 const rangeRegex = /([0-9]+)([smhd])/;
@@ -139,7 +149,7 @@ export default {
                         return t.format("MMMM");
                     }
                 }
-            break;
+                break;
 
             case 1:
                 const year = parts[0];
@@ -149,7 +159,7 @@ export default {
                 } else {
                     return t.format("YYYY");
                 }
-            break;
+                break;
         }
         return index;
     }

@@ -1,7 +1,17 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 // Import the require hook for babel runtime
 import "babel/register";
 
-import React from "react/addons";
+import React from "react";
 import Router from "react-router";
 
 import App from "./app.jsx";
@@ -42,6 +52,6 @@ const routes = (
     </Route>
 );
 
-Router.run(routes, function (Handler) {
+Router.run(routes, Handler => {
     React.render(<Handler/>, document.getElementById("content"));
 });
