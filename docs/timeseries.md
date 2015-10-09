@@ -186,9 +186,16 @@ const cropped = series.slice(begin, end);  // Returns a cropped series
 
 #### TimeSeries.merge(name, [series1, series2, ...]) [Static]
 
-Returns a new TimeSeries with a union of the columns in each of the TimeSeries past in. Columns cannot be shared between the inputs, i.e. values themselves can't be merged. In addition the constituent events must be the same type.
+Returns a new TimeSeries that merges a list of TimeSeries together. The common uses for this are:
 
-For example, if we create type TimeSeries:
+ * Join a list of TimeSeries together that have different columns.
+ * Append together a list of TimeSeries with the same columns, but different times.
+
+There are some rules surrounding the use of `merge()`.
+
+If we consider each row of each TimeSeries with the same time (or `Index`, or `TimeRange`), then we have a list of Events (or `IndexedEvents`, or `TimeRangeEvents`). This list needs to be reduced. To do this the events themselves are merged using `Event.merge()`. This operation will not attempt to reduce values which have the same column, for the same time, so for each of these lists of events there should be no shared columns. In other words, you can merge a TimeSeries with columns "a" and "b" with a TimeSeries with a column "c", but not with a TimeSeries with a column "a" (if the two TimeSeries overlap their times).
+
+For example, first we create two TimeSeries, one with a "in" column and one with an "out" column:
 
 ```javascript
 const inTraffic = new TimeSeries({
@@ -213,7 +220,6 @@ const outTraffic = new TimeSeries({
     ]
 });
 ```
-
 
 We can them merge them:
 

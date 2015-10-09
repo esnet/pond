@@ -314,6 +314,28 @@ const trafficDataOut = {
     ]
 };
 
+const partialTraffic1 = {
+    name: "star-cr5:to_anl_ip-a_v4",
+    columns: ["time", "value"],
+    points: [
+        [1400425947000, 34],
+        [1400425948000, 13],
+        [1400425949000, 67],
+        [1400425950000, 91],
+    ]
+};
+
+const partialTraffic2 = {
+    name: "star-cr5:to_anl_ip-a_v4",
+    columns: ["time", "value"],
+    points: [
+        [1400425951000, 65],
+        [1400425952000, 86],
+        [1400425953000, 27],
+        [1400425954000, 72],
+    ]
+};
+
 describe("TimeSeries", () => {
 
     describe("TimeSeries created with a javascript objects", () => {
@@ -603,28 +625,40 @@ describe("Mutation of timeseries", () => {
     describe("Series created with a javascript object", () => {
         it("can create an slice a series", done => {
             const series = new TimeSeries(availabilityData);
-
             const expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08","88%"],["2014-07","100%"]]}`;
             const lastTwo = series.slice(-2);
             expect(lastTwo.toString()).to.equal(expectedLastTwo);
-
             const expectedFirstThree = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"]]}`;
             const firstThree = series.slice(0, 3);
             expect(firstThree.toString()).to.equal(expectedFirstThree);
-
             const expectedAll = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
             const sliceAll = series.slice();
             expect(sliceAll.toString()).to.equal(expectedAll);
-
             done();
         });
 
-        it("can merge two timeseries together", (done) => {
+        it("can merge two timeseries columns together using merge", (done) => {
             const inTraffic = new TimeSeries(trafficDataIn);
             const outTraffic = new TimeSeries(trafficDataOut);
             const trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
             expect(trafficSeries.at(2).get("in")).to.equal(26);
             expect(trafficSeries.at(2).get("out")).to.equal(67);
+            done();
+        });
+
+        it("can append two timeseries together using merge", (done) => {
+            const tile1 = new TimeSeries(partialTraffic1);
+            const tile2 = new TimeSeries(partialTraffic2);
+            const trafficSeries = TimeSeries.merge("traffic", [tile1, tile2]);
+            expect(trafficSeries.size()).to.equal(8);
+            expect(trafficSeries.at(0).get()).to.equal(34);
+            expect(trafficSeries.at(1).get()).to.equal(13);
+            expect(trafficSeries.at(2).get()).to.equal(67);
+            expect(trafficSeries.at(3).get()).to.equal(91);
+            expect(trafficSeries.at(4).get()).to.equal(65);
+            expect(trafficSeries.at(5).get()).to.equal(86);
+            expect(trafficSeries.at(6).get()).to.equal(27);
+            expect(trafficSeries.at(7).get()).to.equal(72);
             done();
         });
     });
