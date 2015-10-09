@@ -1,3 +1,13 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import _ from "underscore";
 import Generator from "./generator";
 import TimeRange from "./range";
@@ -71,7 +81,7 @@ export default class Binner {
         _.each(this._activeBucketList, (bucket) => {
             const bucketTimeRange = bucket.index().asTimerange();
             const pointsTimeRange = new TimeRange(this._lastTime, time);
-            let intersection = pointsTimeRange.intersection(bucketTimeRange);
+            const intersection = pointsTimeRange.intersection(bucketTimeRange);
             if (intersection && intersection.begin().getTime() ===
                 bucketTimeRange.begin().getTime()) {
                 const {va, vb} = this.getEdgeValues(pointsTimeRange,
@@ -84,7 +94,7 @@ export default class Binner {
         });
 
         // Flush buckets
-        let deleteList = [];
+        const deleteList = [];
         _.each(this._activeBucketList, (bucket, key) => {
             if (bucket.end() < time) {
                 bucket.aggregate(this._processor, e => {

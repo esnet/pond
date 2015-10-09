@@ -1,8 +1,18 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import moment from "moment";
 import _ from "underscore";
 import Bucket from "./bucket";
 
-var units = {
+const units = {
     s: {label: "seconds", length: 1},
     m: {label: "minutes", length: 60},
     h: {label: "hours", length: 60 * 60},
@@ -61,7 +71,7 @@ export default class Generator {
     bucketIndexList(date1, date2) {
         const pos1 = Generator.getBucketPosFromDate(date1, this._length);
         const pos2 = Generator.getBucketPosFromDate(date2, this._length);
-        let indexList = [];
+        const indexList = [];
         if (pos1 <= pos2) {
             for (let pos = pos1; pos <= pos2; pos++) {
                 indexList.push(`${this._size}-${pos}`);

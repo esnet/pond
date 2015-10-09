@@ -1,3 +1,13 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import moment from "moment";
 import _ from "underscore";
 import Immutable from "immutable";
@@ -21,7 +31,7 @@ function timestampFromArgs(arg1) {
 }
 
 function dataFromArgs(arg1) {
-    let data = {};
+    let data;
     if (_.isObject(arg1)) {
         data = new Immutable.Map(arg1);
     } else if (data instanceof Immutable.Map) {
@@ -67,7 +77,7 @@ export class Event {
     constructor(arg1, arg2) {
         // Copy constructor
         if (arg1 instanceof Event) {
-            let other = arg1;
+            const other = arg1;
             this._time = other._time;
             this._data = other._data;
             return;
@@ -142,6 +152,104 @@ export class Event {
     stringify() {
         return JSON.stringify(this._data);
     }
+
+    static mergeEvents(events) {
+        const t = events[0].timestamp();
+        const data = {};
+        _.each(events, event => {
+            if (!event instanceof Event) {
+                const msg = "Events being merged must have the same type";
+                throw new Error(msg);
+            }
+
+            if (t.getTime() !== event.timestamp().getTime()) {
+                const msg = "Events being merged must have the same timestamp";
+                throw new Error(msg);
+            }
+
+            const d = event.toJSON().data;
+            _.each(d, (val, key) => {
+                if (_.has(data, key)) {
+                    const msg =
+                    `Events being merged may not have the same key '${key}'`;
+                    throw new Error(msg);
+                }
+                data[key] = val;
+            });
+        });
+
+        return new Event(t, data);
+    }
+
+    static mergeTimeRangeEvents(events) {
+        const timerange = events[0].timerange();
+        const data = {};
+        _.each(events, event => {
+            if (!event instanceof TimeRangeEvent) {
+                const msg = "Events being merged must have the same type";
+                throw new Error(msg);
+            }
+
+            if (timerange.toUTCString() !== event.timerange().toUTCString()) {
+                const msg = "Events being merged must have the same timerange";
+                throw new Error(msg);
+            }
+
+            const d = event.toJSON().data;
+            _.each(d, (val, key) => {
+                if (_.has(data, key)) {
+                    const msg =
+                    `Events being merged may not have the same key '${key}'`;
+                    throw new Error(msg);
+                }
+                data[key] = val;
+            });
+        });
+
+        return new TimeRangeEvent(timerange, data);
+    }
+
+    static mergeIndexedEvents(events) {
+        const index = events[0].indexAsString();
+        const data = {};
+        _.each(events, event => {
+            if (!event instanceof IndexedEvent) {
+                throw new Error("Events being merged must have the same type");
+            }
+
+            if (index !== event.indexAsString()) {
+                throw new Error("Events being merged must have the same index");
+            }
+
+            const d = event.toJSON().data;
+            _.each(d, (val, key) => {
+                if (_.has(data, key)) {
+                    const msg =
+                    `Events being merged may not have the same key '${key}'`;
+                    throw new Error(msg);
+                }
+                data[key] = val;
+            });
+        });
+
+        return new IndexedEvent(index, data);
+    }
+
+    static merge(events) {
+        if (events.length < 1) {
+            return;
+        } else if (events.length === 1) {
+            return events[0];
+        }
+
+        if (events[0] instanceof Event) {
+            return Event.mergeEvents(events);
+        } else if (events[0] instanceof TimeRangeEvent) {
+            return Event.mergeTimeRangeEvents(events);
+        } else if (events[0] instanceof IndexedEvent) {
+            return Event.mergeIndexedEvents(events);
+        }
+    }
 }
 
 /**
@@ -183,7 +291,7 @@ export class TimeRangeEvent {
     constructor(arg1, arg2) {
         // Timerange
         if (arg1 instanceof TimeRange) {
-            let timerange = arg1;
+            const timerange = arg1;
             this._range = timerange;
         }
 

@@ -1,3 +1,13 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import Generator from "./generator";
 
 export default class Aggregator {
@@ -50,8 +60,8 @@ export default class Aggregator {
      * Add an event, which will be assigned to a bucket
      */
     addEvent(event, cb) {
-        let t = event.timestamp();
-        let bucket = this.bucket(t);
+        const t = event.timestamp();
+        const bucket = this.bucket(t);
 
         //
         // Adding the value to the bucket. This could be an async operation

@@ -10,17 +10,17 @@ There are three types of Events in Pond:
 
 The creation of an Event is done by combining two parts: the timestamp (or time range, or Index...) and the data.
 
-For a basic `Event`, you specify the timestamp as either a Javascript Date object, a Moment, or the number of ms since the UNIX epoch.
+ * For a basic `Event`, you specify the timestamp as either a Javascript Date object, a Moment, or the number of ms since the UNIX epoch.
 
-For a `TimeRangeEvent`, you specify a TimeRange, along with the data.
+ * For a `TimeRangeEvent`, you specify a TimeRange, along with the data.
 
-For a `IndexedEvent`, you specify an Index, along with the data, and if the event should be considered to be in UTC time or not.
+ * For a `IndexedEvent`, you specify an Index, along with the data, and if the event should be considered to be in UTC time or not.
 
 To specify the data you can supply either a Javascript object of key/values, a
 Immutable.Map, or a simple type such as an integer. In the case of the simple
 type this is a shorthand for supplying {"value": v}.
  
-Example:
+**Example:**
 
 Given some source of data that looks like this:
 
@@ -74,12 +74,61 @@ outageEvent.data()
 
 to fetch the whole data object, which will be an Immutable Map.
 
-### Query
+---
 
-* `toJSON()` - Returns a JSON representation of the Event
-* `toString()` - Returns a string representation of the Event, useful for serialization
-* `timestampAsUTCString()` - Returns the timestamp of the Event in UTC time.
-* `timestampAsLocalString()` - Returns the timestamp of the Event in Local time.
-* `timestamp()` - Returns the timestamp of the Event as a Date.
-* `data()` - Returns the internal data of the event, as an Immutable.Map.
-* `get(key)` - Returns the value for a specific key within the Event data. If no key is specified then 'value' is used for the key.
+### Query API
+
+#### toJSON()
+
+Returns a JSON representation of the Event
+
+#### toString()
+
+Returns a string representation of the Event, useful for serialization
+
+#### timestampAsUTCString()
+
+Returns the timestamp of the Event in UTC time.
+
+#### timestampAsLocalString()
+
+Returns the timestamp of the Event in Local time.
+
+#### timestamp()
+
+Returns the timestamp of the Event as a Date.
+
+#### data()
+
+Returns the internal data of the event, as an Immutable.Map.
+
+#### get(key)
+
+Returns the value for a specific key within the Event data. If no key is specified then 'value' is used for the key.
+
+---
+
+### Mutation API
+
+#### Event.merge([event1, event2, ...]) [Static]
+
+Creates a new Event from an array of other events. This only works under the following conditions:
+
+ * All Events are of the same type (i.e. all `Events`, all `TimeRangeEvents` or all `IndexedEvents`).
+ * The fields within the data of each event need to be orthogonal from each other, in that event1 might have an "a" and "b" field, then event2 should not have an "a" or "b" field but might instead have a "c" field.
+ * The time (or `Index`, or `TimeRange`) of each event must be the same.
+
+In this case the merge would create a new event with both a "a", "b" and "c" field. Example:
+
+```javascript
+const event1 = new IndexedEvent("1h-396206", {a: 5, b: 6});
+const event2 = new IndexedEvent("1h-396206", {c: 2});
+const merged = Event.merge([event1, event2]);
+```
+
+Result:
+```
+"1h-396206" -> {a:5, b:6, c:2}
+```
+
+Note: you can merge `TimeSeries` too, which internally uses this merge function to perform a merge across the whole series.

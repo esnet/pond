@@ -8,13 +8,13 @@ npm install @esnet/pond --save
 
 ### Client
 
-While Pond is written in ES6 the npm dist is transpiled to ES5 so it should run anywhere. To use in a browser you will need to install it with npm and and build your source with Webpack or something similar.
+While Pond is written in ES6 the npm dist is transpiled to ES5 so it will run anywhere. To use it within a browser you will need to install it with npm and then build your source with Webpack, Browserify or something similar.
 
 ### Server
 
 On the server, it's best to use babel-node, though straight up node will generally work too.
 
-Here's a simple example:
+Here's a simple example, run with babel-node:
 
     import {Index, TimeSeries} from "@esnet/pond";
 

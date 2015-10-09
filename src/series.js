@@ -1,8 +1,18 @@
+/**
+ *  Copyright (c) 2015, The Regents of the University of California,
+ *  through Lawrence Berkeley National Laboratory (subject to receipt
+ *  of any required approvals from the U.S. Dept. of Energy).
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the BSD-style license found in the
+ *  LICENSE file in the root directory of this source tree.
+ */
+
 import _ from "underscore";
 import Immutable from "immutable";
 import Index from "./index";
 import TimeRange from "./range";
-import {Event, IndexedEvent} from "./event";
+import {Event, TimeRangeEvent, IndexedEvent} from "./event";
 import util from "./util";
 
 /**
@@ -68,9 +78,9 @@ export class Series {
                 this._series = data;
             } else {
                 this._series = Immutable.fromJS(
-                    _.map(data, function (d) {
-                        let pointMap = {};
-                        _.each(d, function (p, i) {
+                    _.map(data, d => {
+                        const pointMap = {};
+                        _.each(d, (p, i) => {
                             pointMap[columns[i]] = p;
                         });
                         return pointMap;
@@ -137,7 +147,11 @@ export class Series {
      * the key and the get back the value matching that key.
      */
     meta(key) {
-        return this._meta.get(key);
+        if (!key) {
+            return this._meta.toJSON();
+        } else {
+            return this._meta.get(key);
+        }
     }
 
     //
@@ -215,7 +229,7 @@ export class Series {
         return this.avg(column);
     }
 
-    medium(column) {
+    median(column) {
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
@@ -258,9 +272,9 @@ export class Series {
   * to do this.
   */
 function uniqueKeys(events) {
-    let arrayOfKeys = [];
-    for (let e of events) {
-        for (let k of e.data().keySeq()) {
+    const arrayOfKeys = [];
+    for (const e of events) {
+        for (const k of e.data().keySeq()) {
             arrayOfKeys.push(k);
         }
     }
@@ -341,7 +355,7 @@ export class TimeSeries extends Series {
             //
 
             // Construct the base series
-            let other = arg1;
+            const other = arg1;
 
             this._name = other._name;
             this._meta = other._meta;
@@ -368,8 +382,8 @@ export class TimeSeries extends Series {
 
             const obj = arg1;
 
-            let times = [];
-            let data = [];
+            const times = [];
+            const data = [];
 
             if (_.has(obj, "events")) {
 
@@ -618,7 +632,7 @@ export class TimeSeries extends Series {
         }
 
         for (; i < size; i++) {
-            let ts = this.at(i).timestamp().getTime();
+            const ts = this.at(i).timestamp().getTime();
             if (ts > tms) {
                 return i - 1 >= 0 ? i - 1 : 0;
             } else if (ts === tms) {
@@ -642,7 +656,7 @@ export class TimeSeries extends Series {
             return this;
         }
 
-        let events = [];
+        const events = [];
         for (let i = b; i < e; i++) {
             events.push(this.at(i));
         }
@@ -679,5 +693,42 @@ export class TimeSeries extends Series {
                 Immutable.is(series1._columns, series2._columns) &&
                 Immutable.is(series1._series, series2._series) &&
                 Immutable.is(series1._times, series2._times));
+    }
+
+    static merge(options, seriesList) {
+        // for each series, map events to the same timestamp/index
+        const eventMap = {};
+        _.each(seriesList, (series) => {
+            for (const event of series.events()) {
+                let key;
+                if (event instanceof Event) {
+                    key = event.timestamp();
+                } else if (event instanceof IndexedEvent) {
+                    key = event.index();
+                } else if (event instanceof TimeRangeEvent) {
+                    key = event.timerange().toUTCString();
+                }
+
+                if (!_.has(eventMap, key)) {
+                    eventMap[key] = [];
+                }
+
+                eventMap[key].push(event);
+            }
+        });
+
+        // for each key, merge the events associated with that key
+        const events = [];
+        _.each(eventMap, (eventsList) => {
+            const event = Event.merge(eventsList);
+            events.push(event);
+        });
+
+        const {name, index, ...meta} = options;
+        return new TimeSeries({name: name,
+                               index: index,
+                               utc: this._utc,
+                               meta: meta,
+                               events: events});
     }
 }
