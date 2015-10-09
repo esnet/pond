@@ -176,9 +176,9 @@ Returns the minimum value found in a given column. If a column is not supplied i
 
 Returns the mean of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value". This is the same as taking the avg().
 
-#### medium(column)
+#### median(column)
 
-Returns the medium of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value".
+Returns the median of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value".
 
 #### stddev(column)
 
@@ -213,7 +213,7 @@ The `info` passed into the `merge()` function is an Object which is used to crea
 
 There are some rules surrounding the use of `merge()`.
 
-If we consider each row of each `TimeSeries` with the same `Date` (or `Index`, or `TimeRange`), then we have a list of `Events` (or `IndexedEvents`, or `TimeRangeEvents`). This list needs to be reduced. To do this the events themselves are merged using `Event.merge()`. This operation will not attempt to reduce values which have the same column, for the same time, so for each of these lists of events there should be no shared columns. In other words, you can merge a `TimeSeries` with columns "a" and "b" with a `TimeSeries` with a column "c", but not with a `TimeSeries` with a column "a" (if the two `TimeSeries` overlap their times).
+If we consider each row of each `TimeSeries` with the same `Date` (or `Index`, or `TimeRange`), then we have a list of `Events` (or `IndexedEvents`, or `TimeRangeEvents`). This list needs to be reduced. To do this the events themselves are merged using `Event.merge()`. This operation will not attempt to reduce values which have the same column, for the same time, so for each of these lists of events there should be no shared columns. In other words, you can merge a `TimeSeries` with columns "a" and "b" with a `TimeSeries` with a column "c", but not a TimeSeries with a column "a" or "b" (if the two TimeSeries overlap their times).
 
 For example, first we create two `TimeSeries`, one with a "in" column and one with an "out" column:
 
@@ -268,8 +268,8 @@ One of the nice things about the `TimeSeries` representation in Pond is that it 
 
 #### TimeSeries.equals(series1, series2) [Static]
 
-Will check that the internal structures of the `TimeSeries` are the same reference. If you use the copy constructor, they will be the same.
+Will check that the internal structures of the `TimeSeries` are the same reference. If you use the copy constructor, they will be the same. Since the internals are built using immutable data structures this is an efficient comparison.
 
 #### TimeSeries.is(series1, series2) [Static]
 
-Perhaps more useful in that it will check to see if the structures, though perhaps being different references, have the same values.
+This will check to see if the structures, though perhaps being different references, have the same values.

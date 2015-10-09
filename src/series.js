@@ -229,7 +229,7 @@ export class Series {
         return this.avg(column);
     }
 
-    medium(column) {
+    median(column) {
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
@@ -725,9 +725,6 @@ export class TimeSeries extends Series {
         });
 
         const {name, index, ...meta} = options;
-
-        console.log(name, index, meta);
-
         return new TimeSeries({name: name,
                                index: index,
                                utc: this._utc,

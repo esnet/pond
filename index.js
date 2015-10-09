@@ -8,7 +8,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-// Prims
+// Primitives
 exports.Index = require("./lib/index.js");
 exports.TimeRange = require("./lib/range.js");
 

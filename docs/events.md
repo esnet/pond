@@ -114,11 +114,11 @@ Returns the value for a specific key within the Event data. If no key is specifi
 
 Creates a new Event from an array of other events. This only works under the following conditions:
 
- * All Events are of the same time (i.e. all Events, all TimeRangeEvents or all IndexedEvents).
- * The fields within the data of each event need to be orthogonal from each other, in that event1 might have an "a" and "b" field, then event2 should not have a "a" field but might instead have a "c" field.
- * The time (or Index, or TimeRange) of each event must be the same.
+ * All Events are of the same type (i.e. all `Events`, all `TimeRangeEvents` or all `IndexedEvents`).
+ * The fields within the data of each event need to be orthogonal from each other, in that event1 might have an "a" and "b" field, then event2 should not have an "a" or "b" field but might instead have a "c" field.
+ * The time (or `Index`, or `TimeRange`) of each event must be the same.
 
- In this case the merge would create a new event with both a "name" and "description" field. Example:
+In this case the merge would create a new event with both a "a", "b" and "c" field. Example:
 
 ```javascript
 const event1 = new IndexedEvent("1h-396206", {a: 5, b: 6});
@@ -131,4 +131,4 @@ Result:
 "1h-396206" -> {a:5, b:6, c:2}
 ```
 
-Note: you can merge TimeSeries too, which internally uses this merge function to perform a merge across the whole series.
+Note: you can merge `TimeSeries` too, which internally uses this merge function to perform a merge across the whole series.
