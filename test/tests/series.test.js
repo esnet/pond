@@ -506,9 +506,9 @@ describe("TimeSeries", () => {
             done();
         });
 
-        it("can find the medium of the series", done => {
+        it("can find the median of the series", done => {
             const series = new TimeSeries(statsData);
-            expect(series.medium()).to.equal(14);
+            expect(series.median()).to.equal(14);
             done();
         });
 
