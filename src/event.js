@@ -218,6 +218,8 @@ export class Event {
     static merge(events) {
         if (events.length < 1) {
             return;
+        } else if (events.length === 1) {
+            return events[0];
         }
 
         if (events[0] instanceof Event) {
