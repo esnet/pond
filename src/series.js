@@ -2,7 +2,7 @@ import _ from "underscore";
 import Immutable from "immutable";
 import Index from "./index";
 import TimeRange from "./range";
-import {Event, IndexedEvent} from "./event";
+import {Event, TimeRangeEvent, IndexedEvent} from "./event";
 import util from "./util";
 
 /**
@@ -679,5 +679,40 @@ export class TimeSeries extends Series {
                 Immutable.is(series1._columns, series2._columns) &&
                 Immutable.is(series1._series, series2._series) &&
                 Immutable.is(series1._times, series2._times));
+    }
+
+    static merge(name, seriesList) {
+
+        console.log("Merge series", name, seriesList);
+
+        // for each series, map events to the same timestamp/index
+        const eventMap = {};
+        _.each(seriesList, (series) => {
+            for (let event of series.events()) {
+                let key;
+                if (event instanceof Event) {
+                    key = event.timestamp();
+                } else if (event instanceof IndexedEvent) {
+                    key = event.index();
+                } else if (event instanceof TimeRangeEvent) {
+                    key = event.timerange().toUTCString();
+                }
+
+                if (!_.has(eventMap, key)) {
+                    eventMap[key] = [];
+                }
+
+                eventMap[key].push(event);
+            }
+        });
+
+        // for each key, merge the events associated with that key
+        const eventList = [];
+        _.each(eventMap, (events, key) => {
+            const event = Event.merge(events);
+            eventList.push(event);
+        });
+
+        return new TimeSeries({name: name, events: eventList});
     }
 }

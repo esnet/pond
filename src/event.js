@@ -142,6 +142,95 @@ export class Event {
     stringify() {
         return JSON.stringify(this._data);
     }
+
+    static mergeEvents(events) {
+        let t = events[0].timestamp();
+        let data = {};
+        _.each(events, event => {
+            if (!event instanceof Event) {
+                throw new Error("Events being merged must have the same type");
+            }
+
+            if (t.getTime() !== event.timestamp().getTime()) {
+                throw new Error("Events being merged must have the same timestamp");
+            }
+
+            const d = event.toJSON().data;
+            _.each(d, (val, key) => {
+                if (_.has(data, key)) {
+                    throw new Error(`Events being merged may not have the same key '${key}'`);
+                    return;
+                }
+                data[key] = val;
+            })
+        });
+
+        return new Event(t, data);
+    }
+
+    static mergeTimeRangeEvents(events) {
+        let timerange = events[0].timerange();
+        let data = {};
+        _.each(events, event => {
+            if (!event instanceof TimeRangeEvent) {
+                throw new Error("Events being merged must have the same type");
+            }
+
+            if (timerange.toUTCString() !== event.timerange().toUTCString()) {
+                throw new Error("Events being merged must have the same timerange");
+            }
+
+            const d = event.toJSON().data;
+            _.each(d, (val, key) => {
+                if (_.has(data, key)) {
+                    throw new Error(`Events being merged may not have the same key '${key}'`);
+                    return;
+                }
+                data[key] = val;
+            })
+        });
+
+        return new TimeRangeEvent(timerange, data);
+    }
+
+    static mergeIndexedEvents(events) {
+        let index = events[0].indexAsString();
+        let data = {};
+        _.each(events, event => {
+            if (!event instanceof IndexedEvent) {
+                throw new Error("Events being merged must have the same type");
+            }
+
+            if (index !== event.indexAsString()) {
+                throw new Error("Events being merged must have the same index");
+            }
+
+            const d = event.toJSON().data;
+            _.each(d, (val, key) => {
+                if (_.has(data, key)) {
+                    throw new Error(`Events being merged may not have the same key '${key}'`);
+                    return;
+                }
+                data[key] = val;
+            })
+        });
+
+        return new IndexedEvent(index, data);
+    }
+
+    static merge(events) {
+        if (events.length < 1) {
+            return;
+        }
+
+        if (events[0] instanceof Event) {
+            return Event.mergeEvents(events);
+        } else if (events[0] instanceof TimeRangeEvent) {
+            return Event.mergeTimeRangeEvents(events);
+        } else if (events[0] instanceof IndexedEvent) {
+            return Event.mergeIndexedEvents(events);
+        }
+    }
 }
 
 /**

@@ -280,6 +280,28 @@ const bisectTestData = {
     ]
 };
 
+const trafficDataIn = {
+    name: "star-cr5:to_anl_ip-a_v4",
+    columns: ["time", "in"],
+    points: [
+        [1400425947000, 52],
+        [1400425948000, 18],
+        [1400425949000, 26],
+        [1400425950000, 93],
+    ]
+};
+
+const trafficDataOut = {
+    name: "star-cr5:to_anl_ip-a_v4",
+    columns: ["time", "out"],
+    points: [
+        [1400425947000, 34],
+        [1400425948000, 13],
+        [1400425949000, 67],
+        [1400425950000, 91],
+    ]
+};
+
 describe("TimeSeries", function () {
 
     describe("TimeSeries created with a javascript objects", function () {
@@ -542,6 +564,8 @@ describe("Timeseries containing indexed timeranges", function () {
     });
 
     /**
+     * DISABLED TEST
+     *
      * The problem is this test creates times in local time, but running the test in
      * different timezones will produce a different timeseries.
 
@@ -580,6 +604,16 @@ describe("Mutation of timeseries", function () {
             var sliceAll = series.slice();
             expect(sliceAll.toString()).to.equal(expectedAll);
 
+            done();
+        });
+
+        it("can merge two timeseries together", (done) => {
+            var inTraffic = new TimeSeries(trafficDataIn);
+            var outTraffic = new TimeSeries(trafficDataOut);
+            var trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
+            console.log("Merged series:", trafficSeries.toString());
+            expect(trafficSeries.at(2).get("in")).to.equal(26);
+            expect(trafficSeries.at(2).get("out")).to.equal(67);
             done();
         });
     });

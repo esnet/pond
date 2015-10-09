@@ -21,40 +21,105 @@ var range = new TimeRange([1326309060000, 1329941520000]);
 
 There is also a copy constructor.
 
-### Query
+---
 
-To get the bounding dates back from a TimeRange use `begin()` and `end()` on it.
+### Query API
 
-A TimeRange can also express its duration using `duration()`. The result will be in milliseconds. A human friendly string that represents the duration can be obtained with `humanizeDuration()`.
+#### begin()
 
-A TimeRange can serialize to a string with `toString()` or simple JSON with `toJSON()`. It can also print itself as local time with `toLocalSring()` and in UTC time with `toUTCString()`.
+Returns the begin time of the TimeRange as a Javascript Date object.
 
-There is also a humanized version of the TimeRange, obtained using `humanize()` (e.g. "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am") or as a range relative to now using `relativeString()` (e.g. "a few seconds ago to a month ago").
+#### end()
 
-### Comparison
+Returns the end time of the TimeRange as a Javascript Date object.
 
-TimeRange also supports a useful set of comparison operators:
+#### duration()
 
- * `equals(other)` - returns if one TimeRange is exactly the same range as another
- * `contains(other)` - returns true if other is completely inside this.
- * `within(other)` - Returns true if this TimeRange is completely within the supplied other TimeRange.
- * `overlaps(other)`- Returns true if the passed in other TimeRange overlaps this time Range.
- * `disjoint(other)` - Returns true if the passed in other Range in no way overlaps this time Range.
+Express the TimeRange as a duration. The result will be in milliseconds.
 
-### Mutation
+#### humanizeDuration()
+
+Returns a human friendly string that represents the duration.
+
+#### toString()
+
+Serialize to a string with `toString()`
+
+#### toJSON()
+
+Convert the TimeRange to simple Javascript objects.
+
+#### toLocalSring()
+
+Return a string version of the TimeRange in local time
+
+#### toUTCString()
+
+Return a string version of the TimeRange in UTC time
+
+#### humanize()
+
+Returns a humanized version of the TimeRange (e.g. "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am")
+
+#### relativeString()
+
+Returns a humanized version of the TimeRange as one time relative to another (e.g. "a few seconds ago to a month ago").
+
+---
+
+### Comparison API
+
+TimeRange also supports a useful set of comparison operators.
+
+#### equals(other)
+
+Returns if one TimeRange is exactly the same TimeRange as another.
+
+#### contains(other)
+
+Returns true if other is completely inside this TimeRange.
+
+#### within(other)
+
+Returns true if this TimeRange is completely within the supplied other TimeRange.
+
+#### overlaps(other)
+
+Returns true if the passed in other TimeRange overlaps this TimeRange.
+
+#### disjoint(other)
+
+Returns true if the passed in other Range in no way overlaps this TimeRange.
+
+
+---
+
+### Mutation API
 
 Any mutations to the TimeRange will return another TimeRange. Such operators include:
 
- * `setBegin(t)` and `setEnd(t)` - change the begin or end time of the TimeRange, resulting in a new TimeRange.
- * `extents(other)` - join a TimeRange with another, returning you a new TimeRange which spans them both.
- * `intersection(other)` - returns a new TimeRange which represents the intersection
-(overlapping) part of this and other.
+#### setBegin(t)` and `setEnd(t)
 
-### Static
+Change the begin or end time of the TimeRange, resulting in a new TimeRange.
 
-TimeRange also has several static methods to return common timeranges. So far these include:
+#### extents(other)
 
- * `lastDay()`
- * `lastSevenDays()`
- * `lastThirtyDays()`
- * `lastNinetyDays()`
+Join a TimeRange with another, returning you a new TimeRange which spans them both.
+
+#### intersection(other)
+
+Returns a new TimeRange which represents the overlapping part of this and the other TimeRange.
+
+---
+
+### Static helpers
+
+TimeRange also has several static methods to return common time ranges. So far these include:
+
+#### TimeRange.lastDay()
+
+#### TimeRange.lastSevenDays()
+
+#### TimeRange.lastThirtyDays()
+
+#### TimeRange.lastNinetyDays()

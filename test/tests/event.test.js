@@ -66,6 +66,60 @@ describe("Events", function () {
             expect(event.get("value")).to.equal(42);
             done();
         });
+
+        it("can merge multiple events together", (done) => {
+            var t = new Date("2015-04-22T03:30:00Z");
+
+            var event1 = new Event(t, {a: 5, b: 6});
+            var event2 = new Event(t, {c: 2});
+            var merged = Event.merge([event1, event2]);
+
+            expect(merged.get("a")).to.equal(5);
+            expect(merged.get("b")).to.equal(6);
+            expect(merged.get("c")).to.equal(2);
+            done();
+        });
+
+        it("can merge multiple indexed events together", (done) => {
+            var index = "1h-396206";
+
+            var event1 = new IndexedEvent(index, {a: 5, b: 6});
+            var event2 = new IndexedEvent(index, {c: 2});
+            var merged = Event.merge([event1, event2]);
+
+            expect(merged.get("a")).to.equal(5);
+            expect(merged.get("b")).to.equal(6);
+            expect(merged.get("c")).to.equal(2);
+            done();
+        });
+
+        it("can merge multiple timerange events together", (done) => {
+            var index = "1h-396206";
+            let beginTime = new Date("2015-04-22T03:30:00Z");
+            let endTime = new Date("2015-04-22T13:00:00Z");
+            var timerange = new TimeRange(beginTime, endTime);
+
+            var event1 = new TimeRangeEvent(timerange, {a: 5, b: 6});
+            var event2 = new TimeRangeEvent(timerange, {c: 2});
+            var merged = Event.merge([event1, event2]);
+
+            expect(merged.get("a")).to.equal(5);
+            expect(merged.get("b")).to.equal(6);
+            expect(merged.get("c")).to.equal(2);
+            done();
+        });
+
+        /*
+        it("can merge multiple events together", (done) => {
+            var t = new Date("2015-04-22T03:30:00Z");
+            var event1 = new Event(t, {a: 5, b: 6});
+            var event2 = new Event(t, {a: 2});
+            var merged = Event.merge([event1, event2]);
+            console.log("merged", merged);
+            expect(merged).to.be.undefined;
+            done();
+        });
+        */
     });
 
     describe("TimeRangeEvent", function() {
