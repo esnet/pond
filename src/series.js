@@ -147,7 +147,11 @@ export class Series {
      * the key and the get back the value matching that key.
      */
     meta(key) {
-        return this._meta.get(key);
+        if (!key) {
+            return this._meta.toJSON();
+        } else {
+            return this._meta.get(key);
+        }
     }
 
     //
@@ -691,7 +695,7 @@ export class TimeSeries extends Series {
                 Immutable.is(series1._times, series2._times));
     }
 
-    static merge(name, seriesList) {
+    static merge(options, seriesList) {
         // for each series, map events to the same timestamp/index
         const eventMap = {};
         _.each(seriesList, (series) => {
@@ -714,12 +718,20 @@ export class TimeSeries extends Series {
         });
 
         // for each key, merge the events associated with that key
-        const eventList = [];
-        _.each(eventMap, (events) => {
-            const event = Event.merge(events);
-            eventList.push(event);
+        const events = [];
+        _.each(eventMap, (eventsList) => {
+            const event = Event.merge(eventsList);
+            events.push(event);
         });
 
-        return new TimeSeries({name: name, events: eventList});
+        const {name, index, ...meta} = options;
+
+        console.log(name, index, meta);
+
+        return new TimeSeries({name: name,
+                               index: index,
+                               utc: this._utc,
+                               meta: meta,
+                               events: events});
     }
 }

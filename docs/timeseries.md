@@ -1,16 +1,18 @@
 ## TimeSeries
 
-A TimeSeries represents a series of events, with each event being a time (or TimeRange) and a corresponding set of data.
+A `TimeSeries` represents a series of events, with each event being a combination of:
+ * time (or `TimeRange`, or `Index`)
+ * data - corresponding set of key/values.
 
 ### Construction
 
-Currently you can initialize a TimeSeries with either a list of events, or with a data format that looks like this:
+Currently you can initialize a `TimeSeries` with either a list of events, or with a data format that looks like this:
 
 ```javascript
-var data = {
-    "name": "trafficc",
-    "columns": ["time", "value"],
-    "points": [
+const data = {
+    name: "trafficc",
+    columns: ["time", "value"],
+    points: [
         [1400425947000, 52],
         [1400425948000, 18],
         [1400425949000, 26],
@@ -22,24 +24,40 @@ var data = {
 
 To create a new TimeSeries object from the above format, simply use the constructor:
 
-    var series = new TimeSeries(data);
+```javascript
+var series = new TimeSeries(data);
+```
 
-### Format
+The format of the data is as follows:
 
   * **name** - optional, but a good practice
   * **columns** - are necessary and give labels to the data in the points.
-  * **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels. As just hinted at, the time column may actually be either a time or a timerange, represented by an Index. By using an Index it's possible to refer to a specific month, for example:
+  * **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
+   
+  As just hinted at, the time column may actually be either a time or a `TimeRange`, or a time range represented by an Index. By using an Index it is possible, for example, to refer to a specific month, for example:
 
 ```javascript
 var availabilityData = {
-    "name": "Last 3 months availability",
-    "columns": ["time", "uptime"],
-    "points": [
-        ["2015-06", "100%"],   // <-- 2015-06 specified here represents June 2015
+    name: "Last 3 months availability",
+    columns: ["time", "uptime"],
+    points: [
+        ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
         ["2015-05", "92%"],
         ["2015-04", "87%"],
     ]
 };
+```
+
+Alternatively, you can construct a `TimeSeries` with a list of events. Here's an example of that:
+
+```javascript
+const events = [];
+events.push(new Event(new Date(2015, 7, 1), {value: 27}));
+events.push(new Event(new Date(2015, 8, 1), {value: 29}));
+const series = new TimeSeries({
+    name: "avg temps",
+    events: events
+});
 ```
 
 ---
@@ -130,13 +148,13 @@ You can then query that back in the future by using the index functions:
 
 #### isUTC()
 
-Returns if the data is UTC or not. This is specified in the constructor as well. UTC (or not) is important when adding data associated with an Index, such as "2015-06-01", i.e. is that June 1st in UTC or local. This only matters when querying the Index back and asking for its actual time range.
+Returns if the data is UTC or not. This is specified in the constructor as well. UTC (or not) is important when adding data associated with an `Index`, such as "2015-06-01", i.e. is that June 1st in UTC or local. This only matters when querying the Index back and asking for its actual time range.
 
 ---
 
 ### Statistics functions
 
-It is possible to get some basic statistics from a TimeSeries. We will add additional operators as needed. Currently supported operators are:
+It is possible to get some basic statistics from a `TimeSeries`. We will add additional operators as needed. Currently supported operators are:
 
 #### sum(column)
 
@@ -184,18 +202,20 @@ const end = series.bisect(t2);
 const cropped = series.slice(begin, end);  // Returns a cropped series
 ```
 
-#### TimeSeries.merge(name, [series1, series2, ...]) [Static]
+#### TimeSeries.merge(info, [series1, series2, ...]) [Static]
 
 Returns a new TimeSeries that merges a list of TimeSeries together. The common uses for this are:
 
- * Join a list of TimeSeries together that have different columns.
- * Append together a list of TimeSeries with the same columns, but different times.
+ * Join a list of `TimeSeries` together that have different columns.
+ * Append together a list of `TimeSeries` with the same columns, but different times.
+
+The `info` passed into the `merge()` function is an Object which is used to create the new `TimeSeries`. It contains a name, index (optional), and meta data.
 
 There are some rules surrounding the use of `merge()`.
 
-If we consider each row of each TimeSeries with the same time (or `Index`, or `TimeRange`), then we have a list of Events (or `IndexedEvents`, or `TimeRangeEvents`). This list needs to be reduced. To do this the events themselves are merged using `Event.merge()`. This operation will not attempt to reduce values which have the same column, for the same time, so for each of these lists of events there should be no shared columns. In other words, you can merge a TimeSeries with columns "a" and "b" with a TimeSeries with a column "c", but not with a TimeSeries with a column "a" (if the two TimeSeries overlap their times).
+If we consider each row of each `TimeSeries` with the same `Date` (or `Index`, or `TimeRange`), then we have a list of `Events` (or `IndexedEvents`, or `TimeRangeEvents`). This list needs to be reduced. To do this the events themselves are merged using `Event.merge()`. This operation will not attempt to reduce values which have the same column, for the same time, so for each of these lists of events there should be no shared columns. In other words, you can merge a `TimeSeries` with columns "a" and "b" with a `TimeSeries` with a column "c", but not with a `TimeSeries` with a column "a" (if the two `TimeSeries` overlap their times).
 
-For example, first we create two TimeSeries, one with a "in" column and one with an "out" column:
+For example, first we create two `TimeSeries`, one with a "in" column and one with an "out" column:
 
 ```javascript
 const inTraffic = new TimeSeries({
@@ -224,7 +244,7 @@ const outTraffic = new TimeSeries({
 We can them merge them:
 
 ```javascript
-var trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
+var trafficSeries = TimeSeries.merge({name: "traffic"}, [inTraffic, outTraffic]);
 ```
 
 The result will look like this:
@@ -244,11 +264,11 @@ The result will look like this:
 
 ### Comparison static functions
 
-One of the nice things about the TimeSeries representation in Pond is that it is built on top of immutable data structures. For instance, if you have a TimeSeries and modify it, those TimeSeries will now have a different reference and noting that they have changed is trivial.
+One of the nice things about the `TimeSeries` representation in Pond is that it is built on top of immutable data structures. For instance, if you have a `TimeSeries` and modify it, those `TimeSeries` will now have a different reference and noting that they have changed is trivial.
 
 #### TimeSeries.equals(series1, series2) [Static]
 
-Will check that the internal structures of the TimeSeries are the same reference. If you use the copy constructor, they will be the same.
+Will check that the internal structures of the `TimeSeries` are the same reference. If you use the copy constructor, they will be the same.
 
 #### TimeSeries.is(series1, series2) [Static]
 

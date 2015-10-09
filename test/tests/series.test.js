@@ -640,7 +640,7 @@ describe("Mutation of timeseries", () => {
         it("can merge two timeseries columns together using merge", (done) => {
             const inTraffic = new TimeSeries(trafficDataIn);
             const outTraffic = new TimeSeries(trafficDataOut);
-            const trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
+            const trafficSeries = TimeSeries.merge({name: "traffic"}, [inTraffic, outTraffic]);
             expect(trafficSeries.at(2).get("in")).to.equal(26);
             expect(trafficSeries.at(2).get("out")).to.equal(67);
             done();
@@ -649,7 +649,7 @@ describe("Mutation of timeseries", () => {
         it("can append two timeseries together using merge", (done) => {
             const tile1 = new TimeSeries(partialTraffic1);
             const tile2 = new TimeSeries(partialTraffic2);
-            const trafficSeries = TimeSeries.merge("traffic", [tile1, tile2]);
+            const trafficSeries = TimeSeries.merge({name: "traffic", source: "router"}, [tile1, tile2]);
             expect(trafficSeries.size()).to.equal(8);
             expect(trafficSeries.at(0).get()).to.equal(34);
             expect(trafficSeries.at(1).get()).to.equal(13);
@@ -659,6 +659,8 @@ describe("Mutation of timeseries", () => {
             expect(trafficSeries.at(5).get()).to.equal(86);
             expect(trafficSeries.at(6).get()).to.equal(27);
             expect(trafficSeries.at(7).get()).to.equal(72);
+            expect(trafficSeries.name()).to.equal("traffic");
+            expect(trafficSeries.meta("source")).to.equal("router");
             done();
         });
     });
