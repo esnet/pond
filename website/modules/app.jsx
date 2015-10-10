@@ -46,7 +46,7 @@ export default React.createClass({
 
                 <div className="row">
 
-                    <div className="col-md-3" style={sidebarStyle}>
+                    <div className="col-md-2" style={sidebarStyle}>
                         <div className="docs-sidebar">
                             <ul className="docs-sidenav nav">
                                 <li><Link to="intro">Introduction</Link></li>
@@ -86,7 +86,7 @@ export default React.createClass({
                         </div>
                     </div>
 
-                    <div className="col-md-9">
+                    <div className="col-md-10">
                       <RouteHandler />
                     </div>
 
