@@ -153,6 +153,27 @@ export class Event {
         return JSON.stringify(this._data);
     }
 
+    /*
+    fill(type, arg1, arg2) {
+        if (type === "NaN") {
+            const fixedValue = arg1;
+            const fixedKey = arg2;
+            const data = this._data.withMutations(d => {
+                this._data.forEach((value, key) => {
+                    if (_.isNaN(value) && (!fixedKey || fixedKey === key)) {
+                        d.set(key, fixedValue);
+                    }
+                });
+            });
+            this._data = data;
+            return this;
+        } else {
+            const msg = "Invalid fill type";
+            throw new Error(msg);
+        }
+    }
+    */
+
     static mergeEvents(events) {
         const t = events[0].timestamp();
         const data = {};
@@ -178,7 +199,8 @@ export class Event {
             });
         });
 
-        return new Event(t, data);
+        const e = new Event(t.getTime(), data);
+        return e;
     }
 
     static mergeTimeRangeEvents(events) {
@@ -231,7 +253,6 @@ export class Event {
                 data[key] = val;
             });
         });
-
         return new IndexedEvent(index, data);
     }
 

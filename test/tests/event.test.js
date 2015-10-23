@@ -117,8 +117,29 @@ describe("Events", () => {
             const event1 = new Event(t, {a: 5, b: 6});
             const event2 = new Event(t, {a: 2});
             const merged = Event.merge([event1, event2]);
-            console.log("merged", merged);
             expect(merged).to.be.undefined;
+            done();
+        });
+        */
+
+        /*
+        it("can fill NaNs with a fixed value for a specific field", done => {
+            const t = new Date("2015-04-22T03:30:00Z");
+            const event = new Event(t, {a: 5, b: NaN, c: NaN});
+            const filled = event.fill("NaN", 0, "b");
+            expect(filled.get("a")).to.equal(5);
+            expect(filled.get("b")).to.equal(0);
+            expect(isNaN(filled.get("c"))).to.equal(true);
+            done();
+        });
+
+        it("can fill NaNs with a fixed value for all fields", done => {
+            const t = new Date("2015-04-22T03:30:00Z");
+            const event = new Event(t, {a: 5, b: NaN, c: NaN});
+            const filled = event.fill("NaN", 99);
+            expect(filled.get("a")).to.equal(5);
+            expect(filled.get("b")).to.equal(99);
+            expect(filled.get("c")).to.equal(99);
             done();
         });
         */

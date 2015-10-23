@@ -398,8 +398,10 @@ export class TimeSeries extends Series {
                 _.each(events, event => {
                     if (event instanceof IndexedEvent) {
                         times.push(event.indexAsString());
-                    } else {
+                    } else if (event instanceof Event) {
                         times.push(event.timestamp());
+                    } else {
+                        console.error("TimeSeries: Unsupported event type");
                     }
                     data.push(event.data());
                 });
@@ -443,7 +445,13 @@ export class TimeSeries extends Series {
 
                 _.each(seriesPoints, point => {
                     const [time, ...others] = point;
-                    times.push(time);
+                    let t;
+                    if (_.isNumber(time)) {
+                        t = new Date(time); // times are stored as Date objects
+                    } else {
+                        t = time;
+                    }
+                    times.push(t);
                     data.push(others);
                 });
 
@@ -482,7 +490,8 @@ export class TimeSeries extends Series {
         const times = this._times;
 
         const points = series.map((value, i) => {
-            const data = [times.get(i)]; // time
+            const t = times.get(i);
+            const data = _.isDate(t) ? [t.getTime()] : [t];
             cols.forEach((column) => {
                 data.push(value.get(column));
             });
@@ -541,12 +550,12 @@ export class TimeSeries extends Series {
                 if (!max || r.end() > max) {
                     max = r.end();
                 }
-            } else if (_.isNumber(time)) {
-                if (!min || time < min) {
-                    min = time;
+            } else if (_.isDate(time)) {
+                if (!min || time.getTime() < min) {
+                    min = time.getTime();
                 }
-                if (!max || time > max) {
-                    max = time;
+                if (!max || time.getTime() > max) {
+                    max = time.getTime();
                 }
             }
         });
@@ -725,10 +734,12 @@ export class TimeSeries extends Series {
         });
 
         const {name, index, ...meta} = options;
-        return new TimeSeries({name: name,
-                               index: index,
-                               utc: this._utc,
-                               meta: meta,
-                               events: events});
+        return new TimeSeries({
+            name: name,
+            index: index,
+            utc: this._utc,
+            meta: meta,
+            events: events
+        });
     }
 }
