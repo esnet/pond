@@ -256,7 +256,6 @@ export class Series {
         }
 
         const mean = this.mean(c, func);
-        console.log(mean);
         return Math.sqrt(this._series.reduce((memo, d) =>
             Math.pow(this._get(d, c, func) - mean, 2) + memo, 0) / this.size());
     }
