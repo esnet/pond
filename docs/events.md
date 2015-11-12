@@ -10,15 +10,16 @@ There are three types of Events in Pond:
 
 The creation of an Event is done by combining two parts: the timestamp (or time range, or Index...) and the data.
 
- * For a basic `Event`, you specify the timestamp as either a Javascript Date object, a Moment, or the number of ms since the UNIX epoch.
+ * For a basic `Event`, you specify the timestamp as either a Javascript Date object, a Moment, or the number of milliseconds since the UNIX epoch.
 
  * For a `TimeRangeEvent`, you specify a TimeRange, along with the data.
 
  * For a `IndexedEvent`, you specify an Index, along with the data, and if the event should be considered to be in UTC time or not.
 
-To specify the data you can supply either a Javascript object of key/values, a
-Immutable.Map, or a simple type such as an integer. In the case of the simple
-type this is a shorthand for supplying {"value": v}.
+To specify the data you can supply:
+ * a Javascript object of key/values. The object may contained nested data.
+ * an Immutable.Map
+ * a simple type such as an integer. This is a shorthand for supplying {"value": v}.
  
 **Example:**
 
@@ -104,8 +105,17 @@ Returns the internal data of the event, as an Immutable.Map.
 
 #### get(key)
 
-Returns the value for a specific key within the Event data. If no key is specified then 'value' is used for the key.
+Returns the value for a specific key within the Event data. If no key is specified then 'value' is used for the key. If the value is a complex type, such as a Map, then the value will be copied to Javascript objects and then returned.
 
+```javascript
+const event = new Event(timestamp, {
+    a: {in: 123, out: 456},
+    b: {in: 654, out: 223}
+});
+
+event.get("a") // {in: 123, out: 456};
+event.get("b") // {in: 654, out: 223};
+```
 ---
 
 ### Mutation API

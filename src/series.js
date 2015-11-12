@@ -181,74 +181,84 @@ export class Series {
         return this._series.get(i);
     }
 
+    _get(data, column, func) {
+        const c = column || "value";
+        if (_.isFunction(func)) {
+            return func(data.get(c).toJSON());
+        } else {
+            return data.get(c);
+        }
+    }
+
     //
     // Aggregate the series
     //
 
-    sum(column) {
+    sum(column, func) {
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        return this._series.reduce((memo, data) => {
-            return data.get(c) + memo;
-        }, 0);
+        return this._series.reduce((memo, d) =>
+            this._get(d, c, func) + memo, 0);
     }
 
-    avg(column) {
+    avg(column, func) {
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        return this.sum(column) / this.size();
+        return this.sum(c, func) / this.size();
     }
 
-    max(column) {
+    max(column, func) {
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        const max = this._series.maxBy((a) => {
-            return a.get(c);
-        });
-        return max.get(c);
+        const max = this._series.maxBy(d => this._get(d, c, func));
+        return this._get(max, c, func);
     }
 
-    min(column) {
+    min(column, func) {
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        const min = this._series.minBy((a) => {
-            return a.get(c);
-        });
-        return min.get(c);
+        const min = this._series.minBy(d => this._get(d, c, func));
+        return this._get(min, c, func);
     }
 
-    mean(column) {
-        return this.avg(column);
+    mean(column, func) {
+        return this.avg(column, func);
     }
 
-    median(column) {
+    median(column, func) {
+        const c = column || "value";
+        if (!this._columns.contains(c) || this.size() === 0) {
+            return undefined;
+        }
+        const sorted = this._series.sortBy(d => this._get(d, c, func));
+        const i = Math.floor(sorted.size / 2);
+        if (sorted.size % 2 === 0) {
+            const a = this._get(sorted.get(i), c, func);
+            const b = this._get(sorted.get(i - 1), c, func);
+            return (a + b) / 2;
+        } else {
+            return this._get(sorted.get(i), c, func);
+        }
+    }
+
+    stdev(column, func) {
         const c = column || "value";
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        const sorted = this._series.sortBy((event) => event.get(c));
-        return sorted.get(Math.floor(sorted.size / 2)).get(c);
-    }
 
-    stdev(column) {
-        const c = column || "value";
-        if (!this._columns.contains(c)) {
-            return undefined;
-        }
-
-        const mean = this.mean();
-        return Math.sqrt(this._series.reduce((memo, event) => {
-            return Math.pow(event.get(c) - mean, 2) + memo;
-        }
-        , 0) / this.size());
+        const mean = this.mean(c, func);
+        console.log(mean);
+        return Math.sqrt(this._series.reduce((memo, d) =>
+            Math.pow(this._get(d, c, func) - mean, 2) + memo, 0) / this.size());
     }
 
     static equal(series1, series2) {

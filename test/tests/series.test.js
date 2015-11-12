@@ -313,6 +313,39 @@ describe("TimeSeries", () => {
         });
     });
 
+    describe("Deeply nested Timeseries", () => {
+        it("can create an series with a nested object", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+                    [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                ]
+            });
+            expect(series.at(0).get("NASA_north").in).to.equal(100);
+            expect(series.at(0).get("NASA_north").out).to.equal(200);
+            done();
+        });
+        it("can create an series with nested events", done => {
+            const events = [];
+            events.push(new Event(new Date(2015, 6, 1), {NASA_north: {in: 100, out: 200}, NASA_south: {in: 145, out: 135}}));
+            events.push(new Event(new Date(2015, 7, 1), {NASA_north: {in: 200, out: 400}, NASA_south: {in: 146, out: 142}}));
+            events.push(new Event(new Date(2015, 8, 1), {NASA_north: {in: 300, out: 600}, NASA_south: {in: 147, out: 158}}));
+            events.push(new Event(new Date(2015, 9, 1), {NASA_north: {in: 400, out: 800}, NASA_south: {in: 155, out: 175}}));
+            const series = new TimeSeries({
+                name: "Map traffic",
+                events: events
+            });
+            expect(series.at(0).get("NASA_north").in).to.equal(100);
+            expect(series.at(3).get("NASA_south").out).to.equal(175);
+            expect(series.size()).to.equal(4);
+            done();
+        });
+    });
+
     describe("Compare series", () => {
         it("can compare a series and a reference to a series as being equal", done => {
             const series = new TimeSeries(data);
@@ -351,6 +384,21 @@ describe("TimeSeries", () => {
             done();
         });
 
+        it("can sum a series with deep data", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+                    [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                ]
+            });
+            expect(series.sum("NASA_north", d => d.in)).to.equal(1000);
+            done();
+        });
+
         it("can sum the series with no column name specified", done => {
             const series = new TimeSeries(data);
             expect(series.sum()).to.equal(189);
@@ -369,9 +417,39 @@ describe("TimeSeries", () => {
             done();
         });
 
+        it("can find the max of a series with deep data", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 182}],
+                    [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                ]
+            });
+            expect(series.max("NASA_south", d => d.out)).to.equal(182);
+            done();
+        });
+
         it("can find the min of the series", done => {
             const series = new TimeSeries(data);
             expect(series.min()).to.equal(18);
+            done();
+        });
+
+        it("can find the min of a series with deep data", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 182}],
+                    [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                ]
+            });
+            expect(series.min("NASA_south", d => d.out)).to.equal(135);
             done();
         });
 
@@ -385,13 +463,22 @@ describe("TimeSeries", () => {
             done();
         });
 
-        it("can mean of the series (the avg)", done => {
-            const series = new TimeSeries(statsData);
-            expect(series.mean()).to.equal(15);
+        it("can avg series with deep data", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+                    [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                ]
+            });
+            expect(series.avg("NASA_north", d => d.in)).to.equal(250);
             done();
         });
 
-        it("can find the mean of the series", done => {
+        it("can mean of the series (the avg)", done => {
             const series = new TimeSeries(statsData);
             expect(series.mean()).to.equal(15);
             done();
@@ -400,6 +487,35 @@ describe("TimeSeries", () => {
         it("can find the median of the series", done => {
             const series = new TimeSeries(statsData);
             expect(series.median()).to.equal(14);
+            done();
+        });
+
+        it("can find the median of a series with deep data and even number of events", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+                    [1400425953000, {in: 400, out: 600}, {in: 147, out: 158}],
+                    [1400425954000, {in: 800, out: 800}, {in: 155, out: 175}],
+                ]
+            });
+            expect(series.median("NASA_north", d => d.in)).to.equal(300);
+            done();
+        });
+
+        it("can find the median of a series with deep data and odd number of events", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+                    [1400425953000, {in: 400, out: 600}, {in: 147, out: 158}]
+                ]
+            });
+            expect(series.median("NASA_north", d => d.out)).to.equal(400);
             done();
         });
 
@@ -413,6 +529,21 @@ describe("TimeSeries", () => {
             const series = new TimeSeries(statsData2);
             expect(Math.round(series.mean() * 10) / 10).to.equal(38.8);
             expect(Math.round(series.stdev() * 10) / 10).to.equal(11.4);
+            done();
+        });
+
+        it("can find the standard deviation of a series with deep data", done => {
+            const series = new TimeSeries({
+                name: "Map Traffic",
+                columns: ["time", "NASA_north", "NASA_south"],
+                points: [
+                    [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+                    [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+                    [1400425953000, {in: 400, out: 600}, {in: 147, out: 158}],
+                    [1400425954000, {in: 800, out: 800}, {in: 155, out: 175}],
+                ]
+            });
+            expect(series.stdev("NASA_south", d => d.out)).to.equal(15.435349040433131);
             done();
         });
     });

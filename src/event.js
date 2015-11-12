@@ -33,10 +33,14 @@ function timestampFromArgs(arg1) {
 function dataFromArgs(arg1) {
     let data;
     if (_.isObject(arg1)) {
-        data = new Immutable.Map(arg1);
+        // Deeply convert the data to Immutable Map
+        data = new Immutable.fromJS(arg1);
     } else if (data instanceof Immutable.Map) {
+        // Copy reference to the data
         data = arg1;
     } else {
+        // Just add it to the value key of a new Map
+        // e.g. new Event(t, 25); -> t, {value: 25}
         data = new Immutable.Map({value: arg1});
     }
     return data;
@@ -140,13 +144,22 @@ export class Event {
     }
 
     /**
-     * Get specific data out of the Event
+     * Get specific data out of the Event. The data will be converted
+     * to a Javascript object.
      * @param  {string} key Key to lookup, or "value" if not specified.
      * @return {Object}     The data associated with this key
      */
     get(key) {
         const k = key || "value";
-        return this._data.get(k);
+        const v = this._data.get(k);
+        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
+            return v.toJS();
+        }
+        return v;
+    }
+
+    value(key) {
+        return this.get(key);
     }
 
     stringify() {
@@ -399,7 +412,15 @@ export class TimeRangeEvent {
      */
     get(key) {
         const k = key || "value";
-        return this._data.get(k);
+        const v = this._data.get(k);
+        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
+            return v.toJS();
+        }
+        return v;
+    }
+
+    value(key) {
+        return this.get(key);
     }
 }
 
@@ -549,6 +570,14 @@ export class IndexedEvent {
      */
     get(key) {
         const k = key || "value";
-        return this._data.get(k);
+        const v = this._data.get(k);
+        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
+            return v.toJS();
+        }
+        return v;
+    }
+
+    value(key) {
+        return this.get(key);
     }
 }

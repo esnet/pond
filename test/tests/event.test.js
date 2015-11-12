@@ -55,6 +55,17 @@ bent pins in two clots of the optical node chassis.`,
     ]
 };
 
+const deepEventData = {
+    NorthRoute: {
+        in: 123,
+        out: 456
+    },
+    SouthRoute: {
+        in: 654,
+        out: 223
+    }
+};
+
 describe("Events", () => {
 
     describe("Event", () => {
@@ -73,6 +84,14 @@ describe("Events", () => {
             const expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
             expect(event.timerangeAsUTCString()).to.equal(expected);
             expect(event.get("value")).to.equal(42);
+            done();
+        });
+
+        it("can create a regular Event, with deep data", done => {
+            const timestamp = new Date("2015-04-22T03:30:00Z");
+            const event = new Event(timestamp, deepEventData);
+            expect(event.get("NorthRoute")).to.deep.equal({in: 123, out: 456});
+            expect(event.get("SouthRoute")).to.deep.equal({in: 654, out: 223});
             done();
         });
 
