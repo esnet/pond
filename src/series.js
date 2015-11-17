@@ -713,7 +713,7 @@ export class TimeSeries extends Series {
                 Immutable.is(series1._times, series2._times));
     }
 
-    static merge(options, seriesList) {
+    static map(options, seriesList, mapper) {
         // for each series, map events to the same timestamp/index
         const eventMap = {};
         _.each(seriesList, (series) => {
@@ -738,7 +738,7 @@ export class TimeSeries extends Series {
         // for each key, merge the events associated with that key
         const events = [];
         _.each(eventMap, (eventsList) => {
-            const event = Event.merge(eventsList);
+            const event = mapper(eventsList);
             events.push(event);
         });
 
@@ -750,5 +750,9 @@ export class TimeSeries extends Series {
             meta: meta,
             events: events
         });
+    }
+
+    static merge(options, seriesList) {
+        return TimeSeries.map(options, seriesList, Event.merge);
     }
 }

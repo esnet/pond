@@ -68,9 +68,17 @@ const deepEventData = {
 
 describe("Events", () => {
 
-    describe("Event", () => {
+    describe("Event creation", () => {
 
-        it("can create an indexed event using a string index and data", done => {
+        it("can create a regular Event, with deep data", done => {
+            const timestamp = new Date("2015-04-22T03:30:00Z");
+            const event = new Event(timestamp, deepEventData);
+            expect(event.get("NorthRoute")).to.deep.equal({in: 123, out: 456});
+            expect(event.get("SouthRoute")).to.deep.equal({in: 654, out: 223});
+            done();
+        });
+
+        it("can create an IndexedEvent using a string index and data", done => {
             const event = new IndexedEvent("1d-12355", {value: 42});
             const expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
             expect(event.timerangeAsUTCString()).to.equal(expected);
@@ -87,13 +95,27 @@ describe("Events", () => {
             done();
         });
 
-        it("can create a regular Event, with deep data", done => {
-            const timestamp = new Date("2015-04-22T03:30:00Z");
-            const event = new Event(timestamp, deepEventData);
-            expect(event.get("NorthRoute")).to.deep.equal({in: 123, out: 456});
-            expect(event.get("SouthRoute")).to.deep.equal({in: 654, out: 223});
+        it("can create a TimeRangeEvent using a object", done => {
+            // Pick one event
+            const sampleEvent = outageList["outage_events"][0];
+
+            // Extract the begin and end times
+            const beginTime = new Date(sampleEvent.start_time);
+            const endTime = new Date(sampleEvent.end_time);
+            const timerange = new TimeRange(beginTime, endTime);
+            const event = new TimeRangeEvent(timerange, sampleEvent);
+            const expected = `{"timerange":[1429673400000,1429707600000],"data":{"external_ticket":"","start_time":"2015-04-22T03:30:00Z","completed":true,"end_time":"2015-04-22T13:00:00Z","organization":"Internet2 / Level 3","title":"STAR-CR5 < 100 ge 06519 > ANL  - Outage","type":"U","esnet_ticket":"ESNET-20150421-013","description":"At 13:33 pacific circuit 06519 went down."}}`;
+            expect(`${event}`).to.equal(expected);
+            expect(event.begin().getTime()).to.equal(1429673400000);
+            expect(event.end().getTime()).to.equal(1429707600000);
+            expect(event.humanizeDuration()).to.equal("10 hours");
+            expect(event.get("title")).to.equal("STAR-CR5 < 100 ge 06519 > ANL  - Outage");
             done();
         });
+
+    });
+
+    describe("Event merging", () => {
 
         it("can merge multiple events together", done => {
             const t = new Date("2015-04-22T03:30:00Z");
@@ -129,19 +151,28 @@ describe("Events", () => {
             expect(merged.get("c")).to.equal(2);
             done();
         });
+    });
 
-        /*
-        it("can merge multiple events together", done => {
+    describe("Event summing", () => {
+
+        it("can sum multiple events together", done => {
             const t = new Date("2015-04-22T03:30:00Z");
-            const event1 = new Event(t, {a: 5, b: 6});
-            const event2 = new Event(t, {a: 2});
-            const merged = Event.merge([event1, event2]);
-            expect(merged).to.be.undefined;
+            const events = [
+                new Event(t, {a: 5, b: 6, c: 7}),
+                new Event(t, {a: 2, b: 3, c: 4}),
+                new Event(t, {a: 1, b: 2, c: 3})
+            ];
+            const sum = Event.sum(events);
+            expect(sum.get("a")).to.equal(8);
+            expect(sum.get("b")).to.equal(11);
+            expect(sum.get("c")).to.equal(14);
             done();
         });
-        */
+    });
 
-        /*
+    /*
+    describe("Event filling", () => {
+
         it("can fill NaNs with a fixed value for a specific field", done => {
             const t = new Date("2015-04-22T03:30:00Z");
             const event = new Event(t, {a: 5, b: NaN, c: NaN});
@@ -161,26 +192,7 @@ describe("Events", () => {
             expect(filled.get("c")).to.equal(99);
             done();
         });
-        */
-    });
+        
+    });*/
 
-    describe("TimeRangeEvent", () => {
-        it("can create a TimeRangeEvent using a object", done => {
-            // Pick one event
-            const sampleEvent = outageList["outage_events"][0];
-
-            // Extract the begin and end times
-            const beginTime = new Date(sampleEvent.start_time);
-            const endTime = new Date(sampleEvent.end_time);
-            const timerange = new TimeRange(beginTime, endTime);
-            const event = new TimeRangeEvent(timerange, sampleEvent);
-            const expected = `{"timerange":[1429673400000,1429707600000],"data":{"external_ticket":"","start_time":"2015-04-22T03:30:00Z","completed":true,"end_time":"2015-04-22T13:00:00Z","organization":"Internet2 / Level 3","title":"STAR-CR5 < 100 ge 06519 > ANL  - Outage","type":"U","esnet_ticket":"ESNET-20150421-013","description":"At 13:33 pacific circuit 06519 went down."}}`;
-            expect(`${event}`).to.equal(expected);
-            expect(event.begin().getTime()).to.equal(1429673400000);
-            expect(event.end().getTime()).to.equal(1429707600000);
-            expect(event.humanizeDuration()).to.equal("10 hours");
-            expect(event.get("title")).to.equal("STAR-CR5 < 100 ge 06519 > ANL  - Outage");
-            done();
-        });
-    });
 });

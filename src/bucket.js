@@ -173,10 +173,10 @@ export default class Bucket {
 
     /**
      * Takes the values within the bucket and aggregates them together
-     * into a new IndexedEvent using the operator supplied. Then result
-     * or error is passed to the callback.
+     * into a new IndexedEvent using the reducer supplied.
+     * The result or error is passed to the callback.
      */
-    aggregate(operator, cb) {
+    aggregate(reducer, cb) {
         this._readFromCache((err, events) => {
             if (!err) {
                 if (events.length) {
@@ -184,7 +184,8 @@ export default class Bucket {
                     const result = {};
                     _.each(keys.toJS(), k => {
                         const vals = _.map(events, v => v.get(k));
-                        result[k] = operator.call(this, this._index, vals, k);
+                        result[k] = reducer.call(
+                            this, this._index.asTimerange(), vals, k);
                     });
                     const event = new IndexedEvent(this._index, result);
                     if (cb) {
@@ -201,8 +202,8 @@ export default class Bucket {
 
     /**
      * Takes the values within the bucket and collects them together
-     * into a new IndexedSeries using the operator supplied. Then result
-     * or error is passed to the callback.
+     * into a new IndexedSeries.
+     * The result or error is passed to the callback.
      */
     collect(cb) {
         this._readFromCache((err, events) => {
