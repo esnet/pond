@@ -169,25 +169,14 @@ describe("Buckets", () => {
         const d2 = Date.UTC(2015, 2, 14, 8, 29, 59);
 
         it("should have the correct bucket list for a date range", done => {
-            const bucketList = generator.bucketList(d1, d2);
+            const timerange = new TimeRange(d1, d2);
+            const bucketList = generator.bucketList(timerange);
             const expectedBegin = "5m-4754394";
             const expectedEnd = "5m-4754405";
 
             expect(bucketList.length).to.equal(12);
             expect(bucketList[0].index().asString()).to.equal(expectedBegin);
             expect(bucketList[bucketList.length - 1].index().asString()).to.equal(expectedEnd);
-            done();
-        });
-
-        it("should have the correct index string list for a date range", done => {
-            const indexList = generator.bucketIndexList(d1, d2);
-            const expectedBegin = "5m-4754394";
-            const expectedEnd = "5m-4754405";
-
-            expect(indexList.length).to.equal(12);
-            expect(indexList[0]).to.equal(expectedBegin);
-            expect(indexList[indexList.length - 1]).to.equal(expectedEnd);
-
             done();
         });
 

@@ -192,7 +192,6 @@ describe("Events", () => {
             expect(filled.get("c")).to.equal(99);
             done();
         });
-        
     });*/
 
 });

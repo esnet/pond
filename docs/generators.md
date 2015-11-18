@@ -4,7 +4,7 @@ Generators are primarily used internally for aggregation and collection within P
 
 ### Generating Index strings
 
-A generator can be used to generate Index strings. We use this to know which tiles are used within a TimeRange.
+A generator can be used to generate Index strings. These strings uniquely identify a range of time, such as a particular 5 minute block. The combine the duration (such as "5m") and the block number. The blocks which lie within the provided timerange (even only partially) will be returned.
 
 ```js
 const generator = new Generator("5m");
@@ -28,7 +28,8 @@ You can also get a list of buckets that fall within a date range:
 
 ```js
 const generator = new Generator("5m");
-const bucketList = generator.bucketList(d1, d2);
+const timerange = new TimeRange(beginTime, endTime);
+const bucketList = generator.bucketList(timerange);
 const firstBucket = bucketList[0].index().asString() // "5m-4754394"
 const lastBucket = bucketList[bucketList.length - 1].index().asString() // "5m-4754405";
 ```

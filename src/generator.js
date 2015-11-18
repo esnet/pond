@@ -76,19 +76,11 @@ export default class Generator {
      * Example output:
      *   ["5m-4754394", "5m-4754395", ..., "5m-4754405"]
      */
-    bucketIndexList(arg1, arg2) {
-        let date1;
-        let date2;
-        if (arg1 instanceof TimeRange) {
-            date1 = arg1.begin();
-            date2 = arg1.end();
-        } else {
-            date1 = arg1;
-            date2 = arg2;
-        }
-
-        const pos1 = Generator.getBucketPosFromDate(date1, this._length);
-        const pos2 = Generator.getBucketPosFromDate(date2, this._length);
+    bucketIndexList(timerange) {
+        const pos1 =
+            Generator.getBucketPosFromDate(timerange.begin(), this._length);
+        const pos2 =
+            Generator.getBucketPosFromDate(timerange.end(), this._length);
         const indexList = [];
         if (pos1 <= pos2) {
             for (let pos = pos1; pos <= pos2; pos++) {
@@ -110,7 +102,8 @@ export default class Generator {
     }
 
     bucketList(date1, date2) {
-        const indexList = this.bucketIndexList(date1, date2);
+        const timerange = new TimeRange(date1, date2);
+        const indexList = this.bucketIndexList(timerange);
         return _.map(indexList, (index) => new Bucket(index));
     }
 }
