@@ -16,6 +16,7 @@
     "start": "webpack-dev-server --content-base website/ --config webpack.website.config.js",
     "start-tester": "webpack-dev-server --config webpack.test.config.js --content-base ./devserver --port 9500 --colors"
   },
+  "pre-commit": ["lint", "test-only", "build"],
   "babel": {
     "optional": [
       "runtime",
@@ -52,6 +53,7 @@
     "jsx-loader": "^0.13.x",
     "mocha": "^2.2.5",
     "mocha-loader": "^0.7.1",
+    "pre-commit": "^1.1.2",
     "raw-loader": "^0.5.1",
     "react": "^0.13.x",
     "react-markdown": "^1.0.3",
