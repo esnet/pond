@@ -10,8 +10,8 @@
 
 import Immutable from "immutable";
 import _ from "underscore";
-import {IndexedEvent} from "./event";
-import {TimeSeries} from "./series";
+import { Event, IndexedEvent } from "./event";
+import { TimeSeries } from "./series";
 import Index from "./index";
 
 /**
@@ -202,17 +202,32 @@ export default class Bucket {
 
     /**
      * Takes the values within the bucket and collects them together
-     * into a new IndexedSeries.
+     * into a new TimeSeries. The convertToTimes flag determines if
+     * the collected Events should be rebuilt with time (i.e. Events)
+     * or left as IndexedEvents.
+     *
      * The result or error is passed to the callback.
      */
-    collect(cb) {
+    collect(cb, convertToTimes = false) {
         this._readFromCache((err, events) => {
+            let seriesEvents;
+            if (!convertToTimes) {
+                seriesEvents = events;
+            } else {
+                seriesEvents = events.map(event => {
+                    if (event instanceof IndexedEvent) {
+                        return new Event(event.index().begin(), event.data());
+                    } else {
+                        return event;
+                    }
+                });
+            }
             if (!err) {
                 const series = new TimeSeries({
                     name: this._index.toString(),
                     meta: {},
                     index: this._index,
-                    events: events
+                    events: seriesEvents
                 });
                 if (cb) {
                     cb(series);

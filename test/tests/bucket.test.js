@@ -12,15 +12,15 @@
 /* eslint no-unused-expressions: 0 */
 /* eslint-disable max-len */
 
-import {expect} from "chai";
+import { expect } from "chai";
 import _ from "underscore";
-import {Event} from "../../src/event";
+import { Event, IndexedEvent } from "../../src/event";
 import TimeRange from "../../src/range";
 import Generator from "../../src/generator.js";
 import Aggregator from "../../src/aggregator";
 import Collector from "../../src/collector";
 import Binner from "../../src/binner";
-import {max, avg, sum, count, difference, derivative} from "../../src/functions";
+import { max, avg, sum, count, difference, derivative } from "../../src/functions";
 
 const sept2014Data = {
     name: "traffic",
@@ -483,6 +483,29 @@ describe("Buckets", () => {
 
             // Done
             hourlyCollection.done();
+
+            done();
+        });
+
+        it("should be able to collect IndexedEvent", done => {
+            const events = [];
+            events.push(new IndexedEvent("5m-4818240", {in: 11, out: 55}));
+            events.push(new IndexedEvent("5m-4818241", {in: 31, out: 16}));
+            events.push(new IndexedEvent("5m-4818242", {in: 56, out: 22}));
+            events.push(new IndexedEvent("5m-4818243", {in: 73, out: 18}));
+            const collection = {};
+
+            const collector = new Collector("7d", (series) => {
+                collection[series.index().asString()] = series;
+            }, true);
+
+            // Add events
+            _.each(events, (event) => {
+                collector.addEvent(event);
+            });
+
+            // Done
+            collector.done();
 
             done();
         });

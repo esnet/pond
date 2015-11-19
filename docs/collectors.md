@@ -52,6 +52,20 @@ For 2/14/2014 8am-9am:
 }
 ```
 
+### Converting IndexedEvents
+
+We can also add `IndexedEvents` to the collector and the resulting `TimeSeries` will associate indexes (such as "30s-123234") with data, and `series.at(i)` will return an `IndexedEvent` back as expected. This can be nice if the result will be represented as a bar chart, for example.
+
+However, there are times when you would like to convert these to times. One such time is if you have a large number of events being collected into the `TimeSeries` and want to visualize that series. In this case it is faster for the visualization code to process times rather than convert Index strings to times.
+
+To achieve this conversion, simply pass `true` as the third argument to the `Collector` constructor, for example:
+
+```js
+const collector = new Collector("7d", series => {
+    collection[series.index().asString()] = series;
+}, true);
+```
+
 ## Combining aggregation and collection
 
 In this example we have a series of 30 sec events and we want to create daily blocks of data, each containing hourly avg values. To do this we'll use an aggregator to take our 30 sec events and output averages for each hour. Then we'll use a collector to collect together those events into daily series.
