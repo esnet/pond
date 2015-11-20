@@ -27,7 +27,7 @@ import Collectors from "./collectors.jsx";
 import Binners from "./binners.jsx";
 import Rollup from "./rollup.jsx";
 
-const {Route, DefaultRoute} = Router;
+const { Route, DefaultRoute } = Router;
 
 const routes = (
     <Route path="/" handler={App}>

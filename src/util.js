@@ -32,7 +32,7 @@ const units = {
  */
 export default {
 
-    rangeFromIndexString: function (index, utc) {
+    rangeFromIndexString(index, utc) {
         const isUTC = !_.isUndefined(utc) ? utc : true;
         const parts = index.split("-");
 
@@ -110,7 +110,7 @@ export default {
      * naming conventions:
      * http://momentjs.com/docs/#/displaying/format/
      */
-    niceIndexString: function (index, format) {
+    niceIndexString(index, format) {
         let t;
 
         const parts = index.split("-");

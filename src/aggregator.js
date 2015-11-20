@@ -70,9 +70,6 @@ export default class Aggregator {
         //
 
         bucket.addEvent(event, err => {
-            if (err) {
-                console.error("Could not add value to bucket:", err);
-            }
             if (cb) {
                 cb(err);
             }

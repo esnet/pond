@@ -24,7 +24,7 @@ const data = {
         [1400425947000, 52, "ok"],
         [1400425948000, 18, "ok"],
         [1400425949000, 26, "fail"],
-        [1400425950000, 93, "offline"],
+        [1400425950000, 93, "offline"]
     ]
 };
 
@@ -36,7 +36,7 @@ const indexedData = {
         [1400425947000, 52, "ok"],
         [1400425948000, 18, "ok"],
         [1400425949000, 26, "fail"],
-        [1400425950000, 93, "offline"],
+        [1400425950000, 93, "offline"]
     ]
 };
 
@@ -144,7 +144,7 @@ const interfaceData = {
         [1400425947000, 52, 34],
         [1400425948000, 18, 13],
         [1400425949000, 26, 67],
-        [1400425950000, 93, 91],
+        [1400425950000, 93, 91]
     ]
 };
 
@@ -179,7 +179,7 @@ const bisectTestData = {
         [moment("2012-01-11 04:00", fmt).valueOf(), 55],
         [moment("2012-01-11 05:00", fmt).valueOf(), 66],
         [moment("2012-01-11 06:00", fmt).valueOf(), 77],
-        [moment("2012-01-11 07:00", fmt).valueOf(), 88],
+        [moment("2012-01-11 07:00", fmt).valueOf(), 88]
     ]
 };
 
@@ -190,7 +190,7 @@ const trafficDataIn = {
         [1400425947000, 52],
         [1400425948000, 18],
         [1400425949000, 26],
-        [1400425950000, 93],
+        [1400425950000, 93]
     ]
 };
 
@@ -201,7 +201,7 @@ const trafficDataOut = {
         [1400425947000, 34],
         [1400425948000, 13],
         [1400425949000, 67],
-        [1400425950000, 91],
+        [1400425950000, 91]
     ]
 };
 
@@ -212,7 +212,7 @@ const partialTraffic1 = {
         [1400425947000, 34],
         [1400425948000, 13],
         [1400425949000, 67],
-        [1400425950000, 91],
+        [1400425950000, 91]
     ]
 };
 
@@ -223,7 +223,7 @@ const partialTraffic2 = {
         [1400425951000, 65],
         [1400425952000, 86],
         [1400425953000, 27],
-        [1400425954000, 72],
+        [1400425954000, 72]
     ]
 };
 
@@ -244,7 +244,7 @@ describe("TimeSeries", () => {
             events.push(new Event(new Date(2015, 8, 1), {value: 14}));
             const series = new TimeSeries({
                 name: "events",
-                events: events
+                events
             });
             expect(series.size()).to.equal(2);
             done();
@@ -253,7 +253,7 @@ describe("TimeSeries", () => {
             const events = [];
             const series = new TimeSeries({
                 name: "events",
-                events: events
+                events
             });
             expect(series.size()).to.equal(0);
             done();
@@ -322,7 +322,7 @@ describe("TimeSeries", () => {
                     [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
                     [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
                     [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
-                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}]
                 ]
             });
             expect(series.at(0).get("NASA_north").in).to.equal(100);
@@ -337,7 +337,7 @@ describe("TimeSeries", () => {
             events.push(new Event(new Date(2015, 9, 1), {NASA_north: {in: 400, out: 800}, NASA_south: {in: 155, out: 175}}));
             const series = new TimeSeries({
                 name: "Map traffic",
-                events: events
+                events
             });
             expect(series.at(0).get("NASA_north").in).to.equal(100);
             expect(series.at(3).get("NASA_south").out).to.equal(175);
@@ -392,7 +392,7 @@ describe("TimeSeries", () => {
                     [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
                     [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
                     [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
-                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}]
                 ]
             });
             expect(series.sum("NASA_north", d => d.in)).to.equal(1000);
@@ -425,7 +425,7 @@ describe("TimeSeries", () => {
                     [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
                     [1400425952000, {in: 200, out: 400}, {in: 146, out: 182}],
                     [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
-                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}]
                 ]
             });
             expect(series.max("NASA_south", d => d.out)).to.equal(182);
@@ -446,7 +446,7 @@ describe("TimeSeries", () => {
                     [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
                     [1400425952000, {in: 200, out: 400}, {in: 146, out: 182}],
                     [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
-                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}]
                 ]
             });
             expect(series.min("NASA_south", d => d.out)).to.equal(135);
@@ -471,7 +471,7 @@ describe("TimeSeries", () => {
                     [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
                     [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
                     [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
-                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+                    [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}]
                 ]
             });
             expect(series.avg("NASA_north", d => d.in)).to.equal(250);
@@ -498,7 +498,7 @@ describe("TimeSeries", () => {
                     [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
                     [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
                     [1400425953000, {in: 400, out: 600}, {in: 147, out: 158}],
-                    [1400425954000, {in: 800, out: 800}, {in: 155, out: 175}],
+                    [1400425954000, {in: 800, out: 800}, {in: 155, out: 175}]
                 ]
             });
             expect(series.median("NASA_north", d => d.in)).to.equal(300);
@@ -540,7 +540,7 @@ describe("TimeSeries", () => {
                     [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
                     [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
                     [1400425953000, {in: 400, out: 600}, {in: 147, out: 158}],
-                    [1400425954000, {in: 800, out: 800}, {in: 155, out: 175}],
+                    [1400425954000, {in: 800, out: 800}, {in: 155, out: 175}]
                 ]
             });
             expect(series.stdev("NASA_south", d => d.out)).to.equal(15.435349040433131);

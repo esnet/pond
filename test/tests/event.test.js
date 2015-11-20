@@ -12,8 +12,8 @@
 /* eslint no-unused-expressions: 0 */
 /* eslint-disable max-len */
 
-import {expect} from "chai";
-import {Event, TimeRangeEvent, IndexedEvent} from "../../src/event.js";
+import { expect } from "chai";
+import { Event, TimeRangeEvent, IndexedEvent } from "../../src/event.js";
 import TimeRange from "../../src/range.js";
 import Index from "../../src/index.js";
 

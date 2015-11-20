@@ -64,9 +64,6 @@ export default class Collector {
         const t = event.timestamp();
         const bucket = this.bucket(t);
         bucket.addEvent(event, err => {
-            if (err) {
-                console.error("Could not add value to bucket:", err);
-            }
             if (cb) {
                 cb(err);
             }

@@ -141,7 +141,7 @@ const sept2014Data = {
         [1409932800000, 86],
         [1409936400000, 65],
         [1409940000000, 93],
-        [1409943600000, 35],
+        [1409943600000, 35]
     ]
 };
 
@@ -616,7 +616,7 @@ describe("Resample bin fitting", () => {
         it("should not return a result for two points in the same bucket", done => {
             const input = [
                 new Event(1386369693000, 141368641534364),
-                new Event(1386369719000, 141368891281597),
+                new Event(1386369719000, 141368891281597)
             ];
 
             const result = {};
@@ -643,7 +643,7 @@ describe("Resample bin fitting", () => {
         it("should calculate the correct derivative", done => {
             const input = [
                 new Event(89000, 100),
-                new Event(181000, 200),
+                new Event(181000, 200)
             ];
 
             const result = {};
