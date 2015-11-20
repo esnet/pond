@@ -16,7 +16,11 @@
     "start-website": "webpack-dev-server --content-base website/ --config webpack.website.config.js",
     "start-tester": "webpack-dev-server --config webpack.test.config.js --content-base ./devserver --port 9500 --colors"
   },
-  "pre-commit": ["lint", "test-only", "build"],
+  "pre-commit": [
+    "lint",
+    "test-only",
+    "build"
+  ],
   "babel": {
     "optional": [
       "runtime",
@@ -31,10 +35,10 @@
   },
   "license": "BSD-3-Clause-LBNL",
   "dependencies": {
+    "babel-runtime": "~5.8.3",
     "immutable": "^3.6.4",
     "moment": "^2.9.0",
-    "underscore": "^1.8.2",
-    "babel-runtime": "~5.8.3"
+    "underscore": "^1.8.2"
   },
   "devDependencies": {
     "@esnet/react-timeseries-charts": "^0.3.2",
