@@ -1,4 +1,4 @@
-[![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond) [![npm version](https://badge.fury.io/js/%40esnet%2Fpond.svg)](https://badge.fury.io/js/%40esnet%2Fpond)
+[![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond) [![npm version](https://badge.fury.io/js/pondjs.svg)](https://badge.fury.io/js/pondjs)
 
 ----
 
