@@ -25,7 +25,7 @@ import {
     YAxis,
     ScatterChart,
     BarChart,
-    Resizable } from "@esnet/react-timeseries-charts";
+    Resizable } from "react-timeseries-charts";
 
 const text = require("raw!../../docs/rollup.md");
 
