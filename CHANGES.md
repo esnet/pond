@@ -10,3 +10,14 @@
  * Began work on ability to do things like sum a series or isolate columns of a series.
  * Website update as well as uniform linting
 
+### 0.2.1
+
+ * Fixed an issue with merge.
+
+### 0.2.0
+
+ * You can either merge two series with different columns together, or same columns and different times.
+
+```
+const trafficSeries = TimeSeries.merge("traffic", [inTraffic, outTraffic]);
+```
