@@ -1,5 +1,5 @@
 {
-  "name": "@esnet/pond",
+  "name": "pondjs",
   "version": "0.3.0",
   "description": "A timeseries library build on top of immutable.js",
   "options": {

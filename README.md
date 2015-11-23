@@ -38,7 +38,7 @@ And then high level helper functions to:
 
 Pond will run in node.js (ideally using babel-node) or in the browser (ideally via webpack). Install from npm:
 
-    npm install @esnet/pond --save
+    npm install pondjs --save
 
 For further information see the [Getting started](http://software.es.net/pond/#/start) guide.
 

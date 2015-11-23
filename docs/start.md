@@ -3,7 +3,7 @@
 Pond will run in node.js or in the browser. Install from npm:
 
 ```cmdline
-npm install @esnet/pond --save
+npm install pondjs --save
 ```
 
 ### Client
@@ -16,7 +16,7 @@ On the server, it's best to use babel-node, though straight up node will general
 
 Here's a simple example, run with babel-node:
 
-    import {Index, TimeSeries} from "@esnet/pond";
+    import {Index, TimeSeries} from "pondjs";
 
     //Index example
     let index = new Index("1d-12345");
