@@ -12,7 +12,7 @@
 /* eslint no-unused-expressions: 0 */
 /* eslint-disable max-len */
 
-import {expect} from "chai";
+import { expect } from "chai";
 import moment from "moment";
 import TimeRange from "../../src/range.js";
 

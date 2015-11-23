@@ -11,6 +11,7 @@
 import moment from "moment";
 import _ from "underscore";
 import Bucket from "./bucket";
+import TimeRange from "./range";
 
 const units = {
     s: {label: "seconds", length: 1},
@@ -68,9 +69,18 @@ export default class Generator {
         return index;
     }
 
-    bucketIndexList(date1, date2) {
-        const pos1 = Generator.getBucketPosFromDate(date1, this._length);
-        const pos2 = Generator.getBucketPosFromDate(date2, this._length);
+    /**
+     * Get a list of Index strings, given either:
+     *   - Two dates
+     *   - A TimeRange
+     * Example output:
+     *   ["5m-4754394", "5m-4754395", ..., "5m-4754405"]
+     */
+    bucketIndexList(timerange) {
+        const pos1 =
+            Generator.getBucketPosFromDate(timerange.begin(), this._length);
+        const pos2 =
+            Generator.getBucketPosFromDate(timerange.end(), this._length);
         const indexList = [];
         if (pos1 <= pos2) {
             for (let pos = pos1; pos <= pos2; pos++) {
@@ -92,7 +102,8 @@ export default class Generator {
     }
 
     bucketList(date1, date2) {
-        const indexList = this.bucketIndexList(date1, date2);
+        const timerange = new TimeRange(date1, date2);
+        const indexList = this.bucketIndexList(timerange);
         return _.map(indexList, (index) => new Bucket(index));
     }
 }

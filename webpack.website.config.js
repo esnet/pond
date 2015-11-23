@@ -9,7 +9,7 @@ module.exports = {
     },
 
     output: {
-        filename: "./website/website-bundle.js"
+        filename: "website-bundle.js"
     },
 
     module: {
@@ -20,6 +20,12 @@ module.exports = {
             { test: /\.json$/, loader: "json-loader" }
         ]
     },
+
+    externals: [
+        {
+            window: "window"
+        }
+    ],
 
     resolve: {
         extensions: ["", ".js", ".jsx", ".json"]

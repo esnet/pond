@@ -12,9 +12,10 @@ import Generator from "./generator";
 
 export default class Collector {
 
-    constructor(size, observer) {
+    constructor(size, observer, convertToTimes = false) {
         this._generator = new Generator(size);
         this._bucket = null;
+        this._convertToTimes = convertToTimes;
 
         // Callback
         this._observer = observer;
@@ -35,7 +36,7 @@ export default class Collector {
                     if (this._observer) {
                         this._observer(series);
                     }
-                });
+                }, this._convertToTimes);
             }
             this._bucket = this._generator.bucket(d);
         }
@@ -52,7 +53,7 @@ export default class Collector {
                     this._observer(series);
                 }
                 this._bucket = null;
-            });
+            }, this._convertToTimes);
         }
     }
 
@@ -63,9 +64,6 @@ export default class Collector {
         const t = event.timestamp();
         const bucket = this.bucket(t);
         bucket.addEvent(event, err => {
-            if (err) {
-                console.error("Could not add value to bucket:", err);
-            }
             if (cb) {
                 cb(err);
             }

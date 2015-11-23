@@ -12,14 +12,15 @@
 /* eslint no-unused-expressions: 0 */
 /* eslint-disable max-len */
 
-import {expect} from "chai";
+import { expect } from "chai";
 import _ from "underscore";
-import {Event} from "../../src/event";
+import { Event, IndexedEvent } from "../../src/event";
+import TimeRange from "../../src/range";
 import Generator from "../../src/generator.js";
 import Aggregator from "../../src/aggregator";
 import Collector from "../../src/collector";
 import Binner from "../../src/binner";
-import {max, avg, sum, count, difference, derivative} from "../../src/functions";
+import { max, avg, sum, count, difference, derivative } from "../../src/functions";
 
 const sept2014Data = {
     name: "traffic",
@@ -140,7 +141,7 @@ const sept2014Data = {
         [1409932800000, 86],
         [1409936400000, 65],
         [1409940000000, 93],
-        [1409943600000, 35],
+        [1409943600000, 35]
     ]
 };
 
@@ -150,26 +151,45 @@ describe("Buckets", () => {
         // Test date: Sat Mar 14 2015 07:32:22 GMT-0700 (PDT)
         const d = Date.UTC(2015, 2, 14, 7, 32, 22);
         const generator = new Generator("5m");
-        it("should have the correct index", done => {
+        it("should generate correct bucket", done => {
             const b = generator.bucket(d);
             const expected = "5m-4754394";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
+        it("should have the correct index string", done => {
+            const indexString = generator.bucketIndex(d);
+            const expected = "5m-4754394";
+            expect(indexString).to.equal(expected);
+            done();
+        });
+
         const d1 = Date.UTC(2015, 2, 14, 7, 30, 0);
         const d2 = Date.UTC(2015, 2, 14, 8, 29, 59);
 
-        it("should have the correct index list for a date range", done => {
-            const bucketList = generator.bucketList(d1, d2);
+        it("should have the correct bucket list for a date range", done => {
+            const timerange = new TimeRange(d1, d2);
+            const bucketList = generator.bucketList(timerange);
             const expectedBegin = "5m-4754394";
             const expectedEnd = "5m-4754405";
-            // _.each(bucketList, (b) => {
-            //     console.log("   -", b.index().asString(), b.index().asTimerange().humanize())
-            // })
+
             expect(bucketList.length).to.equal(12);
             expect(bucketList[0].index().asString()).to.equal(expectedBegin);
             expect(bucketList[bucketList.length - 1].index().asString()).to.equal(expectedEnd);
+            done();
+        });
+
+        it("should have the correct index string list for a TimeRange", done => {
+            const timerange = new TimeRange(d1, d2);
+            const indexList = generator.bucketIndexList(timerange);
+            const expectedBegin = "5m-4754394";
+            const expectedEnd = "5m-4754405";
+
+            expect(indexList.length).to.equal(12);
+            expect(indexList[0]).to.equal(expectedBegin);
+            expect(indexList[indexList.length - 1]).to.equal(expectedEnd);
+
             done();
         });
     });
@@ -420,7 +440,7 @@ describe("Buckets", () => {
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {cpu1: 24.5, cpu2: 85.2}));
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {cpu1: 45.2, cpu2: 91.6}));
 
-        it("should calculate the correct sum for the two 1hr buckets", done => {
+        it("should collect together 5 events using Date objects and two data fields", done => {
             const collection = {};
 
             const hourlyCollection = new Collector("1h", (series) => {
@@ -440,6 +460,52 @@ describe("Buckets", () => {
 
             expect(collection["1h-396199"].size()).to.equal(3);
             expect(collection["1h-396200"].size()).to.equal(2);
+
+            done();
+        });
+
+        it("should be able to collect events using a ms timestamp", done => {
+            const events = [];
+            events.push(new Event(1445449170000, {in: 1516472753.3333333, out: 2449781785.0666666}));
+            events.push(new Event(1445449200000, {in: 2352267287.733333, out: 2383241021.0666666}));
+            events.push(new Event(1445449230000, {in: 5602383779.466666, out: 2270295356.2666664}));
+            events.push(new Event(1445449260000, {in: 7822001988.533334, out: 2566206616.7999997}));
+            const collection = {};
+
+            const hourlyCollection = new Collector("1h", (series) => {
+                collection[series.index().asString()] = series;
+            });
+
+            // Add events
+            _.each(events, (event) => {
+                hourlyCollection.addEvent(event);
+            });
+
+            // Done
+            hourlyCollection.done();
+
+            done();
+        });
+
+        it("should be able to collect IndexedEvent", done => {
+            const events = [];
+            events.push(new IndexedEvent("5m-4818240", {in: 11, out: 55}));
+            events.push(new IndexedEvent("5m-4818241", {in: 31, out: 16}));
+            events.push(new IndexedEvent("5m-4818242", {in: 56, out: 22}));
+            events.push(new IndexedEvent("5m-4818243", {in: 73, out: 18}));
+            const collection = {};
+
+            const collector = new Collector("7d", (series) => {
+                collection[series.index().asString()] = series;
+            }, true);
+
+            // Add events
+            _.each(events, (event) => {
+                collector.addEvent(event);
+            });
+
+            // Done
+            collector.done();
 
             done();
         });
@@ -550,7 +616,7 @@ describe("Resample bin fitting", () => {
         it("should not return a result for two points in the same bucket", done => {
             const input = [
                 new Event(1386369693000, 141368641534364),
-                new Event(1386369719000, 141368891281597),
+                new Event(1386369719000, 141368891281597)
             ];
 
             const result = {};
@@ -577,7 +643,7 @@ describe("Resample bin fitting", () => {
         it("should calculate the correct derivative", done => {
             const input = [
                 new Event(89000, 100),
-                new Event(181000, 200),
+                new Event(181000, 200)
             ];
 
             const result = {};

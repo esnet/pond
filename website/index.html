@@ -4,40 +4,65 @@
 
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ESnet - Pond Timeseries library</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <meta name="description" content="This project contains Timeseries data structures, used within the ESnet visualization code.">
+    <meta name="author" content="tools@es.net">
+    <title>ESnet React Network diagrams</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootswatch/3.3.1/cerulean/bootstrap.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/styles/github.min.css" />
+    <link href="./styles/app.css" rel="stylesheet">
     <style>
         html { overflow-y:scroll; }
         body { padding-top:50px; }
-        h1, h2, h3, h4 { color: steelblue; }
-        .sidebar-heading {
-            text-transform: uppercase;
-            font-weight: 600;
-            font-size: 12px;
-        }
-        h2, h3 {
-            border-bottom: #DDD;
-            border-bottom-style: solid;
-            border-bottom-width: thin;
-        }
     </style>
+
 </head>
 
 <body>
-    <div class="container theme-showcase" role="main">
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">
+            Pond - Timeseries library
+          </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="http://www.es.net"><img alt="ESnet" width="32px" height="32px" src="./img/logo.png"></a>
+            <li><a href="https://github.com/esnet/pond/"><img alt="Github" width="32px" height="32px" src="./img/github.png"></a>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
         <div id="content">
         </div>
     </div>
 
     <!-- Load jQuery from CDN -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/highlight.min.js"></script>
-    <!-- Our application -->
-    <script src="website-bundle.js"></script>
 
+    <!-- Load Bootstrap from CDN -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/highlight.min.js"></script>
+
+    <!-- dev server stuff -->
+    <script src="http://localhost:8080/webpack-dev-server.js"></script>
+
+    <!-- Our website application -->
+    <script src="website-bundle.js"></script>
 </body>
 
 </html>

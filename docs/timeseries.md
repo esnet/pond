@@ -34,7 +34,7 @@ The format of the data is as follows:
   * **columns** - are necessary and give labels to the data in the points.
   * **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
    
-  As just hinted at, the time column may actually be either a time or a `TimeRange`, or a time range represented by an Index. By using an Index it is possible, for example, to refer to a specific month, for example:
+  As just hinted at, the time column may actually be either a time or a `TimeRange`, or a time range represented by an `Index`. By using an `Index` it is possible, for example, to refer to a specific month, for example:
 
 ```javascript
 var availabilityData = {
@@ -59,6 +59,36 @@ const series = new TimeSeries({
     events: events
 });
 ```
+
+### Nested data
+
+The values do not have to be simple types like the above examples. Here's an example where each value is itself an object with "in" and "out" keys:
+
+```javascript
+const series = new TimeSeries({
+    name: "Map Traffic",
+    columns: ["time", "NASA_north", "NASA_south"],
+    points: [
+        [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+        [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+        [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+        [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+    ]
+});
+```
+
+Complex data is stored in an Immutable structure. To get a value out of nested data like this you will get the Event you want (by row), as usual, and then use `get()` to fetch the value by column name. The result of this call will be a JSON copy of the Immutable data so you can query deeper in the usual way:
+
+```javascript
+series.at(0).get("NASA_north")["in"]  // 200`
+```
+
+It is then possible to use a value mapper function when calculating different properties. For example, to get the average "in" value of the NASA_north column:
+
+```javascript
+series.avg("NASA_north", d => d.in);  // 250
+```
+
 
 ---
 
@@ -154,35 +184,41 @@ Returns if the data is UTC or not. This is specified in the constructor as well.
 
 ### Statistics functions
 
-It is possible to get some basic statistics from a `TimeSeries`. We will add additional operators as needed. Currently supported operators are:
+It is possible to get some basic statistics from a `TimeSeries`. We will add additional operators as needed. Each takes in the column to calculate over. If not column is specified a column called "value" is assumed. A second optional argument can be supplied provide more sophisticated data access, especially in the case of nested data.
 
-#### sum(column)
+Currently supported operators are:
 
-Returns the sum of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value".
+#### sum(column, valueMapper)
 
-#### avg(column)
+Returns the sum of the Timeseries values for the given column.
 
-Returns an average of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value".
+#### avg(column, valueMapper)
 
-#### max(column)
+Returns an average of the Timeseries values for the given column.
 
-Returns the maximum value found in a given column. If a column is not supplied it assumes the column to be "value" We often use this to generate axis scales when charting the TimeSeries.
+```javascript
+series.avg("sensor", d => d.pressure);
+```
 
-#### min(column)
+#### max(column, valueMapper)
 
-Returns the minimum value found in a given column. If a column is not supplied it assumes the column to be "value". We often use this to generate axis scales when charting the TimeSeries.
+Returns the maximum value found in a given column. We often use this to generate axis scales when charting the TimeSeries.
 
-#### mean(column)
+#### min(column, valueMapper)
 
-Returns the mean of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value". This is the same as taking the avg().
+Returns the minimum value found in a given column. We often use this to generate axis scales when charting the TimeSeries.
 
-#### median(column)
+#### mean(column, valueMapper)
 
-Returns the median of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value".
+Returns the mean of the Timeseries values for the given column. This is the same as taking the avg().
 
-#### stddev(column)
+#### median(column, valueMapper)
 
-Returns the standard deviation of the Timeseries values for the given column. If a column is not supplied it assumes the column to be "value".
+Returns the median of the Timeseries values for the given column.
+
+#### stddev(column, valueMapper)
+
+Returns the standard deviation of the Timeseries values for the given column.
 
 ---
 
@@ -264,7 +300,7 @@ The result will look like this:
 
 ### Comparison static functions
 
-One of the nice things about the `TimeSeries` representation in Pond is that it is built on top of immutable data structures. For instance, if you have a `TimeSeries` and modify it, those `TimeSeries` will now have a different reference and noting that they have changed is trivial.
+One of the nice things about the `TimeSeries` representation in Pond is that it is built on top of immutable data structures (using Immutable.js). For instance, if you have a `TimeSeries` and modify it, those `TimeSeries` will now have a different reference and noting that they have changed is trivial.
 
 #### TimeSeries.equals(series1, series2) [Static]
 

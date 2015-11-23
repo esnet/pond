@@ -11,7 +11,7 @@
 import _ from "underscore";
 import Generator from "./generator";
 import TimeRange from "./range";
-import {Event} from "./event";
+import { Event } from "./event";
 
 /**
  * Bins a stream of events to a new stream of events with a fixed

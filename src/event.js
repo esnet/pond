@@ -13,6 +13,7 @@ import _ from "underscore";
 import Immutable from "immutable";
 import Index from "./index";
 import TimeRange from "./range";
+import { sum, avg } from "./functions";
 
 //
 // Util
@@ -33,10 +34,14 @@ function timestampFromArgs(arg1) {
 function dataFromArgs(arg1) {
     let data;
     if (_.isObject(arg1)) {
-        data = new Immutable.Map(arg1);
+        // Deeply convert the data to Immutable Map
+        data = new Immutable.fromJS(arg1);
     } else if (data instanceof Immutable.Map) {
+        // Copy reference to the data
         data = arg1;
     } else {
+        // Just add it to the value key of a new Map
+        // e.g. new Event(t, 25); -> t, {value: 25}
         data = new Immutable.Map({value: arg1});
     }
     return data;
@@ -140,13 +145,22 @@ export class Event {
     }
 
     /**
-     * Get specific data out of the Event
+     * Get specific data out of the Event. The data will be converted
+     * to a Javascript object.
      * @param  {string} key Key to lookup, or "value" if not specified.
      * @return {Object}     The data associated with this key
      */
     get(key) {
         const k = key || "value";
-        return this._data.get(k);
+        const v = this._data.get(k);
+        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
+            return v.toJS();
+        }
+        return v;
+    }
+
+    value(key) {
+        return this.get(key);
     }
 
     stringify() {
@@ -269,6 +283,63 @@ export class Event {
             return Event.mergeTimeRangeEvents(events);
         } else if (events[0] instanceof IndexedEvent) {
             return Event.mergeIndexedEvents(events);
+        }
+    }
+
+    /**
+     * Takes a list of events and a reducer function and returns
+     * a new Event with the result, for each column. The reducer is
+     * of the form:
+     *     function sum(timerange, valueList) {
+     *         return calcValue;
+     *     }
+     */
+    static reduce(events, reducer) {
+        const data = {};
+        const t = events[0].timestamp();
+        _.each(events, event => {
+            if (!event instanceof Event) {
+                const msg = "Events being merged must have the same type";
+                throw new Error(msg);
+            }
+
+            if (t.getTime() !== event.timestamp().getTime()) {
+                const msg = "Events being summed must have the same timestamp";
+                throw new Error(msg);
+            }
+
+            const d = event.toJSON().data;
+            _.each(d, (val, key) => {
+                if (!_.has(data, key)) {
+                    data[key] = [];
+                }
+                data[key].push(val);
+            });
+        });
+
+        const result = {};
+        _.each(data, (valueList, key) => {
+            result[key] = reducer(null, valueList);
+        });
+
+        return new Event(t.getTime(), result);
+    }
+
+    static sum(events) {
+        if (events.length < 1) {
+            return;
+        }
+        if (events[0] instanceof Event) {
+            return Event.reduce(events, sum);
+        }
+    }
+
+    static avg(events) {
+        if (events.length < 1) {
+            return;
+        }
+        if (events[0] instanceof Event) {
+            return Event.reduce(events, avg);
         }
     }
 }
@@ -399,7 +470,15 @@ export class TimeRangeEvent {
      */
     get(key) {
         const k = key || "value";
-        return this._data.get(k);
+        const v = this._data.get(k);
+        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
+            return v.toJS();
+        }
+        return v;
+    }
+
+    value(key) {
+        return this.get(key);
     }
 }
 
@@ -549,6 +628,14 @@ export class IndexedEvent {
      */
     get(key) {
         const k = key || "value";
-        return this._data.get(k);
+        const v = this._data.get(k);
+        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
+            return v.toJS();
+        }
+        return v;
+    }
+
+    value(key) {
+        return this.get(key);
     }
 }
