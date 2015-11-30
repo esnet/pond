@@ -8,6 +8,13 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+// Chrome debugging
+import Immutable from "immutable";
+import installDevTools from "immutable-devtools";
+if (typeof window !== "undefined") {
+    installDevTools(Immutable);
+}
+
 // Primitives
 exports.Index = require("./lib/index.js");
 exports.TimeRange = require("./lib/range.js");
