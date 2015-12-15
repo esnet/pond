@@ -62,7 +62,6 @@ export default class Generator {
         return parseInt(dd /= length, 10);
     }
 
-
     bucketIndex(date) {
         const pos = Generator.getBucketPosFromDate(date, this._length);
         const index = `${this._size}-${pos}`;
@@ -96,14 +95,14 @@ export default class Generator {
      * for seconds, minutes, or hours. But days will be offset from
      * midnight to midnight, depending on local timezone.
      */
-    bucket(date) {
+    bucket(date, key) {
         const index = this.bucketIndex(date);
-        return new Bucket(index);
+        return new Bucket(index, key);
     }
 
-    bucketList(date1, date2) {
+    bucketList(date1, date2, key) {
         const timerange = new TimeRange(date1, date2);
         const indexList = this.bucketIndexList(timerange);
-        return _.map(indexList, (index) => new Bucket(index));
+        return _.map(indexList, (index) => new Bucket(index, key));
     }
 }

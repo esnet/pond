@@ -9,8 +9,16 @@
  */
 
 require("babel/polyfill");
+
+// Chrome debugging
+import Immutable from "immutable";
+import installDevTools from "immutable-devtools";
+if (typeof window !== "undefined") {
+    installDevTools(Immutable);
+}
+
 require("./tests/index.test.js");
 require("./tests/range.test.js");
 require("./tests/event.test.js");
-require("./tests/bucket.test.js");
+require("./tests/process.test.js");
 require("./tests/series.test.js");

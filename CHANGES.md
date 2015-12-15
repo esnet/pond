@@ -1,4 +1,23 @@
 
+### 0.4.0
+
+ * Support for processing chains. e.g.
+ 
+```
+    const processor = Processor()
+        .groupBy("channelName")
+        .aggregate("5m", avg)
+        .collect("1d", false, timeseries => {
+            // --> Output timeseries representing 1 day of 5 min averages
+        });
+```
+
+ * `Aggregators` and `collector` now support emitting events "always", and not just when the "next" bucket is created
+ * Processing function API has been cleaned up. To flush events, use `flush()` (`done()` and `sync()` are gone)
+ * Event internals are now an Immutable.map rather than using member variables that could be modified
+ * Events support keys to enable the ability to do groupBy operations. You can add a key to an `Event` with `setKey()`, and you'll get a new `Event` back which is the same as the old one, but with a key. You can query the key with, unsurprisingly, `key()`.
+ * `Groupers` are a new `Event` processor which takes an incoming event stream and emits the same event but with a key on it. This enables downstream processing, such as aggregation, to group based on the key.
+
 ### 0.3.0
 
  * Better support for nested objects:

@@ -34,6 +34,7 @@ exports.Bucket = require("./lib/bucket.js");
 exports.Generator = require("./lib/generator.js");
 exports.Aggregator = require("./lib/aggregator.js");
 exports.Collector = require("./lib/collector.js");
+exports.Derivative = require("./lib/derivative.js");
 exports.Binner = require("./lib/binner.js");
 
 // Util

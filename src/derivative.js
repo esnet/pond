@@ -15,19 +15,17 @@ import { Event } from "./event";
 
 /**
  * Bins a stream of events to a new stream of events with a fixed
- * frequency.
+ * frequency and then emits events which are the derivative of the
+ * incoming stream.
  */
-export default class Binner {
+export default class Derivative {
 
     constructor(options, observer) {
         if (!_.has(options, "window")) {
-            throw new Error("Binner: constructor needs 'window' in options");
+            throw new Error("Derivative: constructor needs 'window' in options");
         }
-        if (!_.has(options, "operator")) {
-            throw new Error("Binner: constructor needs 'operator' function in options");
-        }
+
         this._generator = new Generator(options.window);
-        this._operator = options.operator;
         this._fieldSpec = options.fieldSpec;
         this._observer = observer;
 
@@ -111,7 +109,7 @@ export default class Binner {
         const deleteList = [];
         _.each(this._activeBucketList, (bucket, activeKey) => {
             if (bucket.end() < time) {
-                bucket.aggregate(this._operator, this._fieldSpec, e => {
+                bucket.derivative(this._fieldSpec, e => {
                     if (!_.isUndefined(e) && this._observer) {
                         this._observer(e);
                     }
@@ -119,7 +117,9 @@ export default class Binner {
                 });
             }
         });
-        _.each(deleteList, activeKey => delete this._activeBucketList[activeKey]);
+        _.each(deleteList, activeKey =>
+            delete this._activeBucketList[activeKey]
+        );
 
         this._lastTime[key] = time;
         this._lastValue[key] = value;
@@ -130,9 +130,9 @@ export default class Binner {
      */
     flush() {
         _.each(this._activeBucketList, bucket => {
-            bucket.aggregate(this._operator,  this._fieldSpec, e => {
+            bucket.derivative(this._fieldSpec, event => {
                 if (this._observer) {
-                    this._observer(e);
+                    this._observer(event);
                 }
             });
         });
