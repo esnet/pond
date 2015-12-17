@@ -8,9 +8,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+/* eslint "no-var": 0 */
+
 // Chrome debugging
-import Immutable from "immutable";
-import installDevTools from "immutable-devtools";
+var Immutable = require("immutable");
+var installDevTools = require("immutable-devtools");
 if (typeof window !== "undefined") {
     installDevTools(Immutable);
 }
