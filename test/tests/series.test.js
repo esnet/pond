@@ -15,7 +15,7 @@
 import moment from "moment";
 import { expect } from "chai";
 import { Event } from "../../src/event.js";
-import { TimeSeries } from "../../src/series.js";
+import TimeSeries from "../../src/series.js";
 
 const data = {
     name: "traffic",

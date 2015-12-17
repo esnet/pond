@@ -4,6 +4,7 @@
 
 A library build on top of immutable.js to provide time-based data structures and processing within ESnet tools. For data structures it unifies the use of time ranges, events and timeseries. For processing it provides a chained operations interface to aggregate and collect streams of events.
 
+We are still developing Pond as it integrates further into our code, so it may change or be incomplete in parts. That said it has a growing collection of tests and we will strive not to break those without careful consideration. See the CHANGES.md document for version updates.
 
 ## Rational
 

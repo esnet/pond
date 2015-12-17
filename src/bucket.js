@@ -10,7 +10,7 @@
 
 import _ from "underscore";
 import { Event, IndexedEvent } from "./event";
-import { TimeSeries } from "./series";
+import TimeSeries from "./series";
 
 import Index from "./index";
 

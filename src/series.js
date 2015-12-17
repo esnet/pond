@@ -90,7 +90,7 @@ function resolveIndex(index, size, defaultIndex) {
  * The timerange associated with a TimeSeries is simply the bounds of the
  * events within it (i.e. the min and max times).
  */
-export class TimeSeries {
+class TimeSeries {
 
     constructor(arg) {
         this._name = null;
@@ -724,3 +724,6 @@ export class TimeSeries {
         return TimeSeries.map(options, seriesList, Event.merge);
     }
 }
+
+export default TimeSeries;
+
