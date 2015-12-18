@@ -443,8 +443,9 @@ describe("Buckets", () => {
         });
 
         it("should calculate the correct count with grouped events", done => {
+            const results = {};
             const aggregate1hMax = new Aggregator({window: "1h", operator: max}, event => {
-                console.log("       **", `${event.index()}`, event.get());
+                results[`${event.index()} ${event.key()}`] = event.get();
             });
             const groupByName = new Grouper({
                 groupBy: "name"
@@ -460,6 +461,44 @@ describe("Buckets", () => {
             // Done
             aggregate1hMax.flush();
 
+            expect(results["1h-396199 a"]).to.equal(3);
+            expect(results["1h-396199 b"]).to.equal(5);
+            expect(results["1h-396200 a"]).to.equal(5);
+            expect(results["1h-396200 b"]).to.equal(7);
+
+            done();
+        });
+
+    });
+
+    describe("Aggregator tests with duplicates", () => {
+        const dupEvents = [];
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), 9));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), 9));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), 6));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), 6));
+
+        it("should be able to handle duplicate events", done => {
+            const avgEvents = {};
+
+            const AvgAggregator = new Aggregator({
+                window: "1h",
+                operator: avg,
+                emitFrequency: "always"
+            });
+
+            AvgAggregator.onEmit(event => {
+                avgEvents[event.index().asString()] = event;
+            });
+
+            // Add events
+            _.each(dupEvents, (event) => {
+                AvgAggregator.addEvent(event);
+            });
+
+            expect(avgEvents["1h-396199"].get()).to.equal(6);
             done();
         });
     });

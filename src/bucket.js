@@ -23,19 +23,28 @@ class MemoryCacheStrategy {
         // nothing for memory cache
     }
 
-    addEvent(key, event, cb) {
-        if (!_.has(this._cache, key)) {
-            this._cache[key] = [];
+    addEvent(name, event, cb) {
+        let eventKey = name;
+        if (event instanceof Event) {
+            eventKey = `${event.timestamp().getTime()}`;
+        } else if (event instanceof IndexedEvent) {
+            eventKey = `${event.index()}`;
         }
-        this._cache[key].push(event);
+
+        if (!_.has(this._cache, name)) {
+            this._cache[name] = {};
+        }
+
+        this._cache[name][eventKey] = event;
 
         // memory cache never fails (we assume)
         cb(null);
     }
 
-    getEvents(key, cb) {
-        if (_.has(this._cache, key)) {
-            cb(null, this._cache[key]);
+    getEvents(name, cb) {
+        if (_.has(this._cache, name)) {
+            const events = _.map(this._cache[name], event => event);
+            cb(null, events);
         } else {
             cb("Unknown cache key", null);
         }
