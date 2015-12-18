@@ -16,10 +16,9 @@ import Generator from "./generator";
  *
  *     - 'window'        - size of the window to collect over (e.g. "1d")
  *     - 'convertToTimes'- to transform IndexedEvents to Events during collection
- *     - 'emitFrequency' - (optional) Either:
- *                         "always" - emit a series on every change
- *                         "next"   - emit a series just when we advance to
- *                                    the next bucket
+ *     - 'emit'         - (optional) Rate to emit events. Either:
+ *                             "always" - emit an event on every change
+ *                             "next" - just when we advance to the next bucket
  *
  * TODO: It might make more sense to make an event transformer for
  *       converting between a stream of IndexedEvents to Events...
@@ -30,7 +29,7 @@ export default class Collector {
         if (!_.has(options, "window")) {
             throw new Error("Collector: constructor needs 'window' in options");
         }
-        this._emitFrequency = options.emitFrequency || "next";
+        this._emitFrequency = options.emit || "next";
         if (["always", "next"].indexOf(this._emitFrequency) === -1) {
             throw new Error("Collector: emitFrequency options should be 'always' or 'next'");
         }

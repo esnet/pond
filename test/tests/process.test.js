@@ -486,7 +486,7 @@ describe("Buckets", () => {
             const AvgAggregator = new Aggregator({
                 window: "1h",
                 operator: avg,
-                emitFrequency: "always"
+                emit: "always"
             });
 
             AvgAggregator.onEmit(event => {
@@ -869,7 +869,7 @@ describe("Process chains", () => {
         it("should generate the correct keys for column based groupBy..", done => {
             const results = {};
             let resultCount = 0;
-            const processChain = Processor({emitFrequency: "always"})
+            const processChain = Processor({emit: "always"})
                 .groupBy("name")
                 .aggregate("1h", avg, ["value"])
                 .out(event => {
@@ -895,7 +895,7 @@ describe("Process chains", () => {
         it("should collect together 5 events using a process chain", done => {
             const collection = {};
             let emitCount = 0;
-            const processChain = Processor({emitFrequency: "always"})
+            const processChain = Processor({emit: "always"})
                 .groupBy("name")
                 .collect("1h", false, series => {
                     collection[series.index().asString()] = series;

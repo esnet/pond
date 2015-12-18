@@ -62,18 +62,18 @@ class Processor {
 
     /**
      * Options:
-     *     emitFrequency is either:
-     *         - "always" - emit always when a new input event arrives
-     *         - "next"   - emit when an event enters the next bucket
+     *     - 'emit'      - (optional) Rate to emit events. Either:
+     *                     "always" - emit an event on every change
+     *                     "next" - just when we advance to the next bucket
      */
     constructor(options) {
         this._processingList = [];
         this._current = null;
-        this._emitFrequency = "next";
+        this._emit = "next";
         this._end = false;
         if (options) {
-            if (_.has(options, "emitFrequency")) {
-                this._emitFrequency = options.emitFrequency;
+            if (_.has(options, "emit")) {
+                this._emit = options.emit;
             }
         }
     }
@@ -115,12 +115,12 @@ class Processor {
         if (this._end) {
             throw new Error("Cannot chain a aggregator after the chain has ended.");
         }
-        const emitFrequency = this._emitFrequency;
+        const emit = this._emit;
         const aggregator = new Aggregator({
             window,
             operator,
             fieldSpec,
-            emitFrequency
+            emit
         });
         this._processingList.push(aggregator);
         if (this._current) {
@@ -150,11 +150,11 @@ class Processor {
         if (this._end) {
             throw new Error("Cannot chain a collector after the chain has ended.");
         }
-        const emitFrequency = this._emitFrequency;
+        const emit = this._emit;
         const collector = new Collector({
             window,
             convertToTimes,
-            emitFrequency
+            emit
         }, observer);
         this._processingList.push(collector);
         if (this._current) {
