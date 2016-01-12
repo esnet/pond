@@ -60,24 +60,20 @@ export default React.createClass({
         //
         // Setup our aggregators
         //
- 
+
         this.fiveMinuteAggregator =
-            new Aggregator({
-                window: "5m", operator: avg
-            }, fiveMinuteAvg => {
+            new Aggregator({window: "5m", operator: avg}, event => {
                 const events = this.state.fiveMinuteAvg;
-                events.push(fiveMinuteAvg);
-                this.setState({fiveMinuteAvg});
+                events.push(event);
+                this.setState({fiveMinuteAvg: events});
             });
 
-        this.hourlyAggregator = new Aggregator({
-            window: "1h",
-            operator: avg
-        }, hourlyAvg => {
-            const events = this.state.hourlyAvg;
-            events.push(hourlyAvg);
-            this.setState({hourlyAvg});
-        });
+        this.hourlyAggregator =
+            new Aggregator({window: "1h", operator: avg}, event => {
+                const events = this.state.hourlyAvg;
+                events.push(event);
+                this.setState({hourlyAvg: events});
+            });
 
         //
         // Setup our interval to advance the time and generate raw events
@@ -128,14 +124,22 @@ export default React.createClass({
             opacity: 0.5
         };
 
+        //
         // Create a TimeSeries for our raw, 5min and hourly events
+        //
+
         const eventSeries =
-            new TimeSeries({name: "raw", events: this.state.events.toArray()});
+            new TimeSeries({
+                name: "raw",
+                events: this.state.events.toArray()
+            });
+
         const fiveMinuteSeries =
             new TimeSeries({
                 name: "five minute avg",
                 events: this.state.fiveMinuteAvg.toArray()
             });
+
         const hourlySeries =
             new TimeSeries({
                 name: "hourly",
