@@ -13,7 +13,7 @@ import Highlighter from "./highlighter";
 import Markdown from "react-markdown";
 import Ring from "ringjs";
 
-import {TimeSeries} from "../../src/series";
+import TimeSeries from "../../src/series";
 import TimeRange from "../../src/range";
 import {Event} from "../../src/event";
 import {avg} from "../../src/functions";
@@ -60,18 +60,23 @@ export default React.createClass({
         //
         // Setup our aggregators
         //
-
+ 
         this.fiveMinuteAggregator =
-            new Aggregator("5m", avg, (index, event) => {
+            new Aggregator({
+                window: "5m", operator: avg
+            }, fiveMinuteAvg => {
                 const events = this.state.fiveMinuteAvg;
-                events.push(event);
-                this.setState({fiveMinuteAvg: events});
+                events.push(fiveMinuteAvg);
+                this.setState({fiveMinuteAvg});
             });
 
-        this.hourlyAggregator = new Aggregator("1h", avg, (index, event) => {
+        this.hourlyAggregator = new Aggregator({
+            window: "1h",
+            operator: avg
+        }, hourlyAvg => {
             const events = this.state.hourlyAvg;
-            events.push(event);
-            this.setState({hourlyAvg: events});
+            events.push(hourlyAvg);
+            this.setState({hourlyAvg});
         });
 
         //
@@ -112,9 +117,9 @@ export default React.createClass({
 
         const hourlyStyle = {
             value: {
-                normal: {fill: "#80AD62", opacity: 0.2},
-                highlight: {fill: "#80AD62", opacity: 0.5},
-                selected: {fill: "#80AD62", opacity: 0.5}
+                normal: {fill: "#AD62A2", opacity: 0.2},
+                highlight: {fill: "#AD62A2", opacity: 0.5},
+                selected: {fill: "#AD62A2", opacity: 0.5}
             }
         };
 
