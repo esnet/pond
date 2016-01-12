@@ -850,14 +850,18 @@ describe("Process chains", () => {
         it("should generate the correct keys for column based groupBy..", done => {
             const results = {};
             let resultCount = 0;
+
             const processChain = Processor()
                 .groupBy("name")
                 .aggregate("1h", avg, ["value"])
                 .out(event => {
+                    console.log("out", event);
                     results[`${event.index()}::${event.key()}`] = `${event}`;
                     resultCount++;
                 });
+
             processChain.addEvents(groupedEvents);
+
             expect(resultCount).to.equal(2);
             expect(`${results["1h-396199::a"]}`)
                 .to.equal(`{"index":"1h-396199","data":{"value":2},"key":"a"}`);

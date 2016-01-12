@@ -26,6 +26,7 @@ import Aggregators from "./aggregators.jsx";
 import Collectors from "./collectors.jsx";
 import Binners from "./binners.jsx";
 import Rollup from "./rollup.jsx";
+import Processor from "./processor.jsx";
 
 const { Route, DefaultRoute } = Router;
 
@@ -42,6 +43,7 @@ const routes = (
         <Route name="aggregators" handler={Aggregators} />
         <Route name="collectors" handler={Collectors} />
         <Route name="binners" handler={Binners} />
+        <Route name="processor" handler={Processor} />
     </Route>
 );
 

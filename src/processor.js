@@ -23,25 +23,9 @@ import Grouper from "./grouper";
 import Aggregator from "./aggregator";
 import Derivative from "./derivative";
 import Collector from "./collector";
+import Binner from "./binner";
 
-export default class Printer {
-
-    constructor(observer) {
-        this._observer = observer;
-    }
-
-    addEvent(event) {
-        if (this._observer) {
-            this._observer(event);
-        }
-    }
-
-    onEmit(cb) {
-        this._observer = cb;
-    }
-
-    done() {}
-}
+const END = true;
 
 export default class Outputer {
 
@@ -98,99 +82,63 @@ class Processor {
         throw new Error("Calling flush() on a Processor chain is not supported.");
     }
 
-    groupBy(groupBy) {
+    /**
+     * Connects a new processor into the chain. If the chain has already been
+     * ended this throws an error. To terminate, pass in END (or true) to this
+     * function as the terminate argument.
+     */
+    _chain(name, processor, terminate = false) {
         if (this._end) {
-            throw new Error("Cannot chain a groupBy after the chain has ended.");
+            throw new Error(`Cannot chain a ${name} after the chain has ended.`);
         }
-        const grouper = new Grouper({groupBy});
-        this._processingList.push(grouper);
+        this._processingList.push(processor);
         if (this._current) {
-            this._current.onEmit(event => grouper.addEvent(event));
+            this._current.onEmit(event => processor.addEvent(event));
         }
-        this._current = grouper;
+        this._current = processor;
+        if (terminate) {
+            this._end = true;
+        }
         return this;
+    }
+
+    groupBy(groupBy) {
+        return this._chain("group by", new Grouper({groupBy}));
     }
 
     aggregate(window, operator, fieldSpec) {
-        if (this._end) {
-            throw new Error("Cannot chain a aggregator after the chain has ended.");
-        }
         const emit = this._emit;
-        const aggregator = new Aggregator({
-            window,
-            operator,
-            fieldSpec,
-            emit
-        });
-        this._processingList.push(aggregator);
-        if (this._current) {
-            this._current.onEmit(event => aggregator.addEvent(event));
-        }
-        this._current = aggregator;
-        return this;
+        return this._chain(
+            "aggregator",
+            new Aggregator({window, operator, fieldSpec, emit})
+        );
     }
 
     derivative(window, fieldSpec) {
-        if (this._end) {
-            throw new Error("Cannot chain a derivative calculator after the chain has ended.");
-        }
-        const derivative = new Derivative({
-            window,
-            fieldSpec
-        });
-        this._processingList.push(derivative);
-        if (this._current) {
-            this._current.onEmit(event => derivative.addEvent(event));
-        }
-        this._current = derivative;
-        return this;
+        return this._chain(
+            "derivative calculator",
+            new Derivative({window, fieldSpec})
+        );
     }
 
     collect(window, convertToTimes, observer) {
-        if (this._end) {
-            throw new Error("Cannot chain a collector after the chain has ended.");
-        }
         const emit = this._emit;
-        const collector = new Collector({
-            window,
-            convertToTimes,
-            emit
-        }, observer);
-        this._processingList.push(collector);
-        if (this._current) {
-            this._current.onEmit(event => collector.addEvent(event));
-        }
-        this._current = collector;
-        this._end = true;
-        return this;
+        return this._chain(
+            "collector",
+            new Collector({window, convertToTimes, emit}, observer),
+            END
+        );
     }
 
-    log() {
-        if (this._end) {
-            throw new Error("Cannot chain a logger after the chain has ended.");
-        }
-        const printer = new Printer() ;
-        this._processingList.push(printer);
-        if (this._current) {
-            this._current.onEmit(event => printer.addEvent(event));
-        }
-        this._current = printer;
-        this._end = true;
-        return this;
+    binner(window, fieldSpec) {
+        return this._chain(
+            "binner",
+            new Binner({window, fieldSpec})
+        );
     }
 
     out(func) {
-        if (this._end) {
-            throw new Error("Cannot chain an output function after the chain has ended.");
-        }
-        const output = new Outputer(func) ;
-        this._processingList.push(output);
-        if (this._current) {
-            this._current.onEmit(event => output.addEvent(event));
-        }
-        this._current = output;
-        this._end = true;
-        return this;
+        return this._chain("output function", new Outputer(func), END);
     }
 
     combine(sourceList) {

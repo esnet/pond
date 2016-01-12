@@ -137,7 +137,7 @@ event.get("b") // {in: 654, out: 223};
 
 ### Mutation API
 
-#### getKey(key)
+#### setKey(key)
 
 Sets a key on the Event, returning a new Event. Immutable data within the Event will be shared between the two events.
 

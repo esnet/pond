@@ -17,7 +17,7 @@ import Generator from "./generator";
  *     - 'window'    -     size of the window to aggregate over (e.g. "5m")
  *     - 'operator'  -     function (e.g. avg)
   *    - 'fieldSpec' -     (optional) describes what part of the events to
- *                         include in the aggregation. Maybe a string, list
+ *                         include in the aggregation. May be a string, list
  *                         of strings for each event column, or a function.
  *                         If a function it should return a list of key/values
  *                         in an object.

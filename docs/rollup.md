@@ -23,7 +23,8 @@ To store it, we put it into a circle buffer that keeps the last n Events. Otherw
 For the more interesting part, the aggregation, we need to setup up a couple of Pond Aggregators to do the work. Here's the 5 min aggregator that we setup:
 
 ```js
-this.fiveMinuteAggregator = new Aggregator("5m", avg, (index, event) => {
+const options = {window: "5m", operator: avg};
+this.fiveMinuteAggregator = new Aggregator(options, (index, event) => {
     // Store the resulting event in state
 });
 ```
