@@ -14,19 +14,21 @@ events.push(new Event(new Date(2015, 2, 14, 8,  1, 0), 5));
 Now lets find the avg value in each of the hours. To do this we setup an Aggregator that is indexed on the hour ("1h") and will use an average function "avg", like this:
 
 ```js
-var {Aggregator, Functions} = require("pond");
-var {avg} = Functions;
+import {Aggregator, Functions} from "pondjs";
+const {avg} = Functions;
 
-var hourlyAverage = new Aggregator("1h", avg, (index, event) => {
-    outputEvents[index.asString()] = event;
+const options = {window: "1h", operator: avg};
+const hourlyAverage = new Aggregator(options, (index, event) => {
+    outputEvents[`${index}`] = event;
 });
 ```
+
 In addition, we add a callback to collect the hourlyAverage events emitted. Here we collect the result but of course we could pass it on to another aggregator or collector.
 
 Now that our aggregator is setup we can add events as long as we want:
 
 ```js
-_.each(events, event => { hourlyAverage.addEvent(event); });
+events.forEach(event => { hourlyAverage.addEvent(event); });
 ```
 
 Knowing when to be done with a bucket that we're aggregating into depends on the situation. If this is a continuous stream of events then the code currenly considers that it is done with a bucket when an event comes in that fits into another bucket. In this example the first event will create the first bucket (7am-8am). Then next two events also fit into this bucket. The 4th event is in the following hour so the old bucket is aggregated based on the aggregation function and an event is emitted with that aggregated value. A new bucket is then created (8am-9am) for the 4th event. The 5th event goes into that same bucket.

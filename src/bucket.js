@@ -8,26 +8,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import Immutable from "immutable";
 import _ from "underscore";
 import { Event, IndexedEvent } from "./event";
-import { TimeSeries } from "./series";
-import Index from "./index";
+import TimeSeries from "./series";
 
-/**
- * Internal function to fund the unique keys of a bunch
- * of immutable maps objects. There's probably a more elegent way
- * to do this.
- */
-function uniqueKeys(events) {
-    const arrayOfKeys = [];
-    for (const e of events) {
-        for (const k of e.data().keySeq()) {
-            arrayOfKeys.push(k);
-        }
-    }
-    return new Immutable.Set(arrayOfKeys);
-}
+import Index from "./index";
 
 class MemoryCacheStrategy {
     constructor() {
@@ -38,19 +23,28 @@ class MemoryCacheStrategy {
         // nothing for memory cache
     }
 
-    addEvent(key, event, cb) {
-        if (!_.has(this._cache, key)) {
-            this._cache[key] = [];
+    addEvent(name, event, cb) {
+        let eventKey = name;
+        if (event instanceof Event) {
+            eventKey = `${event.timestamp().getTime()}`;
+        } else if (event instanceof IndexedEvent) {
+            eventKey = `${event.index()}`;
         }
-        this._cache[key].push(event);
+
+        if (!_.has(this._cache, name)) {
+            this._cache[name] = {};
+        }
+
+        this._cache[name][eventKey] = event;
 
         // memory cache never fails (we assume)
         cb(null);
     }
 
-    getEvents(key, cb) {
-        if (_.has(this._cache, key)) {
-            cb(null, this._cache[key]);
+    getEvents(name, cb) {
+        if (_.has(this._cache, name)) {
+            const events = _.map(this._cache[name], event => event);
+            cb(null, events);
         } else {
             cb("Unknown cache key", null);
         }
@@ -59,6 +53,14 @@ class MemoryCacheStrategy {
     shutdown() {
         // nothing for memory cache
     }
+}
+
+function derivative(timerange) {
+    return function fn(values) {
+        return values.length ?
+            (values[values.length - 1] - values[0]) /
+            (timerange.duration() / 1000) : undefined;
+    };
 }
 
 /**
@@ -82,7 +84,7 @@ class MemoryCacheStrategy {
  */
 export default class Bucket {
 
-    constructor(index, strategy) {
+    constructor(index, key, strategy) {
         // Caching strategy
         if (!strategy) {
             this._cacheStrategy = new MemoryCacheStrategy();
@@ -97,10 +99,21 @@ export default class Bucket {
         } else if (index instanceof Index) {
             this._index = index;
         }
+
+        // Event key
+        if (_.isString(key)) {
+            this._key = key;
+        } else {
+            this._key = null;
+        }
     }
 
     name() {
         return this._index.asString();
+    }
+
+    key() {
+        return this._key;
     }
 
     timerange() {
@@ -173,21 +186,15 @@ export default class Bucket {
 
     /**
      * Takes the values within the bucket and aggregates them together
-     * into a new IndexedEvent using the reducer supplied.
+     * into a new IndexedEvent using the operator supplied.
      * The result or error is passed to the callback.
      */
-    aggregate(reducer, cb) {
+    aggregate(operator, fieldSpec, cb) {
         this._readFromCache((err, events) => {
             if (!err) {
                 if (events.length) {
-                    const keys = uniqueKeys(events);
-                    const result = {};
-                    _.each(keys.toJS(), k => {
-                        const vals = _.map(events, v => v.get(k));
-                        result[k] = reducer.call(
-                            this, this._index.asTimerange(), vals, k);
-                    });
-                    const event = new IndexedEvent(this._index, result);
+                    const data = Event.mapReduce(events, fieldSpec, operator);
+                    const event = new IndexedEvent(this._index, data, null, this._key);
                     if (cb) {
                         cb(event);
                     }
@@ -198,6 +205,15 @@ export default class Bucket {
                 cb();
             }
         });
+    }
+
+    /**
+     * Takes the values within the bucket and aggregates them together
+     * using a derivative function.
+     */
+    derivative(fieldSpec, cb) {
+        const fn = derivative(this._index.asTimerange());
+        this.aggregate(fn, fieldSpec, cb);
     }
 
     /**

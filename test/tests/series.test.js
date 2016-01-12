@@ -13,9 +13,9 @@
 /* eslint-disable max-len */
 
 import moment from "moment";
-import {expect} from "chai";
-import {Event} from "../../src/event.js";
-import {TimeSeries} from "../../src/series.js";
+import { expect } from "chai";
+import { Event } from "../../src/event.js";
+import TimeSeries from "../../src/series.js";
 
 const data = {
     name: "traffic",
@@ -85,7 +85,7 @@ const statsData2 = {
 
 const availabilityData = {
     name: "availability",
-    columns: ["time", "uptime"],
+    columns: ["index", "uptime"],
     points: [
         ["2015-06", "100%"],
         ["2015-05", "92%"],
@@ -304,7 +304,7 @@ describe("TimeSeries", () => {
     });
 
     describe("Timeseries with meta data can be created with a javascript object", () => {
-        it("can create an series with meta data and get that data back", done => {
+        it("can create a series with meta data and get that data back", done => {
             const series = new TimeSeries(interfaceData);
             const expected = `{"name":"star-cr5:to_anl_ip-a_v4","columns":["time","in","out"],"points":[[1400425947000,52,34],[1400425948000,18,13],[1400425949000,26,67],[1400425950000,93,91]],"site_interface":"et-1/0/0","site":"anl","site_device":"noni","device":"star-cr5","oscars_id":null,"title":null,"is_oscars":false,"interface":"to_anl_ip-a_v4","stats_type":"Standard","id":169,"resource_uri":"","is_ipv6":false,"description":"star-cr5->anl(as683):100ge:site-ex:show:intercloud"}`;
             expect(series.toString()).to.equal(expected);
@@ -314,7 +314,7 @@ describe("TimeSeries", () => {
     });
 
     describe("Deeply nested Timeseries", () => {
-        it("can create an series with a nested object", done => {
+        it("can create a series with a nested object", done => {
             const series = new TimeSeries({
                 name: "Map Traffic",
                 columns: ["time", "NASA_north", "NASA_south"],
@@ -329,7 +329,7 @@ describe("TimeSeries", () => {
             expect(series.at(0).get("NASA_north").out).to.equal(200);
             done();
         });
-        it("can create an series with nested events", done => {
+        it("can create a series with nested events", done => {
             const events = [];
             events.push(new Event(new Date(2015, 6, 1), {NASA_north: {in: 100, out: 200}, NASA_south: {in: 145, out: 135}}));
             events.push(new Event(new Date(2015, 7, 1), {NASA_north: {in: 200, out: 400}, NASA_south: {in: 146, out: 142}}));
@@ -647,13 +647,13 @@ describe("Mutation of timeseries", () => {
     describe("Series created with a javascript object", () => {
         it("can create a slice of a series", done => {
             const series = new TimeSeries(availabilityData);
-            const expectedLastTwo = `{"name":"availability","columns":["time","uptime"],"points":[["2014-08","88%"],["2014-07","100%"]]}`;
+            const expectedLastTwo = `{"name":"availability","columns":["index","uptime"],"points":[["2014-08","88%"],["2014-07","100%"]]}`;
             const lastTwo = series.slice(-2);
             expect(lastTwo.toString()).to.equal(expectedLastTwo);
-            const expectedFirstThree = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"]]}`;
+            const expectedFirstThree = `{"name":"availability","columns":["index","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"]]}`;
             const firstThree = series.slice(0, 3);
             expect(firstThree.toString()).to.equal(expectedFirstThree);
-            const expectedAll = `{"name":"availability","columns":["time","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
+            const expectedAll = `{"name":"availability","columns":["index","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
             const sliceAll = series.slice();
             expect(sliceAll.toString()).to.equal(expectedAll);
             done();
@@ -695,5 +695,6 @@ describe("Mutation of timeseries", () => {
             expect(trafficSeries.at(2).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:13:30 GMT");
             done();
         });
+
     });
 });

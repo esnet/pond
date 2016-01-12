@@ -8,7 +8,7 @@ There are three types of Events in Pond:
 
 ### Construction
 
-The creation of an Event is done by combining two parts: the timestamp (or time range, or Index...) and the data.
+The creation of an Event is done by combining two parts: the timestamp (or time range, or Index...) and the data, along with an optional key which is described below.
 
  * For a basic `Event`, you specify the timestamp as either a Javascript Date object, a Moment, or the number of milliseconds since the UNIX epoch.
 
@@ -17,10 +17,13 @@ The creation of an Event is done by combining two parts: the timestamp (or time 
  * For a `IndexedEvent`, you specify an Index, along with the data, and if the event should be considered to be in UTC time or not.
 
 To specify the data you can supply:
+
  * a Javascript object of key/values. The object may contained nested data.
+
  * an Immutable.Map
+
  * a simple type such as an integer. This is a shorthand for supplying {"value": v}.
- 
+
 **Example:**
 
 Given some source of data that looks like this:
@@ -75,6 +78,20 @@ outageEvent.data()
 
 to fetch the whole data object, which will be an Immutable Map.
 
+## Keys
+
+Events may contain keys which are used to provide partition groupings when doing aggregations or collections. You can provide the key at construction by adding the key as the last argument. For example "cpu_usage" below:
+
+```js
+const timestamp = new Date("2015-04-22T03:30:00Z");
+const event = new Event(timestamp, {name: "machine_A123", memory_usage: 9.34}, "A123");
+console.log(event.key()) // "A123"
+```
+
+See groupers for more information.
+
+You can also change the key of an Event with `setKey()`. Rather than causing a mutation to the existing event, this will generate a new Event (though it will efficiently share the same timestamp and data).
+
 ---
 
 ### Query API
@@ -103,9 +120,9 @@ Returns the timestamp of the Event as a Date.
 
 Returns the internal data of the event, as an Immutable.Map.
 
-#### get(key)
+#### get(column)
 
-Returns the value for a specific key within the Event data. If no key is specified then 'value' is used for the key. If the value is a complex type, such as a Map, then the value will be copied to Javascript objects and then returned.
+Returns the value for a specific column within the Event data. If no column is specified then 'value' is used for the column. If the value is a complex type, such as a Map, then the value will be copied to a Javascript object and then returned.
 
 ```javascript
 const event = new Event(timestamp, {
@@ -119,6 +136,22 @@ event.get("b") // {in: 654, out: 223};
 ---
 
 ### Mutation API
+
+#### setKey(key)
+
+Sets a key on the Event, returning a new Event. Immutable data within the Event will be shared between the two events.
+
+```javascript
+const event = new Event(t, {a: 5, b: 6, c: 7});
+const eventWithKey = event.setKey("A123");  // original event is unchanged
+
+console.log(event.key())       // ""
+console.log(eventWithKey.key()) // "A123"
+console.log(event === eventWithKey); // false
+console.log(event._d === eventWithKey._d); // false
+console.log(event.data() === eventWithKey.data()); // true
+```
+
 
 #### Event.merge([event1, event2, ...]) [Static]
 

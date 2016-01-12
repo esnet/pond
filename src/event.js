@@ -11,41 +11,69 @@
 import moment from "moment";
 import _ from "underscore";
 import Immutable from "immutable";
+
 import Index from "./index";
 import TimeRange from "./range";
 import { sum, avg } from "./functions";
 
-//
-// Util
-//
-
-function timestampFromArgs(arg1) {
-    let timestamp;
-    if (_.isNumber(arg1)) {
-        timestamp = new Date(arg1);
-    } else if (_.isDate(arg1)) {
-        timestamp = new Date(arg1.getTime());
-    } else if (moment.isMoment(arg1)) {
-        timestamp = new Date(arg1.valueOf());
+function timestampFromArg(arg) {
+    if (_.isNumber(arg)) {
+        return new Date(arg);
+    } else if (_.isDate(arg)) {
+        return new Date(arg.getTime());
+    } else if (moment.isMoment(arg)) {
+        return new Date(arg.valueOf());
+    } else {
+        throw new Error(`Unable to get timestamp from ${arg}. Should be a number, date, or moment.`);
     }
-    return timestamp;
 }
 
-function dataFromArgs(arg1) {
+function timeRangeFromArg(arg) {
+    if (arg instanceof TimeRange) {
+        return arg;
+    } else {
+        throw new Error(`Unable to parse timerange. Should be a TimeRange.`);
+    }
+}
+
+function indexFromArgs(arg1, arg2) {
+    if (_.isString(arg1)) {
+        return new Index(arg1, arg2 || true);
+    } else if (arg1 instanceof Index) {
+        return arg1;
+    } else {
+        throw new Error(`Unable to get index from ${arg1}. Should be a string or Index.`);
+    }
+}
+
+function dataFromArg(arg) {
     let data;
-    if (_.isObject(arg1)) {
+    if (_.isObject(arg)) {
         // Deeply convert the data to Immutable Map
-        data = new Immutable.fromJS(arg1);
+        data = new Immutable.fromJS(arg);
     } else if (data instanceof Immutable.Map) {
         // Copy reference to the data
-        data = arg1;
-    } else {
+        data = arg;
+    } else if (_.isNumber(arg) || _.isString(arg)) {
         // Just add it to the value key of a new Map
         // e.g. new Event(t, 25); -> t, {value: 25}
-        data = new Immutable.Map({value: arg1});
+        data = new Immutable.Map({value: arg});
+    } else {
+        throw new Error(`Unable to interpret event data from ${arg}.`);
     }
     return data;
 }
+
+function keyFromArg(arg) {
+    if (_.isString(arg)) {
+        return arg;
+    } else if (_.isUndefined(arg) || _.isNull(arg)) {
+        return "";
+    } else {
+        throw new Error(`Unable to get key from ${arg}. Should be a string.`);
+    }
+}
+
 
 /**
  * A generic event
@@ -71,7 +99,7 @@ export class Event {
      * To construct you specify the timestamp as either:
      *     - Javascript Date object
      *     - a Moment, or
-     *     - ms timestamp: the number of ms since the UNIX epoch
+     *     - millisecond timestamp: the number of ms since the UNIX epoch
      *
      * To specify the data you can supply either:
      *     - a Javascript object containing key values pairs
@@ -79,20 +107,21 @@ export class Event {
      *     - a simple type such as an integer. In the case of the simple type
      *       this is a shorthand for supplying {"value": v}.
      */
-    constructor(arg1, arg2) {
-        // Copy constructor
+    constructor(arg1, arg2, arg3) {
         if (arg1 instanceof Event) {
             const other = arg1;
-            this._time = other._time;
-            this._data = other._data;
+            this._d = other._d;
             return;
         }
-
-        // Timestamp
-        this._time = timestampFromArgs(arg1);
-
-        // Data
-        this._data = dataFromArgs(arg2);
+        if (arg1 instanceof Immutable.Map &&
+            arg1.has("time") && arg1.has("data") && arg1.has("key")) {
+            this._d = arg1;
+            return;
+        }
+        const time = timestampFromArg(arg1);
+        const data = dataFromArg(arg2);
+        const key = keyFromArg(arg3);
+        this._d = new Immutable.Map({time, data, key});
     }
 
     /**
@@ -101,7 +130,11 @@ export class Event {
      * @return {Object} The event as JSON.
      */
     toJSON() {
-        return {time: this._time.getTime(), data: this._data.toJSON()};
+        return {
+            time: this.timestamp().getTime(),
+            data: this.data().toJSON(),
+            key: this.key()
+        };
     }
 
     /**
@@ -117,7 +150,7 @@ export class Event {
      * @return {string} Time of this data.
      */
     timestampAsUTCString() {
-        return this._time.toUTCString();
+        return this.timestamp().toUTCString();
     }
 
     /**
@@ -125,7 +158,7 @@ export class Event {
      * @return {string} Time of this data.
      */
     timestampAsLocalString() {
-        return this._time.toString();
+        return this.timestamp().toString();
     }
 
     /**
@@ -133,7 +166,7 @@ export class Event {
      * @return {Date} Time of this data.
      */
     timestamp() {
-        return this._time;
+        return this._d.get("time");
     }
 
     /**
@@ -141,7 +174,20 @@ export class Event {
      * @return {Immutable.Map} Data for the Event
      */
     data() {
-        return this._data;
+        return this._d.get("data");
+    }
+
+    /**
+     * Access the event key
+     * @return {string} Key for the Event
+     */
+    key() {
+        return this._d.get("key");
+    }
+
+    setKey(key) {
+        const d = this._d.set("key", key);
+        return new Event(d);
     }
 
     /**
@@ -152,7 +198,7 @@ export class Event {
      */
     get(key) {
         const k = key || "value";
-        const v = this._data.get(k);
+        const v = this.data().get(k);
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {
             return v.toJS();
         }
@@ -164,7 +210,7 @@ export class Event {
     }
 
     stringify() {
-        return JSON.stringify(this._data);
+        return JSON.stringify(this.data());
     }
 
     /*
@@ -287,60 +333,130 @@ export class Event {
     }
 
     /**
+     * Combines multiple events with the same time together
+     * to form a new event. Doesn't currently work on IndexedEvents
+     * or TimeRangeEvents.
+     */
+    static combine(events, fieldSpec, reducer) {
+        if (events.length < 1) {
+            return;
+        }
+        const mapped = Event.map(events, (event) => {
+            const mapEvent = {};
+            // Which field do we want to work with
+            let fieldNames = [];
+            if (!fieldSpec) {
+                fieldNames = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
+            } else if (_.isString(fieldSpec)) {
+                fieldNames = [fieldSpec];
+            } else if (_.isArray(fieldSpec)) {
+                fieldNames = fieldSpec;
+            }
+            // Map the fields, along with the timestamp, to the value
+            _.each(fieldNames, (fieldName) => {
+                mapEvent[`${event.timestamp().getTime()}::${fieldName}`] =
+                    event.data().get(fieldName);
+            });
+
+            return mapEvent;
+        });
+        const eventData = {};
+        _.each(Event.reduce(mapped, reducer), (value, key) => {
+            const [ timestamp, fieldName ] = key.split("::");
+            if (!_.has(eventData, timestamp)) {
+                eventData[timestamp] = {};
+            }
+            eventData[timestamp][fieldName] = value;
+        });
+        return _.map(eventData, (data, timestamp) => {
+            return new Event(+timestamp, data);
+        });
+    }
+
+    static sum(events, fieldSpec) {
+        return Event.combine(events, fieldSpec, sum);
+    }
+
+    static avg(events, fieldSpec) {
+        return Event.combine(events, fieldSpec, avg);
+    }
+
+    /**
+     * Maps a list of events according to the selection
+     * specification passed in. The spec maybe a single
+     * field name, a list of field names, or a function
+     * that takes an event and returns a key/value pair.
+     *
+     * Example 1:
+     *         in   out
+     *  3am    1    2
+     *  4am    3    4
+     *
+     * Mapper result:  { in: [1, 3], out: [2, 4]}
+     */
+    static map(events, fieldSpec) {
+        const result = {};
+
+        if (_.isString(fieldSpec)) {
+            const fieldName = fieldSpec;
+            _.each(events, event => {
+                if (!_.has(result, fieldName)) {
+                    result[fieldName] = [];
+                }
+                const value = event.get(fieldName);
+                result[fieldName].push(value);
+            });
+        } else if (_.isArray(fieldSpec)) {
+            _.each(fieldSpec, fieldName => {
+                _.each(events, event => {
+                    if (!_.has(result, fieldName)) {
+                        result[fieldName] = [];
+                    }
+                    result[fieldName].push(event.get(fieldName));
+                });
+            });
+        } else if (_.isFunction(fieldSpec)) {
+            _.each(events, event => {
+                const pair = fieldSpec(event);
+                _.each(pair, (value, key) => {
+                    if (!_.has(result, key)) {
+                        result[key] = [];
+                    }
+                    result[key].push(value);
+                });
+            });
+        } else {
+            _.each(events, event => {
+                _.each(event.data().toJSON(), (value, key) => {
+                    if (!_.has(result, key)) {
+                        result[key] = [];
+                    }
+                    result[key].push(value);
+                });
+            });
+        }
+        return result;
+    }
+
+    /**
      * Takes a list of events and a reducer function and returns
      * a new Event with the result, for each column. The reducer is
      * of the form:
-     *     function sum(timerange, valueList) {
+     *     function sum(valueList) {
      *         return calcValue;
      *     }
      */
-    static reduce(events, reducer) {
-        const data = {};
-        const t = events[0].timestamp();
-        _.each(events, event => {
-            if (!event instanceof Event) {
-                const msg = "Events being merged must have the same type";
-                throw new Error(msg);
-            }
-
-            if (t.getTime() !== event.timestamp().getTime()) {
-                const msg = "Events being summed must have the same timestamp";
-                throw new Error(msg);
-            }
-
-            const d = event.toJSON().data;
-            _.each(d, (val, key) => {
-                if (!_.has(data, key)) {
-                    data[key] = [];
-                }
-                data[key].push(val);
-            });
-        });
-
+    static reduce(mapped, reducer) {
         const result = {};
-        _.each(data, (valueList, key) => {
-            result[key] = reducer(null, valueList);
+        _.each(mapped, (valueList, key) => {
+            result[key] = reducer(valueList);
         });
-
-        return new Event(t.getTime(), result);
+        return result;
     }
 
-    static sum(events) {
-        if (events.length < 1) {
-            return;
-        }
-        if (events[0] instanceof Event) {
-            return Event.reduce(events, sum);
-        }
-    }
-
-    static avg(events) {
-        if (events.length < 1) {
-            return;
-        }
-        if (events[0] instanceof Event) {
-            return Event.reduce(events, avg);
-        }
+    static mapReduce(events, fieldSpec, reducer) {
+        const mapped = this.map(events, fieldSpec);
+        return Event.reduce(mapped, reducer);
     }
 }
 
@@ -380,19 +496,24 @@ export class TimeRangeEvent {
      *     - a simple type such as an integer. In the case of the simple type
      *       this is a shorthand for supplying {"value": v}.
      */
-    constructor(arg1, arg2) {
-        // Timerange
-        if (arg1 instanceof TimeRange) {
-            const timerange = arg1;
-            this._range = timerange;
+    constructor(arg1, arg2, arg3) {
+        if (arg1 instanceof TimeRangeEvent) {
+            const other = arg1;
+            this._d = other._d;
+            return;
         }
-
-        // Data
-        this._data = dataFromArgs(arg2);
+        const range = timeRangeFromArg(arg1);
+        const data = dataFromArg(arg2);
+        const key = keyFromArg(arg3);
+        this._d = new Immutable.Map({range, data, key});
     }
 
     toJSON() {
-        return {timerange: this._range.toJSON(), data: this._data.toJSON()};
+        return {
+            timerange: this.timerange().toJSON(),
+            data: this.data().toJSON(),
+            key: this.key()
+        };
     }
 
     toString() {
@@ -408,7 +529,23 @@ export class TimeRangeEvent {
      * @return {TimeRange} TimeRange of this data.
      */
     timerange() {
-        return this._range;
+        return this._d.get("range");
+    }
+
+    /**
+     * Access the event data
+     * @return {Immutable.Map} Data for the Event
+     */
+    data() {
+        return this._d.get("data");
+    }
+
+    /**
+     * Access the event key
+     * @return {string} Key for the Event
+     */
+    key() {
+        return this._d.get("key");
     }
 
     /**
@@ -432,7 +569,7 @@ export class TimeRangeEvent {
      * @return {Data} Begin time
      */
     begin() {
-        return this._range.begin();
+        return this.timerange().begin();
     }
 
     /**
@@ -440,7 +577,7 @@ export class TimeRangeEvent {
      * @return {Data} End time
      */
     end() {
-        return this._range.end();
+        return this.timerange().end();
     }
 
     /**
@@ -452,15 +589,7 @@ export class TimeRangeEvent {
     }
 
     humanizeDuration() {
-        return this._range.humanizeDuration();
-    }
-
-    /**
-     * Access the event data
-     * @return {Immutable.Map} Data for the Event
-     */
-    data() {
-        return this._data;
+        return this.timerange().humanizeDuration();
     }
 
     /**
@@ -470,7 +599,7 @@ export class TimeRangeEvent {
      */
     get(key) {
         const k = key || "value";
-        const v = this._data.get(k);
+        const v = this.data().get(k);
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {
             return v.toJS();
         }
@@ -523,26 +652,24 @@ export class IndexedEvent {
      *     - a simple type such as an integer. In the case of the simple type
      *       this is a shorthand for supplying {"value": v}.
      */
-    constructor(index, data, utc) {
-        // Index
-        if (_.isString(index)) {
-            this._index = new Index(index, utc);
-        } else if (index instanceof Index) {
-            this._index = index;
+    constructor(arg1, arg2, arg3, arg4) {
+        if (arg1 instanceof IndexedEvent) {
+            const other = arg1;
+            this._d = other._d;
+            return;
         }
-
-        // Data
-        if (_.isObject(data)) {
-            this._data = new Immutable.Map(data);
-        } else if (data instanceof Immutable.Map) {
-            this._data = data;
-        } else {
-            this._data = new Immutable.Map({value: data});
-        }
+        const index = indexFromArgs(arg1, arg3);
+        const data = dataFromArg(arg2);
+        const key = keyFromArg(arg4);
+        this._d = new Immutable.Map({index, data, key});
     }
 
     toJSON() {
-        return {index: this.indexAsString(), data: this.data().toJSON()};
+        return {
+            index: this.indexAsString(),
+            data: this.data().toJSON(),
+            key: this.key()
+        };
     }
 
     toString() {
@@ -554,7 +681,23 @@ export class IndexedEvent {
      * @return {Index} The Index
      */
     index() {
-        return this._index;
+        return this._d.get("index");
+    }
+
+    /**
+     * Access the event data
+     * @return {Immutable.Map} Data for the Event
+     */
+    data() {
+        return this._d.get("data");
+    }
+
+    /**
+     * Access the event data
+     * @return {string} Key for the Event
+     */
+    key() {
+        return this._d.get("key");
     }
 
     /**
@@ -562,7 +705,7 @@ export class IndexedEvent {
      * @return {string} The Index
      */
     indexAsString() {
-        return this._index.asString();
+        return this.index().asString();
     }
 
     /**
@@ -586,7 +729,7 @@ export class IndexedEvent {
      * @return {TimeRange} TimeRange of this data.
      */
     timerange() {
-        return this._index.asTimerange();
+        return this.index().asTimerange();
     }
 
     /**
@@ -614,21 +757,13 @@ export class IndexedEvent {
     }
 
     /**
-     * Access the event data
-     * @return {Immutable.Map} Data for the Event
-     */
-    data() {
-        return this._data;
-    }
-
-    /**
      * Get specific data out of the Event
      * @param  {string} key Key to lookup, or "value" if not specified.
      * @return {Object}     The data associated with this key
      */
     get(key) {
         const k = key || "value";
-        const v = this._data.get(k);
+        const v = this.data().get(k);
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {
             return v.toJS();
         }

@@ -11,34 +11,29 @@
 import _ from "underscore";
 
 export default {
-    sum(timerange, values) {
+    sum(values) {
         return _.reduce(values, (a, b) => { return a + b; }, 0);
     },
-    avg(timerange, values) {
+    avg(values) {
         const sum = _.reduce(values, (a, b) => { return a + b; }, 0);
         return sum / values.length;
     },
-    max(timerange, values) {
+    max(values) {
         return _.max(values);
     },
-    min(timerange, values) {
+    min(values) {
         return _.min(values);
     },
-    count(timerange, values) {
+    count(values) {
         return values.length;
     },
-    first(timerange, values) {
+    first(values) {
         return values.length ? values[0] : undefined;
     },
-    last(timerange, values) {
+    last(values) {
         return values.length ? values[values.length - 1] : undefined;
     },
-    difference(timerange, values) {
+    difference(values) {
         return _.max(values) - _.min(values);
-    },
-    derivative(timerange, values) {
-        return values.length ?
-            (values[values.length - 1] - values[0]) /
-                (timerange.duration() / 1000) : undefined;
     }
 };

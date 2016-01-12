@@ -36,7 +36,7 @@ export default React.createClass({
                         <li><Link to="rollups">Rollups</Link></li>
                     </ul>
 
-                    <div className="sidebar-heading">API</div>
+                    <div className="sidebar-heading">Structures</div>
 
                     <ul className="nav nav-sidebar">
                         <li><Link to="time">Time</Link></li>
@@ -44,9 +44,15 @@ export default React.createClass({
                         <li><Link to="index">Index</Link></li>
                         <li><Link to="events">Events</Link></li>
                         <li><Link to="timeseries">TimeSeries</Link></li>
+                    </ul>
+
+                    <div className="sidebar-heading">Processing</div>
+
+                    <ul className="nav nav-sidebar">
                         <li><Link to="aggregators">Aggregators</Link></li>
                         <li><Link to="collectors">Collectors</Link></li>
                         <li><Link to="binners">Binners</Link></li>
+                        <li><Link to="processor">Processor</Link></li>
                     </ul>
 
                     <div className="sidebar-heading">Links</div>

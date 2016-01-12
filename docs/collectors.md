@@ -16,7 +16,7 @@ events.push(new Event(new Date(2015, 2, 14, 8,  1, 0), {"cpu1": 45.2, "cpu2": 91
 Similarly to constructing a Aggregator, we build a Collector:
 
 ```javascript
-var hourlyCollector = new Collector("1h");
+var hourlyCollector = new Collector({window: "1h"});
 ```
 
 Then we setup a handler to catch the emitted TimeSeries. Here we'll just console.log the result:
@@ -30,10 +30,7 @@ hourlyCollector.onEmit((series) => {
 And then as in the Aggregator, we feed it our events, and call done() to flush at then end:
 
 ```javascript
-_.each(events, (event) => {
-    hourlyCollector.addEvent(event);
-});
-
+events.forEach(event => hourlyCollector.addEvent(event));
 hourlyCollector.done();
 ```
 
@@ -56,15 +53,16 @@ For 2/14/2014 8am-9am:
 
 We can also add `IndexedEvents` to the collector and the resulting `TimeSeries` will associate indexes (such as "30s-123234") with data, and `series.at(i)` will return an `IndexedEvent` back as expected. This can be nice if the result will be represented as a bar chart, for example.
 
-However, there are times when you would like to convert these to times. One such time is if you have a large number of events being collected into the `TimeSeries` and want to visualize that series. In this case it is faster for the visualization code to process times rather than convert Index strings to times.
+However, there are times when you would like to convert these to times. One such occasion is if you have a large number of events being collected into a `TimeSeries` and want to visualize that series. In this case it is faster for the visualization code to process times rather than convert Index strings to times.
 
 To achieve this conversion, simply pass `true` as the third argument to the `Collector` constructor, for example:
 
 ```js
-const collector = new Collector("7d", series => {
+const collector = new Collector({window: "7d"}, series => {
     collection[series.index().asString()] = series;
 }, true);
 ```
+
 
 ## Combining aggregation and collection
 

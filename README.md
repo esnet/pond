@@ -2,29 +2,53 @@
 
 ----
 
-A library build on top of immutable.js to provide basic timeseries functionality within ESnet tools. It is in a very early stage of development.
+A library build on top of immutable.js to provide time-based data structures and processing within ESnet tools. For data structures it unifies the use of time ranges, events and timeseries. For processing it provides a chained operations interface to aggregate and collect streams of events.
 
-## Why?
+We are still developing Pond as it integrates further into our code, so it may change or be incomplete in parts. That said it has a growing collection of tests and we will strive not to break those without careful consideration. See the CHANGES.md document for version updates.
 
-Because we consume timeseries data throughout our network visualization applications, especially on the client, but potentially on the server. We would like a library to do this in a consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated than they need to be. Not only do we need to deal with different formats at the UI layer, we also repeat our processing code over and over.
+## Rational
+
+We consume timeseries data throughout our network visualization applications and data processing chains so we needed to build a Javascript library to work with that was consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated. Not only do we need to deal with different formats at all layers of the system, we also repeat our processing code over and over.
+
+The result might be as simple as comparing two time ranges:
+
+```js
+    const timerange = timerange1.intersection(timerange2);
+    timerange.asRelativeString();  // "a few seconds ago to a month ago"
+```
+
+Or finding the average value in a timeseries:
+
+```js
+    timeseries.avg("sensor");
+```
+
+Or much higher level stream processing:
+
+```js
+    // Set up processing chain
+    const processor = Processor()
+        .groupBy("channelName")
+        .aggregate("5m", avg)
+        .collect("1d", false, timeseries => {
+            // --> Output timeseries representing 1 day of 5 min averages
+        });
+    // As events come in...
+    processor.addEvents(incomingEvents);
+```
 
 ## What does it do?
 
-Pond is built on several primitives:
+Pond has two main goals: basic data structures built on Immutable.js and processing operations to work with those structures. Here is a summary of what is provided:
 
-* **Time** - these are basic Javascript Date objects. We refer to these as timestamps.
 * **TimeRange** - a begin and end time, packaged together.
 * **Index** - A time range denoted by a string, for example "5m-1234" is a 5 minute timerange, or "2014-09" is September 2014.
-
-Building on these, we have Events:
-
-* **Event** - These are a timestamp and a data object packaged together.
-* **IndexedEvent** - An index (timerange) and a data object packaged together. e.g. 1hr sample
-* **TimeRangeEvent** - A timerange and a data object packaged together. e.g. outage event
+* **Events** - These are a timestamp and a data object packaged together.
+* **IndexedEvents** - An index (timerange) and a data object packaged together. e.g. 1hr sample
+* **TimeRangeEvents** - A timerange and a data object packaged together. e.g. outage event
 
 And forming together a collection of events, we have a Timeseries:
 
-* **Series** - Conceptually a sequence of Events.
 * **TimeSeries** - A sequence of Events associated with a list of times or time ranges (Indexes).
 
 And then high level helper functions to:
@@ -33,6 +57,10 @@ And then high level helper functions to:
 * **Collect** - Create TimeSeries objects from Event streams
 * **Bin** - Fit data into regular intervals
 * **Resample** [TODO]
+
+And finally a a chained interface to the high level functions:
+
+* **Processor** - Build a stream of events using .aggregate(), .collect() etc.
 
 # Getting started
 

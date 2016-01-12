@@ -20,7 +20,11 @@ import Generator from "../../src/generator.js";
 import Aggregator from "../../src/aggregator";
 import Collector from "../../src/collector";
 import Binner from "../../src/binner";
-import { max, avg, sum, count, difference, derivative } from "../../src/functions";
+import Derivative from "../../src/derivative";
+import Grouper from "../../src/grouper";
+import Processor from "../../src/processor";
+
+import { max, avg, sum, count, difference } from "../../src/functions";
 
 const sept2014Data = {
     name: "traffic",
@@ -151,6 +155,8 @@ describe("Buckets", () => {
         // Test date: Sat Mar 14 2015 07:32:22 GMT-0700 (PDT)
         const d = Date.UTC(2015, 2, 14, 7, 32, 22);
         const generator = new Generator("5m");
+        const key = "poptart";
+
         it("should generate correct bucket", done => {
             const b = generator.bucket(d);
             const expected = "5m-4754394";
@@ -162,6 +168,12 @@ describe("Buckets", () => {
             const indexString = generator.bucketIndex(d);
             const expected = "5m-4754394";
             expect(indexString).to.equal(expected);
+            done();
+        });
+
+        it("should generate bucket with key", done => {
+            const b = generator.bucket(d, key);
+            expect(b.key()).to.equal(key);
             done();
         });
 
@@ -269,13 +281,28 @@ describe("Buckets", () => {
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), 4));
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), 5));
 
+        const groupedEvents = [];
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {name: "a", value: 1}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {name: "b", value: 3}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {name: "a", value: 2}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {name: "b", value: 4}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {name: "a", value: 3}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {name: "b", value: 5}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {name: "a", value: 4}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {name: "b", value: 6}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {name: "a", value: 5}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {name: "b", value: 7}));
+
         it("should calculate the correct max for the two 1hr buckets", done => {
             const maxEvents = {};
 
-            const MaxAggregator = new Aggregator("1h", max);
+            const MaxAggregator = new Aggregator({
+                window: "1h",
+                operator: max
+            });
 
-            MaxAggregator.onEmit((index, event) => {
-                maxEvents[index.asString()] = event;
+            MaxAggregator.onEmit(event => {
+                maxEvents[event.index().asString()] = event;
             });
 
             // Add events
@@ -284,7 +311,7 @@ describe("Buckets", () => {
             });
 
             // Done
-            MaxAggregator.done();
+            MaxAggregator.flush();
 
             expect(maxEvents["1h-396199"].get()).to.equal(9);
             expect(maxEvents["1h-396200"].get()).to.equal(5);
@@ -294,10 +321,13 @@ describe("Buckets", () => {
         it("should calculate the correct avg for the two 1hr buckets", done => {
             const avgEvents = {};
 
-            const AvgAggregator = new Aggregator("1h", avg);
+            const AvgAggregator = new Aggregator({
+                window: "1h",
+                operator: avg
+            });
 
-            AvgAggregator.onEmit((index, event) => {
-                avgEvents[index.asString()] = event;
+            AvgAggregator.onEmit(event => {
+                avgEvents[event.index().asString()] = event;
             });
 
             // Add events
@@ -306,7 +336,7 @@ describe("Buckets", () => {
             });
 
             // Done
-            AvgAggregator.done();
+            AvgAggregator.flush();
 
             expect(avgEvents["1h-396199"].get()).to.equal(6);
             expect(avgEvents["1h-396200"].get()).to.equal(4.5);
@@ -315,9 +345,12 @@ describe("Buckets", () => {
 
         it("should calculate the correct sum for the two 1hr buckets", done => {
             const sumEvents = {};
-            const SumAggregator = new Aggregator("1h", sum);
-            SumAggregator.onEmit((index, event) => {
-                sumEvents[index.asString()] = event;
+            const SumAggregator = new Aggregator({
+                window: "1h",
+                operator: sum
+            });
+            SumAggregator.onEmit(event => {
+                sumEvents[event.index().asString()] = event;
             });
 
             // Add events
@@ -326,7 +359,7 @@ describe("Buckets", () => {
             });
 
             // Done
-            SumAggregator.done();
+            SumAggregator.flush();
 
             expect(sumEvents["1h-396199"].get("value")).to.equal(18);
             expect(sumEvents["1h-396200"].get("value")).to.equal(9);
@@ -335,16 +368,19 @@ describe("Buckets", () => {
 
         it("should calculate the correct count for the two 1hr buckets", done => {
             const countEvents = {};
-            const CountAggregator = new Aggregator("1h", count);
-            CountAggregator.onEmit((index, event) => {
-                countEvents[index.asString()] = event;
+            const CountAggregator = new Aggregator({
+                window: "1h",
+                operator: count
             });
-            _.each(incomingEvents, (event) => {
+            CountAggregator.onEmit(event => {
+                countEvents[event.index().asString()] = event;
+            });
+            _.each(incomingEvents, event => {
                 CountAggregator.addEvent(event);
             });
 
             // Done
-            CountAggregator.done();
+            CountAggregator.flush();
 
             expect(countEvents["1h-396199"].get()).to.equal(3);
             expect(countEvents["1h-396200"].get()).to.equal(2);
@@ -360,15 +396,18 @@ describe("Buckets", () => {
                 events.push(new Event(point[0], point[1]));
             });
 
-            const CountAggregator = new Aggregator("1d", count);
-            CountAggregator.onEmit((index, event) => {
-                countEvents[index.asString()] = event;
+            const CountAggregator = new Aggregator({
+                window: "1d",
+                operator: count
+            });
+            CountAggregator.onEmit(event => {
+                countEvents[event.index().asString()] = event;
             });
             _.each(events, (event) => {
                 CountAggregator.addEvent(event);
             });
 
-            CountAggregator.done();
+            CountAggregator.flush();
 
             expect(countEvents["1d-16314"].get()).to.equal(24);
             expect(countEvents["1d-16318"].get()).to.equal(20);
@@ -384,8 +423,11 @@ describe("Buckets", () => {
                 events.push(new Event(point[0], point[1]));
             });
 
-            const CountAggregator = new Aggregator("1d", count, (index, event) => {
-                countEvents[index.asString()] = event;
+            const CountAggregator = new Aggregator({
+                window: "1d",
+                operator: count
+            }, event => {
+                countEvents[event.index().asString()] = event;
             });
 
             _.each(events, (event) => {
@@ -393,10 +435,70 @@ describe("Buckets", () => {
             });
 
             // Done
-            CountAggregator.done();
+            CountAggregator.flush();
 
             expect(countEvents["1d-16314"].get()).to.equal(24);
             expect(countEvents["1d-16318"].get()).to.equal(20);
+            done();
+        });
+
+        it("should calculate the correct count with grouped events", done => {
+            const results = {};
+            const aggregate1hMax = new Aggregator({window: "1h", operator: max}, event => {
+                results[`${event.index()} ${event.key()}`] = event.get();
+            });
+            const groupByName = new Grouper({
+                groupBy: "name"
+            }, event => {
+                aggregate1hMax.addEvent(event);
+            });
+
+            // Add events
+            _.each(groupedEvents, (event) => {
+                groupByName.addEvent(event);
+            });
+
+            // Done
+            aggregate1hMax.flush();
+
+            expect(results["1h-396199 a"]).to.equal(3);
+            expect(results["1h-396199 b"]).to.equal(5);
+            expect(results["1h-396200 a"]).to.equal(5);
+            expect(results["1h-396200 b"]).to.equal(7);
+
+            done();
+        });
+
+    });
+
+    describe("Aggregator tests with duplicates", () => {
+        const dupEvents = [];
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), 9));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), 9));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), 6));
+        dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), 6));
+
+        it("should be able to handle duplicate events", done => {
+            const avgEvents = {};
+
+            const AvgAggregator = new Aggregator({
+                window: "1h",
+                operator: avg,
+                emit: "always"
+            });
+
+            AvgAggregator.onEmit(event => {
+                avgEvents[event.index().asString()] = event;
+            });
+
+            // Add events
+            _.each(dupEvents, (event) => {
+                AvgAggregator.addEvent(event);
+            });
+
+            expect(avgEvents["1h-396199"].get()).to.equal(6);
             done();
         });
     });
@@ -411,9 +513,9 @@ describe("Buckets", () => {
 
         it("should calculate the correct sum for the two 1hr buckets", done => {
             const sumEvents = {};
-            const SumAggregator = new Aggregator("1h", sum);
-            SumAggregator.onEmit((index, event) => {
-                sumEvents[index.asString()] = event;
+            const SumAggregator = new Aggregator({window: "1h", operator: sum});
+            SumAggregator.onEmit(event => {
+                sumEvents[event.index().asString()] = event;
             });
 
             // Add events
@@ -422,7 +524,7 @@ describe("Buckets", () => {
             });
 
             // Done
-            SumAggregator.done();
+            SumAggregator.flush();
 
             expect(sumEvents["1h-396199"].get("cpu1")).to.equal(98.2);
             expect(sumEvents["1h-396199"].get("cpu2")).to.equal(165.9);
@@ -443,7 +545,7 @@ describe("Buckets", () => {
         it("should collect together 5 events using Date objects and two data fields", done => {
             const collection = {};
 
-            const hourlyCollection = new Collector("1h", (series) => {
+            const hourlyCollection = new Collector({window: "1h"}, series => {
                 collection[series.index().asString()] = series;
             });
 
@@ -452,8 +554,9 @@ describe("Buckets", () => {
                 hourlyCollection.addEvent(event);
             });
 
+
             // Done
-            hourlyCollection.done();
+            hourlyCollection.flush();
 
             expect(collection["1h-396199"].indexAsString()).to.equal("1h-396199");
             expect(collection["1h-396200"].indexAsString()).to.equal("1h-396200");
@@ -472,7 +575,7 @@ describe("Buckets", () => {
             events.push(new Event(1445449260000, {in: 7822001988.533334, out: 2566206616.7999997}));
             const collection = {};
 
-            const hourlyCollection = new Collector("1h", (series) => {
+            const hourlyCollection = new Collector({window: "1h"}, series => {
                 collection[series.index().asString()] = series;
             });
 
@@ -482,7 +585,7 @@ describe("Buckets", () => {
             });
 
             // Done
-            hourlyCollection.done();
+            hourlyCollection.flush();
 
             done();
         });
@@ -495,7 +598,7 @@ describe("Buckets", () => {
             events.push(new IndexedEvent("5m-4818243", {in: 73, out: 18}));
             const collection = {};
 
-            const collector = new Collector("7d", (series) => {
+            const collector = new Collector({window: "7d"}, (series) => {
                 collection[series.index().asString()] = series;
             }, true);
 
@@ -505,7 +608,7 @@ describe("Buckets", () => {
             });
 
             // Done
-            collector.done();
+            collector.flush();
 
             done();
         });
@@ -525,7 +628,10 @@ describe("Resample bin fitting", () => {
         it("should calculate the correct fitted data for two boundry aligned values", done => {
             const input = [new Event(0, 0), new Event(30000, 100)];
             const result = {};
-            const binner = new Binner("30s", difference, (event) => {
+            const binner = new Binner({
+                window: "30s",
+                operator: difference
+            }, event => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -537,6 +643,7 @@ describe("Resample bin fitting", () => {
             expect(result["30s-0"].get()).to.equal(100);
             expect(result["30s-1"].get()).to.equal(0);
             done();
+
         });
 
         // In this case, there is no middle buckets at all
@@ -550,15 +657,17 @@ describe("Resample bin fitting", () => {
         //
         it("should calculate the correct fitted data for no middle buckets with flush", done => {
             const input = [new Event(31000, 100), new Event(62000, 213)];
-
             const result = {};
-            const binner = new Binner("30s", difference, (event) => {
+            const binner = new Binner({
+                window: "30s",
+                operator: difference
+            }, event => {
                 const key = event.index().asString();
                 result[key] = event;
             });
 
             // Feed events
-            _.each(input, event => binner.addEvent(event));
+            input.forEach(event => binner.addEvent(event));
             binner.flush();
 
             expect(result["30s-1"]).to.be.undefined;
@@ -576,7 +685,10 @@ describe("Resample bin fitting", () => {
             const input = [new Event(90000, 100), new Event(121000, 200)];
 
             const result = {};
-            const binner = new Binner("30s", difference, (event) => {
+            const binner = new Binner({
+                window: "30s",
+                operator: difference
+            }, event => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -598,7 +710,10 @@ describe("Resample bin fitting", () => {
             const input = [new Event(89000, 100), new Event(181000, 200)];
 
             const result = {};
-            const binner = new Binner("30s", difference, (event) => {
+            const binner = new Binner({
+                window: "30s",
+                operator: difference
+            }, event => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -620,7 +735,10 @@ describe("Resample bin fitting", () => {
             ];
 
             const result = {};
-            const binner = new Binner("30s", difference, (event) => {
+            const binner = new Binner({
+                window: "30s",
+                operator: difference
+            }, event => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -647,7 +765,9 @@ describe("Resample bin fitting", () => {
             ];
 
             const result = {};
-            const binner = new Binner("30s", derivative, (event) => {
+            const binner = new Derivative({
+                window: "30s"
+            }, event => {
                 const key = event.index().asString();
                 result[key] = event;
             });
@@ -659,6 +779,139 @@ describe("Resample bin fitting", () => {
             expect(result["30s-4"].get()).to.equal(1.0869565217391293);
             expect(result["30s-5"].get()).to.equal(1.0869565217391313);
             expect(result["30s-6"]).to.be.undefined;
+            done();
+        });
+    });
+});
+
+
+describe("Process chains", () => {
+
+    describe("Groupers", () => {
+        const incomingEvents = [];
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0),
+            {name: "a", subname: "x", cpu1: 23.4, cpu2: 55.1}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0),
+            {name: "a", subname: "y", cpu1: 36.2, cpu2: 45.6}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0),
+            {name: "b", subname: "z", cpu1: 38.6, cpu2: 65.2}));
+
+        it("should generate the correct keys for column based groupBy", done => {
+            const results = [];
+            const groupByName = new Grouper({groupBy: "name"}, event => {
+                results.push(event);
+            });
+
+            // Add events
+            _.each(incomingEvents, (event) => {
+                groupByName.addEvent(event);
+            });
+
+            expect(results[0].key()).to.equal("a");
+            expect(results[1].key()).to.equal("a");
+            expect(results[2].key()).to.equal("b");
+
+            done();
+        });
+
+        it("should generate the correct keys for column list based groupBy", done => {
+            const results = [];
+            const groupByName = new Grouper({groupBy: ["name", "subname"]}, event => {
+                results.push(event);
+            });
+
+            // Add events
+            _.each(incomingEvents, (event) => {
+                groupByName.addEvent(event);
+            });
+
+            expect(results[0].key()).to.equal("a::x");
+            expect(results[1].key()).to.equal("a::y");
+            expect(results[2].key()).to.equal("b::z");
+
+            done();
+        });
+    });
+
+    describe("Process chains", () => {
+
+        const groupedEvents = [];
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {name: "a", value: 1}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {name: "b", value: 3}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {name: "a", value: 2}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {name: "b", value: 4}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {name: "a", value: 3}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {name: "b", value: 5}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {name: "a", value: 4}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {name: "b", value: 6}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {name: "a", value: 5}));
+        groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {name: "b", value: 7}));
+
+        it("should generate the correct keys for column based groupBy..", done => {
+            const results = {};
+            let resultCount = 0;
+
+            const processChain = Processor()
+                .groupBy("name")
+                .aggregate("1h", avg, ["value"])
+                .out(event => {
+                    console.log("out", event);
+                    results[`${event.index()}::${event.key()}`] = `${event}`;
+                    resultCount++;
+                });
+
+            processChain.addEvents(groupedEvents);
+
+            expect(resultCount).to.equal(2);
+            expect(`${results["1h-396199::a"]}`)
+                .to.equal(`{"index":"1h-396199","data":{"value":2},"key":"a"}`);
+            expect(`${results["1h-396199::b"]}`)
+                .to.equal(`{"index":"1h-396199","data":{"value":4},"key":"b"}`);
+            done();
+        });
+
+        it("should generate the correct keys for column based groupBy..", done => {
+            const results = {};
+            let resultCount = 0;
+            const processChain = Processor({emit: "always"})
+                .groupBy("name")
+                .aggregate("1h", avg, ["value"])
+                .out(event => {
+                    results[`${event.index()}::${event.key()}`] = `${event}`;
+                    resultCount++;
+                });
+            processChain.addEvents(groupedEvents);
+            expect(resultCount).to.equal(10);
+            expect(`${results["1h-396199::a"]}`)
+                .to.equal(`{"index":"1h-396199","data":{"value":2},"key":"a"}`);
+            expect(`${results["1h-396199::b"]}`)
+                .to.equal(`{"index":"1h-396199","data":{"value":4},"key":"b"}`);
+            done();
+        });
+
+        const incomingEvents = [];
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {cpu1: 23.4, cpu2: 55.1}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {cpu1: 36.2, cpu2: 45.6}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {cpu1: 38.6, cpu2: 65.2}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {cpu1: 24.5, cpu2: 85.2}));
+        incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {cpu1: 45.2, cpu2: 91.6}));
+
+        it("should collect together 5 events using a process chain", done => {
+            const collection = {};
+            let emitCount = 0;
+            const processChain = Processor({emit: "always"})
+                .groupBy("name")
+                .collect("1h", false, series => {
+                    collection[series.index().asString()] = series;
+                    emitCount++;
+                });
+            processChain.addEvents(incomingEvents);
+            expect(emitCount).to.equal(5);
+            expect(collection["1h-396199"].indexAsString()).to.equal("1h-396199");
+            expect(collection["1h-396200"].indexAsString()).to.equal("1h-396200");
+            expect(collection["1h-396199"].size()).to.equal(3);
+            expect(collection["1h-396200"].size()).to.equal(2);
+
             done();
         });
     });
