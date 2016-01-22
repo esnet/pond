@@ -16,13 +16,13 @@ import { expect } from "chai";
 import _ from "underscore";
 import { Event, IndexedEvent } from "../../src/event";
 import TimeRange from "../../src/range";
-import Generator from "../../src/generator.js";
 import Aggregator from "../../src/aggregator";
 import Collector from "../../src/collector";
 import Binner from "../../src/binner";
 import Derivative from "../../src/derivative";
 import Grouper from "../../src/grouper";
 import Processor from "../../src/processor";
+import Index from "../../src/index";
 
 import { max, avg, sum, count, difference } from "../../src/functions";
 
@@ -151,53 +151,94 @@ const sept2014Data = {
 
 describe("Buckets", () => {
 
-    describe("Generator tests", () => {
-        // Test date: Sat Mar 14 2015 07:32:22 GMT-0700 (PDT)
+    /**
+     * It is possible to get a Bucket given an window size such as "1h" and a
+     * time. That is, for an indexed piece of time, we can get a Bucket which
+     * will hold events for that time.
+     *
+     * It is possible to then take the filled or partially filled bucket
+     * and aggregate or collect the events within it.
+     */
+    describe("Generating buckets", () => {
+
         const d = Date.UTC(2015, 2, 14, 7, 32, 22);
-        const generator = new Generator("5m");
         const key = "poptart";
 
-        it("should generate correct bucket", done => {
-            const b = generator.bucket(d);
+        /**
+         * Test getting a basic IndexedBucket. We can then query the bucket for
+         * the index() it covers, then query the index as a string and it should be
+         * "5m-4754394".
+         */
+        it("should be possible to get a bucket with a window and a date", done => {
+            const b = Index.getBucket("5m", d);
             const expected = "5m-4754394";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
-        it("should have the correct index string", done => {
-            const indexString = generator.bucketIndex(d);
+        /**
+         * Test directly getting the Index string without actually making a
+         * new bucket. This is done using the Index.getIndexString() static
+         * function.
+         *
+         * In this case it should be the same string as the last example.
+         */
+        it("should be possible to get an index string given a window and date", done => {
+            const indexString = Index.getIndexString("5m", d);
             const expected = "5m-4754394";
             expect(indexString).to.equal(expected);
             done();
         });
 
+        /**
+         * A bucket may also will keep track of its key, which is used for
+         * groupBy functionality in processing chains. Typically a bucket
+         * will collect events for a particular key only. When a bucket emits
+         * an event, the emitted event will also have that key. Here we just test
+         * that when we generate a bucket and specify a key, that the bucket
+         * stores that key and we can get it back.
+         */
         it("should generate bucket with key", done => {
-            const b = generator.bucket(d, key);
+            const b = Index.getBucket("5m", d, key);
             expect(b.key()).to.equal(key);
             done();
         });
+
+        /**
+         * For getting a list of buckets given a TimeRange we use the
+         * Index.bucketList() static function. For 7:30 am until 8:29:59am
+         * on 2/14/2015 we expect 12 buckets with indexes from "5m-4754394" to
+         * "5m-4754405".
+         */
 
         const d1 = Date.UTC(2015, 2, 14, 7, 30, 0);
         const d2 = Date.UTC(2015, 2, 14, 8, 29, 59);
 
         it("should have the correct bucket list for a date range", done => {
             const timerange = new TimeRange(d1, d2);
-            const bucketList = generator.bucketList(timerange);
+            const bucketList = Index.getBucketList("5m", timerange);
+
             const expectedBegin = "5m-4754394";
             const expectedEnd = "5m-4754405";
-
             expect(bucketList.length).to.equal(12);
             expect(bucketList[0].index().asString()).to.equal(expectedBegin);
             expect(bucketList[bucketList.length - 1].index().asString()).to.equal(expectedEnd);
             done();
         });
 
+        /**
+         * We also can also get just for the list of Index strings for a
+         * TimeRange using the Index.bucketIndexList static function. This
+         * is actually really useful for tiling data because for a requested
+         * time range you can find out the names of all the tiles you need to
+         * complete that request.
+         */
         it("should have the correct index string list for a TimeRange", done => {
             const timerange = new TimeRange(d1, d2);
-            const indexList = generator.bucketIndexList(timerange);
+            const indexList = Index.getIndexStringList("5m", timerange);
+
             const expectedBegin = "5m-4754394";
             const expectedEnd = "5m-4754405";
-
             expect(indexList.length).to.equal(12);
             expect(indexList[0]).to.equal(expectedBegin);
             expect(indexList[indexList.length - 1]).to.equal(expectedEnd);
@@ -206,67 +247,52 @@ describe("Buckets", () => {
         });
     });
 
-    describe("5min bucket tests", () => {
-
-        const BucketGenerator = require("../../src/generator.js");
+    /**
+     * Our bucket tests here use 5m, 1h and 1d buckets and test that the
+     * index and the toUTCString() functionality works ok.
+     */
+    describe("Bucket tests", () => {
 
         // Test date: Sat Mar 14 2015 07:32:22 UTC
         const d = Date.UTC(2015, 2, 14, 7, 32, 22);
-        const Buckets = new BucketGenerator("5m");
-        it("should have the correct index", done => {
-            const b = Buckets.bucket(d);
+
+        it("should have the correct index for a 5 min bucket", done => {
+            const b = Index.getBucket("5m", d);
             const expected = "5m-4754394";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
-        it("should have the correct UTC string", done => {
-            const b = Buckets.bucket(d);
+        it("should have the correct UTC string for a 5 min bucket", done => {
+            const b = Index.getBucket("5m", d);
             const expected = "5m-4754394: [Sat, 14 Mar 2015 07:30:00 GMT, Sat, 14 Mar 2015 07:35:00 GMT]";
             expect(b.toUTCString()).to.equal(expected);
             done();
         });
-    });
 
-    describe("Hourly bucket tests", () => {
-
-        const BucketGenerator = require("../../src/generator.js");
-
-        // Test date: Sat Mar 14 2015 07:32:22 UTC
-        const d = Date.UTC(2015, 2, 14, 7, 32, 22);
-        const Buckets = new BucketGenerator("1h");
-
-        it("should have the correct index", done => {
-            const b = Buckets.bucket(d);
+        it("should have the correct index for a 1 hour bucket", done => {
+            const b = Index.getBucket("1h", d);
             const expected = "1h-396199";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
-        it("should have the correct UTC string", done => {
-            const b = Buckets.bucket(d);
+        it("should have the correct UTC string for a 1 hour bucket", done => {
+            const b = Index.getBucket("1h", d);
             const expected = "1h-396199: [Sat, 14 Mar 2015 07:00:00 GMT, Sat, 14 Mar 2015 08:00:00 GMT]";
             expect(b.toUTCString()).to.equal(expected);
             done();
         });
-    });
 
-    describe("Daily bucket tests", () => {
-        const BucketGenerator = require("../../src/generator.js");
-
-        // Test date: Sat Mar 14 2015 07:32:22 UTC
-        const d = new Date(2015, 2, 14, 7, 32, 22);
-        const Buckets = new BucketGenerator("1d");
-
-        it("should have the correct index", done => {
-            const b = Buckets.bucket(d);
+        it("should have the correct index for a 1 day bucket", done => {
+            const b = Index.getBucket("1d", d);
             const expected = "1d-16508";
             expect(b.index().asString()).to.equal(expected);
             done();
         });
 
-        it("should have the correct UTC string", done => {
-            const b = Buckets.bucket(d);
+        it("should have the correct UTC string for a 1 day bucket", done => {
+            const b = Index.getBucket("1d", d);
             const expected = "1d-16508: [Sat, 14 Mar 2015 00:00:00 GMT, Sun, 15 Mar 2015 00:00:00 GMT]";
             expect(b.toUTCString()).to.equal(expected);
             done();
@@ -855,7 +881,6 @@ describe("Process chains", () => {
                 .groupBy("name")
                 .aggregate("1h", avg, ["value"])
                 .out(event => {
-                    console.log("out", event);
                     results[`${event.index()}::${event.key()}`] = `${event}`;
                     resultCount++;
                 });

@@ -24,7 +24,6 @@ exports.TimeRangeEvent = require("./lib/event.js").TimeRangeEvent;
 exports.IndexedEvent = require("./lib/event.js").IndexedEvent;
 exports.TimeSeries = require("./lib/series.js").TimeSeries;
 exports.Bucket = require("./lib/bucket.js");
-exports.Generator = require("./lib/generator.js");
 exports.Aggregator = require("./lib/aggregator.js");
 exports.Collector = require("./lib/collector.js");
 exports.Derivative = require("./lib/derivative.js");

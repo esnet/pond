@@ -10,6 +10,7 @@
 
 import _ from "underscore";
 import util from "./util";
+import { IndexedBucket } from "./bucket";
 
 /**
  * An index that represents as a string a range of time. That range may either
@@ -87,5 +88,31 @@ export default class Index {
      */
     end() {
         return this._timerange.end();
+    }
+
+    static getIndexString(win, date) {
+        const pos = util.windowPositionFromDate(win, date);
+        return `${win}-${pos}`;
+    }
+
+    static getBucket(win, date, key) {
+        return new IndexedBucket(Index.getIndexString(win, date), key);
+    }
+
+    static getIndexStringList(win, timerange) {
+        const pos1 = util.windowPositionFromDate(win, timerange.begin());
+        const pos2 = util.windowPositionFromDate(win, timerange.end());
+        const indexList = [];
+        if (pos1 <= pos2) {
+            for (let pos = pos1; pos <= pos2; pos++) {
+                indexList.push(`${win}-${pos}`);
+            }
+        }
+        return indexList;
+    }
+
+    static getBucketList(win, timerange, key) {
+        const indexList = Index.getIndexStringList(win, timerange);
+        return _.map(indexList, index => new IndexedBucket(index, key));
     }
 }

@@ -9,7 +9,7 @@
  */
 
 import _ from "underscore";
-import Generator from "./generator";
+import Index from "./index";
 import TimeRange from "./range";
 import { Event } from "./event";
 
@@ -25,7 +25,7 @@ export default class Derivative {
             throw new Error("Derivative: constructor needs 'window' in options");
         }
 
-        this._generator = new Generator(options.window);
+        this._window = options.window;
         this._fieldSpec = options.fieldSpec;
         this._observer = observer;
 
@@ -47,7 +47,9 @@ export default class Derivative {
             bucketList = [];
         } else {
             bucketList =
-                this._generator.bucketList(this._lastTime[key], timestamp, key);
+                Index.getBucketList(this._window,
+                                    new TimeRange(this._lastTime[key], timestamp),
+                                    key);
         }
         _.each(bucketList, (b) => {
             if (!_.has(this._activeBucketList, `${b.index()}::${key}`)) {

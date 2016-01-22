@@ -9,7 +9,7 @@
  */
 
 import _ from "underscore";
-import Generator from "./generator";
+import Index from "./index";
 
 /**
  * An aggregator takes the following options:
@@ -21,13 +21,37 @@ import Generator from "./generator";
  *                         of strings for each event column, or a function.
  *                         If a function it should return a list of key/values
  *                         in an object.
- *     - 'emit'      - (optional) Rate to emit events. Either:
- *                         "always" - emit an event on every change
- *                         "next" - just when we advance to the next bucket
+ *     - 'emit'      -     (optional) Rate to emit events. Either:
+ *                             "always" - emit an event on every change
+ *                             "next" - just when we advance to the next bucket
+ */
+
+/**
+ * const aggregator = new Aggregator({
+ *     window: {duration: "1h", type: "sliding"},
+ *     emit: 5 // every 5 points the event will emit
+ * })
+ *
+ * Example windows:
+ *     what kind of bucket to maintain:
+ *
+ *     duration 1h,  type sliding   A sliding window 1hr long
+ *     duration 5,   type sliding   A sliding window 5 events long
+ *     duration 30s, type fixed     A fixed window 30s long
+ *     duration 100, type fixed     A fixed window 100 events long
+ *
+ * Example emit:
+ *     emit determines how often an event is emitted:
+ *
+ *     emit always   - Emit a result for every incoming event, same as emit 1
+ *     emit next     - Emit a result whenever a fixed window moves
+ *     emit 100      - Emit a result, even partial, every 100 events
+ *
  */
 export default class Aggregator {
 
     constructor(options, observer) {
+        // Options
         if (!options) {
             throw new Error("Aggregator: no options supplied");
         }
@@ -37,7 +61,20 @@ export default class Aggregator {
         if (!_.has(options, "operator")) {
             throw new Error("Aggregator: constructor needs 'operator' function in options");
         }
-        this._generator = new Generator(options.window);
+
+        /**
+        if (options.window.type === "sliding") {
+            this._aggregator = new SlidingWindowAggregator(options.duration);
+        } else {
+            if (options.length) {
+                this._aggregator = new FixedLengthWindowAggregator(options.length);
+            } else {
+                this._aggregator = new FixedTimeWindowAggregator(options.duration);
+            }
+        }
+        */
+
+        this._window = options.window;
         this._operator = options.operator;
         this._fieldSpec = options.fieldSpec;
         this._emitFrequency = options.emit || "next";
@@ -68,12 +105,12 @@ export default class Aggregator {
     addEvent(event, cb) {
         const key = event.key() === "" ? "_default_" : event.key();
         const timestamp = event.timestamp();
-        const index = this._generator.bucketIndex(timestamp);
+        const indexString = Index.getIndexString(this._window, timestamp);
         const currentBucket = this._buckets[key];
-        const currentBucketIndex = currentBucket ? currentBucket.index().asString() : "";
+        const currentBucketIndexString = currentBucket ? currentBucket.index().asString() : "";
 
         // See if we need a new bucket
-        if (index !== currentBucketIndex) {
+        if (indexString !== currentBucketIndexString) {
             // Emit the old bucket if we are emitting on 'next'
             if (currentBucket && this._emitFrequency === "next") {
                 currentBucket.aggregate(this._operator, this._fieldSpec, event => {
@@ -83,7 +120,7 @@ export default class Aggregator {
                 });
             }
             // And now make the new bucket to add our event to
-            this._buckets[key] = this._generator.bucket(timestamp, key);
+            this._buckets[key] = Index.getBucket(this._window, timestamp, key);
         }
 
         // Add our event to the current/new bucket

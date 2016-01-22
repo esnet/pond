@@ -9,7 +9,7 @@
  */
 
 import _ from "underscore";
-import Generator from "./generator";
+import Index from "./index";
 
 /**
  * A collector takes the following options:
@@ -34,7 +34,7 @@ export default class Collector {
             throw new Error("Collector: emitFrequency options should be 'always' or 'next'");
         }
         this._convertToTimes = options.convertToTimes || false;
-        this._generator = new Generator(options.window);
+        this._window = options.window;
         this._buckets = {};
         this._observer = observer;
     }
@@ -59,12 +59,12 @@ export default class Collector {
     addEvent(event, cb) {
         const key = event.key() === "" ? "_default_" : event.key();
         const timestamp = event.timestamp();
-        const index = this._generator.bucketIndex(timestamp);
+        const indexString = Index.getIndexString(this._window, timestamp);
         const currentBucket = this._buckets[key];
-        const currentBucketIndex = currentBucket ? currentBucket.index().asString() : "";
+        const currentBucketIndexString = currentBucket ? currentBucket.index().asString() : "";
 
         // See if we need a new bucket
-        if (index !== currentBucketIndex) {
+        if (indexString !== currentBucketIndexString) {
             // Emit the old bucket if we are emitting on 'next'
             if (currentBucket && this._emitFrequency === "next") {
                 currentBucket.collect(series => {
@@ -74,7 +74,7 @@ export default class Collector {
                 }, this._convertToTimes);
             }
             // And now make the new bucket to add our event to
-            this._buckets[key] = this._generator.bucket(timestamp, key);
+            this._buckets[key] = Index.getBucket(this._window, timestamp, key);
         }
 
         // Add our event to the current/new bucket

@@ -82,22 +82,15 @@ function derivative(timerange) {
  * refers to a block of time 1 day long, starting 1673 days after
  * the beginning of 1970.
  */
-export default class Bucket {
+export class Bucket {
 
-    constructor(index, key, strategy) {
+    constructor(key, strategy) {
         // Caching strategy
         if (!strategy) {
             this._cacheStrategy = new MemoryCacheStrategy();
             this._cacheStrategy.init();
         } else {
             this._cacheStrategy = strategy;
-        }
-
-        // Index
-        if (_.isString(index)) {
-            this._index = new Index(index);
-        } else if (index instanceof Index) {
-            this._index = index;
         }
 
         // Event key
@@ -109,43 +102,11 @@ export default class Bucket {
     }
 
     name() {
-        return this._index.asString();
+        return "bucket";
     }
 
     key() {
         return this._key;
-    }
-
-    timerange() {
-        return this._index.asTimerange();
-    }
-
-    index() {
-        return this._index;
-    }
-
-    toUTCString() {
-        return `${this.index().asString()}: ${this.range().toUTCString()}`;
-    }
-
-    toLocalString() {
-        return `${this.index().asString()}: ${this.range().toLocalString()}`;
-    }
-
-    //
-    // Convenience access the bucket range
-    //
-
-    range() {
-        return this._index.asTimerange();
-    }
-
-    begin() {
-        return this.range().begin();
-    }
-
-    end() {
-        return this.range().end();
     }
 
     //
@@ -183,6 +144,10 @@ export default class Bucket {
             }
         });
     }
+
+    //
+    // Reduce the bucket to something else, like a number, or a Timeseries...
+    //
 
     /**
      * Takes the values within the bucket and aggregates them together
@@ -252,5 +217,60 @@ export default class Bucket {
                 cb();
             }
         });
+    }
+}
+
+/**
+ * An indexed bucket represents a fixed range of time, defined by the
+ * index supplied to the constructor. The index may be of string form
+ * or an actual Index.
+ */
+export class IndexedBucket extends Bucket {
+
+    constructor(index, key, strategy) {
+        super(key, strategy);
+
+        // Index
+        if (_.isString(index)) {
+            this._index = new Index(index);
+        } else if (index instanceof Index) {
+            this._index = index;
+        }
+    }
+
+    name() {
+        return this._index.asString();
+    }
+
+    //
+    // Access the index in different ways
+    //
+
+    index() {
+        return this._index;
+    }
+
+    timerange() {
+        return this._index.asTimerange();
+    }
+
+    toUTCString() {
+        return `${this._index.asString()}: ${this.range().toUTCString()}`;
+    }
+
+    toLocalString() {
+        return `${this._index.asString()}: ${this.range().toLocalString()}`;
+    }
+
+    range() {
+        return this._index.asTimerange();
+    }
+
+    begin() {
+        return this.range().begin();
+    }
+
+    end() {
+        return this.range().end();
     }
 }
