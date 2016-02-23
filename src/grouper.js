@@ -21,6 +21,7 @@ export default class Grouper {
      */
     constructor(options, observer) {
         if (!_.has(options, "groupBy")) {
+            
             throw new Error("Grouper: constructor needs 'groupBy' in options");
         }
 

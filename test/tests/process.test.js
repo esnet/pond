@@ -14,8 +14,9 @@
 
 import { expect } from "chai";
 import _ from "underscore";
-import { Event, IndexedEvent } from "../../src/event";
+import { Event, IndexedEvent, TimeRangeEvent } from "../../src/event";
 import TimeRange from "../../src/range";
+import { SlidingTimeBucket } from "../../src/bucket";
 import Aggregator from "../../src/aggregator";
 import Collector from "../../src/collector";
 import Binner from "../../src/binner";
@@ -299,6 +300,66 @@ describe("Buckets", () => {
         });
     });
 
+    /**
+     * We also have a sliding time bucket
+     */
+    describe("Sliding Bucket tests", () => {
+
+        const event1 = new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3);
+        const event2 = new Event(Date.UTC(2015, 2, 14, 7, 57, 30), 5);
+        const event3 = new Event(Date.UTC(2015, 2, 14, 7, 58, 10), 7);
+
+        it("should be able to create a sliding bucket", done => {
+            /**
+             * In this test the first event will be removed by the third
+             * event since the third event will advance the window forward
+             * such that the first event is more than a minute old
+             */
+            const slidingBucket = new SlidingTimeBucket("1m");
+            slidingBucket.addEvent(event1);
+            slidingBucket.addEvent(event2);
+            slidingBucket.addEvent(event3);
+
+            slidingBucket.getEvents((err, events) => {
+                expect(events.length)
+                    .to.equal(2);
+                expect(events[0].toString())
+                    .to.equal(`{"time":1426319850000,"data":{"value":5},"key":""}`);
+                expect(events[1].toString())
+                    .to.equal(`{"time":1426319890000,"data":{"value":7},"key":""}`);
+                done();
+            });
+        });
+
+        it("should be able to do sliding bucket aggregation", done => {
+            const events = [];
+
+            const AvgAggregator = new Aggregator({
+                window: {type: "sliding-time", duration: "1m"},
+                operator: avg,
+                emit: "always"
+            }, event => {
+                events.push(event);
+            });
+
+            AvgAggregator.addEvent(event1);
+            AvgAggregator.addEvent(event2);
+            AvgAggregator.addEvent(event3);
+
+            expect(events.length)
+                .to.equal(3);
+            expect(events[0].toString())
+                .to.equal(`{"timerange":[1426319820000,1426319820000],"data":{"value":3},"key":""}`);
+            expect(events[1].toString())
+                .to.equal(`{"timerange":[1426319820000,1426319850000],"data":{"value":4},"key":""}`);
+            expect(events[2].toString())
+                .to.equal(`{"timerange":[1426319850000,1426319890000],"data":{"value":6},"key":""}`);
+            done();
+
+        });
+
+    });
+
     describe("Aggregator", () => {
         const incomingEvents = [];
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
@@ -323,7 +384,7 @@ describe("Buckets", () => {
             const maxEvents = {};
 
             const MaxAggregator = new Aggregator({
-                window: "1h",
+                window: {duration: "1h"},
                 operator: max
             });
 
@@ -348,7 +409,7 @@ describe("Buckets", () => {
             const avgEvents = {};
 
             const AvgAggregator = new Aggregator({
-                window: "1h",
+                window: {duration: "1h"},
                 operator: avg
             });
 
@@ -372,7 +433,7 @@ describe("Buckets", () => {
         it("should calculate the correct sum for the two 1hr buckets", done => {
             const sumEvents = {};
             const SumAggregator = new Aggregator({
-                window: "1h",
+                window: {duration: "1h"},
                 operator: sum
             });
             SumAggregator.onEmit(event => {
@@ -395,7 +456,7 @@ describe("Buckets", () => {
         it("should calculate the correct count for the two 1hr buckets", done => {
             const countEvents = {};
             const CountAggregator = new Aggregator({
-                window: "1h",
+                window: {duration: "1h"},
                 operator: count
             });
             CountAggregator.onEmit(event => {
@@ -423,7 +484,7 @@ describe("Buckets", () => {
             });
 
             const CountAggregator = new Aggregator({
-                window: "1d",
+                window: {duration: "1d"},
                 operator: count
             });
             CountAggregator.onEmit(event => {
@@ -450,7 +511,7 @@ describe("Buckets", () => {
             });
 
             const CountAggregator = new Aggregator({
-                window: "1d",
+                window: {duration: "1d"},
                 operator: count
             }, event => {
                 countEvents[event.index().asString()] = event;
@@ -470,7 +531,10 @@ describe("Buckets", () => {
 
         it("should calculate the correct count with grouped events", done => {
             const results = {};
-            const aggregate1hMax = new Aggregator({window: "1h", operator: max}, event => {
+            const aggregate1hMax = new Aggregator({
+                window: {duration: "1h"},
+                operator: max
+            }, event => {
                 results[`${event.index()} ${event.key()}`] = event.get();
             });
             const groupByName = new Grouper({
@@ -510,7 +574,7 @@ describe("Buckets", () => {
             const avgEvents = {};
 
             const AvgAggregator = new Aggregator({
-                window: "1h",
+                window: {duration: "1h"},
                 operator: avg,
                 emit: "always"
             });
@@ -539,7 +603,9 @@ describe("Buckets", () => {
 
         it("should calculate the correct sum for the two 1hr buckets", done => {
             const sumEvents = {};
-            const SumAggregator = new Aggregator({window: "1h", operator: sum});
+            const SumAggregator = new Aggregator({
+                window: {duration: "1h"}, operator: sum
+            });
             SumAggregator.onEmit(event => {
                 sumEvents[event.index().asString()] = event;
             });
@@ -601,7 +667,9 @@ describe("Buckets", () => {
             events.push(new Event(1445449260000, {in: 7822001988.533334, out: 2566206616.7999997}));
             const collection = {};
 
-            const hourlyCollection = new Collector({window: "1h"}, series => {
+            const hourlyCollection = new Collector({
+                window: {duration: "1h"}
+            }, series => {
                 collection[series.index().asString()] = series;
             });
 
@@ -624,7 +692,9 @@ describe("Buckets", () => {
             events.push(new IndexedEvent("5m-4818243", {in: 73, out: 18}));
             const collection = {};
 
-            const collector = new Collector({window: "7d"}, (series) => {
+            const collector = new Collector({
+                window: "7d"
+            }, (series) => {
                 collection[series.index().asString()] = series;
             }, true);
 
@@ -859,6 +929,164 @@ describe("Process chains", () => {
         });
     });
 
+    describe("Event conversion", () => {
+
+        const timestamp = new Date(1426316400000);
+        const e = new Event(timestamp , 3);
+
+        it("should be able to convert from an Event to an TimeRangeEvent, using a duration, in front of the event", done => {
+            const processChain = Processor()
+                .convertTo(TimeRangeEvent, "front", "1h")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"timerange":[1426316400000,1426320000000],"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(e);
+        });
+
+        it("should be able to convert from an Event to an TimeRangeEvent, using a duration, surrounding the event", done => {
+            const processChain = Processor()
+                .convertTo(TimeRangeEvent, "center", "1h")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"timerange":[1426314600000,1426318200000],"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(e);
+        });
+
+        it("should be able to convert from an Event to an TimeRangeEvent, using a duration, in behind of the event", done => {
+            const processChain = Processor()
+                .convertTo(TimeRangeEvent, "behind", "1h")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"timerange":[1426312800000,1426316400000],"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(e);
+        });
+
+        it("should be able to convert from an Event to an IndexedEvent", done => {
+            const processChain = Processor()
+                .convertTo(IndexedEvent, null, "1h")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"index":"1h-396199","data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(e);
+        });
+
+        it("should be able to convert from an Event to an Event as a noop", done => {
+            const processChain = Processor()
+                .convertTo(Event)
+                .out(event => {
+                    expect(event).to.equal(e);
+                    done();
+                });
+            processChain.addEvent(e);
+        });
+    });
+
+    describe("TimeRangeEvent conversion", () => {
+
+        const timeRange = new TimeRange([1426316400000, 1426320000000]);
+        const timeRangeEvent = new TimeRangeEvent(timeRange, 3);
+
+        it("should be able to convert from an TimeRangeEvent to an Event, using the center of the range", done => {
+            const processChain = Processor()
+                .convertTo(Event)
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"time":1426318200000,"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(timeRangeEvent);
+        });
+
+        it("should be able to convert from an TimeRangeEvent to an Event, using beginning of the range", done => {
+            const processChain = Processor()
+                .convertTo(Event, "lag")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"time":1426316400000,"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(timeRangeEvent);
+        });
+
+        it("should be able to convert from an TimeRangeEvent to an Event, using the end of the range", done => {
+            const processChain = Processor()
+                .convertTo(Event, "lead")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"time":1426320000000,"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(timeRangeEvent);
+        });
+
+        it("should be able to convert from an TimeRangeEvent to an TimeRangeEvent as a noop", done => {
+            const processChain = Processor()
+                .convertTo(TimeRangeEvent)
+                .out(event => {
+                    expect(event).to.equal(timeRangeEvent);
+                    done();
+                });
+            processChain.addEvent(timeRangeEvent);
+        });
+    });
+
+    describe("IndexedEvent conversion", () => {
+
+        const indexedEvent = new IndexedEvent("1h-396199", 3);
+
+        it("should be able to convert from an IndexedEvent to an Event, using the center of the range", done => {
+            const processChain = Processor()
+                .convertTo(Event)
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"time":1426318200000,"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(indexedEvent);
+        });
+
+        it("should be able to convert from an IndexedEvent to an Event, using beginning of the range", done => {
+            const processChain = Processor()
+                .convertTo(Event, "lag")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"time":1426316400000,"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(indexedEvent);
+        });
+
+        it("should be able to convert from an IndexedEvent to an Event, using the end of the range", done => {
+            const processChain = Processor()
+                .convertTo(Event, "lead")
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"time":1426320000000,"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(indexedEvent);
+        });
+
+        it("should be able to convert from an IndexedEvent to an TimeRangeEvent", done => {
+            const processChain = Processor()
+                .convertTo(TimeRangeEvent)
+                .out(event => {
+                    expect(`${event}`).to.equal(`{"timerange":[1426316400000,1426320000000],"data":{"value":3},"key":""}`);
+                    done();
+                });
+            processChain.addEvent(indexedEvent);
+        });
+
+        it("should be able to convert from an IndexedEvent to an IndexedEvent as a noop", done => {
+            const processChain = Processor()
+                .convertTo(IndexedEvent)
+                .out(event => {
+                    expect(event).to.equal(indexedEvent);
+                    done();
+                });
+            processChain.addEvent(indexedEvent);
+        });
+
+    });
+
     describe("Process chains", () => {
 
         const groupedEvents = [];
@@ -873,13 +1101,13 @@ describe("Process chains", () => {
         groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {name: "a", value: 5}));
         groupedEvents.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {name: "b", value: 7}));
 
-        it("should generate the correct keys for column based groupBy..", done => {
+        it("should be able to combine groupby with aggregation using a processor chain", done => {
             const results = {};
             let resultCount = 0;
 
             const processChain = Processor()
                 .groupBy("name")
-                .aggregate("1h", avg, ["value"])
+                .aggregate({duration: "1h"}, avg, ["value"])
                 .out(event => {
                     results[`${event.index()}::${event.key()}`] = `${event}`;
                     resultCount++;
@@ -895,16 +1123,17 @@ describe("Process chains", () => {
             done();
         });
 
-        it("should generate the correct keys for column based groupBy..", done => {
+        it("should be able to emit always", done => {
             const results = {};
             let resultCount = 0;
             const processChain = Processor({emit: "always"})
                 .groupBy("name")
-                .aggregate("1h", avg, ["value"])
+                .aggregate({duration: "1h"}, avg, ["value"])
                 .out(event => {
                     results[`${event.index()}::${event.key()}`] = `${event}`;
                     resultCount++;
                 });
+
             processChain.addEvents(groupedEvents);
             expect(resultCount).to.equal(10);
             expect(`${results["1h-396199::a"]}`)
@@ -926,7 +1155,7 @@ describe("Process chains", () => {
             let emitCount = 0;
             const processChain = Processor({emit: "always"})
                 .groupBy("name")
-                .collect("1h", false, series => {
+                .collect("1h", series => {
                     collection[series.index().asString()] = series;
                     emitCount++;
                 });
@@ -939,5 +1168,27 @@ describe("Process chains", () => {
 
             done();
         });
+
+        /*
+        it("should be able to aggregate to IndexedEvents and then collect Events into a TimeSeries", done => {
+            const results = [];
+            const processChain = Processor({emit: "always"})
+                .groupBy("name")
+                .aggregate({duration: "1h"}, avg, ["value"])
+                .convertTo(TimeRangeEvent)
+                .out(event => {
+                    // console.log(`$$ ${event}`);
+                });
+                // .collect("1h", series => {
+                //    console.log(series, `:: ${series}`);
+                //});
+
+            processChain.addEvents(groupedEvents);
+
+            // console.log("Resulting events", results);
+
+            done();
+        });
+        */
     });
 });

@@ -24,6 +24,7 @@ import Aggregator from "./aggregator";
 import Derivative from "./derivative";
 import Collector from "./collector";
 import Binner from "./binner";
+import Converter from "./converter";
 
 const END = true;
 
@@ -121,11 +122,11 @@ class Processor {
         );
     }
 
-    collect(window, convertToTimes, observer) {
+    collect(window, observer) {
         const emit = this._emit;
         return this._chain(
             "collector",
-            new Collector({window, convertToTimes, emit}, observer),
+            new Collector({window, emit}, observer),
             END
         );
     }
@@ -134,6 +135,17 @@ class Processor {
         return this._chain(
             "binner",
             new Binner({window, fieldSpec})
+        );
+    }
+
+    convertTo(eventType, alignment, duration) {
+        return this._chain(
+            "convert to",
+            new Converter({
+                type: eventType,
+                alignment,
+                duration
+            })
         );
     }
 

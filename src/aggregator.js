@@ -10,6 +10,7 @@
 
 import _ from "underscore";
 import Index from "./index";
+import { SlidingTimeBucket } from "./bucket";
 
 /**
  * An aggregator takes the following options:
@@ -35,10 +36,9 @@ import Index from "./index";
  * Example windows:
  *     what kind of bucket to maintain:
  *
- *     duration 1h,  type sliding   A sliding window 1hr long
- *     duration 5,   type sliding   A sliding window 5 events long
- *     duration 30s, type fixed     A fixed window 30s long
- *     duration 100, type fixed     A fixed window 100 events long
+ *     duration: "1h"   type:  sliding   - A sliding window 1hr long
+ *     size:      5     type:  sliding   - A sliding window 5 events long
+ *     duration: "30s"  type:  fixed     - A fixed window 30s long
  *
  * Example emit:
  *     emit determines how often an event is emitted:
@@ -62,19 +62,23 @@ export default class Aggregator {
             throw new Error("Aggregator: constructor needs 'operator' function in options");
         }
 
-        /**
-        if (options.window.type === "sliding") {
-            this._aggregator = new SlidingWindowAggregator(options.duration);
-        } else {
-            if (options.length) {
-                this._aggregator = new FixedLengthWindowAggregator(options.length);
-            } else {
-                this._aggregator = new FixedTimeWindowAggregator(options.duration);
-            }
+        const type = options.window.type || "fixed";
+        switch (type) {
+            case "fixed":
+                this._bucketType = "fixed";
+                this._fixedWindow = options.window.duration || "1m";
+                break;
+            case "sliding":
+                this._bucketType = "sliding";
+                this._slidingWindowSize = options.window.size || 10;
+                break;
+            case "sliding-time":
+                this._bucketType = "sliding-time";
+                this._slidingWindowDuration = options.window.duration || "1m";
+                break;
         }
-        */
 
-        this._window = options.window;
+        // this._window = options.window;
         this._operator = options.operator;
         this._fieldSpec = options.fieldSpec;
         this._emitFrequency = options.emit || "next";
@@ -83,6 +87,35 @@ export default class Aggregator {
         }
         this._buckets = {};
         this._observer = observer;
+    }
+
+    //
+    // Triggering
+    //
+
+    emitOnBucketAdvance() {
+        return (this._emitFrequency === "next");
+    }
+
+    emitOnEvent() {
+        return (this._emitFrequency === "always");
+    }
+
+    //
+    // New buckets
+    //
+
+    generateNewBucket(timestamp, key) {
+        switch (this._bucketType) {
+            case "fixed":
+                return Index.getBucket(this._fixedWindow, timestamp, key);
+            case "sliding":
+                return null;
+            case "sliding-time":
+                return new SlidingTimeBucket(this._slidingWindowDuration, key);
+            default:
+                return;
+        }
     }
 
     /**
@@ -105,22 +138,31 @@ export default class Aggregator {
     addEvent(event, cb) {
         const key = event.key() === "" ? "_default_" : event.key();
         const timestamp = event.timestamp();
-        const indexString = Index.getIndexString(this._window, timestamp);
         const currentBucket = this._buckets[key];
-        const currentBucketIndexString = currentBucket ? currentBucket.index().asString() : "";
 
-        // See if we need a new bucket
-        if (indexString !== currentBucketIndexString) {
-            // Emit the old bucket if we are emitting on 'next'
-            if (currentBucket && this._emitFrequency === "next") {
-                currentBucket.aggregate(this._operator, this._fieldSpec, event => {
-                    if (this._observer) {
-                        this._observer(event);
-                    }
-                });
+        // If we have a fixed bucket, we might need to generate a new bucket
+        // when the events advance enough. However, with sliding windows we always use the
+        // same window, we just advance it as necessary.
+        if (this._bucketType === "fixed") {
+            // See if we need a new bucket
+            const currentIndexString = currentBucket ? currentBucket.index().asString() : "";
+            const nextIndexString = Index.getIndexString(this._fixedWindow, timestamp);
+            if (nextIndexString !== currentIndexString) {
+                // Emit the old bucket if we are emitting on 'next'
+                if (currentBucket && this.emitOnBucketAdvance()) {
+                    currentBucket.aggregate(this._operator, this._fieldSpec, event => {
+                        if (this._observer) {
+                            this._observer(event);
+                        }
+                    });
+                }
+                // And now make the new bucket to add our event to
+                this._buckets[key] = this.generateNewBucket(timestamp, key);
             }
-            // And now make the new bucket to add our event to
-            this._buckets[key] = Index.getBucket(this._window, timestamp, key);
+        } else {
+            if (!this._buckets[key]) {
+                this._buckets[key] = this.generateNewBucket(timestamp, key);
+            }
         }
 
         // Add our event to the current/new bucket
@@ -133,7 +175,7 @@ export default class Aggregator {
 
         // Finally, emit the current/new bucket with the new event in it, if
         // we have been asked to always emit
-        if (this._emitFrequency === "always") {
+        if (this.emitOnEvent()) {
             if (bucket) {
                 bucket.aggregate(this._operator, this._fieldSpec, event => {
                     if (this._observer) {

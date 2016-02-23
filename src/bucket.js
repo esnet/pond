@@ -9,9 +9,12 @@
  */
 
 import _ from "underscore";
-import { Event, IndexedEvent } from "./event";
-import TimeSeries from "./series";
+import Immutable from "immutable";
 
+import { Event, IndexedEvent, TimeRangeEvent } from "./event";
+import TimeSeries from "./series";
+import TimeRange from "./range";
+import Util from "./util";
 import Index from "./index";
 
 class MemoryCacheStrategy {
@@ -24,27 +27,37 @@ class MemoryCacheStrategy {
     }
 
     addEvent(name, event, cb) {
-        let eventKey = name;
-        if (event instanceof Event) {
-            eventKey = `${event.timestamp().getTime()}`;
-        } else if (event instanceof IndexedEvent) {
-            eventKey = `${event.index()}`;
-        }
-
         if (!_.has(this._cache, name)) {
-            this._cache[name] = {};
+            this._cache[name] = Immutable.List();
         }
-
-        this._cache[name][eventKey] = event;
-
-        // memory cache never fails (we assume)
+        this._cache[name] = this._cache[name].push(event);
         cb(null);
+    }
+
+    /**
+     * Removes the first event in the list
+     */
+    removeFirstEvent(name) {
+        if (_.has(this._cache, name)) {
+            this._cache[name] = this._cache[name].shift();
+        }
+    }
+
+    /**
+     * Removes all the events before the given timestamp
+     */
+    removeOldEvents(name, timestamp) {
+        if (_.has(this._cache, name)) {
+            this._cache[name] = this._cache[name]
+                .filterNot(event => {
+                    return event.timestamp().getTime() < timestamp.getTime();
+                });
+        }
     }
 
     getEvents(name, cb) {
         if (_.has(this._cache, name)) {
-            const events = _.map(this._cache[name], event => event);
-            cb(null, events);
+            cb(null, this._cache[name].toJS());
         } else {
             cb("Unknown cache key", null);
         }
@@ -114,8 +127,6 @@ export class Bucket {
     // so pushing to the cache takes a callback, which will be called
     // when the event is added to the cache.
     //
-    // TODO: This should be stategy based.
-    //
 
     _pushToCache(event, cb) {
         this._cacheStrategy.addEvent(this.name(), event, (err) => {
@@ -145,6 +156,10 @@ export class Bucket {
         });
     }
 
+    getEvents(cb) {
+        this._readFromCache(cb);
+    }
+
     //
     // Reduce the bucket to something else, like a number, or a Timeseries...
     //
@@ -159,7 +174,8 @@ export class Bucket {
             if (!err) {
                 if (events.length) {
                     const data = Event.mapReduce(events, fieldSpec, operator);
-                    const event = new IndexedEvent(this._index, data, null, this._key);
+                    const key = this._key === "_default_" ? undefined : this._key;
+                    const event = new IndexedEvent(this._index, data, null, key);
                     if (cb) {
                         cb(event);
                     }
@@ -183,32 +199,19 @@ export class Bucket {
 
     /**
      * Takes the values within the bucket and collects them together
-     * into a new TimeSeries. The convertToTimes flag determines if
-     * the collected Events should be rebuilt with time (i.e. Events)
-     * or left as IndexedEvents.
+     * into a new TimeSeries.
      *
      * The result or error is passed to the callback.
      */
-    collect(cb, convertToTimes = false) {
+    collect(cb) {
         this._readFromCache((err, events) => {
-            let seriesEvents;
-            if (!convertToTimes) {
-                seriesEvents = events;
-            } else {
-                seriesEvents = events.map(event => {
-                    if (event instanceof IndexedEvent) {
-                        return new Event(event.index().begin(), event.data());
-                    } else {
-                        return event;
-                    }
-                });
-            }
             if (!err) {
+                console.log("XX", events);
                 const series = new TimeSeries({
                     name: this._index.toString(),
                     meta: {},
                     index: this._index,
-                    events: seriesEvents
+                    events: events
                 });
                 if (cb) {
                     cb(series);
@@ -273,4 +276,83 @@ export class IndexedBucket extends Bucket {
     end() {
         return this.range().end();
     }
+}
+
+/**
+ * There are two types of sliding buckets:
+ *
+ *     - A bucket that keeps a constant number of events. As each event
+ *       is added, the oldest event is ejected. If the bucket window is a
+ *       number then this is assumed to be the number of events in the bucket.
+ *
+ *     - A bucket that keeps a constant time. As each event is added, the
+ *       bucket moves forward in time to the new event. The bucket timerange
+ *       stays the same. Only events no longer in the bucket are removed. If
+ *       the bucket is a string e.g. "5m", then this defines the bucket size.
+ *
+ *  ** Only the second type is currently implemented below.
+ */
+export class SlidingTimeBucket extends Bucket {
+    constructor(arg, key, strategy) {
+        super(key, strategy);
+        if (_.isString(arg)) {
+            this._duration = Util.windowDuration(arg);
+        } else if (_.isNumber(arg)) {
+            this._duration = arg;
+        }
+    }
+
+    _pushToCache(event, cb) {
+        const name = this.name();
+        this._cacheStrategy.addEvent(this.name(), event, (err) => {
+            const windowEnd = event.timestamp();
+            const windowBegin = new Date(windowEnd.getTime() - this._duration);
+            this._cacheStrategy.removeOldEvents(name, windowBegin);
+            if (cb) {
+                cb(err);
+            }
+        });
+    }
+
+    //
+    // Add values to the sliding bucket. The event goes at the end, but
+    // it may be that earlier events should also be removed.
+    //
+
+    addEvent(event, cb) {
+        this._pushToCache(event, (err) => {
+            if (cb) {
+                cb(err);
+            }
+        });
+    }
+
+    /**
+     * Takes the values within the bucket and aggregates them together
+     * into a new TimeRangeEvent using the operator supplied.
+     * The result or error is passed to the callback.
+     */
+    aggregate(operator, fieldSpec, cb) {
+        this.getEvents((err, events) => {
+            if (!err) {
+                if (events.length) {
+                    const data = Event.mapReduce(events, fieldSpec, operator);
+                    const timerange = new TimeRange(
+                        events[0].timestamp(),
+                        events[events.length - 1].timestamp()
+                    );
+                    const key = this._key === "_default_" ? undefined : this._key;
+                    const event = new TimeRangeEvent(timerange, data, key);
+                    if (cb) {
+                        cb(event);
+                    }
+                } else if (cb) {
+                    cb();
+                }
+            } else if (cb) {
+                cb(err);
+            }
+        });
+    }
+
 }

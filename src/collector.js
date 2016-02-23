@@ -33,7 +33,6 @@ export default class Collector {
         if (["always", "next"].indexOf(this._emitFrequency) === -1) {
             throw new Error("Collector: emitFrequency options should be 'always' or 'next'");
         }
-        this._convertToTimes = options.convertToTimes || false;
         this._window = options.window;
         this._buckets = {};
         this._observer = observer;
@@ -48,7 +47,7 @@ export default class Collector {
                 if (this._observer) {
                     this._observer(series);
                 }
-            }, this._convertToTimes);
+            });
         });
         this._buckets = {};
     }
@@ -71,7 +70,7 @@ export default class Collector {
                     if (this._observer) {
                         this._observer(series);
                     }
-                }, this._convertToTimes);
+                });
             }
             // And now make the new bucket to add our event to
             this._buckets[key] = Index.getBucket(this._window, timestamp, key);
@@ -93,7 +92,7 @@ export default class Collector {
                     if (this._observer) {
                         this._observer(series);
                     }
-                }, this._convertToTimes);
+                });
             }
         }
     }

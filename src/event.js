@@ -455,8 +455,7 @@ export class Event {
     }
 
     static mapReduce(events, fieldSpec, reducer) {
-        const mapped = this.map(events, fieldSpec);
-        return Event.reduce(mapped, reducer);
+        return Event.reduce(this.map(events, fieldSpec), reducer);
     }
 }
 
