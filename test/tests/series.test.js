@@ -14,8 +14,9 @@
 
 import moment from "moment";
 import { expect } from "chai";
-import { Event } from "../../src/event.js";
+import { Event, TimeRangeEvent } from "../../src/event.js";
 import TimeSeries from "../../src/series.js";
+import TimeRange from "../../src/range.js";
 
 const data = {
     name: "traffic",
@@ -226,6 +227,40 @@ const partialTraffic2 = {
         [1400425954000, 72]
     ]
 };
+
+const outageEvents = [
+    {
+        startTime: "2015-04-22T03:30:00Z",
+        endTime: "2015-04-22T13:00:00Z",
+        description: "At 13:33 pacific circuit 06519 went down.",
+        title: "STAR-CR5 < 100 ge 06519 > ANL  - Outage",
+        completed: true,
+        external_ticket: "",
+        esnet_ticket: "ESNET-20150421-013",
+        organization: "Internet2 / Level 3",
+        type: "Unplanned"
+    }, {
+        startTime: "2015-04-22T03:30:00Z",
+        endTime: "2015-04-22T16:50:00Z",
+        title: "STAR-CR5 < 100 ge 06519 > ANL  - Outage",
+        description: "The listed circuit was unavailable due to bent pins.",
+        completed: true,
+        external_ticket: "3576:144",
+        esnet_ticket: "ESNET-20150421-013",
+        organization: "Internet2 / Level 3",
+        type: "Unplanned"
+    }, {
+        startTime: "2015-03-04T09:00:00Z",
+        endTime: "2015-03-04T14:00:00Z",
+        title: "ANL Scheduled Maintenance",
+        description: "ANL will be switching border routers...",
+        completed: true,
+        external_ticket: "",
+        esnet_ticket: "ESNET-20150302-002",
+        organization: "ANL",
+        type: "Planned"
+    }
+];
 
 describe("TimeSeries", () => {
 
@@ -602,11 +637,49 @@ describe("Indexed TimeSeries", () => {
 });
 
 /**
+ * A TimeSeries bases on TimeRanges
+ */
+describe("Timeseries containing timerange based events", () => {
+
+    describe("Series created with a a list of TimeRange events", () => {
+
+        const events = outageEvents.map(event => {
+            const { startTime, endTime, ...other } = event; //eslint-disable-line
+            const b = new Date(startTime);
+            const e = new Date(endTime);
+            return new TimeRangeEvent(new TimeRange(b, e), other);
+        });
+
+        it("can make a timeseries with the right timerange", done => {
+            const series = new TimeSeries({name: "outages", events});
+            expect(series.range().toString()).to.equal("[1425459600000,1429721400000]");
+            done();
+        });
+
+        it("can make a timeseries that can be serialized to a string", done => {
+            const series = new TimeSeries({name: "outages", events});
+            const expected = `{"name":"outages","columns":["timeRange","description","title","completed","external_ticket","esnet_ticket","organization","type"],"points":[[[1429673400000,1429707600000],"At 13:33 pacific circuit 06519 went down.","STAR-CR5 < 100 ge 06519 > ANL  - Outage",true,"","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1429673400000,1429721400000],"The listed circuit was unavailable due to bent pins.","STAR-CR5 < 100 ge 06519 > ANL  - Outage",true,"3576:144","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1425459600000,1425477600000],"ANL will be switching border routers...","ANL Scheduled Maintenance",true,"","ESNET-20150302-002","ANL","Planned"]]}`;
+            expect(series.toString()).to.equal(expected);
+            done();
+        });
+
+        it("can make a timeseries that can be serialized to JSON and then used to construct a TimeSeries again", done => {
+            const series = new TimeSeries({name: "outages", events});
+            const newSeries = new TimeSeries(series.toJSON());
+            expect(series.toString()).to.equal(newSeries.toString());
+            done();
+        });
+
+    });
+});
+
+
+/**
  * A series should be able to have an Index associated with it, for instance
  * if the series represents june 2014 then the Index might be "2014-06", or the
  * 123rd day since the epoch would be "1d-123"
  */
-describe("Timeseries containing indexed timeranges", () => {
+describe("Timeseries containing index based events", () => {
 
     describe("Series created with indexed data in the default UTC time", () => {
         it("can create an series with indexed data (in UTC time)", done => {

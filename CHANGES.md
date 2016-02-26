@@ -1,4 +1,9 @@
 
+### 0.4.1
+
+ * Fixed creation of a `TimeSeries` from `TimeRangeEvents`.
+ * Fixed `timerange()` calculation of a `TimeSeries` made of `TimeRangeEvents`.
+
 ### 0.4.0
 
  * Support for processing chains. e.g.
