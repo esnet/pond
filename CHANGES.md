@@ -1,8 +1,12 @@
 
-### 0.4.1
+### 0.4.2
 
  * Fixed creation of a `TimeSeries` from `TimeRangeEvents`.
  * Fixed `timerange()` calculation of a `TimeSeries` made of `TimeRangeEvents`.
+
+### 0.4.1
+
+ * Fixed TimeSeries import
 
 ### 0.4.0
 
