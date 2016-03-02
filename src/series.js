@@ -208,9 +208,8 @@ class TimeSeries {
 
                 const firstColumn = columns[0];
                 const useTimes = firstColumn === "time";
-                const useTimeRanges = firstColumn === "timerange";
+                const useTimeRanges = firstColumn === "timeRange";
                 const useIndexes = firstColumn === "index";
-                const re = /\[([0-9]*)\,([0-9]*)\]/;
                 const dataList = [];
                 _.each(seriesPoints, point => {
                     // The series maybe indexed by a time, timerange or index
@@ -225,11 +224,7 @@ class TimeSeries {
                         }
                         times.push(t);
                     } else if (useTimeRanges) {
-                        const timerange = i;
-                        let match = timerange.match(re);
-                        let beginTime = parseInt(match[1]);
-                        let endTime = parseInt(match[2]);
-                        let timeRange = new TimeRange(beginTime, endTime);
+                        const timeRange = new TimeRange(...i);
                         timeRanges.push(timeRange.range());
                     } else if (useIndexes) {
                         const index = i;
@@ -292,13 +287,13 @@ class TimeSeries {
         const cols = this._columns;
         const series = this._data;
 
-        let indexedBy;
+        let columns;
         if (this._times) {
-            indexedBy = "time";
+            columns = ["time"];
         } else if (this._timeRanges) {
-            indexedBy = "timerange";
+            columns = ["timeRange"];
         } else if (this._indexes) {
-            indexedBy = "index";
+            columns = ["index"];
         }
 
         const points = series.map((value, i) => {
@@ -308,7 +303,7 @@ class TimeSeries {
                 data.push(t.getTime());
             } else if (this._timeRanges) {
                 const tr = this._timeRanges.get(i);
-                data.push([tr[0], tr[1]]);
+                data.push([tr.get(0).getTime(), tr.get(1).getTime()]);
             } else if (this._indexes) {
                 const index = this._indexes.get(i);
                 data.push(index);
@@ -319,8 +314,7 @@ class TimeSeries {
             return data;
         }).toJSON();
 
-        // The JSON output has 'time' as the first column
-        const columns = [indexedBy];
+        // The rest of the columns
         cols.forEach((column) => {
             columns.push(column);
         });
@@ -373,11 +367,11 @@ class TimeSeries {
             });
         } else if (this._timeRanges) {
             this._timeRanges.forEach(timeRange => {
-                if (!min || timeRange.at(0).getTime() < min) {
-                    min = timeRange.at(0).getTime();
+                if (!min || timeRange.get(0).getTime() < min) {
+                    min = timeRange.get(0).getTime();
                 }
-                if (!max || timeRange.at(1).getTime() > max) {
-                    max = timeRange.at(1).getTime();
+                if (!max || timeRange.get(1).getTime() > max) {
+                    max = timeRange.get(1).getTime();
                 }
             });
         } else if (this._indexes) {

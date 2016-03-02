@@ -34,12 +34,16 @@ The format of the data is as follows:
   * **columns** - are necessary and give labels to the data in the points.
   * **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
    
-  As just hinted at, the time column may actually be either a time or a `TimeRange`, or a time range represented by an `Index`. By using an `Index` it is possible, for example, to refer to a specific month, for example:
+  As just hinted at, the first column may actually be:
+
+   * "time"
+   * "timeRange" represented by a `TimeRange`
+   * "index" - a time range represented by an `Index`. By using an index it is possible, for example, to refer to a specific month:
 
 ```javascript
 var availabilityData = {
     name: "Last 3 months availability",
-    columns: ["time", "uptime"],
+    columns: ["index", "uptime"],
     points: [
         ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
         ["2015-05", "92%"],
@@ -48,7 +52,7 @@ var availabilityData = {
 };
 ```
 
-Alternatively, you can construct a `TimeSeries` with a list of events. Here's an example of that:
+Alternatively, you can construct a `TimeSeries` with a list of events. These may be `Events`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
 
 ```javascript
 const events = [];
