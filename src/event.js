@@ -185,6 +185,15 @@ export class Event {
         return this._d.get("key");
     }
 
+    /**
+     * Sets the data portion of the event and
+     * returns a new Event.
+     */
+    setData(data) {
+        const d = this._d.set("data", dataFromArg(data));
+        return new Event(d);
+    }
+
     setKey(key) {
         const d = this._d.set("key", key);
         return new Event(d);
@@ -233,6 +242,35 @@ export class Event {
         }
     }
     */
+
+    static is(event1, event2) {
+        return Immutable.is(event1._d, event2._d);
+    }
+
+    /**
+     * Function to select specific fields of an event using
+     * a fieldSpec. The fieldSpec can be:
+     *  * A single field name
+     *  * An array of field names
+     *
+     * The function returns a new event.
+     */
+    static selector(event, fieldSpec) {
+        const data = {};
+        if (_.isString(fieldSpec)) {
+            const fieldName = fieldSpec;
+            const value = event.get(fieldName);
+            data[fieldName] = value;
+        } else if (_.isArray(fieldSpec)) {
+            _.each(fieldSpec, fieldName => {
+                const value = event.get(fieldName);
+                data[fieldName] = value;
+            });
+        } else {
+            return event;
+        }
+        return event.setData(data);
+    }
 
     static mergeEvents(events) {
         const t = events[0].timestamp();
@@ -548,6 +586,20 @@ export class TimeRangeEvent {
     }
 
     /**
+     * Sets the data portion of the event and
+     * returns a new TimeRangeEvent.
+     */
+    setData(data) {
+        const d = this._d.set("data", dataFromArg(data));
+        return new TimeRangeEvent(d);
+    }
+
+    setKey(key) {
+        const d = this._d.set("key", key);
+        return new TimeRangeEvent(d);
+    }
+
+    /**
      * The TimeRange of this data, in UTC, as a string.
      * @return {string} TimeRange of this data.
      */
@@ -697,6 +749,20 @@ export class IndexedEvent {
      */
     key() {
         return this._d.get("key");
+    }
+
+    /**
+     * Sets the data portion of the event and
+     * returns a new IndexedEvent.
+     */
+    setData(data) {
+        const d = this._d.set("data", dataFromArg(data));
+        return new IndexedEvent(d);
+    }
+
+    setKey(key) {
+        const d = this._d.set("key", key);
+        return new IndexedEvent(d);
     }
 
     /**

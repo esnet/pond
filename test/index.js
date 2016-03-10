@@ -20,5 +20,6 @@ if (typeof window !== "undefined") {
 require("./tests/index.test.js");
 require("./tests/range.test.js");
 require("./tests/event.test.js");
+require("./tests/pipeline.test.js");
 require("./tests/process.test.js");
 require("./tests/series.test.js");

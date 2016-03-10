@@ -583,6 +583,22 @@ class TimeSeries {
         }
     }
 
+    isValidNumber(v) {
+        return !(_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
+    }
+
+    numValid(column, func) {
+        let count = 0;
+        const c = column || "value";
+        this._data.forEach(d => {
+            const v = this.getInternal(d, c, func);
+            if (this.isValidNumber(v)) {
+                count++;
+            }
+        });
+        return count;
+    }
+
     //
     // Aggregate the series
     //
@@ -592,8 +608,9 @@ class TimeSeries {
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        return this._data.reduce((memo, d) =>
-            this.getInternal(d, c, func) + memo, 0);
+        return this._data
+            .filter(d => this.isValidNumber(this.getInternal(d, c, func)))
+            .reduce((memo, d) => +this.getInternal(d, c, func) + memo, 0);
     }
 
     avg(column, func) {
@@ -601,7 +618,7 @@ class TimeSeries {
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        return this.sum(c, func) / this.size();
+        return this.sum(c, func) / this.numValid(c, func);
     }
 
     max(column, func) {
@@ -609,7 +626,11 @@ class TimeSeries {
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        const max = this._data.maxBy(d => this.getInternal(d, c, func));
+        const max = this._data
+            .filter(d => this.isValidNumber(this.getInternal(d, c, func)))
+            .maxBy(d => {
+                return this.getInternal(d, c, func);
+            });
         return this.getInternal(max, c, func);
     }
 
@@ -618,7 +639,9 @@ class TimeSeries {
         if (!this._columns.contains(c)) {
             return undefined;
         }
-        const min = this._data.minBy(d => this.getInternal(d, c, func));
+        const min = this._data
+            .filter(d => this.isValidNumber(this.getInternal(d, c, func)))
+            .minBy(d => this.getInternal(d, c, func));
         return this.getInternal(min, c, func);
     }
 
@@ -631,7 +654,9 @@ class TimeSeries {
         if (!this._columns.contains(c) || this.size() === 0) {
             return undefined;
         }
-        const sorted = this._data.sortBy(d => this.getInternal(d, c, func));
+        const sorted = this._data
+            .filter(d => this.isValidNumber(this.getInternal(d, c, func)))
+            .sortBy(d => this.getInternal(d, c, func));
         const i = Math.floor(sorted.size / 2);
         if (sorted.size % 2 === 0) {
             const a = this.getInternal(sorted.get(i), c, func);
@@ -649,8 +674,11 @@ class TimeSeries {
         }
 
         const mean = this.mean(c, func);
-        return Math.sqrt(this._data.reduce((memo, d) =>
-            Math.pow(this.getInternal(d, c, func) - mean, 2) + memo, 0) / this.size());
+        return Math.sqrt(this._data
+            .filter(d => this.isValidNumber(this.getInternal(d, c, func)))
+            .reduce((memo, d) =>
+                Math.pow(this.getInternal(d, c, func) - mean, 2) + memo, 0) / this.size()
+            );
     }
 
     /**

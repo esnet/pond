@@ -206,7 +206,6 @@ export class Bucket {
     collect(cb) {
         this._readFromCache((err, events) => {
             if (!err) {
-                console.log("XX", events);
                 const series = new TimeSeries({
                     name: this._index.toString(),
                     meta: {},

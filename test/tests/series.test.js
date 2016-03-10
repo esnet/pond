@@ -228,6 +228,17 @@ const partialTraffic2 = {
     ]
 };
 
+const missingDataSeries = new TimeSeries({
+    name: "series",
+    columns: ["time", "in", "out"],
+    points: [
+        [1400425951000, 100, null],
+        [1400425952000, 300, undefined],
+        [1400425953000, null, 500],
+        [1400425954000, 200, 400]
+    ]
+});
+
 const outageEvents = [
     {
         startTime: "2015-04-22T03:30:00Z",
@@ -434,6 +445,14 @@ describe("TimeSeries", () => {
             done();
         });
 
+        it("can sum a series with missing data", done => {
+            expect(missingDataSeries.sum("in")).to.equal(600);
+            expect(missingDataSeries.sum("out")).to.equal(900);
+            expect(missingDataSeries.numValid("in")).to.equal(3);
+            expect(missingDataSeries.numValid("out")).to.equal(2);
+            done();
+        });
+
         it("can sum the series with no column name specified", done => {
             const series = new TimeSeries(data);
             expect(series.sum()).to.equal(189);
@@ -449,6 +468,13 @@ describe("TimeSeries", () => {
         it("can find the max of the series", done => {
             const series = new TimeSeries(data);
             expect(series.max()).to.equal(93);
+            done();
+        });
+
+        it("can find the max of the series with missing data", done => {
+            const series = new TimeSeries(missingDataSeries);
+            expect(series.max("in")).to.equal(300);
+            expect(series.max("out")).to.equal(500);
             done();
         });
 
@@ -470,6 +496,13 @@ describe("TimeSeries", () => {
         it("can find the min of the series", done => {
             const series = new TimeSeries(data);
             expect(series.min()).to.equal(18);
+            done();
+        });
+
+        it("can find the min of the series with missing data", done => {
+            const series = new TimeSeries(missingDataSeries);
+            expect(series.min("in")).to.equal(100);
+            expect(series.min("out")).to.equal(400);
             done();
         });
 
