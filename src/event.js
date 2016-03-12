@@ -31,8 +31,10 @@ function timestampFromArg(arg) {
 function timeRangeFromArg(arg) {
     if (arg instanceof TimeRange) {
         return arg;
+    } else if (_.isArray(arg) && arg.length === 2) {
+        return new TimeRange(arg);
     } else {
-        throw new Error(`Unable to parse timerange. Should be a TimeRange.`);
+        throw new Error(`Unable to parse timerange. Should be a TimeRange. Got ${arg}.`);
     }
 }
 
@@ -146,8 +148,15 @@ export class Event {
     }
 
     /**
+     * Returns a flat array starting with the timestamp, followed by the values.
+     * Doesn't include the groupByKey (key).
+     */
+    toPoint() {
+        return [this.timestamp().getTime(), ..._.values(this.data().toJSON())];
+    }
+
+    /**
      * The timestamp of this data, in UTC time, as a string.
-     * @return {string} Time of this data.
      */
     timestampAsUTCString() {
         return this.timestamp().toUTCString();
@@ -155,7 +164,6 @@ export class Event {
 
     /**
      * The timestamp of this data, in Local time, as a string.
-     * @return {string} Time of this data.
      */
     timestampAsLocalString() {
         return this.timestamp().toString();
@@ -163,37 +171,50 @@ export class Event {
 
     /**
      * The timestamp of this data
-     * @return {Date} Time of this data.
      */
     timestamp() {
         return this._d.get("time");
     }
 
     /**
-     * Access the event data
-     * @return {Immutable.Map} Data for the Event
+     * The begin time of this Event, which will be just the timestamp
+     */
+    begin() {
+        return this.timestamp();
+    }
+
+    /**
+     * The end time of this Event, which will be just the timestamp
+     */
+    end() {
+        return this.timestamp();
+    }
+
+    /**
+     * Direct access to the event data. The result will be an Immutable.Map.
      */
     data() {
         return this._d.get("data");
     }
 
     /**
-     * Access the event key
-     * @return {string} Key for the Event
+     * Access the event groupBy key
      */
     key() {
         return this._d.get("key");
     }
 
     /**
-     * Sets the data portion of the event and
-     * returns a new Event.
+     * Sets the data portion of the event and returns a new Event.
      */
     setData(data) {
         const d = this._d.set("data", dataFromArg(data));
         return new Event(d);
     }
 
+    /**
+     * Sets the groupBy Key and returns a new Event
+     */
     setKey(key) {
         const d = this._d.set("key", key);
         return new Event(d);
@@ -201,21 +222,29 @@ export class Event {
 
     /**
      * Get specific data out of the Event. The data will be converted
-     * to a Javascript object.
-     * @param  {string} key Key to lookup, or "value" if not specified.
-     * @return {Object}     The data associated with this key
+     * to a js object. You can use a fieldSpec to address deep data.
+     * A fieldSpec could be "a.b"
      */
-    get(key) {
-        const k = key || "value";
-        const v = this.data().get(k);
+    get(fieldSpec = "value") {
+        let v;
+        if (_.isString(fieldSpec)) {
+            const searchKeyPath = fieldSpec.split(".");
+            if (this.data().hasIn(searchKeyPath)) {
+                v = this.data().getIn(searchKeyPath);
+            }
+        }
+
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {
             return v.toJS();
         }
         return v;
     }
 
-    value(key) {
-        return this.get(key);
+    /**
+     * Alias for get()
+     */
+    value(fieldSpec) {
+        return this.get(fieldSpec);
     }
 
     stringify() {
@@ -248,8 +277,20 @@ export class Event {
     }
 
     /**
+     * The same as Event.value() only it will return false if the
+     * value is either undefined, NaN or Null.
+     */
+    static isValidValue(event, fieldSpec = "value") {
+        const v = event.value(fieldSpec);
+        const invalid = (_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
+        return !invalid;
+    }
+
+    /**
      * Function to select specific fields of an event using
-     * a fieldSpec. The fieldSpec can be:
+     * a fieldSpec and return a new event with just those fields.
+     *
+     * The fieldSpec currently can be:
      *  * A single field name
      *  * An array of field names
      *
@@ -538,6 +579,9 @@ export class TimeRangeEvent {
             const other = arg1;
             this._d = other._d;
             return;
+        } else if (arg1 instanceof Immutable.Map) {
+            this._d = arg1;
+            return;
         }
         const range = timeRangeFromArg(arg1);
         const data = dataFromArg(arg2);
@@ -560,6 +604,17 @@ export class TimeRangeEvent {
     //
     // Access the timerange represented by the index
     //
+
+    /**
+     * Returns a flat array starting with the timestamp, followed by the values.
+     * Doesn't include the groupByKey (key).
+     */
+    toPoint() {
+        return [
+            this.timerange().toJSON(),
+            ..._.values(this.data().toJSON())
+        ];
+    }
 
     /**
      * The TimeRange of this data
@@ -708,6 +763,9 @@ export class IndexedEvent {
             const other = arg1;
             this._d = other._d;
             return;
+        } else if (arg1 instanceof Immutable.Map) {
+            this._d = arg1;
+            return;
         }
         const index = indexFromArgs(arg1, arg3);
         const data = dataFromArg(arg2);
@@ -725,6 +783,17 @@ export class IndexedEvent {
 
     toString() {
         return JSON.stringify(this.toJSON());
+    }
+
+    /**
+     * Returns a flat array starting with the timestamp, followed by the values.
+     * Doesn't include the groupByKey (key).
+     */
+    toPoint() {
+        return [
+            this.indexAsString(),
+            ..._.values(this.data().toJSON())
+        ];
     }
 
     /**

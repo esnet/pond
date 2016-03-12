@@ -210,7 +210,7 @@ export class Bucket {
                     name: this._index.toString(),
                     meta: {},
                     index: this._index,
-                    events: events
+                    events
                 });
                 if (cb) {
                     cb(series);

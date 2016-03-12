@@ -144,7 +144,7 @@ class Pipeline {
                 const input = this._last.in();
                 for (const e of input.events()) {
                     if (this._first) {
-                        console.log("->", e.toString());
+                        // console.log("->", e.toString());
                         this._first.addEvent(e);
                     }
                 }

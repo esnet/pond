@@ -16,139 +16,12 @@ import { expect } from "chai";
 import _ from "underscore";
 import { Event, IndexedEvent, TimeRangeEvent } from "../../src/event";
 import TimeRange from "../../src/range";
-import { SlidingTimeBucket } from "../../src/bucket";
-import Aggregator from "../../src/aggregator";
-import Collector from "../../src/collector";
 import Binner from "../../src/binner";
 import Derivative from "../../src/derivative";
 import Grouper from "../../src/grouper";
 import Processor from "../../src/processor";
 import Index from "../../src/index";
-
-import { max, avg, sum, count, difference } from "../../src/functions";
-
-const sept2014Data = {
-    name: "traffic",
-    columns: ["time", "value"],
-    points: [
-        [1409529600000, 80],
-        [1409533200000, 88],
-        [1409536800000, 52],
-        [1409540400000, 80],
-        [1409544000000, 26],
-        [1409547600000, 37],
-        [1409551200000, 6 ],
-        [1409554800000, 32],
-        [1409558400000, 69],
-        [1409562000000, 21],
-        [1409565600000, 6 ],
-        [1409569200000, 54],
-        [1409572800000, 88],
-        [1409576400000, 41],
-        [1409580000000, 35],
-        [1409583600000, 43],
-        [1409587200000, 84],
-        [1409590800000, 32],
-        [1409594400000, 41],
-        [1409598000000, 57],
-        [1409601600000, 27],
-        [1409605200000, 50],
-        [1409608800000, 13],
-        [1409612400000, 63],
-        [1409616000000, 58],
-        [1409619600000, 80],
-        [1409623200000, 59],
-        [1409626800000, 96],
-        [1409630400000, 2],
-        [1409634000000, 20],
-        [1409637600000, 64],
-        [1409641200000, 7],
-        [1409644800000, 50],
-        [1409648400000, 88],
-        [1409652000000, 34],
-        [1409655600000, 31],
-        [1409659200000, 16],
-        [1409662800000, 38],
-        [1409666400000, 94],
-        [1409670000000, 78],
-        [1409673600000, 86],
-        [1409677200000, 13],
-        [1409680800000, 34],
-        [1409684400000, 29],
-        [1409688000000, 48],
-        [1409691600000, 80],
-        [1409695200000, 30],
-        [1409698800000, 15],
-        [1409702400000, 62],
-        [1409706000000, 66],
-        [1409709600000, 44],
-        [1409713200000, 94],
-        [1409716800000, 78],
-        [1409720400000, 29],
-        [1409724000000, 21],
-        [1409727600000, 4 ],
-        [1409731200000, 83],
-        [1409734800000, 15],
-        [1409738400000, 89],
-        [1409742000000, 53],
-        [1409745600000, 70],
-        [1409749200000, 41],
-        [1409752800000, 47],
-        [1409756400000, 30],
-        [1409760000000, 68],
-        [1409763600000, 89],
-        [1409767200000, 29],
-        [1409770800000, 17],
-        [1409774400000, 38],
-        [1409778000000, 67],
-        [1409781600000, 75],
-        [1409785200000, 89],
-        [1409788800000, 47],
-        [1409792400000, 82],
-        [1409796000000, 33],
-        [1409799600000, 67],
-        [1409803200000, 93],
-        [1409806800000, 86],
-        [1409810400000, 97],
-        [1409814000000, 19],
-        [1409817600000, 19],
-        [1409821200000, 31],
-        [1409824800000, 56],
-        [1409828400000, 19],
-        [1409832000000, 43],
-        [1409835600000, 29],
-        [1409839200000, 72],
-        [1409842800000, 27],
-        [1409846400000, 21],
-        [1409850000000, 88],
-        [1409853600000, 18],
-        [1409857200000, 30],
-        [1409860800000, 46],
-        [1409864400000, 34],
-        [1409868000000, 31],
-        [1409871600000, 20],
-        [1409875200000, 45],
-        [1409878800000, 17],
-        [1409882400000, 24],
-        [1409886000000, 84],
-        [1409889600000, 6 ],
-        [1409893200000, 91],
-        [1409896800000, 82],
-        [1409900400000, 71],
-        [1409904000000, 97],
-        [1409907600000, 43],
-        [1409911200000, 38],
-        [1409914800000, 1],
-        [1409918400000, 71],
-        [1409922000000, 50],
-        [1409925600000, 19],
-        [1409929200000, 19],
-        [1409932800000, 86],
-        [1409936400000, 65],
-        [1409940000000, 93],
-        [1409943600000, 35]
-    ]
-};
+import { avg, difference } from "../../src/functions";
 
 describe("Buckets", () => {
 
@@ -252,6 +125,8 @@ describe("Buckets", () => {
      * Our bucket tests here use 5m, 1h and 1d buckets and test that the
      * index and the toUTCString() functionality works ok.
      */
+    
+    /*
     describe("Bucket tests", () => {
 
         // Test date: Sat Mar 14 2015 07:32:22 UTC
@@ -299,10 +174,13 @@ describe("Buckets", () => {
             done();
         });
     });
-
+    */
+   
     /**
      * We also have a sliding time bucket
      */
+    
+    /*
     describe("Sliding Bucket tests", () => {
 
         const event1 = new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3);
@@ -310,11 +188,11 @@ describe("Buckets", () => {
         const event3 = new Event(Date.UTC(2015, 2, 14, 7, 58, 10), 7);
 
         it("should be able to create a sliding bucket", done => {
-            /**
-             * In this test the first event will be removed by the third
-             * event since the third event will advance the window forward
-             * such that the first event is more than a minute old
-             */
+            //
+            // In this test the first event will be removed by the third
+            // event since the third event will advance the window forward
+            // such that the first event is more than a minute old
+            //
             const slidingBucket = new SlidingTimeBucket("1m");
             slidingBucket.addEvent(event1);
             slidingBucket.addEvent(event2);
@@ -357,9 +235,10 @@ describe("Buckets", () => {
             done();
 
         });
-
     });
-
+    */
+   
+    /*
     describe("Aggregator", () => {
         const incomingEvents = [];
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
@@ -558,9 +437,10 @@ describe("Buckets", () => {
 
             done();
         });
-
     });
-
+    */
+   
+    /*
     describe("Aggregator tests with duplicates", () => {
         const dupEvents = [];
         dupEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
@@ -592,7 +472,9 @@ describe("Buckets", () => {
             done();
         });
     });
-
+    */
+   
+    /*
     describe("Aggregator tests for object events", () => {
         const incomingEvents = [];
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {cpu1: 23.4, cpu2: 55.1}));
@@ -625,7 +507,9 @@ describe("Buckets", () => {
             done();
         });
     });
-
+    */
+   
+    /*
     describe("Collection tests", () => {
         const incomingEvents = [];
         incomingEvents.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {cpu1: 23.4, cpu2: 55.1}));
@@ -709,7 +593,7 @@ describe("Buckets", () => {
             done();
         });
     });
-
+    */
 });
 
 describe("Resample bin fitting", () => {

@@ -15,7 +15,8 @@
 import { expect } from "chai";
 
 import Pipeline from "../../src/pipeline.js";
-import { Collection, UnboundedIn } from "../../src/pipelinein.js";
+import { UnboundedIn } from "../../src/pipelinein.js";
+import Collection from "../../src/collection.js";
 import { ConsoleOut, CollectionOut } from "../../src/pipelineout.js";
 import { Event } from "../../src/event.js";
 
