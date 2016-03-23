@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2016, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -9,187 +9,188 @@
  */
 
 import _ from "underscore";
+
+import Processor from "./processor";
+import Collection from "./collection";
+import { IndexedEvent } from "./event";
 import Index from "./index";
-import { SlidingTimeBucket } from "./bucket";
 
 /**
- * An aggregator takes the following options:
+ * An Aggregator works over one of 3 types of windows:
+ *     - fixed        - A window which is a fixed, represented by a
+ *                      duration string such as 5m. Windows are fixed in time.
+ *                      If events move on from that window, they move into
+ *                      a new window.
+ *     - sliding      - A window which can hold a fixed number of events. The most
+ *                      recent event will be included in the window, along with
+ *                      the n events before it.
+ *     - sliding-time - A window which is always a fixed with but moves with events.
+ *                      The most recent event will be in the window, along with the
+ *                      events before it within a fixed time.
  *
- *     - 'window'    -     size of the window to aggregate over (e.g. "5m")
- *     - 'operator'  -     function (e.g. avg)
-  *    - 'fieldSpec' -     (optional) describes what part of the events to
- *                         include in the aggregation. May be a string, list
- *                         of strings for each event column, or a function.
- *                         If a function it should return a list of key/values
- *                         in an object.
- *     - 'emit'      -     (optional) Rate to emit events. Either:
- *                             "always" - emit an event on every change
- *                             "next" - just when we advance to the next bucket
+ * Events:
+ *
+ * An incoming sequence of events will be added to the aggregator. Each
+ * event will have a time and data. It will also have a groupByKey that
+ * may have been set upstream.
+ *
+ * Fixed windows:
+ *
+ * To key by a fixed window is simple. Each can be given a key of
+ * ${groupByKey}:${index}  Such as interface1:1h-1234 and all events of
+ * that key can be placed in the same collection. This window knows to:
+ *   a) Aggregate and emit when triggered
+ *
+ * Sliding windows:
+ *
+ * To key a moving window, we key just by the ${groupByKey} and place
+ * all events in that window. This window knows to:
+ *   a) Remove old events that do not fit in the window anymore
+ *   b) Aggregate and emit when triggered
+ *
+ * Triggering:
+ *
+ * The Collection is given a Trigger strategy when it is created. When
+ * the Collection has each event added to it, the trigger determines if the
+ * Collection should emit.
  */
 
-/**
- * const aggregator = new Aggregator({
- *     window: {duration: "1h", type: "sliding"},
- *     emit: 5 // every 5 points the event will emit
- * })
- *
- * Example windows:
- *     what kind of bucket to maintain:
- *
- *     duration: "1h"   type:  sliding   - A sliding window 1hr long
- *     size:      5     type:  sliding   - A sliding window 5 events long
- *     duration: "30s"  type:  fixed     - A fixed window 30s long
- *
- * Example emit:
- *     emit determines how often an event is emitted:
- *
- *     emit always   - Emit a result for every incoming event, same as emit 1
- *     emit next     - Emit a result whenever a fixed window moves
- *     emit 100      - Emit a result, even partial, every 100 events
- *
- */
-export default class Aggregator {
+export default class Aggregator extends Processor {
 
-    constructor(options, observer) {
-        // Options
-        if (!options) {
-            throw new Error("Aggregator: no options supplied");
-        }
-        if (!_.has(options, "window")) {
-            throw new Error("Aggregator: constructor needs 'window' in options");
-        }
-        if (!_.has(options, "operator")) {
-            throw new Error("Aggregator: constructor needs 'operator' function in options");
+    constructor(pipeline, options, observer) {
+        super(pipeline, options, observer);
+
+        // Aggregation operators
+        const availableOperators =
+            ["sum", "avg", "max", "min", "count", "first", "last"];
+        if (!_.has(options, "fields")) {
+            throw new Error("Aggregator: constructor needs an aggregator field mapping");
         }
 
-        const type = options.window.type || "fixed";
-        switch (type) {
-            case "fixed":
-                this._bucketType = "fixed";
-                this._fixedWindow = options.window.duration || "1m";
-                break;
-            case "sliding":
-                this._bucketType = "sliding";
-                this._slidingWindowSize = options.window.size || 10;
-                break;
-            case "sliding-time":
-                this._bucketType = "sliding-time";
-                this._slidingWindowDuration = options.window.duration || "1m";
-                break;
-        }
+        // Check each of the aggregator -> field mappings
+        _.forEach(options.fields, (field, operator) => {
+            // Check that each operator is in our white list. We should probably
+            // allow custom functions here, but this will work for now
+            if (availableOperators.indexOf(operator) === -1) {
+                throw new Error("Aggregator: unknown aggregation operator: " + operator);
+            }
 
-        // this._window = options.window;
-        this._operator = options.operator;
-        this._fieldSpec = options.fieldSpec;
-        this._emitFrequency = options.emit || "next";
-        if (["always", "next"].indexOf(this._emitFrequency) === -1) {
-            throw new Error("Aggregator: emitFrequency options should be 'always' or 'next'");
-        }
-        this._buckets = {};
-        this._observer = observer;
+            // Field should either be an array or a string
+            if (!_.isString(field) && !_.isArray(field)) {
+                throw new Error("Aggregator: field of unknown type: " + field);
+            }
+        });
+        this._fields = options.fields;
+
+        // Pipeline state
+        this._groupBy = pipeline.getGroupBy();
+        this._windowType = pipeline.getWindowType();
+        this._windowDuration = pipeline.getWindowDuration();
+        this._emitOn = pipeline.getEmitOn();
+
+        // Maintained collections
+        this._collections = {};
     }
 
-    //
-    // Triggering
-    //
-
-    emitOnBucketAdvance() {
-        return (this._emitFrequency === "next");
-    }
-
-    emitOnEvent() {
-        return (this._emitFrequency === "always");
-    }
-
-    //
-    // New buckets
-    //
-
-    generateNewBucket(timestamp, key) {
-        switch (this._bucketType) {
-            case "fixed":
-                return Index.getBucket(this._fixedWindow, timestamp, key);
-            case "sliding":
-                return null;
-            case "sliding-time":
-                return new SlidingTimeBucket(this._slidingWindowDuration, key);
-            default:
-                return;
-        }
-    }
-
-    /**
-     * Forces the current bucket to emit
-     */
-    flush() {
-        _.each(this._buckets, (bucket, key) => {
-            this._buckets[key].aggregate(this._operator, this._fieldSpec, event => {
-                if (this._observer) {
-                    this._observer(event);
-                }
+    emitCollections(collections) {
+        _.each(collections, c => {
+            const { collection, windowKey } = c;
+            const d = {};
+            _.each(this._fields, (fields, operator) => {
+                const fieldList = _.isString(fields) ? [fields] : fields;
+                _.each(fieldList, fieldSpec => {
+                    const op = collection[operator];
+                    const fieldValue = op.call(collection, fieldSpec);
+                    const fieldName = fieldSpec.split(".").pop();
+                    d[fieldName] = fieldValue;
+                });
             });
+
+            const event = new IndexedEvent(windowKey, d);
+            this.emit(event);
         });
-        this._buckets = {};
     }
 
-    /**
-     * Add an event, which will be assigned to a bucket
-     */
-    addEvent(event, cb) {
-        const key = event.key() === "" ? "_default_" : event.key();
-        const timestamp = event.timestamp();
-        const currentBucket = this._buckets[key];
+    flush() {
+        this.emitCollections(this._collections);
+        super.flush();
+    }
 
-        // If we have a fixed bucket, we might need to generate a new bucket
-        // when the events advance enough. However, with sliding windows we always use the
-        // same window, we just advance it as necessary.
-        if (this._bucketType === "fixed") {
-            // See if we need a new bucket
-            const currentIndexString = currentBucket ? currentBucket.index().asString() : "";
-            const nextIndexString = Index.getIndexString(this._fixedWindow, timestamp);
-            if (nextIndexString !== currentIndexString) {
-                // Emit the old bucket if we are emitting on 'next'
-                if (currentBucket && this.emitOnBucketAdvance()) {
-                    currentBucket.aggregate(this._operator, this._fieldSpec, event => {
-                        if (this._observer) {
-                            this._observer(event);
-                        }
-                    });
-                }
-                // And now make the new bucket to add our event to
-                this._buckets[key] = this.generateNewBucket(timestamp, key);
-            }
-        } else {
-            if (!this._buckets[key]) {
-                this._buckets[key] = this.generateNewBucket(timestamp, key);
-            }
-        }
+    addEvent(event) {
+        if (this.hasObservers()) {
+            const timestamp = event.timestamp();
 
-        // Add our event to the current/new bucket
-        const bucket = this._buckets[key];
-        bucket.addEvent(event, err => {
-            if (cb) {
-                cb(err);
-            }
-        });
+            //
+            // We manage our collections here. Each collection is a
+            // time window collection.
+            //
+            // In the case of a fixed window new collections are created
+            // as we go. In the case of a moving window, the same bucket
+            // is used, but based on the user specification, events are
+            // discarded as new events arrive to advance the bucket along.
+            //
+            // Collections are stored in a dictionary, where the key is a
+            // join of the event key and a window identifier. The combination
+            // of the groupbyKey and the windowKey determines which collection
+            // an incoming event should be placed in.
+            //
+            // For a sliding window, the windowKey is simply "sliding", but
+            // for fixed buckets the key identifies a particular time window
+            // using an Index string.
+            //
 
-        // Finally, emit the current/new bucket with the new event in it, if
-        // we have been asked to always emit
-        if (this.emitOnEvent()) {
-            if (bucket) {
-                bucket.aggregate(this._operator, this._fieldSpec, event => {
-                    if (this._observer) {
-                        this._observer(event);
+            const windowType = this._windowType;
+
+            let windowKey;
+            if (windowType === "fixed") {
+                windowKey = Index.getIndexString(this._windowDuration, timestamp);
+            } else {
+                windowKey = windowType;
+            }
+            
+            const groupbyKey = this._groupBy(event);
+            const collectionKey = groupbyKey ?
+                `${windowKey}::${groupbyKey}` : windowKey;
+
+            let discard = false;
+            if (!_.has(this._collections, collectionKey)) {
+                this._collections[collectionKey] = {
+                    windowKey,
+                    groupbyKey,
+                    collection: new Collection()
+                };
+                discard = true;
+            }
+            this._collections[collectionKey].collection =
+                this._collections[collectionKey].collection.addEvent(event);
+            
+            //
+            // If fixed windows, collect together old collections that
+            // will be discarded
+            //
+            
+            const discards = {};
+            if (discard && windowType === "fixed") {
+                _.each(this._collections, (c, k) => {
+                    if (windowKey !== c.windowKey) {
+                        discards[k] = c;
                     }
                 });
             }
-        }
-    }
 
-    /**
-     * Set the emit callback after the constructor
-     */
-    onEmit(cb) {
-        this._observer = cb;
+            //
+            // Emit
+            //
+
+            const emitOn = this._emitOn;
+            if (emitOn === "eachEvent") {
+                this.emitCollections(this._collections);
+            } else if (emitOn === "discard") {
+                this.emitCollections(discards);
+                _.each(Object.keys(discards), k => {
+                    delete this._collections[k];
+                });
+            }
+        }
     }
 }

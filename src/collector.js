@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2016, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -9,95 +9,153 @@
  */
 
 import _ from "underscore";
+
+import Collection from "./collection";
 import Index from "./index";
 
 /**
- * A collector takes the following options:
- *
- *     - 'window'        - size of the window to collect over (e.g. "1d")
- *     - 'convertToTimes'- to transform IndexedEvents to Events during collection
- *     - 'emit'         - (optional) Rate to emit events. Either:
- *                             "always" - emit an event on every change
- *                             "next" - just when we advance to the next bucket
- *
- * TODO: It might make more sense to make an event transformer for
- *       converting between a stream of IndexedEvents to Events...
+ * A sink for processing chains. Outputs a Collection of events
+ * each based on the emit on trigger spec. Currently this means it
+ * will either output everytime and event comes in, or just when
+ * Collections are done with and are about to be discarded.
  */
-export default class Collector {
+export class FixedWindowCollector {
 
-    constructor(options, observer) {
-        if (!_.has(options, "window")) {
-            throw new Error("Collector: constructor needs 'window' in options");
-        }
-        this._emitFrequency = options.emit || "next";
-        if (["always", "next"].indexOf(this._emitFrequency) === -1) {
-            throw new Error("Collector: emitFrequency options should be 'always' or 'next'");
-        }
-        this._window = options.window;
-        this._buckets = {};
+    constructor(pipeline, observer) {
+
         this._observer = observer;
+
+        // Pipeline state
+        this._groupBy = pipeline.getGroupBy();
+        this._windowType = "fixed";
+        this._windowDuration = pipeline.getWindowDuration();
+        this._emitOn = pipeline.getEmitOn();
+
+        this._collections = {};
     }
 
-    /**
-     * Forces the current bucket to emit
-     */
-    flush() {
-        _.each(this._buckets, (bucket, key) => {
-            this._buckets[key].collect(series => {
-                if (this._observer) {
-                    this._observer(series);
+    emitCollections(collections) {
+        if (this._observer) {
+            _.each(collections, (c, k) => {
+                this._observer(c, k);
+            });
+        }
+    }
+
+    done() {
+        this.emitCollections(this._collections);
+    }
+
+    collections() {
+        return this._collections;
+    }
+
+    addEvent(event) {
+        const timestamp = event.timestamp();
+
+        //
+        // We manage our collections here. Each collection is a
+        // fixed time window collection. New collections are created
+        // as we go along.
+        //
+        // Collections are stored in a dictionary, where the key is a
+        // join of the event key and a window identifier. The combination
+        // of the eventKey and the windowKey determines which collection
+        // an incoming event should be placed in.
+        //
+        
+        // Out keys will either be:
+        //   - global
+        //   - 1d-1234
+        //   - 1d-1234:groupKey
+        //
+
+        const windowType = this._windowType;
+
+        let windowKey;
+
+        if (windowType === "fixed") {
+            windowKey = Index.getIndexString(this._windowDuration, timestamp);
+        } else {
+            windowKey = windowType;
+        }
+        
+        const eventKey = this._groupBy(event);
+        const collectionKey = eventKey ?
+            `${windowKey}::${eventKey}` : windowKey;
+
+        let discard = false;
+        if (!_.has(this._collections, collectionKey)) {
+            this._collections[collectionKey] = new Collection();
+            discard = true;
+        }
+
+        this._collections[collectionKey] =
+            this._collections[collectionKey].addEvent(event);
+        
+        //
+        // If fixed windows, collect together old collections that
+        // will be discarded
+        //
+        
+        const discards = {};
+        if (discard) {
+            _.each(this._collections, (c, k) => {
+                const wk = collectionKey.split("::")[0];
+                if (wk !== k) {
+                    discards[k] = c;
                 }
             });
-        });
-        this._buckets = {};
-    }
-
-    /**
-     * Add an event, which will be assigned to a bucket
-     */
-    addEvent(event, cb) {
-        const key = event.key() === "" ? "_default_" : event.key();
-        const timestamp = event.timestamp();
-        const indexString = Index.getIndexString(this._window, timestamp);
-        const currentBucket = this._buckets[key];
-        const currentBucketIndexString = currentBucket ? currentBucket.index().asString() : "";
-
-        // See if we need a new bucket
-        if (indexString !== currentBucketIndexString) {
-            // Emit the old bucket if we are emitting on 'next'
-            if (currentBucket && this._emitFrequency === "next") {
-                currentBucket.collect(series => {
-                    if (this._observer) {
-                        this._observer(series);
-                    }
-                });
-            }
-            // And now make the new bucket to add our event to
-            this._buckets[key] = Index.getBucket(this._window, timestamp, key);
         }
 
-        // Add our event to the current/new bucket
-        const bucket = this._buckets[key];
-        bucket.addEvent(event, err => {
-            if (cb) {
-                cb(err);
-            }
-        });
+        //
+        // Emit
+        //
 
-        // Finally, emit the current/new bucket with the new event in it, if
-        // we have been asked to always emit
-        if (this._emitFrequency === "always") {
-            if (bucket) {
-                bucket.collect(series => {
-                    if (this._observer) {
-                        this._observer(series);
-                    }
-                });
-            }
+        const emitOn = this._emitOn;
+        if (emitOn === "eachEvent") {
+            this.emitCollections(this._collections);
+        } else if (emitOn === "discard") {
+            this.emitCollections(discards);
         }
+
+        _.each(_.keys(discards), k => {
+            delete this._collections[k];
+        });
+    }
+}
+
+/**
+ * A sink for processing chains. Maintains a single global collection.
+ * This is used for quick and dirty collections.
+ *
+ * The collection will catch all events, regardless
+ * of upstream groupBy or windowing in the pipeline.
+ *
+ * If you want that, use the fixed window collector.
+ */
+export class Collector {
+
+    constructor(pipeline, options, observer) {
+        console.log("Created Collector", pipeline, options, observer);
+        this._observer = observer;
+        this._collection = new Collection();
     }
 
-    onEmit(cb) {
-        this._observer = cb;
+    emitCollection() {
+        this._observer && this._observer(this._collection);
+    }
+
+    done() {
+        this.emitCollection();
+    }
+
+    collection() {
+        return this._collection;
+    }
+
+    addEvent(event) {
+        this._collection = this._collection.addEvent(event);
+        this.emitCollection();
     }
 }

@@ -239,6 +239,23 @@ const missingDataSeries = new TimeSeries({
     ]
 });
 
+const nullDataSeries = new TimeSeries({
+    name: "series",
+    columns: ["time", "in", "out"],
+    points: [
+        [1400425951000, null, null],
+        [1400425952000, null, null],
+        [1400425953000, null, null],
+        [1400425954000, null, null]
+    ]
+});
+
+const noDataSeries = new TimeSeries({
+    name: "series",
+    columns: ["time", "in", "out"],
+    points: []
+});
+
 const outageEvents = [
     {
         startTime: "2015-04-22T03:30:00Z",
@@ -477,6 +494,17 @@ describe("TimeSeries", () => {
             done();
         });
 
+        it("can find the max of the series with no data", done => {
+            const series = new TimeSeries(noDataSeries);
+            expect(series.max()).to.be.undefined;
+            done();
+        });
+
+        it("can find the max of the series with null data", done => {
+            const series = new TimeSeries(nullDataSeries);
+            expect(series.max()).to.be.undefined;
+            done();
+        });
 
         it("can find the max of a series with deep data", done => {
             const series = new TimeSeries({
@@ -530,7 +558,6 @@ describe("TimeSeries", () => {
             done();
         });
 
-
         it("can avg series with deep data", done => {
             const series = new TimeSeries({
                 name: "Map Traffic",
@@ -543,6 +570,12 @@ describe("TimeSeries", () => {
                 ]
             });
             expect(series.avg("NASA_north.in")).to.equal(250);
+            done();
+        });
+
+        it("can find the max of the series with no data", done => {
+            const series = new TimeSeries(noDataSeries);
+            expect(series.avg()).to.be.undefined;
             done();
         });
 

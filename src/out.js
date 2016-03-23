@@ -8,22 +8,9 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import Collection from "./collection";
-
-export class StreamOut {
-    constructor() {
-    }
-}
-
-export class BatchOut {
-    constructor() {
-    }
-}
-
-export class EventOut extends StreamOut {
+export class EventOut {
 
     constructor(callback) {
-        super();
         this._callback = callback;
     }
 
@@ -36,12 +23,14 @@ export class EventOut extends StreamOut {
     onEmit(cb) {
         this._callback = cb;
     }
+    
+    done() {
+    }
 }
 
-export class ConsoleOut extends StreamOut {
+export class ConsoleOut {
 
     constructor(observer) {
-        super();
         this._observer = observer;
     }
 
@@ -50,37 +39,10 @@ export class ConsoleOut extends StreamOut {
      * event with that key.
      */
     addEvent(event) {
-        console.log("result: addEvent", event.toString());
+        console.log("OUT:", event.toString()); //eslint-disable-line
     }
 
     onEmit(observer) {
         this._callback = observer;
-    }
-}
-
-export class CollectionOut extends BatchOut {
-
-    constructor(observer) {
-        super();
-        this._observer = observer;
-        this._collection = new Collection();
-    }
-
-    collection() {
-        return this._collection;
-    }
-
-    /**
-     * Add an event will add a key to the event and then emit the
-     * event with that key.
-     */
-    addEvent(event) {
-        this._collection = this._collection.addEvent(event);
-    }
-
-    done() {
-        if (this._observer) {
-            this._observer(this.collection());
-        }
     }
 }

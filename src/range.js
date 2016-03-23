@@ -120,7 +120,6 @@ export default class TimeRange {
 
     /**
      * Returns the begin time of the TimeRange.
-     * @return {Date} Begin time
      */
     begin() {
         return this._range.get(0);
@@ -128,7 +127,6 @@ export default class TimeRange {
 
     /**
      * Returns the end time of the TimeRange.
-     * @return {Date} End time
      */
     end() {
         return this._range.get(1);
@@ -237,26 +235,32 @@ export default class TimeRange {
     //
 
     static lastDay() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(24, "hours");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(24, "hours");
         return new TimeRange(beginTime, endTime);
     }
 
     static lastSevenDays() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(7, "days");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(7, "days");
         return new TimeRange(beginTime, endTime);
     }
 
     static lastThirtyDays() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(30, "days");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(30, "days");
+        return new TimeRange(beginTime, endTime);
+    }
+
+    static lastMonth() {
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(1, "month");
         return new TimeRange(beginTime, endTime);
     }
 
     static lastNinetyDays() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(90, "days");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(90, "days");
         return new TimeRange(beginTime, endTime);
     }
 }

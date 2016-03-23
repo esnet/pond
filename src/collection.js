@@ -10,10 +10,9 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
-
-import { Event } from "./event";
-import { BoundedIn } from "./pipelinein";
 import TimeRange from "./range";
+import { Event } from "./event";
+import { BoundedIn } from "./in";
 
 /**
  * A collection is a list of Events. You can construct one out of either
@@ -29,6 +28,7 @@ export default class Collection extends BoundedIn {
     constructor(arg1, copyEvents = true) {
         super();
 
+        this._id = _.uniqueId("collection-");
         this._eventList = null;  // The events in this collection
         this._type = null;       // The type (class) of the events in this collection
 
@@ -96,7 +96,8 @@ export default class Collection extends BoundedIn {
      * Returns an item in the collection by its position
      */
     at(pos) {
-        return new this._type(this._eventList.get(pos));
+        const event = new this._type(this._eventList.get(pos));
+        return event;
     }
 
     atTime(time) {
@@ -106,13 +107,13 @@ export default class Collection extends BoundedIn {
         }
     }
 
-    first() {
+    atFirst() {
         if (this.size()) {
             return this.at(0);
         }
     }
 
-    last() {
+    atLast() {
         if (this.size()) {
             return this.at(this.size() - 1);
         }
@@ -229,6 +230,18 @@ export default class Collection extends BoundedIn {
 
     count(fieldSpec = "value") {
         return this.sizeValid(fieldSpec);
+    }
+
+    first(fieldSpec = "value") {
+        const collection = this.clean(fieldSpec);
+        const e = collection.atFirst();
+        return e.value(fieldSpec);
+    }
+
+    last(fieldSpec = "value") {
+        const collection = this.clean(fieldSpec);
+        const e = collection.atLast();
+        return e.value(fieldSpec);
     }
 
     sum(fieldSpec = "value") {

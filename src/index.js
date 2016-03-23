@@ -10,7 +10,6 @@
 
 import _ from "underscore";
 import util from "./util";
-import { IndexedBucket } from "./bucket";
 
 /**
  * An index that represents as a string a range of time. That range may either
@@ -34,7 +33,6 @@ export default class Index {
     /**
      * Returns the Index as JSON, which will just be its string
      * representation
-     * @return {Object} JSON representation of the Index
      */
     toJSON() {
         return this._string;
@@ -42,7 +40,6 @@ export default class Index {
 
     /**
      * Simply returns the Index as its string
-     * @return {string} String representation of the Index
      */
     toString() {
         return this._string;
@@ -52,7 +49,6 @@ export default class Index {
      * for the calendar range style Indexes, this lets you return
      * that calendar range as a human readable format, e.g. "June, 2014".
      * The format specified is a Moment.format.
-     * @return {string} String representation of the Index
      */
     toNiceString(format) {
         return util.niceIndexString(this._string, format);
@@ -60,7 +56,6 @@ export default class Index {
 
     /**
      * Alias for toString()
-     * @return {string} String representation of the Index
      */
     asString() {
         return this.toString();
@@ -68,7 +63,6 @@ export default class Index {
 
     /**
      * Returns the Index as a TimeRange
-     * @return {TimeRange} TimeRange representation of the Index
      */
     asTimerange() {
         return this._timerange;
@@ -76,7 +70,6 @@ export default class Index {
 
     /**
      * Returns the start date of the Index
-     * @return {Date} Begin date
      */
     begin() {
         return this._timerange.begin();
@@ -84,7 +77,6 @@ export default class Index {
 
     /**
      * Returns the end date of the Index
-     * @return {Date} End date
      */
     end() {
         return this._timerange.end();
@@ -93,10 +85,6 @@ export default class Index {
     static getIndexString(win, date) {
         const pos = util.windowPositionFromDate(win, date);
         return `${win}-${pos}`;
-    }
-
-    static getBucket(win, date, key) {
-        return new IndexedBucket(Index.getIndexString(win, date), key);
     }
 
     static getIndexStringList(win, timerange) {
@@ -109,10 +97,5 @@ export default class Index {
             }
         }
         return indexList;
-    }
-
-    static getBucketList(win, timerange, key) {
-        const indexList = Index.getIndexStringList(win, timerange);
-        return _.map(indexList, index => new IndexedBucket(index, key));
     }
 }

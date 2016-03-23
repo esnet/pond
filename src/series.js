@@ -14,6 +14,7 @@ import Immutable from "immutable";
 import Collection from "./collection";
 import Index from "./index";
 import { Event, TimeRangeEvent, IndexedEvent } from "./event";
+import { Pipeline } from "./pipeline.js";
 
 function buildMetaData(meta) {
     let d = meta ? meta : {};
@@ -87,7 +88,6 @@ class TimeSeries {
             const other = arg;
             this._data = other._data;
             this._collection = other._collection;
-
         } else if (_.isObject(arg)) {
 
             //
@@ -115,6 +115,10 @@ class TimeSeries {
                 this._collection = new Collection(events);
                 this._data = buildMetaData(meta1);
 
+            } else if (_.has(obj, "collection")) {
+                const { collection, ...meta3 } = obj; //eslint-disable-line
+                this._collection = collection;
+                this._data = buildMetaData(meta3);
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
 
                 //
@@ -317,13 +321,6 @@ class TimeSeries {
     /**
      * Returns the number of rows in the series.
      */
-    size() {
-        return this._collection.size();
-    }
-
-    /**
-     * Returns the number of rows in the series.
-     */
     sizeValid(fieldSpec) {
         return this._collection.sizeValid(fieldSpec);
     }
@@ -362,6 +359,11 @@ class TimeSeries {
 
     stdev(fieldSpec) {
         return this._collection.stdev(fieldSpec);
+    }
+
+    pipeline() {
+        return new Pipeline()
+            .from(this._collection);
     }
 
     /**

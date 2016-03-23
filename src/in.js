@@ -10,10 +10,14 @@
 
 import _ from "underscore";
 import { Event, TimeRangeEvent, IndexedEvent } from "./event";
+import Observable from "./observable";
 
-export class In {
+export class In extends Observable {
+
     constructor() {
-        this._id = _.uniqueId("source-");
+        super();
+
+        this._id = _.uniqueId("in-");
         this._type = null;       // The type (class) of the events in this In
     }
 
@@ -79,8 +83,8 @@ export class UnboundedIn extends In {
      */
     addEvent(event) {
         this._check(event);
-        if (this._observer && this._running) {
-            this._observer(event);
+        if (this.hasObservers() && this._running) {
+            this.emit(event);
         }
     }
 
@@ -89,9 +93,13 @@ export class UnboundedIn extends In {
     }
 
     /**
-     * Define a callback for outbound events from the source
+     * Push a flush message down the chain. This will cause aggregations to
+     * emit what they have.
      */
-    onEmit(cb) {
-        this._observer = cb;
+    flush() {
+        if (this.hasObservers()) {
+            console.log("UnboundedIn FLUSH", this);            
+            super.flush();
+        }
     }
 }

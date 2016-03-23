@@ -105,33 +105,12 @@ describe("Events", () => {
             const endTime = new Date(sampleEvent.end_time);
             const timerange = new TimeRange(beginTime, endTime);
             const event = new TimeRangeEvent(timerange, sampleEvent);
-            const expected = `{"timerange":[1429673400000,1429707600000],"data":{"external_ticket":"","start_time":"2015-04-22T03:30:00Z","completed":true,"end_time":"2015-04-22T13:00:00Z","organization":"Internet2 / Level 3","title":"STAR-CR5 < 100 ge 06519 > ANL  - Outage","type":"U","esnet_ticket":"ESNET-20150421-013","description":"At 13:33 pacific circuit 06519 went down."},"key":""}`;
+            const expected = `{"timerange":[1429673400000,1429707600000],"data":{"external_ticket":"","start_time":"2015-04-22T03:30:00Z","completed":true,"end_time":"2015-04-22T13:00:00Z","organization":"Internet2 / Level 3","title":"STAR-CR5 < 100 ge 06519 > ANL  - Outage","type":"U","esnet_ticket":"ESNET-20150421-013","description":"At 13:33 pacific circuit 06519 went down."}}`;
             expect(`${event}`).to.equal(expected);
             expect(event.begin().getTime()).to.equal(1429673400000);
             expect(event.end().getTime()).to.equal(1429707600000);
             expect(event.humanizeDuration()).to.equal("10 hours");
             expect(event.get("title")).to.equal("STAR-CR5 < 100 ge 06519 > ANL  - Outage");
-            done();
-        });
-
-        it("can create a regular Event with a key", done => {
-            const timestamp = new Date("2015-04-22T03:30:00Z");
-            const event = new Event(timestamp, {a: 3, b: 6}, "cpu_usage");
-            expect(event.key()).to.equal("cpu_usage");
-            done();
-        });
-
-        it("can create a TimeRangeEvent with a key", done => {
-            const timerange = new TimeRange(1429673400000, 1429707600000);
-            const event = new TimeRangeEvent(timerange, {a: 3, b: 6}, "cpu_usage");
-            expect(event.key()).to.equal("cpu_usage");
-            done();
-        });
-
-        it("can create a IndexedEvent with a key", done => {
-            const index = new Index("1d-12355");
-            const event = new IndexedEvent(index, {a: 3, b: 6}, null, "cpu_usage");
-            expect(event.key()).to.equal("cpu_usage");
             done();
         });
     });
@@ -187,24 +166,6 @@ describe("Events", () => {
             expect(result[0].get("a")).to.equal(8);
             expect(result[0].get("b")).to.equal(11);
             expect(result[0].get("c")).to.equal(14);
-            done();
-        });
-    });
-
-    describe("Immutable tests", () => {
-
-        it("can set the key on an event and get a new event back", done => {
-            const event = new Event(1429673400000, {a: 5, b: 6, c: 7});
-            const eventWithKey = event.setKey("cpu_usage");
-            expect(event.timestamp().getTime()).to.equal(1429673400000);
-            expect(eventWithKey.timestamp().getTime()).to.equal(1429673400000);
-            expect(event.get("a")).to.equal(5);
-            expect(eventWithKey.get("a")).to.equal(5);
-            expect(event.key()).to.equal("");
-            expect(eventWithKey.key()).to.equal("cpu_usage");
-            expect(event).to.not.equal(eventWithKey);
-            expect(event._d).to.not.equal(eventWithKey._d);
-            expect(event.data()).to.equal(eventWithKey.data());
             done();
         });
     });
