@@ -195,13 +195,13 @@ export class Event {
      * to a js object. You can use a fieldSpec to address deep data.
      * A fieldSpec could be "a.b"
      */
-    get(fieldSpec = "value") {
+    get(fieldSpec = ["value"]) {
         let v;
-        if (_.isString(fieldSpec)) {
+        if (_.isArray(fieldSpec)) {
+            v = this.data().getIn(fieldSpec);
+        } else if (_.isString(fieldSpec)) {
             const searchKeyPath = fieldSpec.split(".");
-            if (this.data().hasIn(searchKeyPath)) {
-                v = this.data().getIn(searchKeyPath);
-            }
+            v = this.data().getIn(searchKeyPath);
         }
 
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {

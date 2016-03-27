@@ -194,6 +194,19 @@ describe("Events", () => {
         });
     });*/
 
+    describe("Deep event get", () => {
+        it("can create an event with deep data and then get values back with dot notation", done => {
+            const timestamp = new Date("2015-04-22T03:30:00Z");
+            const event = new Event(timestamp, deepEventData);
+            let eventValue;
+            for (let i = 0; i < 100000; i++) {
+                eventValue = event.get(["NorthRoute", "in"]); //1550ms
+            }
+            expect(eventValue).to.equal(123);
+            done();
+        });
+    });
+
     describe("Event mapreduce", () => {
 
         const events = [];

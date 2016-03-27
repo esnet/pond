@@ -225,6 +225,14 @@ export default class Collection extends BoundedIn {
         return new Collection(filteredEvents);
     }
 
+    _fieldSpecToArray(fieldSpec) {
+        if (_.isArray(fieldSpec)) {
+            return fieldSpec;
+        } else if (_.isString(fieldSpec)) {
+            return fieldSpec.split(".");
+        }
+    }
+
     //
     // Aggregate the event list to a single value
     //
@@ -244,9 +252,10 @@ export default class Collection extends BoundedIn {
     }
 
     sum(fieldSpec = "value") {
+        const fs = this._fieldSpecToArray(fieldSpec);
         let sum = 0;
         for (const e of this.events()) {
-            sum += e.value(fieldSpec);
+            sum += e.value(fs);
         }
         return sum;
     }
@@ -258,18 +267,20 @@ export default class Collection extends BoundedIn {
     }
 
     max(fieldSpec = "value") {
+        const fs = this._fieldSpecToArray(fieldSpec);
         let max;
         for (const e of this.events()) {
-            const v = e.value(fieldSpec);
+            const v = e.value(fs);
             if (!max || max < v) max = v;
         }
         return max;
     }
 
     min(fieldSpec = "value") {
+        const fs = this._fieldSpecToArray(fieldSpec);
         let min;
         for (const e of this.events()) {
-            const v = e.value(fieldSpec);
+            const v = e.value(fs);
             if (!min || min > v) min = v;
         }
         return min;
@@ -280,27 +291,28 @@ export default class Collection extends BoundedIn {
     }
 
     median(fieldSpec = "value") {
-        const searchKeyPath = fieldSpec.split(".");
+        const fs = this._fieldSpecToArray(fieldSpec);
         const sorted = this._eventList.sortBy(d =>
-            d.get("data").getIn(searchKeyPath)
+            d.get("data").getIn(fs)
         );
 
         const i = Math.floor(sorted.size / 2);
         if (sorted.size % 2 === 0) {
-            const a = sorted.get(i).get("data").getIn(searchKeyPath);
-            const b = sorted.get(i - 1).get("data").getIn(searchKeyPath);
+            const a = sorted.get(i).get("data").getIn(fs);
+            const b = sorted.get(i - 1).get("data").getIn(fs);
             return (a + b) / 2;
         } else {
-            return sorted.get(i).get("data").getIn(searchKeyPath);
+            return sorted.get(i).get("data").getIn(fs);
         }
     }
 
     stdev(fieldSpec = "value") {
-        const mean = this.mean(fieldSpec);
-        const count = this.sizeValid(fieldSpec);
+        const fs = this._fieldSpecToArray(fieldSpec);
+        const mean = this.mean(fs);
+        const count = this.sizeValid(fs);
         let sums = 0;
         for (const e of this.events()) {
-            sums += Math.pow(e.value(fieldSpec) - mean, 2);
+            sums += Math.pow(e.value(fs) - mean, 2);
         }
         return Math.sqrt(sums / count);
     }
