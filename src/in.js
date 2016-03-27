@@ -91,15 +91,4 @@ export class UnboundedIn extends In {
     * events() {
         throw new Error("Iteration across unbounded sources is not supported.");
     }
-
-    /**
-     * Push a flush message down the chain. This will cause aggregations to
-     * emit what they have.
-     */
-    flush() {
-        if (this.hasObservers()) {
-            console.log("UnboundedIn FLUSH", this);            
-            super.flush();
-        }
-    }
 }

@@ -124,7 +124,7 @@ describe("Time range", () => {
         });
     });
 
-    describe("TimeRange mutation", () => {
+    describe("mutation", () => {
 
         it("can be mutatated to form a new range", done => {
             const beginTime = moment("2012-01-11 1:11", fmt).toDate();

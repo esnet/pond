@@ -372,11 +372,7 @@ describe("Pipeline", () => {
                     result[`${event.index()}`] = event;
                 }));
 
-            console.log(p);
-
             eventsIn.forEach(event => input.addEvent(event));
-
-            console.log(result);
 
             expect(result["1h-396199"].get("avg")).to.equal(6);
             expect(result["1h-396200"].get("avg")).to.equal(4.5);

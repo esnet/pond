@@ -215,9 +215,10 @@ export default class Collection extends BoundedIn {
      * The resulting Collection will be clean for that fieldSpec.
      */
     clean(fieldSpec) {
+        const fs = fieldSpec || "value";
         const filteredEvents = [];
         for (const e of this.events()) {
-            if (Event.isValidValue(e, fieldSpec)) {
+            if (Event.isValidValue(e, fs)) {
                 filteredEvents.push(e);
             }
         }
@@ -233,21 +234,18 @@ export default class Collection extends BoundedIn {
     }
 
     first(fieldSpec = "value") {
-        const collection = this.clean(fieldSpec);
-        const e = collection.atFirst();
+        const e = this.atFirst();
         return e.value(fieldSpec);
     }
 
     last(fieldSpec = "value") {
-        const collection = this.clean(fieldSpec);
-        const e = collection.atLast();
+        const e = this.atLast();
         return e.value(fieldSpec);
     }
 
     sum(fieldSpec = "value") {
         let sum = 0;
-        const collection = this.clean(fieldSpec);
-        for (const e of collection.events()) {
+        for (const e of this.events()) {
             sum += e.value(fieldSpec);
         }
         return sum;
@@ -260,9 +258,8 @@ export default class Collection extends BoundedIn {
     }
 
     max(fieldSpec = "value") {
-        const collection = this.clean(fieldSpec);
         let max;
-        for (const e of collection.events()) {
+        for (const e of this.events()) {
             const v = e.value(fieldSpec);
             if (!max || max < v) max = v;
         }
@@ -270,9 +267,8 @@ export default class Collection extends BoundedIn {
     }
 
     min(fieldSpec = "value") {
-        const collection = this.clean(fieldSpec);
         let min;
-        for (const e of collection.events()) {
+        for (const e of this.events()) {
             const v = e.value(fieldSpec);
             if (!min || min > v) min = v;
         }
@@ -285,8 +281,7 @@ export default class Collection extends BoundedIn {
 
     median(fieldSpec = "value") {
         const searchKeyPath = fieldSpec.split(".");
-        const collection = this.clean(fieldSpec);
-        const sorted = collection._eventList.sortBy(d =>
+        const sorted = this._eventList.sortBy(d =>
             d.get("data").getIn(searchKeyPath)
         );
 
@@ -301,11 +296,10 @@ export default class Collection extends BoundedIn {
     }
 
     stdev(fieldSpec = "value") {
-        const collection = this.clean(fieldSpec);
         const mean = this.mean(fieldSpec);
         const count = this.sizeValid(fieldSpec);
         let sums = 0;
-        for (const e of collection.events()) {
+        for (const e of this.events()) {
             sums += Math.pow(e.value(fieldSpec) - mean, 2);
         }
         return Math.sqrt(sums / count);

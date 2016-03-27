@@ -468,10 +468,12 @@ describe("TimeSeries", () => {
         });
 
         it("can sum a series with missing data", done => {
-            expect(missingDataSeries.sum("in")).to.equal(600);
-            expect(missingDataSeries.sum("out")).to.equal(900);
-            expect(missingDataSeries.sizeValid("in")).to.equal(3);
-            expect(missingDataSeries.sizeValid("out")).to.equal(2);
+            const inSeries = missingDataSeries.clean("in");
+            const outSeries = missingDataSeries.clean("out");
+            expect(inSeries.sum("in")).to.equal(600);
+            expect(outSeries.sum("out")).to.equal(900);
+            expect(inSeries.sizeValid("in")).to.equal(3);
+            expect(outSeries.sizeValid("out")).to.equal(2);
             done();
         });
 
@@ -529,8 +531,10 @@ describe("TimeSeries", () => {
 
         it("can find the min of the series with missing data", done => {
             const series = new TimeSeries(missingDataSeries);
-            expect(series.min("in")).to.equal(100);
-            expect(series.min("out")).to.equal(400);
+            const inSeries = series.clean("in");
+            const outSeries = series.clean("out");
+            expect(inSeries.min("in")).to.equal(100);
+            expect(outSeries.min("out")).to.equal(400);
             done();
         });
 

@@ -242,6 +242,13 @@ class TimeSeries {
         return result;
     }
 
+    clean(fieldSpec) {
+        const cleaned = this._collection.clean(fieldSpec);
+        const result = new TimeSeries(this);
+        result._collection = cleaned;
+        return result;
+    }
+
     /**
      *  Generator to allow for..of loops over series.events()
      */

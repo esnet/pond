@@ -137,7 +137,6 @@ export class FixedWindowCollector {
 export class Collector {
 
     constructor(pipeline, options, observer) {
-        console.log("Created Collector", pipeline, options, observer);
         this._observer = observer;
         this._collection = new Collection();
     }
