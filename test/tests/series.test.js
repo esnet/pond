@@ -103,27 +103,24 @@ const availabilityData = {
     ]
 };
 
-/*
-const availabilityDataLocalTime = {
+const availabilitySeries = {
     name: "availability",
-    utc: false,
-    columns: ["time", "uptime"],
+    columns: ["index", "uptime", "notes", "outages"],
     points: [
-        ["2015-06", "100%"],
-        ["2015-05", "92%"],
-        ["2015-04", "87%"],
-        ["2015-03", "99%"],
-        ["2015-02", "92%"],
-        ["2015-01", "100%"],
-        ["2014-12", "99%"],
-        ["2014-11", "91%"],
-        ["2014-10", "99%"],
-        ["2014-09", "95%"],
-        ["2014-08", "88%"],
-        ["2014-07", "100%"]
+        ["2015-06", 100, "", 0],
+        ["2015-05", 92, "Router failure June 12", 26],
+        ["2015-04", 87, "Planned downtime in April", 82],
+        ["2015-03", 99, "Minor outage March 2", 4],
+        ["2015-02", 92, "",12],
+        ["2015-01", 100, "", 0],
+        ["2014-12", 99, "", 3],
+        ["2014-11", 91, "", 14],
+        ["2014-10", 99, "", 3],
+        ["2014-09", 95, "", 6],
+        ["2014-08", 88, "", 17],
+        ["2014-09", 100, "", 2]
     ]
 };
-*/
 
 const interfaceData = {
     name: "star-cr5:to_anl_ip-a_v4",
@@ -576,6 +573,12 @@ describe("TimeSeries", () => {
             expect(series.avg("NASA_north.in")).to.equal(250);
             done();
         });
+       
+        it("can avg series with deep data", done => {
+            const series = new TimeSeries(availabilitySeries);
+            expect(series.avg("uptime")).to.equal(95.16666666666667);
+            done();
+        });
 
         it("can find the max of the series with no data", done => {
             const series = new TimeSeries(noDataSeries);
@@ -594,7 +597,6 @@ describe("TimeSeries", () => {
             expect(series.median()).to.equal(14);
             done();
         });
-
 
         it("can find the median of a series with deep data and even number of events", done => {
             const series = new TimeSeries({

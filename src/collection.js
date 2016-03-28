@@ -237,8 +237,8 @@ export default class Collection extends BoundedIn {
     // Aggregate the event list to a single value
     //
 
-    count(fieldSpec = "value") {
-        return this.sizeValid(fieldSpec);
+    count() {
+        return this.size();
     }
 
     first(fieldSpec = "value") {
@@ -262,7 +262,7 @@ export default class Collection extends BoundedIn {
 
     avg(fieldSpec = "value") {
         const sum = this.sum(fieldSpec);
-        const count = this.sizeValid(fieldSpec);
+        const count = this.size();
         return count ? sum / count : undefined;
     }
 
@@ -309,7 +309,7 @@ export default class Collection extends BoundedIn {
     stdev(fieldSpec = "value") {
         const fs = this._fieldSpecToArray(fieldSpec);
         const mean = this.mean(fs);
-        const count = this.sizeValid(fs);
+        const count = this.size();
         let sums = 0;
         for (const e of this.events()) {
             sums += Math.pow(e.value(fs) - mean, 2);
