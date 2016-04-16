@@ -78,7 +78,7 @@ export default class Converter extends Processor {
                     break;
             }
             const timeRange = new TimeRange([begin, end]);
-            return new TimeRangeEvent(timeRange, event.data(), event.key());
+            return new TimeRangeEvent(timeRange, event.data());
         } else if (this._convertTo === IndexedEvent) {
             const timestamp = event.timestamp();
             const indexString = Index.getIndexString(this._durationString, timestamp);
@@ -106,7 +106,7 @@ export default class Converter extends Processor {
                     timestamp = endTime;
                     break;
             }
-            return new Event(timestamp, event.data(), event.key());
+            return new Event(timestamp, event.data());
         }
         if (this._convertTo === IndexedEvent) {
             throw new Error("Cannot convert TimeRangeEvent to an IndexedEvent");
@@ -136,7 +136,7 @@ export default class Converter extends Processor {
             return new Event(timestamp, event.data());
         }
         if (this._convertTo === TimeRangeEvent) {
-            return new TimeRangeEvent(event.timerange(), event.data(), event.key());
+            return new TimeRangeEvent(event.timerange(), event.data());
         }
     }
 

@@ -435,7 +435,7 @@ describe("Pipeline", () => {
                 .windowBy("1h")           // 1 day fixed windows
                 .emitOn("eachEvent")    // emit result on each event
                 .aggregate({in: avg, out: avg})
-                .asEvents({alignment: "lag"})
+                .asTimeRangeEvents({alignment: "lag"})
                 .to(EventOut, {}, event => {
                     result[`${+event.timestamp()}`] = event;
                 });

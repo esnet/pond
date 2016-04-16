@@ -16,7 +16,7 @@ import Processor from "./processor";
 import Offset from "./offset";
 import Aggregator from "./aggregator";
 import Converter from "./converter";
-import { Event } from "./event";
+import { Event, TimeRangeEvent, IndexedEvent } from "./event";
 
 /**
  * A pipeline manages a processing chain, for either batch or stream processing
@@ -379,6 +379,27 @@ class Pipeline {
         return this._append(p);
     }
 
+    asTimeRangeEvents(options) {
+        const type = TimeRangeEvent;
+        const p = new Converter(this, {
+            type,
+            ...options,
+            prev: this._last ? this._last : this
+        });
+        
+        return this._append(p);
+    }
+
+    asIndexedEvents(options) {
+        const type = IndexedEvent;
+        const p = new Converter(this, {
+            type,
+            ...options,
+            prev: this._last ? this._last : this
+        });
+        
+        return this._append(p);
+    }
 }
 
 function pipeline(args) {
