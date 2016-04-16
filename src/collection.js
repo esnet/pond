@@ -13,6 +13,7 @@ import Immutable from "immutable";
 import TimeRange from "./range";
 import { Event } from "./event";
 import { BoundedIn } from "./in";
+import { sum, avg, max, min, first, last, median, stdev } from "./functions";
 
 /**
  * A collection is a list of Events. You can construct one out of either
@@ -149,6 +150,13 @@ export default class Collection extends BoundedIn {
         return this._eventList;
     }
 
+    eventListAsArray() {
+        const events = [];
+        for (const e of this.events()) {
+            events.push(e);
+        }
+        return events;
+    }
 
     //
     // Series range
@@ -170,9 +178,12 @@ export default class Collection extends BoundedIn {
     }
 
     //
-    // Event list mutation
+    // Collection mutation
     //
 
+    /**
+     * Adds an event to the collection, returns a new collection
+     */
     addEvent(event) {
         this._check(event);
         const result = new Collection(this);
@@ -191,6 +202,9 @@ export default class Collection extends BoundedIn {
         return sliced;
     }
 
+    /**
+     * Filter the collection's event list with the supplied function
+     */
     filter(func) {
         const filteredEventList = [];
         for (const e of this.events()) {
@@ -201,6 +215,10 @@ export default class Collection extends BoundedIn {
         return new Collection(filteredEventList);
     }
 
+    /**
+     * Map the collection's event list to a new event list with
+     * the supplied function.
+     */
     map(func) {
         const result = [];
         for (const e of this.events()) {
@@ -214,8 +232,8 @@ export default class Collection extends BoundedIn {
      * values for being valid (not NaN, null or undefined).
      * The resulting Collection will be clean for that fieldSpec.
      */
-    clean(fieldSpec) {
-        const fs = fieldSpec || "value";
+    clean(fieldSpec = "value") {
+        const fs = this._fieldSpecToArray(fieldSpec);
         const filteredEvents = [];
         for (const e of this.events()) {
             if (Event.isValidValue(e, fs)) {
@@ -223,14 +241,6 @@ export default class Collection extends BoundedIn {
             }
         }
         return new Collection(filteredEvents);
-    }
-
-    _fieldSpecToArray(fieldSpec) {
-        if (_.isArray(fieldSpec)) {
-            return fieldSpec;
-        } else if (_.isString(fieldSpec)) {
-            return fieldSpec.split(".");
-        }
     }
 
     //
@@ -242,48 +252,27 @@ export default class Collection extends BoundedIn {
     }
 
     first(fieldSpec = "value") {
-        const e = this.atFirst();
-        return e.value(fieldSpec);
+        return this.aggregate(first, fieldSpec);
     }
 
     last(fieldSpec = "value") {
-        const e = this.atLast();
-        return e.value(fieldSpec);
+        return this.aggregate(last, fieldSpec);
     }
 
     sum(fieldSpec = "value") {
-        const fs = this._fieldSpecToArray(fieldSpec);
-        let sum = 0;
-        for (const e of this.events()) {
-            sum += e.value(fs);
-        }
-        return sum;
+        return this.aggregate(sum, fieldSpec);
     }
 
     avg(fieldSpec = "value") {
-        const sum = this.sum(fieldSpec);
-        const count = this.size();
-        return count ? sum / count : undefined;
+        return this.aggregate(avg, fieldSpec);
     }
 
     max(fieldSpec = "value") {
-        const fs = this._fieldSpecToArray(fieldSpec);
-        let max;
-        for (const e of this.events()) {
-            const v = e.value(fs);
-            if (!max || max < v) max = v;
-        }
-        return max;
+        return this.aggregate(max, fieldSpec);
     }
 
     min(fieldSpec = "value") {
-        const fs = this._fieldSpecToArray(fieldSpec);
-        let min;
-        for (const e of this.events()) {
-            const v = e.value(fs);
-            if (!min || min > v) min = v;
-        }
-        return min;
+        return this.aggregate(min, fieldSpec);
     }
 
     mean(fieldSpec = "value") {
@@ -291,29 +280,30 @@ export default class Collection extends BoundedIn {
     }
 
     median(fieldSpec = "value") {
-        const fs = this._fieldSpecToArray(fieldSpec);
-        const sorted = this._eventList.sortBy(d =>
-            d.get("data").getIn(fs)
-        );
-
-        const i = Math.floor(sorted.size / 2);
-        if (sorted.size % 2 === 0) {
-            const a = sorted.get(i).get("data").getIn(fs);
-            const b = sorted.get(i - 1).get("data").getIn(fs);
-            return (a + b) / 2;
-        } else {
-            return sorted.get(i).get("data").getIn(fs);
-        }
+        return this.aggregate(median, fieldSpec);
     }
 
     stdev(fieldSpec = "value") {
+        return this.aggregate(stdev, fieldSpec);
+    }
+
+    aggregate(func, fieldSpec = "value") {
         const fs = this._fieldSpecToArray(fieldSpec);
-        const mean = this.mean(fs);
-        const count = this.size();
-        let sums = 0;
-        for (const e of this.events()) {
-            sums += Math.pow(e.value(fs) - mean, 2);
+        const result = Event.mapReduce(this.eventListAsArray(), [fs], func);
+        return result[fs];
+    }
+
+    /**
+     * Internal function to take a fieldSpec and
+     * return it as an array if it isn't already one. Using
+     * arrays in inner loops is faster than splitting
+     * a string repeatedly.
+     */
+    _fieldSpecToArray(fieldSpec) {
+        if (_.isArray(fieldSpec)) {
+            return fieldSpec;
+        } else if (_.isString(fieldSpec)) {
+            return fieldSpec.split(".");
         }
-        return Math.sqrt(sums / count);
     }
 }

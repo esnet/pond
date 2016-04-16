@@ -10,7 +10,7 @@
 
 export class EventOut {
 
-    constructor(callback) {
+    constructor(pipeline, options, callback) {
         this._callback = callback;
     }
 

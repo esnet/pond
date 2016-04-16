@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2016, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -13,35 +13,48 @@ import { Event, TimeRangeEvent, IndexedEvent } from "./event";
 import TimeRange from "./range";
 import Utils from "./util";
 import Index from "./index";
+import { isPipeline } from "./pipeline";
+import Processor from "./processor";
 
-export default class Converter {
+export default class Converter extends Processor {
 
-    /**
-     * `groupBy` may be either:
-     *     * A function which takes an event and returns a string as a key
-     *     * A string, which corresponds to a column in the event, like "name"
-     *     * A list, which corresponds to a list of columns to join together for the key
-     * `observer` is the callback that will receive the emitted events
-     */
-    constructor(options, observer) {
-        if (!_.has(options, "type")) {
-            throw new Error("Converter: constructor needs 'type' in options");
-        }
-        if (options.type === Event ||
-            options.type === TimeRangeEvent ||
-            options.type === IndexedEvent) {
-            this._convertTo = options.type;
-        } else {
-            throw Error("Unable to interpret type argument passed to Converter constructor");
-        }
-        if (options.type === TimeRangeEvent || options.type === IndexedEvent) {
-            if (options.duration && _.isString(options.duration)) {
-                this._duration = Utils.windowDuration(options.duration);
-                this._durationString = options.duration;
+    constructor(arg1, options, observer) {
+        super(arg1, options, observer);
+
+        if (arg1 instanceof Converter) {
+            const other = arg1;
+            this._by = other._by;
+            this._fieldSpec = other._fieldSpec;
+
+        } else if (isPipeline(arg1)) {
+            if (!_.has(options, "type")) {
+                throw new Error("Converter: constructor needs 'type' in options");
             }
+
+            if (options.type === Event ||
+                options.type === TimeRangeEvent ||
+                options.type === IndexedEvent) {
+                this._convertTo = options.type;
+            } else {
+                throw Error("Unable to interpret type argument passed to Converter constructor");
+            }
+
+            if (options.type === TimeRangeEvent || options.type === IndexedEvent) {
+                if (options.duration && _.isString(options.duration)) {
+                    this._duration = Utils.windowDuration(options.duration);
+                    this._durationString = options.duration;
+                }
+            }
+
+            this._alignment = options.alignment || "center";
+
+        } else {
+            throw new Error("Unknown arg to Converter constructor", arg1);
         }
-        this._alignment = options.alignment || "center";
-        this._observer = observer;
+    }
+
+    clone() {
+        return new Converter(this);
     }
 
     convertEvent(event) {
@@ -120,7 +133,7 @@ export default class Converter {
                     timestamp = endTime;
                     break;
             }
-            return new Event(timestamp, event.data(), event.key());
+            return new Event(timestamp, event.data());
         }
         if (this._convertTo === TimeRangeEvent) {
             return new TimeRangeEvent(event.timerange(), event.data(), event.key());
@@ -128,31 +141,22 @@ export default class Converter {
     }
 
     /**
-     * Add an event will add a key to the event and then emit the
-     * event with that key.
+     * Output a converted event
      */
-    addEvent(event, cb) {
-        if (this._observer) {
-            let out;
+    addEvent(event) {
+        if (this.hasObservers()) {
+            let outputEvent;
             if (event instanceof TimeRangeEvent) {
-                out = this.convertTimeRangeEvent(event);
+                outputEvent = this.convertTimeRangeEvent(event);
             } else if (event instanceof IndexedEvent) {
-                out = this.convertIndexedEvent(event);
+                outputEvent = this.convertIndexedEvent(event);
             } else if (event instanceof Event) {
-                out = this.convertEvent(event);
+                outputEvent = this.convertEvent(event);
+            } else {
+                throw new Error("Unknown event type received");
             }
-            this._observer(out);
-        }
-        if (cb) {
-            cb(null);
+            this.emit(outputEvent);
         }
     }
 
-    onEmit(cb) {
-        this._observer = cb;
-    }
-
-    done() {
-        return;
-    }
 }

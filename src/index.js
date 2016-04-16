@@ -8,7 +8,6 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import _ from "underscore";
 import util from "./util";
 
 /**
@@ -24,8 +23,8 @@ import util from "./util";
  */
 export default class Index {
 
-    constructor(s, utc) {
-        this._utc = _.isBoolean(utc) ? utc : true;
+    constructor(s, utc = true) {
+        this._utc = utc;
         this._string = s;
         this._timerange = util.rangeFromIndexString(s, this._utc);
     }

@@ -11,7 +11,7 @@
 import _ from "underscore";
 
 import Processor from "./processor";
-import { Event } from "./event"; 
+import { Event } from "./event";
 import { isPipeline } from "./pipeline";
 
 /**
@@ -39,8 +39,7 @@ export default class Offset extends Processor {
     }
 
     /**
-     * Add an event will add a key to the event and then emit the
-     * event with that key.
+     * Output an event that is offset
      */
     addEvent(event) {
         if (this.hasObservers()) {

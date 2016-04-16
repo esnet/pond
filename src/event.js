@@ -390,7 +390,7 @@ export class Event {
         if (events.length < 1) {
             return;
         }
-        const mapped = Event.map(events, (event) => {
+        const mapped = Event.map(events, event => {
             const mapEvent = {};
             // Which field do we want to work with
             let fieldNames = [];
@@ -402,13 +402,14 @@ export class Event {
                 fieldNames = fieldSpec;
             }
             // Map the fields, along with the timestamp, to the value
-            _.each(fieldNames, (fieldName) => {
+            _.each(fieldNames, fieldName => {
                 mapEvent[`${event.timestamp().getTime()}::${fieldName}`] =
                     event.data().get(fieldName);
             });
 
             return mapEvent;
         });
+
         const eventData = {};
         _.each(Event.reduce(mapped, reducer), (value, key) => {
             const [ timestamp, fieldName ] = key.split("::");
@@ -417,6 +418,7 @@ export class Event {
             }
             eventData[timestamp][fieldName] = value;
         });
+
         return _.map(eventData, (data, timestamp) => {
             return new Event(+timestamp, data);
         });
@@ -431,10 +433,10 @@ export class Event {
     }
 
     /**
-     * Maps a list of events according to the selection
-     * specification passed in. The spec maybe a single
-     * field name, a list of field names, or a function
-     * that takes an event and returns a key/value pair.
+     * Maps a list of events according to the fieldSpec
+     * passed in. The spec maybe a single field name, a
+     * list of field names, or a function that takes an
+     * event and returns a key/value pair.
      *
      * Example 1:
      *         in   out
@@ -443,30 +445,41 @@ export class Event {
      *
      * Mapper result:  { in: [1, 3], out: [2, 4]}
      */
-    static map(events, fieldSpec) {
+    static map(evts, multiFieldSpec = "value") {
         const result = {};
 
-        if (_.isString(fieldSpec)) {
-            const fieldName = fieldSpec;
-            _.each(events, event => {
-                if (!_.has(result, fieldName)) {
-                    result[fieldName] = [];
+        let events;
+        if (evts instanceof Immutable.List) {
+            events = evts;
+        } else if (_.isArray(evts)) {
+            events = new Immutable.List(evts);
+        } else {
+            throw new Error("Unknown event list type. Should be an array or Immutable List");
+        }
+
+        if (_.isString(multiFieldSpec)) {
+            const fieldSpec = multiFieldSpec;
+            events.forEach(event => {
+                if (!_.has(result, fieldSpec)) {
+                    result[fieldSpec] = [];
                 }
-                const value = event.get(fieldName);
-                result[fieldName].push(value);
+                const value = event.get(fieldSpec);
+                
+                result[fieldSpec].push(value);
             });
-        } else if (_.isArray(fieldSpec)) {
-            _.each(fieldSpec, fieldName => {
-                _.each(events, event => {
-                    if (!_.has(result, fieldName)) {
-                        result[fieldName] = [];
+        } else if (_.isArray(multiFieldSpec)) {
+            _.each(multiFieldSpec, fieldSpec => {
+                events.forEach(event => {
+
+                    if (!_.has(result, fieldSpec)) {
+                        result[fieldSpec] = [];
                     }
-                    result[fieldName].push(event.get(fieldName));
+                    result[fieldSpec].push(event.get(fieldSpec));
                 });
             });
-        } else if (_.isFunction(fieldSpec)) {
-            _.each(events, event => {
-                const pair = fieldSpec(event);
+        } else if (_.isFunction(multiFieldSpec)) {
+            events.forEach(event => {
+                const pair = multiFieldSpec(event);
                 _.each(pair, (value, key) => {
                     if (!_.has(result, key)) {
                         result[key] = [];
@@ -475,7 +488,7 @@ export class Event {
                 });
             });
         } else {
-            _.each(events, event => {
+            events.forEach(event => {
                 _.each(event.data().toJSON(), (value, key) => {
                     if (!_.has(result, key)) {
                         result[key] = [];
@@ -503,8 +516,8 @@ export class Event {
         return result;
     }
 
-    static mapReduce(events, fieldSpec, reducer) {
-        return Event.reduce(this.map(events, fieldSpec), reducer);
+    static mapReduce(events, multiFieldSpec, reducer) {
+        return Event.reduce(this.map(events, multiFieldSpec), reducer);
     }
 }
 

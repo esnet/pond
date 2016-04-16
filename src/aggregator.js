@@ -60,32 +60,29 @@ export default class Aggregator extends Processor {
     constructor(pipeline, options, observer) {
         super(pipeline, options, observer);
 
-        // Aggregation operators
-        const availableOperators =
-            ["sum", "avg", "max", "min", "count", "first", "last"];
         if (!_.has(options, "fields")) {
             throw new Error("Aggregator: constructor needs an aggregator field mapping");
         }
 
         // Check each of the aggregator -> field mappings
-        _.forEach(options.fields, (field, operator) => {
-            // Check that each operator is in our white list. We should probably
-            // allow custom functions here, but this will work for now
-            if (availableOperators.indexOf(operator) === -1) {
-                throw new Error("Aggregator: unknown aggregation operator: " + operator);
-            }
-
+        _.forEach(options.fields, (operator, field) => {
             // Field should either be an array or a string
             if (!_.isString(field) && !_.isArray(field)) {
                 throw new Error("Aggregator: field of unknown type: " + field);
             }
         });
+
         this._fields = options.fields;
 
         // Pipeline state
         this._groupBy = pipeline.getGroupBy();
         this._windowType = pipeline.getWindowType();
         this._windowDuration = pipeline.getWindowDuration();
+
+        if (!this._windowType || !this._windowDuration) {
+            throw new Error("Unable to aggregate because no windowing strategy is supplied (use windowBy)");
+        }
+
         this._emitOn = pipeline.getEmitOn();
 
         // Maintained collections
@@ -96,11 +93,11 @@ export default class Aggregator extends Processor {
         _.each(collections, c => {
             const { collection, windowKey } = c;
             const d = {};
-            _.each(this._fields, (fields, operator) => {
+
+            _.each(this._fields, (operator, fields) => {
                 const fieldList = _.isString(fields) ? [fields] : fields;
                 _.each(fieldList, fieldSpec => {
-                    const op = collection[operator];
-                    const fieldValue = op.call(collection, fieldSpec);
+                    const fieldValue = collection.aggregate(operator, fieldSpec);
                     const fieldName = fieldSpec.split(".").pop();
                     d[fieldName] = fieldValue;
                 });

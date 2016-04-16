@@ -24,7 +24,7 @@ import TimeSeries from "../../src/series.js";
 import { Collector, FixedWindowCollector } from "../../src/collector.js";
 
 import { Event } from "../../src/event.js";
-import { avg } from "../../src/functions.js";
+import { keep, avg } from "../../src/functions.js";
 
 const eventList1 = [
     new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
@@ -351,89 +351,104 @@ describe("Pipeline", () => {
 
     describe("aggregation", () => {
 
-        const eventsIn = [];
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {category: "a", value: 3}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {category: "a", value: 9}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {category: "a", value: 6}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {category: "a", value: 4}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {category: "a", value: 5}));
-
-        /*
         it("can aggregate events into a windowed avg", done => {
+
+            const eventsIn = [];
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {in: 3, out: 1}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {in: 9, out: 2}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {in: 6, out: 6}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {in: 4, out: 7}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {in: 5, out: 9}));
+
             const input = new UnboundedIn();
             const result = {};
+
             const p = Pipeline()
                 .from(input)
-                .window("1h")           // 1 day fixed windows
-                .emitOn("eachEvent")  // emit result on each event
-                .aggregate("avg")
-                .to(new EventOut(event => {
-                    console.log("EVENT OUT", event.toString());
+                .windowBy("1h")           // 1 day fixed windows
+                .emitOn("eachEvent")    // emit result on each event
+                .aggregate({in: avg, out: avg})
+                .to(EventOut, {}, event => {
                     result[`${event.index()}`] = event;
-                }));
+                });
 
             eventsIn.forEach(event => input.addEvent(event));
 
-            expect(result["1h-396199"].get("avg")).to.equal(6);
-            expect(result["1h-396200"].get("avg")).to.equal(4.5);
+            expect(result["1h-396199"].get("in")).to.equal(6);
+            expect(result["1h-396199"].get("out")).to.equal(3);
+            expect(result["1h-396200"].get("in")).to.equal(4.5);
+            expect(result["1h-396200"].get("out")).to.equal(8);
+
             done();
         });
-        */
        
-        /*
-        
-        XXXX
-        
-        it("can collect together events and aggregate", done => {
-            const eventStream = new UnboundedIn();
-            let out;
+        it("an collect together events and aggregate", done => {
 
-            const p = Pipeline()
-                .from(eventStream)
-                .groupBy("category")
-                .windowBy({type: "fixed", duration: "1h"})        // 1 hour fixed windows
-                .emitOn("discard")                                // emit result on each event
-                .aggregate({avg: ["value"], first: ["category"]}) // aggregate avg value, keep category
-                .to(Collector, {}, collection => {                // output into a collection of all IndexedEvents
-                    out = new TimeSeries({name, collection});
-                });
-            
-            eventsIn.forEach(event => eventStream.addEvent(event));
-            eventStream.flush();
+            const eventsIn = [];
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {type: "a", in: 3, out: 1}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {type: "a", in: 9, out: 2}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {type: "b", in: 6, out: 6}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {type: "a", in: 4, out: 7}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {type: "b", in: 5, out: 9}));
 
-            expect(out.size()).to.equal(2);
-            //expect(result["1h-396199"].get("avg")).to.equal(6);
-            //expect(result["1h-396200"].get("avg")).to.equal(4.5);
-
-            done();
-        });
-         */
-
-        /*
-        it("can collect together events into new collections", done => {
             const input = new UnboundedIn();
             const result = {};
 
             const p = Pipeline()
                 .from(input)
-                .groupBy("category")
-                .windowBy({type: "fixed", duration: "1h"}) // 1 hour fixed windows
-                .emitOn("eachEvent")  // emit result on each event
-                .aggregate("avg")
-                .windowBy({type: "fixed", duration: "1h"})
-                .to(FixedWindowCollector, (collection, name) => {
-                    console.log("**", name, collection);
-                    result[name] = new TimeSeries({name, collection});
+                .groupBy("type")
+                .windowBy("1h")           // 1 day fixed windows
+                .emitOn("eachEvent")    // emit result on each event
+                .aggregate({type: keep, in: avg, out: avg})
+                .to(EventOut, {}, event => {
+                    result[`${event.index()}:${event.get("type")}`] = event;
                 });
 
             eventsIn.forEach(event => input.addEvent(event));
 
-            expect(result["1h-396199"].get("avg")).to.equal(6);
-            expect(result["1h-396200"].get("avg")).to.equal(4.5);
+            expect(result["1h-396199:a"].get("in")).to.equal(6);
+            expect(result["1h-396199:a"].get("out")).to.equal(1.5);
+            expect(result["1h-396199:b"].get("in")).to.equal(6);
+            expect(result["1h-396199:b"].get("out")).to.equal(6);
+            expect(result["1h-396200:a"].get("in")).to.equal(4);
+            expect(result["1h-396200:a"].get("out")).to.equal(7);
+            expect(result["1h-396200:b"].get("in")).to.equal(5);
+            expect(result["1h-396200:b"].get("out")).to.equal(9);
 
             done();
         });
-        */
+
+        it("can aggregate events into a windowed avg and convert them to Events", done => {
+
+            const eventsIn = [];
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 57, 0), {in: 3, out: 1}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 58, 0), {in: 9, out: 2}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 59, 0), {in: 6, out: 6}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 0, 0), {in: 4, out: 7}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 1, 0), {in: 5, out: 9}));
+
+            const input = new UnboundedIn();
+            const result = {};
+
+            const p = Pipeline()
+                .from(input)
+                .windowBy("1h")           // 1 day fixed windows
+                .emitOn("eachEvent")    // emit result on each event
+                .aggregate({in: avg, out: avg})
+                .asEvents({alignment: "lag"})
+                .to(EventOut, {}, event => {
+                    result[`${+event.timestamp()}`] = event;
+                });
+
+            eventsIn.forEach(event => input.addEvent(event));
+
+            expect(result["1426294800000"].get("in")).to.equal(6);
+            expect(result["1426294800000"].get("out")).to.equal(3);
+            expect(result["1426298400000"].get("in")).to.equal(4.5);
+            expect(result["1426298400000"].get("out")).to.equal(8);
+           
+            done();
+        });
     });
 
     /*

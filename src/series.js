@@ -368,6 +368,10 @@ class TimeSeries {
         return this._collection.stdev(fieldSpec);
     }
 
+    aggregate(func, fieldSpec) {
+        return this._collection.aggregate(func, fieldSpec);
+    }
+
     pipeline() {
         return new Pipeline()
             .from(this._collection);

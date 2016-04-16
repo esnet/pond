@@ -8,9 +8,9 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-require("babel/polyfill");
+import "babel-polyfill";
 
-// Chrome debugging
+// Chrome debugging for the tests
 import Immutable from "immutable";
 import installDevTools from "immutable-devtools";
 if (typeof window !== "undefined") {

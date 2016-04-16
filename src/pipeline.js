@@ -15,6 +15,8 @@ import { UnboundedIn, BoundedIn } from "./in";
 import Processor from "./processor";
 import Offset from "./offset";
 import Aggregator from "./aggregator";
+import Converter from "./converter";
+import { Event } from "./event";
 
 /**
  * A pipeline manages a processing chain, for either batch or stream processing
@@ -143,6 +145,13 @@ class Pipeline {
     // Pipeline state chained methods
     //
 
+    setState(key, value) {
+        const d = this._d.withMutations(map => {
+            map.set(key, value);
+        });
+        return new Pipeline(d);
+    }
+
     /**
      * Set the window, returning a new Pipeline. The argument here
      * is an object with {type, duration}.
@@ -152,11 +161,21 @@ class Pipeline {
      *  * "30s", "5m" or "1d" etc
      */
     windowBy(w) {
-        const { type, duration } = w;
+        let type, duration;
+        if (_.isString(w)) {
+            // assume fixed window with size w
+            type = "fixed";
+            duration = w;
+        } else if (_.isObject(w)) {
+            type = w.type;
+            duration = w.duration;
+        }
+
         const d = this._d.withMutations(map => {
             map.set("windowType", type)
                .set("windowDuration", duration);
         });
+
         return new Pipeline(d);
     }
 
@@ -183,11 +202,7 @@ class Pipeline {
             throw Error("Unable to interpret groupBy argument", k);
         }
 
-        const d = this._d.withMutations(map => {
-            map.set("groupBy", grp);
-        });
-
-        return new Pipeline(d);
+        return this.setState("groupBy", grp);
     }
 
     /**
@@ -244,6 +259,7 @@ class Pipeline {
         let force = false;
         let observer = () => {};
         let options = {};
+
         if (_.isObject(arg2)) {
             options = arg2;
             observer = arg3;
@@ -294,6 +310,7 @@ class Pipeline {
             for (const e of input.events()) {
                 head.addEvent(e);
             }
+
             if (force) head.flush();
  
         } else if (this.mode() === "stream") {
@@ -345,6 +362,17 @@ class Pipeline {
     aggregate(fields) {
         const p = new Aggregator(this, {
             fields,
+            prev: this._last ? this._last : this
+        });
+        
+        return this._append(p);
+    }
+
+    asEvents(options) {
+        const type = Event;
+        const p = new Converter(this, {
+            type,
+            ...options,
             prev: this._last ? this._last : this
         });
         
