@@ -11,8 +11,11 @@
 // Import the require hook for babel runtime
 import "babel/register";
 
+/* eslint max-len:0 */
+
 import React from "react";
-import Router from "react-router";
+import { render } from "react-dom";
+import { Router, IndexRoute, Route, browserHistory } from "react-router";
 
 import App from "./app.jsx";
 import Intro from "./intro.jsx";
@@ -22,31 +25,21 @@ import TimeRange from "./timerange.jsx";
 import Index from "./index.jsx";
 import Events from "./events.jsx";
 import TimeSeries from "./timeseries.jsx";
-import Aggregators from "./aggregators.jsx";
-import Collectors from "./collectors.jsx";
-import Binners from "./binners.jsx";
 import Rollup from "./rollup.jsx";
-import Processor from "./processor.jsx";
+import Pipeline from "./pipeline.jsx";
 
-const { Route, DefaultRoute } = Router;
-
-const routes = (
-    <Route path="/" handler={App}>
-        <DefaultRoute name="intro" handler={Intro} />
-        <Route name="start" handler={Start} />
-        <Route name="rollups" handler={Rollup} />
-        <Route name="time" handler={Time} />
-        <Route name="timerange" handler={TimeRange} />
-        <Route name="index" handler={Index} />
-        <Route name="events" handler={Events} />
-        <Route name="timeseries" handler={TimeSeries} />
-        <Route name="aggregators" handler={Aggregators} />
-        <Route name="collectors" handler={Collectors} />
-        <Route name="binners" handler={Binners} />
-        <Route name="processor" handler={Processor} />
-    </Route>
-);
-
-Router.run(routes, Handler => {
-    React.render(<Handler/>, document.getElementById("content"));
-});
+render((
+    <Router history={browserHistory}>
+        <Route path="/" component={App}>
+            <IndexRoute component={Intro}/>
+            <Route path="start" component={Start} />
+            <Route path="rollups" component={Rollup} />
+            <Route path="time" component={Time} />
+            <Route path="timerange" component={TimeRange} />
+            <Route path="index" component={Index} />
+            <Route path="events" component={Events} />
+            <Route path="timeseries" component={TimeSeries} />
+            <Route path="pipeline" component={Pipeline} />
+        </Route>
+    </Router>
+), document.getElementById("content"));

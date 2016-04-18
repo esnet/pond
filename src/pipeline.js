@@ -256,7 +256,6 @@ class Pipeline {
      */
     to(arg1, arg2, arg3, arg4) {
         const Out = arg1;
-        console.log("Out:", Out);
         let force = false;
         let observer = () => {};
         let options = {};

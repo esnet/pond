@@ -21,7 +21,7 @@ if (process.env.COMPRESS) {
 module.exports = {
 
     output: {
-        library: ["ESnet", "Pond"],
+        library: ["Pond"],
         libraryTarget: "assign"
     },
 
@@ -39,5 +39,9 @@ module.exports = {
         Buffer: false
     },
 
-    plugins: plugins
+    plugins: plugins,
+
+    resolve: {
+        extensions: [".js", ".jsx", ".json"]
+    }
 };

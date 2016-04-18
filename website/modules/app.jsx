@@ -11,9 +11,8 @@
 /* eslint-disable max-len */
 
 import React from "react";
-import Router from "react-router";
+import { Link } from "react-router";
 
-const {RouteHandler, Link} = Router;
 const logo = document.createElement("img");
 logo.src = require("../img/logo.png");
 
@@ -72,7 +71,7 @@ export default React.createClass({
                 </div>
 
                 <div className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                    <RouteHandler />
+                    {this.props.children}
                 </div>
 
             </div>

@@ -15,9 +15,9 @@ import Ring from "ringjs";
 
 import TimeSeries from "../../src/series";
 import TimeRange from "../../src/range";
-import {Event} from "../../src/event";
-import {avg} from "../../src/functions";
-import Aggregator from "../../src/Aggregator";
+import { Event } from "../../src/event";
+// import { avg } from "../../src/functions";
+// import Aggregator from "../../src/aggregator";
 import {
     ChartContainer,
     ChartRow,
@@ -25,14 +25,15 @@ import {
     YAxis,
     ScatterChart,
     BarChart,
-    Resizable } from "react-timeseries-charts";
+    Resizable
+} from "react-timeseries-charts";
 
 const text = require("raw!../../docs/rollup.md");
 
 const sec = 1000;
 const minute = 60 * sec;
 const hours = 60 * minute;
-const INTERVAL_RATE = 200;
+// const INTERVAL_RATE = 200;
 
 export default React.createClass({
 
@@ -61,6 +62,7 @@ export default React.createClass({
         // Setup our aggregators
         //
 
+        /*
         this.fiveMinuteAggregator =
             new Aggregator({window: "5m", operator: avg}, event => {
                 const events = this.state.fiveMinuteAvg;
@@ -94,6 +96,7 @@ export default React.createClass({
             this.hourlyAggregator.addEvent(event);
 
         }, INTERVAL_RATE);
+        */
     },
 
     componentWillUnmount() {
