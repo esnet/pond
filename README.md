@@ -26,45 +26,50 @@ Or finding the average value in a timeseries:
 Or much higher level stream processing:
 
 ```js
-    // Set up processing chain
-    const processor = Processor()
-        .groupBy("channelName")
-        .aggregate("5m", avg)
-        .collect("1d", false, timeseries => {
-            // --> Output timeseries representing 1 day of 5 min averages
+    Pipeline()
+        .from(input)                            // input (unbounded)
+        .windowBy("1h")                         //  - 1 day fixed windows
+        .emitOn("eachEvent")                    //  - emit result on each event
+        .aggregate({in: avg, out: avg})         //  - emit new events, 1hr avg
+        .to(EventOut, event => {                // output
+            result[`${event.index()}`] = event; //  - result
         });
+
     // As events come in...
-    processor.addEvents(incomingEvents);
+    input.addEvents(incomingEvents);
+
 ```
 
 ## What does it do?
 
-Pond has two main goals: basic data structures built on Immutable.js and processing operations to work with those structures. Here is a summary of what is provided:
+Pond has three main goals:
+
+ 1. provide basic time-related data structures built on Immutable.js
+ 2. provide serialization of these structures for transmission across the wire
+ 3. provide processing operations to work with those structures.
+
+Here is a summary of what is provided:
 
 * **TimeRange** - a begin and end time, packaged together.
-* **Index** - A time range denoted by a string, for example "5m-1234" is a 5 minute timerange, or "2014-09" is September 2014.
-* **Events** - These are a timestamp and a data object packaged together.
-* **IndexedEvents** - An index (timerange) and a data object packaged together. e.g. 1hr sample
-* **TimeRangeEvents** - A timerange and a data object packaged together. e.g. outage event
+* **Index** - A time range denoted by a string, for example "5m-1234" is a specific 5 minute time range, or "2014-09" is September 2014.
+* **Events** - A timestamp and a data object packaged together.
+* **IndexedEvents** - An Index and a data object packaged together. e.g. 1hr max.
+* **TimeRangeEvents** - A TimeRange and a data object packaged together. e.g. outage event.
 
-And forming together a collection of events, we have a Timeseries:
+And forming together collections of events:
 
-* **TimeSeries** - A sequence of Events associated with a list of times or time ranges (Indexes).
+* **Collection** - A bag of Events
+* **TimeSeries** - An ordered Collection of Events and associated meta data
 
-And then high level helper functions to:
+And then high level processing via Event pipelines:
 
-* **Aggregate** - Create time range bound buckets and aggregate events into those buckets
-* **Collect** - Create TimeSeries objects from Event streams
-* **Bin** - Fit data into regular intervals
-* **Resample** [TODO]
-
-And finally a a chained interface to the high level functions:
-
-* **Processor** - Build a stream of events using .aggregate(), .collect() etc.
+* **Pipeline** - Stream or batch processing of Events. Supports windowing, grouping and aggregation.
 
 # Getting started
 
-Pond will run in node.js (ideally using babel-node) or in the browser (ideally via webpack). Install from npm:
+Pond will run in node.js or in the browser (ideally via webpack).
+
+Install from npm:
 
     npm install pondjs --save
 

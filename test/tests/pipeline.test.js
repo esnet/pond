@@ -17,7 +17,7 @@ import { expect } from "chai";
 
 import { Pipeline } from "../../src/pipeline.js";
 import { UnboundedIn } from "../../src/in.js";
-import { ConsoleOut, EventOut } from "../../src/out.js";
+import { ConsoleOut, EventOut, CollectionOut } from "../../src/out.js";
 
 import Collection from "../../src/collection.js";
 import TimeSeries from "../../src/series.js";
@@ -217,14 +217,13 @@ describe("Pipeline", () => {
             let c2;
 
             const p1 = Pipeline()
-                .from(collection)                  // This links to the src collection
-                .offsetBy(1, "in")                 // Transforms to a new collection
-                .offsetBy(2)                       // And then to another collection
-                .to(Collector, {}, c => c1 = c);   // Evokes the action to pass collection
-                                                   // into offsetBy, and so on
-            const p2 = p1
-                .offsetBy(3, "in")                 // Transforms to a new collection
-                .to(Collector, {}, c => c2 = c);   // Evokes the action to pass collection
+                .from(collection)                      // <-- This links to the src collection
+                .offsetBy(1, "in")                     //     - Transforms to a new collection
+                .offsetBy(2)                           //     - And then to another collection
+                .to(CollectionOut, {}, c => c1 = c);   // --> Specified output, evokes batch op
+            const p2 = p1                              //            ||
+                .offsetBy(3, "in")                     //     - Transforms to a new collection
+                .to(CollectionOut, {}, c => c2 = c);   // --> Specified output, evokes batch op
 
             expect(c1.size()).to.equal(3);
             expect(c1.at(0).get("in")).to.equal(4);
@@ -246,7 +245,7 @@ describe("Pipeline", () => {
 
             const p = Pipeline()
                 .from(source)
-                .to(Collector, {}, c => out = c);
+                .to(CollectionOut, {}, c => out = c);
 
             source.addEvent(events[0]);
             source.addEvent(events[1]);
@@ -264,7 +263,7 @@ describe("Pipeline", () => {
             const p = Pipeline()
                 .from(source)
                 .offsetBy(3, "in")
-                .to(Collector, {}, c => out = c);
+                .to(CollectionOut, {}, c => out = c);
 
             source.addEvent(events[0]);
             source.addEvent(events[1]);
@@ -284,11 +283,11 @@ describe("Pipeline", () => {
                 .from(source)
                 .offsetBy(1, "in")
                 .offsetBy(2)
-                .to(Collector, {}, c => out1 = c);
+                .to(CollectionOut, {}, c => out1 = c);
 
             const p2 = p1
                 .offsetBy(3, "in")
-                .to(Collector, {}, c => out2 = c);
+                .to(CollectionOut, {}, c => out2 = c);
 
             source.addEvent(events[0]);
             
@@ -322,7 +321,7 @@ describe("Pipeline", () => {
                 .from(timeseries.collection())
                 .offsetBy(1, "value")
                 .offsetBy(2)
-                .to(Collector, {}, c => out = c);
+                .to(CollectionOut, {}, c => out = c);
 
             expect(out.at(0).get()).to.equal(55);
             expect(out.at(1).get()).to.equal(21);
@@ -338,7 +337,7 @@ describe("Pipeline", () => {
             timeseries.pipeline()
                 .offsetBy(1, "value")
                 .offsetBy(2)
-                .to(Collector, {}, c => out = c);
+                .to(CollectionOut, {}, c => out = c);
 
             expect(out.at(0).get()).to.equal(55);
             expect(out.at(1).get()).to.equal(21);
@@ -351,7 +350,7 @@ describe("Pipeline", () => {
 
     describe("aggregation", () => {
 
-        it("can aggregate events into a windowed avg", done => {
+        it("can aggregate events into by windowed avg", done => {
 
             const eventsIn = [];
             eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {in: 3, out: 1}));
@@ -418,7 +417,7 @@ describe("Pipeline", () => {
             done();
         });
 
-        it("can aggregate events into a windowed avg and convert them to Events", done => {
+        it("can aggregate events by windowed avg and convert them to Events", done => {
 
             const eventsIn = [];
             eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 57, 0), {in: 3, out: 1}));

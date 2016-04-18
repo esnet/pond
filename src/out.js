@@ -8,6 +8,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+import Collector from "./collector";
+
 export class EventOut {
 
     constructor(pipeline, options, callback) {
@@ -44,5 +46,29 @@ export class ConsoleOut {
 
     onEmit(observer) {
         this._callback = observer;
+    }
+}
+
+export class CollectionOut {
+
+    constructor(pipeline, options, callback) {
+        this._callback = callback;
+        this._collector = new Collector({
+            windowType: pipeline.getWindowType(),
+            windowDuration: pipeline.getWindowDuration(),
+            groupBy: pipeline.getGroupBy(),
+            emitOn: pipeline.getEmitOn()
+        }, (collection, windowKey) => this._callback(collection, windowKey));
+    }
+
+    addEvent(event) {
+        this._collector.addEvent(event);
+    }
+
+    onEmit(cb) {
+        this._callback = cb;
+    }
+    
+    done() {
     }
 }

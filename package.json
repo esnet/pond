@@ -1,6 +1,7 @@
 {
   "name": "pondjs",
   "version": "0.5.0",
+  "main": "lib/entry",
   "description": "A timeseries library build on top of immutable.js",
   "scripts": {
     "lint": "eslint src test/tests website/modules/*.jsx",

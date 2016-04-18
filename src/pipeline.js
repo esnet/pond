@@ -256,6 +256,7 @@ class Pipeline {
      */
     to(arg1, arg2, arg3, arg4) {
         const Out = arg1;
+        console.log("Out:", Out);
         let force = false;
         let observer = () => {};
         let options = {};
@@ -410,4 +411,4 @@ function is(p) {
     return p instanceof Pipeline;
 }
 
-export {pipeline as Pipeline, is as isPipeline};
+export { pipeline as Pipeline, is as isPipeline };
