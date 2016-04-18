@@ -20,34 +20,76 @@ Here are several examples of a calendar index:
     2015          // All of the year 2015
 ```
 
-An Index is a nice representation of certain types of time intervals because it can be cached with its string representation as a key. Then a specific chunk of time, and associated data can be looked up based on that string. It also allows us to represent things like months, which have variable length.
+An Index is a nice representation of certain types of time intervals because it can be cached with its string representation as a key. A specific chunk of time, and associated data can be looked up based on that string. It also allows us to represent things like months, which have variable length.
 
-An Index is also useful when bucketing into specific timeranges, for example generating all the 5 min ("5m") maximum rollups within a specific day ("1d"). See the discussion about aggregators, collectors and binners within these docs.
+An Index is also useful when collecting into specific time ranges, for example generating all the 5 min ("5m") maximum rollups within a specific day ("1d"). See the processing section within these docs.
 
-### Construction
+---
+## API Reference
 
-Construct an Index with its string representation.
+An index that represents as a string a range of time. That range may either
+be in UTC or local time. UTC is the default.
 
-### Query
+The actual derived timerange can be found using asRange(). This will return
+a TimeRange instance.
 
-The Index has a basic interface to find the TimeRange it represents:
+The original string representation can be found with toString(). A nice
+version for date based indexes (e.g. 2015-03) can be generated with
+toNiceString(format) (e.g. March, 2015).
 
-* `asTimerange()` - returns a TimeRange object for the Index
-* `begin() - returns the begin time of the Index
-* `end()` - returns the end time of the Index
+**Kind**: global class  
 
-You can also get back the original string with:
-* `asString()` (or `toString()`).
+* [Index](#Index)
+    * [.toJSON()](#Index+toJSON)
+    * [.toString()](#Index+toString)
+    * [.toNiceString()](#Index+toNiceString)
+    * [.asString()](#Index+asString)
+    * [.asTimerange()](#Index+asTimerange)
+    * [.begin()](#Index+begin)
+    * [.end()](#Index+end)
 
-* `toNiceString(format)` - for the calendar index, this method lets you return that calendar range as a human readable format, e.g. "June, 2014". The format specified is a Moment.format. A multiplier index is just returned a its original string.
+<a name="Index+toJSON"></a>
 
-You can also get a simple JSON object with:
+### index.toJSON()
+Returns the Index as JSON, which will just be its string
+representation
 
-* `toJSON()`.
+**Kind**: instance method of <code>[Index](#Index)</code>  
+<a name="Index+toString"></a>
 
-### Example
+### index.toString()
+Simply returns the Index as its string
 
-```js
-var index = new Index("1h-123554");
-index.asTimerange().humanizeDuration() // "an hour"
-```
+**Kind**: instance method of <code>[Index](#Index)</code>  
+<a name="Index+toNiceString"></a>
+
+### index.toNiceString()
+for the calendar range style Indexes, this lets you return
+that calendar range as a human readable format, e.g. "June, 2014".
+The format specified is a Moment.format.
+
+**Kind**: instance method of <code>[Index](#Index)</code>  
+<a name="Index+asString"></a>
+
+### index.asString()
+Alias for toString()
+
+**Kind**: instance method of <code>[Index](#Index)</code>  
+<a name="Index+asTimerange"></a>
+
+### index.asTimerange()
+Returns the Index as a TimeRange
+
+**Kind**: instance method of <code>[Index](#Index)</code>  
+<a name="Index+begin"></a>
+
+### index.begin()
+Returns the start date of the Index
+
+**Kind**: instance method of <code>[Index](#Index)</code>  
+<a name="Index+end"></a>
+
+### index.end()
+Returns the end date of the Index
+
+**Kind**: instance method of <code>[Index](#Index)</code>  

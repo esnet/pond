@@ -437,4 +437,3 @@ class TimeSeries {
 }
 
 export default TimeSeries;
-

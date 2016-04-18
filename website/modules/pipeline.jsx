@@ -12,26 +12,18 @@ import React from "react";
 import Markdown from "react-markdown";
 import Highlighter from "./highlighter";
 
-import text from "raw!../../docs/pipeline.md";
+import markdown from "raw!../../docs/pipeline.md";
 
 export default React.createClass({
 
     mixins: [Highlighter],
 
-    getInitialState() {
-        return {
-            markdown: text
-        };
-    },
-
     render() {
         return (
             <div>
-                <span className="label label-warning">Experimental</span>
-                <hr />
                 <div className="row">
                     <div className="col-md-12">
-                        <Markdown source={this.state.markdown}/>
+                        <Markdown source={markdown}/>
                     </div>
                 </div>
             </div>

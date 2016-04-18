@@ -78,20 +78,6 @@ outageEvent.data()
 
 to fetch the whole data object, which will be an Immutable Map.
 
-## Keys
-
-Events may contain keys which are used to provide partition groupings when doing aggregations or collections. You can provide the key at construction by adding the key as the last argument. For example "cpu_usage" below:
-
-```js
-const timestamp = new Date("2015-04-22T03:30:00Z");
-const event = new Event(timestamp, {name: "machine_A123", memory_usage: 9.34}, "A123");
-console.log(event.key()) // "A123"
-```
-
-See groupers for more information.
-
-You can also change the key of an Event with `setKey()`. Rather than causing a mutation to the existing event, this will generate a new Event (though it will efficiently share the same timestamp and data).
-
 ---
 
 ### Query API
@@ -133,45 +119,33 @@ const event = new Event(timestamp, {
 event.get("a") // {in: 123, out: 456};
 event.get("b") // {in: 654, out: 223};
 ```
+
 ---
+## Event Reference
 
-### Mutation API
+{{#class name="Event"~}}
+{{>body~}}
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}
 
-#### setKey(key)
+---
+## TimeRangeEvent Reference
 
-Sets a key on the Event, returning a new Event. Immutable data within the Event will be shared between the two events.
+{{#class name="TimeRangeEvent"~}}
+{{>body~}}
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}
 
-```javascript
-const event = new Event(t, {a: 5, b: 6, c: 7});
-const eventWithKey = event.setKey("A123");  // original event is unchanged
+---
+## IndexedEvent Reference
 
-console.log(event.key())       // ""
-console.log(eventWithKey.key()) // "A123"
-console.log(event === eventWithKey); // false
-console.log(event._d === eventWithKey._d); // false
-console.log(event.data() === eventWithKey.data()); // true
-```
-
-
-#### Event.merge([event1, event2, ...]) [Static]
-
-Creates a new Event from an array of other events. This only works under the following conditions:
-
- * All Events are of the same type (i.e. all `Events`, all `TimeRangeEvents` or all `IndexedEvents`).
- * The fields within the data of each event need to be orthogonal from each other, in that event1 might have an "a" and "b" field, then event2 should not have an "a" or "b" field but might instead have a "c" field.
- * The time (or `Index`, or `TimeRange`) of each event must be the same.
-
-In this case the merge would create a new event with both a "a", "b" and "c" field. Example:
-
-```javascript
-const event1 = new IndexedEvent("1h-396206", {a: 5, b: 6});
-const event2 = new IndexedEvent("1h-396206", {c: 2});
-const merged = Event.merge([event1, event2]);
-```
-
-Result:
-```
-"1h-396206" -> {a:5, b:6, c:2}
-```
-
-Note: you can merge `TimeSeries` too, which internally uses this merge function to perform a merge across the whole series.
+{{#class name="IndexedEvent"~}}
+{{>body~}}
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}

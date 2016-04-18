@@ -22,7 +22,7 @@ const avroType = avro.parse({
     }
 });
 
-export default class TimeRange {
+class TimeRange {
 
     /**
      * Builds a new TimeRange which may be of several different formats:
@@ -290,3 +290,5 @@ export default class TimeRange {
         return new TimeRange(beginTime, endTime);
     }
 }
+
+export default TimeRange;

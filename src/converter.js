@@ -82,7 +82,7 @@ export default class Converter extends Processor {
         } else if (this._convertTo === IndexedEvent) {
             const timestamp = event.timestamp();
             const indexString = Index.getIndexString(this._durationString, timestamp);
-            return new IndexedEvent(indexString, event.data(), null, event.key());
+            return new IndexedEvent(indexString, event.data(), null);
         }
     }
 

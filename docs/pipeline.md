@@ -157,6 +157,241 @@ Pipelines can also be run directly off TimeSeries objects.
         .offsetBy(2)
         .to(Collector, {}, c => out = c);
 
+---
+## API Reference
+
+A pipeline manages a processing chain, for either batch or stream processing
+of collection data.
+
+**Kind**: global class  
+
+* [Pipeline](#Pipeline)
+    * [new Pipeline([arg])](#new_Pipeline_new)
+    * [.windowBy()](#Pipeline+windowBy) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.groupBy(k)](#Pipeline+groupBy) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.emitOn(trigger)](#Pipeline+emitOn) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.from(src)](#Pipeline+from) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.to()](#Pipeline+to) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.offsetBy(by, fieldSpec)](#Pipeline+offsetBy) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.aggregate(fields)](#Pipeline+aggregate) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.asEvents(options)](#Pipeline+asEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.asTimeRangeEvents(options)](#Pipeline+asTimeRangeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.asIndexedEvents(options)](#Pipeline+asIndexedEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
+
+<a name="new_Pipeline_new"></a>
+
+### new Pipeline([arg])
+Build a new Pipeline.
+
+**Params**
+
+- [arg] <code>[Pipeline](#Pipeline)</code> | <code>Immutable.Map</code> | <code>null</code> - May be either:
+ * a Pipeline (copy contructor)
+ * an Immutable.Map, in which case the internal state of the
+   Pipeline will be contructed from the Map
+ * not specified
+
+Usually you would initialize a Pipeline using the factory
+function, rather than this object directly with `new`.
+
+**Example**  
+```
+import { Pipeline } from "pondjs";
+const process = Pipeline()...`
+```
+<a name="Pipeline+windowBy"></a>
+
+### pipeline.windowBy() ⇒ <code>[Pipeline](#Pipeline)</code>
+Set the window, returning a new Pipeline. The argument here
+is an object with {type, duration}.
+type may be:
+ * "Fixed"
+duration is of the form:
+ * "30s", "5m" or "1d" etc
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+<a name="Pipeline+groupBy"></a>
+
+### pipeline.groupBy(k) ⇒ <code>[Pipeline](#Pipeline)</code>
+Sets a new groupBy expression. Returns a new Pipeline.
+
+Grouping is a state set on the Pipeline. Operations downstream
+of the group specification will use that state. For example, an
+aggregation would occur over any grouping specified.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- k <code>function</code> | <code>array</code> | <code>string</code> - The key to group by.
+You can groupby using a function `(event) => return key`,
+a fieldSpec (a field name, or dot delimitted path to a field),
+or a array of fieldSpecs
+
+<a name="Pipeline+emitOn"></a>
+
+### pipeline.emitOn(trigger) ⇒ <code>[Pipeline](#Pipeline)</code>
+Sets the condition under which accumulated collection will
+be emitted. If specified before an aggregation this will control
+when the resulting event will be emitted relative to the
+window accumulation. Current options are to emit on every event
+or just when the collection is complete.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- trigger <code>string</code> - A string indicating how to trigger a
+Collection should be emitted. May be:
+    * "eachEvent" - when a new event comes in, all currently
+                    maintained collections will emit their result
+    * "discard"   - when a collection is to be discarded,
+                    first it will emit. But only then.
+
+<a name="Pipeline+from"></a>
+
+### pipeline.from(src) ⇒ <code>[Pipeline](#Pipeline)</code>
+The "In" to get events from. The In needs to be able to
+iterate its events using for..of loop for bounded Ins, or
+be able to emit for unbounded Ins. The actual batch, or stream
+connection occurs when an output is defined with to().
+
+from() returns a new Pipeline.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- src <code>In</code> - The source for the Pipeline.
+
+<a name="Pipeline+to"></a>
+
+### pipeline.to() ⇒ <code>[Pipeline](#Pipeline)</code>
+Sets up the destination sink for the pipeline. The output should
+be a BatchOut subclass for a bounded input and a StreamOut subclass
+for an unbounded input.
+
+For a batch mode connection, the output is connected and then the
+source input is iterated over to process all events into the pipeline and
+down to the out.
+
+For stream mode connections, the output is connected and from then on
+any events added to the input will be processed down the pipeline to
+the out.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Example**  
+```
+const p = Pipeline()
+ ...
+ .to(EventOut, {}, event => {
+     result[`${event.index()}`] = event;
+ });
+```
+<a name="Pipeline+offsetBy"></a>
+
+### pipeline.offsetBy(by, fieldSpec) ⇒ <code>[Pipeline](#Pipeline)</code>
+Processor to offset a set of fields by a value. Mostly used for
+testing processor operations.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The modified Pipeline  
+**Params**
+
+- by <code>number</code> - The amount to offset by
+- fieldSpec <code>string</code> | <code>array</code> - The field(s)
+
+<a name="Pipeline+aggregate"></a>
+
+### pipeline.aggregate(fields) ⇒ <code>[Pipeline](#Pipeline)</code>
+Uses the current Pipeline windowing and grouping
+state to build collections of events and aggregate them.
+`IndexedEvent`s will be emitted out of the aggregator based
+on the `emitOn` state of the Pipeline.
+
+To specify what part of the incoming events should
+be aggregated together you specify a `fields`
+object. This is a map from fieldName to operator.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- fields <code>object</code> - Fields and operators to be aggregated
+
+**Example**  
+```js
+import { Pipeline, EventOut, functions } from "pondjs";
+const { avg } = functions;
+
+const p = Pipeline()
+  .from(input)
+  .windowBy("1h")           // 1 day fixed windows
+  .emitOn("eachEvent")    // emit result on each event
+  .aggregate({in: avg, out: avg})
+  .asEvents()
+  .to(EventOut, {}, event => {
+     result[`${event.index()}`] = event;
+  });
+```
+<a name="Pipeline+asEvents"></a>
+
+### pipeline.asEvents(options) ⇒ <code>[Pipeline](#Pipeline)</code>
+Converts incoming TimeRangeEvents or IndexedEvents to
+Events. This is helpful since some processors will
+emit TimeRangeEvents or IndexedEvents, which may be
+unsuitable for some applications.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- options <code>object</code> - To convert to an Event you need
+to convert a time range to a single time. There are three options:
+ 1. use the beginning time (options = {alignment: "lag"})
+ 2. use the center time (options = {alignment: "center"})
+ 3. use the end time (options = {alignment: "lead"})
+
+<a name="Pipeline+asTimeRangeEvents"></a>
+
+### pipeline.asTimeRangeEvents(options) ⇒ <code>[Pipeline](#Pipeline)</code>
+Converts incoming Events or IndexedEvents to
+TimeRangeEvents.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- options <code>object</code> - To convert from an Event you need
+to convert a single time to a time range. To control this you
+need to specify the duration of that time range, along with
+the positioning (alignment) of the time range with respect to
+the time stamp of the Event.
+
+There are three option for alignment:
+ 1. time range will be in front of the timestamp (options = {alignment: "front"})
+ 2. time range will be centered on the timestamp (options = {alignment: "center"})
+ 3. time range will be positoned behind the timestamp (options = {alignment: "behind"})
+
+The duration is of the form "1h" for one hour, "30s" for 30 seconds and so on.
+
+<a name="Pipeline+asIndexedEvents"></a>
+
+### pipeline.asIndexedEvents(options) ⇒ <code>[Pipeline](#Pipeline)</code>
+Converts incoming Events to IndexedEvents.
+
+Note: It isn't possible to convert TimeRangeEvents to IndexedEvents.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- options <code>Object</code> - An object containing the conversion
+options. In this case the duration string of the Index is expected.
+    - .duration <code>string</code> - The duration string is of the form "1h" for one hour, "30s"
+for 30 seconds and so on.
 
 
 

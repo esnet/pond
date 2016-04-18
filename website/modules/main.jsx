@@ -15,7 +15,11 @@ import "babel/register";
 
 import React from "react";
 import { render } from "react-dom";
-import { Router, IndexRoute, Route, browserHistory } from "react-router";
+import { Router, IndexRoute, Route, useRouterHistory } from "react-router";
+import createBrowserHistory from "history/lib/createBrowserHistory";
+import useScroll from "scroll-behavior/lib/useStandardScroll";
+
+const browserHistory = useScroll(useRouterHistory(createBrowserHistory))();
 
 import App from "./app.jsx";
 import Intro from "./intro.jsx";
@@ -24,8 +28,8 @@ import Time from "./time.jsx";
 import TimeRange from "./timerange.jsx";
 import Index from "./index.jsx";
 import Events from "./events.jsx";
+import Collection from "./collection.jsx";
 import TimeSeries from "./timeseries.jsx";
-import Rollup from "./rollup.jsx";
 import Pipeline from "./pipeline.jsx";
 
 render((
@@ -33,11 +37,11 @@ render((
         <Route path="/" component={App}>
             <IndexRoute component={Intro}/>
             <Route path="start" component={Start} />
-            <Route path="rollups" component={Rollup} />
             <Route path="time" component={Time} />
             <Route path="timerange" component={TimeRange} />
             <Route path="index" component={Index} />
             <Route path="events" component={Events} />
+            <Route path="collection" component={Collection} />
             <Route path="timeseries" component={TimeSeries} />
             <Route path="pipeline" component={Pipeline} />
         </Route>

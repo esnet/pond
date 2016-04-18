@@ -25,6 +25,26 @@ import { Event, TimeRangeEvent, IndexedEvent } from "./event";
 
 class Pipeline {
 
+    /**
+     * Build a new Pipeline.
+     *
+     * @param  {Pipeline|Immutable.Map|null} [arg] May be either:
+     *  * a Pipeline (copy contructor)
+     *  * an Immutable.Map, in which case the internal state of the
+     *    Pipeline will be contructed from the Map
+     *  * not specified
+     *
+     * Usually you would initialize a Pipeline using the factory
+     * function, rather than this object directly with `new`.
+     *
+     * @example
+     * ```
+     * import { Pipeline } from "pondjs";
+     * const process = Pipeline()...`
+     * ```
+     *
+     * @return {Pipeline} The Pipeline
+     */
     constructor(arg) {
         if (arg instanceof Pipeline) {
             const other = arg;
@@ -87,6 +107,8 @@ class Pipeline {
 
     /**
      * Setting the In for the Pipeline returns a new Pipeline
+     *
+     * @private
      */
     _setIn(input) {
         let mode;
@@ -109,7 +131,9 @@ class Pipeline {
     /**
      * Set the first processing node pointed to, returning
      * a new Pipeline. The original pipeline will still point
-     * to its orginal processing node
+     * to its orginal processing node.
+     *
+     * @private
      */
     _setFirst(n) {
         const d = this._d.set("first", n);
@@ -119,13 +143,18 @@ class Pipeline {
     /**
      * Set the last processing node pointed to, returning
      * a new Pipeline. The original pipeline will still point
-     * to its orginal processing node
+     * to its orginal processing node.
+     *
+     * @private
      */
     _setLast(n) {
         const d = this._d.set("last", n);
         return new Pipeline(d);
     }
 
+    /**
+     * @private
+     */
     _append(processor) {
         let first = this.first();
         let last = this.last();
@@ -141,16 +170,16 @@ class Pipeline {
         return new Pipeline(d);
     }
 
-    //
-    // Pipeline state chained methods
-    //
-
-    setState(key, value) {
+    _setState(key, value) {
         const d = this._d.withMutations(map => {
             map.set(key, value);
         });
         return new Pipeline(d);
     }
+
+    //
+    // Pipeline state chained methods
+    //
 
     /**
      * Set the window, returning a new Pipeline. The argument here
@@ -159,6 +188,8 @@ class Pipeline {
      *  * "Fixed"
      * duration is of the form:
      *  * "30s", "5m" or "1d" etc
+     *
+     * @return {Pipeline} The Pipeline
      */
     windowBy(w) {
         let type, duration;
@@ -180,9 +211,18 @@ class Pipeline {
     }
 
     /**
-     * Sets a new groupBy expression, returning a new Pipeline.
-     * You can groupby using a function (event) => return key,
-     * a fieldSpec or a array of fieldSpecs.
+     * Sets a new groupBy expression. Returns a new Pipeline.
+     *
+     * Grouping is a state set on the Pipeline. Operations downstream
+     * of the group specification will use that state. For example, an
+     * aggregation would occur over any grouping specified.
+     *
+     * @param {function|array|string} k The key to group by.
+     * You can groupby using a function `(event) => return key`,
+     * a fieldSpec (a field name, or dot delimitted path to a field),
+     * or a array of fieldSpecs
+     *
+     * @return {Pipeline} The Pipeline
      */
     groupBy(k) {
         let grp;
@@ -202,18 +242,24 @@ class Pipeline {
             throw Error("Unable to interpret groupBy argument", k);
         }
 
-        return this.setState("groupBy", grp);
+        return this._setState("groupBy", grp);
     }
 
     /**
-     * Sets the condition under which an aggregated
-     * collection will emit a new event.
+     * Sets the condition under which accumulated collection will
+     * be emitted. If specified before an aggregation this will control
+     * when the resulting event will be emitted relative to the
+     * window accumulation. Current options are to emit on every event
+     * or just when the collection is complete.
      *
-     * Either:
-     *  * "eachEvent" - when a new event comes in, all currently
-     *                  maintained collections will emit their result
-     *  * "discard"   - when a collection is to be discarded,
-     *                  first it will emit. But only then.
+     * @param {string} trigger A string indicating how to trigger a
+     * Collection should be emitted. May be:
+     *     * "eachEvent" - when a new event comes in, all currently
+     *                     maintained collections will emit their result
+     *     * "discard"   - when a collection is to be discarded,
+     *                     first it will emit. But only then.
+     *
+     * @return {Pipeline} The Pipeline
      */
     emitOn(trigger) {
         const d = this._d.set("emitOn", trigger);
@@ -231,6 +277,10 @@ class Pipeline {
      * connection occurs when an output is defined with to().
      *
      * from() returns a new Pipeline.
+     *
+     * @param {In} src The source for the Pipeline.
+     *
+     * @return {Pipeline} The Pipeline
      */
     from(src) {
         if (src instanceof Pipeline) {
@@ -253,6 +303,15 @@ class Pipeline {
      * For stream mode connections, the output is connected and from then on
      * any events added to the input will be processed down the pipeline to
      * the out.
+     * @example
+     * ```
+     * const p = Pipeline()
+     *  ...
+     *  .to(EventOut, {}, event => {
+     *      result[`${event.index()}`] = event;
+     *  });
+     * ```
+     * @return {Pipeline} The Pipeline
      */
     to(arg1, arg2, arg3, arg4) {
         const Out = arg1;
@@ -328,27 +387,17 @@ class Pipeline {
         return this;
     }
 
-    // slidingWindow(count) {
-    //     return this.setWindow({
-    //         type: "sliding-count",
-    //         count,
-    //         emitOn: this._emitOn ? this._emitOn : "windowMove"
-    //     });
-    // }
-
-    // slidingTimeWindow(duration) {
-    //     return this.setWindow({
-    //         type: "sliding-time",
-    //         duration,
-    //         emitOn: this._emitOn ? this._emitOn : "windowMove"
-    //     });
-    // }
-
-
     //
     // Processors
     //
     
+    /**
+     * Processor to offset a set of fields by a value. Mostly used for
+     * testing processor operations.
+     * @param  {number} by              The amount to offset by
+     * @param  {string|array} fieldSpec The field(s)
+     * @return {Pipeline}               The modified Pipeline
+     */
     offsetBy(by, fieldSpec) {
         const p = new Offset(this, {
             by,
@@ -359,6 +408,34 @@ class Pipeline {
         return this._append(p);
     }
 
+    /**
+     * Uses the current Pipeline windowing and grouping
+     * state to build collections of events and aggregate them.
+     * `IndexedEvent`s will be emitted out of the aggregator based
+     * on the `emitOn` state of the Pipeline.
+     *
+     * To specify what part of the incoming events should
+     * be aggregated together you specify a `fields`
+     * object. This is a map from fieldName to operator.
+     *
+     * @example
+     *
+     * import { Pipeline, EventOut, functions } from "pondjs";
+     * const { avg } = functions;
+     *
+     * const p = Pipeline()
+     *   .from(input)
+     *   .windowBy("1h")           // 1 day fixed windows
+     *   .emitOn("eachEvent")    // emit result on each event
+     *   .aggregate({in: avg, out: avg})
+     *   .asEvents()
+     *   .to(EventOut, {}, event => {
+     *      result[`${event.index()}`] = event;
+     *   });
+     * @param  {object} fields Fields and operators to be aggregated
+     *
+     * @return {Pipeline} The Pipeline
+     */
     aggregate(fields) {
         const p = new Aggregator(this, {
             fields,
@@ -368,6 +445,20 @@ class Pipeline {
         return this._append(p);
     }
 
+    /**
+     * Converts incoming TimeRangeEvents or IndexedEvents to
+     * Events. This is helpful since some processors will
+     * emit TimeRangeEvents or IndexedEvents, which may be
+     * unsuitable for some applications.
+     *
+     * @param  {object} options To convert to an Event you need
+     * to convert a time range to a single time. There are three options:
+     *  1. use the beginning time (options = {alignment: "lag"})
+     *  2. use the center time (options = {alignment: "center"})
+     *  3. use the end time (options = {alignment: "lead"})
+     *
+     * @return {Pipeline} The Pipeline
+     */
     asEvents(options) {
         const type = Event;
         const p = new Converter(this, {
@@ -379,6 +470,25 @@ class Pipeline {
         return this._append(p);
     }
 
+    /**
+     * Converts incoming Events or IndexedEvents to
+     * TimeRangeEvents.
+     *
+     * @param {object} options To convert from an Event you need
+     * to convert a single time to a time range. To control this you
+     * need to specify the duration of that time range, along with
+     * the positioning (alignment) of the time range with respect to
+     * the time stamp of the Event.
+     *
+     * There are three option for alignment:
+     *  1. time range will be in front of the timestamp (options = {alignment: "front"})
+     *  2. time range will be centered on the timestamp (options = {alignment: "center"})
+     *  3. time range will be positoned behind the timestamp (options = {alignment: "behind"})
+     *
+     * The duration is of the form "1h" for one hour, "30s" for 30 seconds and so on.
+     *
+     * @return {Pipeline} The Pipeline
+     */
     asTimeRangeEvents(options) {
         const type = TimeRangeEvent;
         const p = new Converter(this, {
@@ -390,6 +500,18 @@ class Pipeline {
         return this._append(p);
     }
 
+    /**
+     * Converts incoming Events to IndexedEvents.
+     *
+     * Note: It isn't possible to convert TimeRangeEvents to IndexedEvents.
+     *
+     * @param {Object} options            An object containing the conversion
+     * options. In this case the duration string of the Index is expected.
+     * @param {string} options.duration   The duration string is of the form "1h" for one hour, "30s"
+     * for 30 seconds and so on.
+     *
+     * @return {Pipeline} The Pipeline
+     */
     asIndexedEvents(options) {
         const type = IndexedEvent;
         const p = new Converter(this, {

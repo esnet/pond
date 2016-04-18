@@ -11,25 +11,18 @@
 import React from "react";
 import Markdown from "react-markdown";
 import Highlighter from "./highlighter";
-
-import text from "raw!../../docs/timeseries.md";
+import text from "raw!../../docs/series.md";
 
 export default React.createClass({
 
     mixins: [Highlighter],
-
-    getInitialState() {
-        return {
-            markdown: text
-        };
-    },
 
     render() {
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
-                        <Markdown source={this.state.markdown}/>
+                        <Markdown source={text}/>
                     </div>
                 </div>
             </div>

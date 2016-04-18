@@ -21,7 +21,7 @@ import util from "./util";
  * version for date based indexes (e.g. 2015-03) can be generated with
  * toNiceString(format) (e.g. March, 2015).
  */
-export default class Index {
+class Index {
 
     constructor(s, utc = true) {
         this._utc = utc;
@@ -98,3 +98,5 @@ export default class Index {
         return indexList;
     }
 }
+
+export default Index;

@@ -12,7 +12,7 @@ import React from "react";
 import Markdown from "react-markdown";
 import Highlighter from "./highlighter";
 
-import text from "raw!../../docs/events.md";
+import text from "raw!../../docs/event.md";
 
 export default React.createClass({
 

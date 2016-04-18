@@ -24,7 +24,7 @@ import { sum, avg, max, min, first, last, median, stdev } from "./functions";
  * can iterate over the collection with a for..of loop, get the size()
  * of the collection and access a specific element with at().
  */
-export default class Collection extends BoundedIn {
+class Collection extends BoundedIn {
 
     constructor(arg1, copyEvents = true) {
         super();
@@ -307,3 +307,6 @@ export default class Collection extends BoundedIn {
         }
     }
 }
+
+export default Collection;
+
