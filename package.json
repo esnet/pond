@@ -5,7 +5,7 @@
   "description": "A timeseries library build on top of immutable.js",
   "scripts": {
     "lint": "eslint src test/tests website/modules/*.jsx",
-    "test": "npm run lint && npm run build && mocha --compilers js:babel-core/register",
+    "test": "npm run lint && npm run build && mocha --compilers js:babel-core/register && npm run cover",
     "test-only": "npm run build && mocha --compilers js:babel-core/register",
     "cover": "istanbul cover _mocha -- --compilers js:babel-core/register -R spec && ./node_modules/.bin/codecov",
     "docs": "./scripts/docs.sh",
