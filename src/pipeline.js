@@ -16,7 +16,9 @@ import Processor from "./processor";
 import Offset from "./offset";
 import Aggregator from "./aggregator";
 import Converter from "./converter";
-import { Event, TimeRangeEvent, IndexedEvent } from "./event";
+import Event from "./event";
+import TimeRangeEvent from "./timerangeevent";
+import IndexedEvent from "./indexedevent";
 
 /**
  * A pipeline manages a processing chain, for either batch or stream processing
@@ -319,13 +321,13 @@ class Pipeline {
         let observer = () => {};
         let options = {};
 
-        if (_.isObject(arg2)) {
+        if (_.isFunction(arg2)) {
+            observer = arg2;
+            force = arg3 ? arg3 : false;
+        } else if (_.isObject(arg2)) {
             options = arg2;
             observer = arg3;
             force = arg4 ? arg4 : false;
-        } else if (_.isFunction(arg2)) {
-            observer = arg2;
-            force = arg3 ? arg3 : false;
         }
 
         if (!this.in()) {
@@ -513,13 +515,15 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     asIndexedEvents(options) {
+        console.log("asIndexedEvents");
+
         const type = IndexedEvent;
         const p = new Converter(this, {
             type,
             ...options,
             prev: this._last ? this._last : this
         });
-        
+        console.log(p);
         return this._append(p);
     }
 }

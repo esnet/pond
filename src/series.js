@@ -13,7 +13,9 @@ import Immutable from "immutable";
 
 import Collection from "./collection";
 import Index from "./index";
-import { Event, TimeRangeEvent, IndexedEvent } from "./event";
+import Event from "./event";
+import TimeRangeEvent from "./timerangeevent";
+import IndexedEvent from "./indexedevent";
 import { Pipeline } from "./pipeline.js";
 
 function buildMetaData(meta) {
@@ -41,37 +43,98 @@ function buildMetaData(meta) {
 }
 
 /**
- * A TimeSeries is a a Series where each event is an association of a timestamp
- * and some associated data.
- *
- * Data passed into it may have the following format, which is our wire format:
- *
- *   {
- *     "name": "traffic",
- *     "columns": ["time", "value", ...],
- *     "points": [
- *        [1400425947000, 52, ...],
- *        [1400425948000, 18, ...],
- *        [1400425949000, 26, ...],
- *        [1400425950000, 93, ...],
- *        ...
- *      ]
- *   }
- *
- * Alternatively, the TimeSeries may be constructed from a list of Event objects.
- *
- * Internaly the above series is represented as two parts:
- *  * Collection - an Immutable.List of Events and associated methods
- *                   to query and manipulate that list
- *  * Meta data  - an Immutable.Map of extra data associated with the
- *                   TimeSeries
- *
- * The events stored in the collection may be Events (timestamp based),
- * TimeRangeEvents (time range based) or IndexedEvents (an alternative form
- * of a time range, such as "2014-08" or "1d-1234")
- *
- * The timerange associated with a TimeSeries is simply the bounds of the
- * events within it (i.e. the min and max times).
+A `TimeSeries` represents a series of events, with each event being a combination of:
+ * time (or `TimeRange`, or `Index`)
+ * data - corresponding set of key/values.
+
+### Construction
+
+Currently you can initialize a `TimeSeries` with either a list of events, or with a data format that looks like this:
+
+```javascript
+const data = {
+    name: "trafficc",
+    columns: ["time", "value"],
+    points: [
+        [1400425947000, 52],
+        [1400425948000, 18],
+        [1400425949000, 26],
+        [1400425950000, 93],
+        ...
+    ]
+};
+```
+
+To create a new TimeSeries object from the above format, simply use the constructor:
+
+```javascript
+var series = new TimeSeries(data);
+```
+
+The format of the data is as follows:
+
+  * **name** - optional, but a good practice
+  * **columns** - are necessary and give labels to the data in the points.
+  * **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
+   
+  As just hinted at, the first column may actually be:
+
+   * "time"
+   * "timeRange" represented by a `TimeRange`
+   * "index" - a time range represented by an `Index`. By using an index it is possible, for example, to refer to a specific month:
+
+```javascript
+var availabilityData = {
+    name: "Last 3 months availability",
+    columns: ["index", "uptime"],
+    points: [
+        ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
+        ["2015-05", "92%"],
+        ["2015-04", "87%"],
+    ]
+};
+```
+
+Alternatively, you can construct a `TimeSeries` with a list of events. These may be `Events`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
+
+```javascript
+const events = [];
+events.push(new Event(new Date(2015, 7, 1), {value: 27}));
+events.push(new Event(new Date(2015, 8, 1), {value: 29}));
+const series = new TimeSeries({
+    name: "avg temps",
+    events: events
+});
+```
+
+### Nested data
+
+The values do not have to be simple types like the above examples. Here's an example where each value is itself an object with "in" and "out" keys:
+
+```javascript
+const series = new TimeSeries({
+    name: "Map Traffic",
+    columns: ["time", "NASA_north", "NASA_south"],
+    points: [
+        [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+        [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+        [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+        [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+    ]
+});
+```
+
+Complex data is stored in an Immutable structure. To get a value out of nested data like this you will get the Event you want (by row), as usual, and then use `get()` to fetch the value by column name. The result of this call will be a JSON copy of the Immutable data so you can query deeper in the usual way:
+
+```javascript
+series.at(0).get("NASA_north")["in"]  // 200`
+```
+
+It is then possible to use a value mapper function when calculating different properties. For example, to get the average "in" value of the NASA_north column:
+
+```javascript
+series.avg("NASA_north", d => d.in);  // 250
+```
  */
 class TimeSeries {
 

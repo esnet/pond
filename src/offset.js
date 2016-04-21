@@ -11,7 +11,7 @@
 import _ from "underscore";
 
 import Processor from "./processor";
-import { Event } from "./event";
+import Event from "./event";
 import { isPipeline } from "./pipeline";
 
 /**

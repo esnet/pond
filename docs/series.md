@@ -1,8 +1,10 @@
 ## TimeSeries
 
+---
+
 A `TimeSeries` represents a series of events, with each event being a combination of:
- * time (or `TimeRange`, or `Index`)
- * data - corresponding set of key/values.
+time (or `TimeRange`, or `Index`)
+data - corresponding set of key/values.
 
 ### Construction
 
@@ -29,16 +31,14 @@ var series = new TimeSeries(data);
 ```
 
 The format of the data is as follows:
-
-  * **name** - optional, but a good practice
-  * **columns** - are necessary and give labels to the data in the points.
-  * **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
+**name** - optional, but a good practice
+**columns** - are necessary and give labels to the data in the points.
+**points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
    
   As just hinted at, the first column may actually be:
-
-   * "time"
-   * "timeRange" represented by a `TimeRange`
-   * "index" - a time range represented by an `Index`. By using an index it is possible, for example, to refer to a specific month:
+"time"
+"timeRange" represented by a `TimeRange`
+"index" - a time range represented by an `Index`. By using an index it is possible, for example, to refer to a specific month:
 
 ```javascript
 var availabilityData = {
@@ -93,43 +93,9 @@ It is then possible to use a value mapper function when calculating different pr
 series.avg("NASA_north", d => d.in);  // 250
 ```
 
----
-
+**Kind**: global class  
 ## API Reference
 
-A TimeSeries is a a Series where each event is an association of a timestamp
-and some associated data.
-
-Data passed into it may have the following format, which is our wire format:
-
-  {
-    "name": "traffic",
-    "columns": ["time", "value", ...],
-    "points": [
-       [1400425947000, 52, ...],
-       [1400425948000, 18, ...],
-       [1400425949000, 26, ...],
-       [1400425950000, 93, ...],
-       ...
-     ]
-  }
-
-Alternatively, the TimeSeries may be constructed from a list of Event objects.
-
-Internaly the above series is represented as two parts:
- * Collection - an Immutable.List of Events and associated methods
-                  to query and manipulate that list
- * Meta data  - an Immutable.Map of extra data associated with the
-                  TimeSeries
-
-The events stored in the collection may be Events (timestamp based),
-TimeRangeEvents (time range based) or IndexedEvents (an alternative form
-of a time range, such as "2014-08" or "1d-1234")
-
-The timerange associated with a TimeSeries is simply the bounds of the
-events within it (i.e. the min and max times).
-
-**Kind**: global class  
 
 * [TimeSeries](#TimeSeries)
     * _instance_

@@ -14,7 +14,9 @@
 
 import moment from "moment";
 import { expect } from "chai";
-import { Event, TimeRangeEvent } from "../../src/event.js";
+
+import Event from "../../src/event";
+import TimeRangeEvent from "../../src/timerangeevent";
 import TimeSeries from "../../src/series.js";
 import TimeRange from "../../src/range.js";
 

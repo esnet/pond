@@ -1,5 +1,7 @@
 ## Getting started
 
+---
+
 Pond will run in node.js or in the browser. Install from npm:
 
 ```cmdline

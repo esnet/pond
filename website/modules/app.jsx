@@ -32,10 +32,11 @@ export default React.createClass({
                     <div className="sidebar-heading">Structures</div>
 
                     <ul className="nav nav-sidebar">
-                        <li><Link to="time">Time</Link></li>
                         <li><Link to="timerange">TimeRange</Link></li>
                         <li><Link to="index">Index</Link></li>
-                        <li><Link to="events">Events</Link></li>
+                        <li><Link to="event">Event</Link></li>
+                        <li><Link to="timerangeevent">TimeRangeEvent</Link></li>
+                        <li><Link to="indexedevent">IndexedEvent</Link></li>
                         <li><Link to="collection">Collection</Link></li>
                         <li><Link to="timeseries">TimeSeries</Link></li>
                     </ul>

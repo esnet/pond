@@ -9,7 +9,9 @@
  */
 
 import _ from "underscore";
-import { Event, TimeRangeEvent, IndexedEvent } from "./event";
+import Event from "./event";
+import TimeRangeEvent from "./timerangeevent";
+import IndexedEvent from "./indexedevent";
 import Observable from "./observable";
 
 export class In extends Observable {

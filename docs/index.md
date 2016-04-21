@@ -1,8 +1,10 @@
 ## Index
 
+---
+
 An index is simply a string that represents a fixed range of time. There are two basic types:
- * *Multiplier index* - the number of some unit of time (hours, days etc) since the UNIX epoch.
- * *Calendar index* - The second represents a calendar range, such as Oct 2014.
+*Multiplier index* - the number of some unit of time (hours, days etc) since the UNIX epoch.
+*Calendar index* - The second represents a calendar range, such as Oct 2014.
 
 For the first type, a multiplier index, an example might be:
 
@@ -24,20 +26,9 @@ An Index is a nice representation of certain types of time intervals because it 
 
 An Index is also useful when collecting into specific time ranges, for example generating all the 5 min ("5m") maximum rollups within a specific day ("1d"). See the processing section within these docs.
 
----
+**Kind**: global class  
 ## API Reference
 
-An index that represents as a string a range of time. That range may either
-be in UTC or local time. UTC is the default.
-
-The actual derived timerange can be found using asRange(). This will return
-a TimeRange instance.
-
-The original string representation can be found with toString(). A nice
-version for date based indexes (e.g. 2015-03) can be generated with
-toNiceString(format) (e.g. March, 2015).
-
-**Kind**: global class  
 
 * [Index](#Index)
     * [.toJSON()](#Index+toJSON)

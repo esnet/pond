@@ -13,9 +13,13 @@
 /* eslint-disable max-len */
 
 import { expect } from "chai";
-import { Event, TimeRangeEvent, IndexedEvent } from "../../src/event.js";
+
+import Event from "../../src/event";
+import TimeRangeEvent from "../../src/timerangeevent";
+import IndexedEvent from "../../src/indexedevent";
 import TimeRange from "../../src/range.js";
 import Index from "../../src/index.js";
+
 import { avg } from "../../src/functions.js";
 
 const outageList = {

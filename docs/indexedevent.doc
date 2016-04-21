@@ -1,8 +1,8 @@
-## Event
+## IndexedEvent
 
 ---
 
-{{#class name="Event"~}}
+{{#class name="IndexedEvent"~}}
 
 {{>body~}}
 

@@ -12,7 +12,7 @@ import _ from "underscore";
 
 import Processor from "./processor";
 import Collector from "./collector";
-import { IndexedEvent } from "./event";
+import IndexedEvent from "./indexedevent";
 
 /**
  * An Aggregator takes incoming events and adds them to a Collector

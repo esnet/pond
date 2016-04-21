@@ -1,8 +1,8 @@
-## Event
+## TimeRangeEvent
 
 ---
 
-{{#class name="Event"~}}
+{{#class name="TimeRangeEvent"~}}
 
 {{>body~}}
 

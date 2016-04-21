@@ -2,10 +2,12 @@
 
 ---
 
+{{#class name="Collection"~}}
+
+{{>body~}}
+
 ## API Reference
 
-{{#class name="Collection"~}}
-{{>body~}}
 {{>member-index~}}
 {{>separator~}}
 {{>members~}}

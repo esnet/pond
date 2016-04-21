@@ -1,4 +1,6 @@
-# Pipelines
+## Pipeline
+
+---
 
 Pipelines are used to transform Pond data. They allow a chain of operations to be applied to streaming Events, Collections or TimeSeries.
 
@@ -12,7 +14,7 @@ This state maybe a combination of:
   
 These states would be applied where appropriate, for example, when aggregating.
 
-## Example
+### Example
 
 Let's look at what that looks like. Imagine we have a collection of Events and each event has a timestamp along with an "in" and "out" value, such as we have with network traffic data.
 
@@ -30,7 +32,7 @@ This raises probably the most important part of how Pipelines work: they are for
 
 ---
 
-## Event streaming
+### Event streaming
 
 As an event processing system, it makes sense that you can stream events though a pipeline. In this example we create a simple UnboundedIn. This forms a target for adding events. A Pipeline similar to the above examples follows. As each event is added to the source, those events flow into the Pipeline and are collected at the bottom.
 
@@ -49,13 +51,7 @@ Note that in this case the Collection will be updated each time new data appears
 It is also possible to derive a class from UnboundedIn() that can produce Events itself, for instance if your events are coming from a Pubsub subscription.
 
 ---
-## State
-
-Pipelines behavior
-
-
----
-## Aggregation
+### Aggregation
 
 A common use-case for Pipelines is aggregation. Aggregation is performed on windowed (and grouped) events. There must currently be a window defined for a Pipeline to aggregate.
 
@@ -83,7 +79,7 @@ Once this state is established the aggregate() processor can be used. The argume
 
 The output, an EventOut, will call the callback whenever a new aggregated event is emitted. Since the triggering (emitOn) is set to "eachEvent", it will be called multiple times. In this case we just re-add it, but the index, to our result map.
 
-## Aggregation with grouping
+### Aggregation with grouping
 
 Pipelines also support a groupBy() processor. In the following example each event has a field called "type". The result of this will be that aggregation collections will be further partitioned based on the group, in addition to the window.
 
@@ -108,7 +104,7 @@ In this case we simply want to collect the events. To do this we separate the ou
 
 ---
 
-## Conversions
+### Conversions
 
 There are three types of events in Pond: regular `Events`, which have a single timestamp, `TimeRangeEvents` which have a `TimeRange` (begin and end time) associated with them, and `IndexedEvents` which have a string that represents a time range. Sometimes it is helpful to convert between these Event types. To do this you can use the `asEvents()`, `asIndexedEvents()` and `asTimeRangeEvent()` processors.
 
@@ -130,7 +126,7 @@ Taking the first streaming example, we can convert the output IndexedEvents to a
 ```
 
 ---
-## Merging pipelines
+### Merging pipelines
 
 Pipelines can themselves be chained together.
 
@@ -147,7 +143,7 @@ Pipelines can themselves be chained together.
 In this example, the second pipeline will attach to the first pipeline. Currently batch pipelines support this, but only as a linear pipe. You cannot merge multiple bounded sources together. It is recommended that you do this manually by using, for example, Collection.combine() first, then running this through the Pipeline.
 
 ---
-## TimeSeries pipelines
+### TimeSeries pipelines
 
 Pipelines can also be run directly off TimeSeries objects.
 

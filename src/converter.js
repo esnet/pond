@@ -9,7 +9,9 @@
  */
 
 import _ from "underscore";
-import { Event, TimeRangeEvent, IndexedEvent } from "./event";
+import Event from "./event";
+import TimeRangeEvent from "./timerangeevent";
+import IndexedEvent from "./indexedevent";
 import TimeRange from "./range";
 import Utils from "./util";
 import Index from "./index";
@@ -63,10 +65,14 @@ export default class Converter extends Processor {
         } else if (this._convertTo === TimeRangeEvent) {
             const alignment = this._alignment;
             let begin, end;
+            if (!this._duration) {
+                throw new Error("Duration expected in converter");
+            }
             switch(alignment) {
                 case "front":
                     begin = event.timestamp();
                     end = new Date(+event.timestamp() + this._duration);
+                    console.log(begin, +event.timestamp());
                     break;
                 case "center":
                     begin = new Date(+event.timestamp() - parseInt(this._duration / 2, 10));
@@ -76,6 +82,8 @@ export default class Converter extends Processor {
                     end = event.timestamp();
                     begin = new Date(+event.timestamp() - this._duration);
                     break;
+                default:
+                    throw new Error("Unknown alignment of converter");
             }
             const timeRange = new TimeRange([begin, end]);
             return new TimeRangeEvent(timeRange, event.data());

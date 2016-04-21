@@ -1,4 +1,6 @@
-## Events
+## Event
+
+---
 
 There are three types of Events in Pond:
 
@@ -9,22 +11,15 @@ There are three types of Events in Pond:
 ### Construction
 
 The creation of an Event is done by combining two parts: the timestamp (or time range, or Index...) and the data, along with an optional key which is described below.
-
- * For a basic `Event`, you specify the timestamp as either a Javascript Date object, a Moment, or the number of milliseconds since the UNIX epoch.
-
- * For a `TimeRangeEvent`, you specify a TimeRange, along with the data.
-
- * For a `IndexedEvent`, you specify an Index, along with the data, and if the event should be considered to be in UTC time or not.
+For a basic `Event`, you specify the timestamp as either a Javascript Date object, a Moment, or the number of milliseconds since the UNIX epoch.
+For a `TimeRangeEvent`, you specify a TimeRange, along with the data.
+For a `IndexedEvent`, you specify an Index, along with the data, and if the event should be considered to be in UTC time or not.
 
 To specify the data you can supply:
-
- * a Javascript object of key/values. The object may contained nested data.
-
- * an Immutable.Map
-
- * a simple type such as an integer. This is a shorthand for supplying {"value": v}.
-
-**Example:**
+a Javascript object of key/values. The object may contained nested data.
+an Immutable.Map
+a simple type such as an integer. This is a shorthand for supplying {"value": v}.
+*Example:**
 
 Given some source of data that looks like this:
 
@@ -78,52 +73,9 @@ outageEvent.data()
 
 to fetch the whole data object, which will be an Immutable Map.
 
----
-
-### Query API
-
-#### toJSON()
-
-Returns a JSON representation of the Event
-
-#### toString()
-
-Returns a string representation of the Event, useful for serialization
-
-#### timestampAsUTCString()
-
-Returns the timestamp of the Event in UTC time.
-
-#### timestampAsLocalString()
-
-Returns the timestamp of the Event in Local time.
-
-#### timestamp()
-
-Returns the timestamp of the Event as a Date.
-
-#### data()
-
-Returns the internal data of the event, as an Immutable.Map.
-
-#### get(column)
-
-Returns the value for a specific column within the Event data. If no column is specified then 'value' is used for the column. If the value is a complex type, such as a Map, then the value will be copied to a Javascript object and then returned.
-
-```javascript
-const event = new Event(timestamp, {
-    a: {in: 123, out: 456},
-    b: {in: 654, out: 223}
-});
-
-event.get("a") // {in: 123, out: 456};
-event.get("b") // {in: 654, out: 223};
-```
-
----
-## Event Reference
-
 **Kind**: global class  
+## API Reference
+
 
 * [Event](#Event)
     * [new Event()](#new_Event_new)
@@ -296,226 +248,3 @@ of the form:
     }
 
 **Kind**: static method of <code>[Event](#Event)</code>  
-
----
-## TimeRangeEvent Reference
-
-**Kind**: global class  
-
-* [TimeRangeEvent](#TimeRangeEvent)
-    * [new TimeRangeEvent()](#new_TimeRangeEvent_new)
-    * [.toPoint()](#TimeRangeEvent+toPoint)
-    * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>TimeRange</code>
-    * [.data()](#TimeRangeEvent+data) ⇒ <code>Immutable.Map</code>
-    * [.setData()](#TimeRangeEvent+setData)
-    * [.timerangeAsUTCString()](#TimeRangeEvent+timerangeAsUTCString) ⇒ <code>string</code>
-    * [.timerangeAsLocalString()](#TimeRangeEvent+timerangeAsLocalString) ⇒ <code>string</code>
-    * [.begin()](#TimeRangeEvent+begin) ⇒ <code>Data</code>
-    * [.end()](#TimeRangeEvent+end) ⇒ <code>Data</code>
-    * [.timestamp()](#TimeRangeEvent+timestamp) ⇒ <code>Data</code>
-    * [.get()](#TimeRangeEvent+get)
-
-<a name="new_TimeRangeEvent_new"></a>
-
-### new TimeRangeEvent()
-The creation of an TimeRangeEvent is done by combining two parts:
-the timerange and the data.
-
-To construct you specify a TimeRange, along with the data.
-
-To specify the data you can supply either:
-    - a Javascript object containing key values pairs
-    - an Immutable.Map, or
-    - a simple type such as an integer. In the case of the simple type
-      this is a shorthand for supplying {"value": v}.
-
-<a name="TimeRangeEvent+toPoint"></a>
-
-### timeRangeEvent.toPoint()
-Returns a flat array starting with the timestamp, followed by the values.
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-<a name="TimeRangeEvent+timerange"></a>
-
-### timeRangeEvent.timerange() ⇒ <code>TimeRange</code>
-The TimeRange of this data
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>TimeRange</code> - TimeRange of this data.  
-<a name="TimeRangeEvent+data"></a>
-
-### timeRangeEvent.data() ⇒ <code>Immutable.Map</code>
-Access the event data
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>Immutable.Map</code> - Data for the Event  
-<a name="TimeRangeEvent+setData"></a>
-
-### timeRangeEvent.setData()
-Sets the data portion of the event and
-returns a new TimeRangeEvent.
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-<a name="TimeRangeEvent+timerangeAsUTCString"></a>
-
-### timeRangeEvent.timerangeAsUTCString() ⇒ <code>string</code>
-The TimeRange of this data, in UTC, as a string.
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>string</code> - TimeRange of this data.  
-<a name="TimeRangeEvent+timerangeAsLocalString"></a>
-
-### timeRangeEvent.timerangeAsLocalString() ⇒ <code>string</code>
-The TimeRange of this data, in Local time, as a string.
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>string</code> - TimeRange of this data.  
-<a name="TimeRangeEvent+begin"></a>
-
-### timeRangeEvent.begin() ⇒ <code>Data</code>
-The begin time of this Event
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>Data</code> - Begin time  
-<a name="TimeRangeEvent+end"></a>
-
-### timeRangeEvent.end() ⇒ <code>Data</code>
-The end time of this Event
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>Data</code> - End time  
-<a name="TimeRangeEvent+timestamp"></a>
-
-### timeRangeEvent.timestamp() ⇒ <code>Data</code>
-Alias for the begin() time.
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>Data</code> - Time representing this Event  
-<a name="TimeRangeEvent+get"></a>
-
-### timeRangeEvent.get()
-Get specific data out of the Event. The data will be converted
-to a js object. You can use a fieldSpec to address deep data.
-A fieldSpec could be "a.b"
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-
----
-## IndexedEvent Reference
-
-**Kind**: global class  
-
-* [IndexedEvent](#IndexedEvent)
-    * [new IndexedEvent()](#new_IndexedEvent_new)
-    * [.toPoint()](#IndexedEvent+toPoint)
-    * [.index()](#IndexedEvent+index) ⇒ <code>Index</code>
-    * [.setData()](#IndexedEvent+setData)
-    * [.data()](#IndexedEvent+data) ⇒ <code>Immutable.Map</code>
-    * [.indexAsString()](#IndexedEvent+indexAsString) ⇒ <code>string</code>
-    * [.timerangeAsUTCString()](#IndexedEvent+timerangeAsUTCString) ⇒ <code>string</code>
-    * [.timerangeAsLocalString()](#IndexedEvent+timerangeAsLocalString) ⇒ <code>string</code>
-    * [.timerange()](#IndexedEvent+timerange) ⇒ <code>TimeRange</code>
-    * [.begin()](#IndexedEvent+begin) ⇒ <code>Data</code>
-    * [.end()](#IndexedEvent+end) ⇒ <code>Data</code>
-    * [.timestamp()](#IndexedEvent+timestamp) ⇒ <code>Data</code>
-    * [.get()](#IndexedEvent+get)
-
-<a name="new_IndexedEvent_new"></a>
-
-### new IndexedEvent()
-The creation of an IndexedEvent is done by combining two parts:
-the Index and the data.
-
-To construct you specify an Index, along with the data.
-
-The index may be an Index, or a string.
-
-To specify the data you can supply either:
-    - a Javascript object containing key values pairs
-    - an Immutable.Map, or
-    - a simple type such as an integer. In the case of the simple type
-      this is a shorthand for supplying {"value": v}.
-
-<a name="IndexedEvent+toPoint"></a>
-
-### indexedEvent.toPoint()
-Returns a flat array starting with the timestamp, followed by the values.
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-<a name="IndexedEvent+index"></a>
-
-### indexedEvent.index() ⇒ <code>Index</code>
-Returns the Index associated with the data in this Event
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>Index</code> - The Index  
-<a name="IndexedEvent+setData"></a>
-
-### indexedEvent.setData()
-Sets the data of the event and returns a new IndexedEvent.
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-<a name="IndexedEvent+data"></a>
-
-### indexedEvent.data() ⇒ <code>Immutable.Map</code>
-Access the event data
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>Immutable.Map</code> - Data for the Event  
-<a name="IndexedEvent+indexAsString"></a>
-
-### indexedEvent.indexAsString() ⇒ <code>string</code>
-Returns the Index as a string, same as event.index().toString()
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>string</code> - The Index  
-<a name="IndexedEvent+timerangeAsUTCString"></a>
-
-### indexedEvent.timerangeAsUTCString() ⇒ <code>string</code>
-The TimeRange of this data, in UTC, as a string.
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>string</code> - TimeRange of this data.  
-<a name="IndexedEvent+timerangeAsLocalString"></a>
-
-### indexedEvent.timerangeAsLocalString() ⇒ <code>string</code>
-The TimeRange of this data, in Local time, as a string.
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>string</code> - TimeRange of this data.  
-<a name="IndexedEvent+timerange"></a>
-
-### indexedEvent.timerange() ⇒ <code>TimeRange</code>
-The TimeRange of this data
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>TimeRange</code> - TimeRange of this data.  
-<a name="IndexedEvent+begin"></a>
-
-### indexedEvent.begin() ⇒ <code>Data</code>
-The begin time of this Event
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>Data</code> - Begin time  
-<a name="IndexedEvent+end"></a>
-
-### indexedEvent.end() ⇒ <code>Data</code>
-The end time of this Event
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>Data</code> - End time  
-<a name="IndexedEvent+timestamp"></a>
-
-### indexedEvent.timestamp() ⇒ <code>Data</code>
-Alias for the begin() time.
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>Data</code> - Time representing this Event  
-<a name="IndexedEvent+get"></a>
-
-### indexedEvent.get()
-Get specific data out of the Event. The data will be converted
-to a js object. You can use a fieldSpec to address deep data.
-A fieldSpec could be "a.b"
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  

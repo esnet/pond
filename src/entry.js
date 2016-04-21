@@ -15,26 +15,23 @@ if (typeof window !== "undefined") {
     installDevTools(Immutable);
 }
 
-import { Event, TimeRangeEvent, IndexedEvent } from "./lib/event.js";
 import { UnboundedIn, BoundedIn } from "./lib/in.js";
 import { EventOut, ConsoleOut, CollectionOut } from "./lib/out.js";
 
-export { Event };
-export { TimeRangeEvent };
-export { IndexedEvent };
 export { UnboundedIn };
 export { BoundedIn };
 export { EventOut };
 export { ConsoleOut };
 export { CollectionOut };
 
+export Event from "./lib/event";
+export TimeRangeEvent from "./lib/timerangeevent";
+export IndexedEvent from "./lib/indexedevent";
 export Index from "./lib/index.js";
 export TimeRange from "./lib/range.js";
 export Collection from "./lib/collection.js";
 export TimeSeries from "./lib/series.js";
 export Pipeline from "./lib/pipeline.js";
-export Aggregator from "./lib/aggregator.js";
-export Collector from "./lib/collector.js";
 export Offset from "./lib/offset.js";
 export Converter from "./lib/offset.js";
 export Functions from "./lib/functions.js";

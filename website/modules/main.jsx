@@ -24,10 +24,11 @@ const browserHistory = useScroll(useRouterHistory(createBrowserHistory))();
 import App from "./app.jsx";
 import Intro from "./intro.jsx";
 import Start from "./start.jsx";
-import Time from "./time.jsx";
 import TimeRange from "./timerange.jsx";
 import Index from "./index.jsx";
-import Events from "./events.jsx";
+import Event from "./event.jsx";
+import TimeRangeEvent from "./timerangeevent.jsx";
+import IndexedEvent from "./indexedevent.jsx";
 import Collection from "./collection.jsx";
 import TimeSeries from "./timeseries.jsx";
 import Pipeline from "./pipeline.jsx";
@@ -37,10 +38,11 @@ render((
         <Route path="/" component={App}>
             <IndexRoute component={Intro}/>
             <Route path="start" component={Start} />
-            <Route path="time" component={Time} />
             <Route path="timerange" component={TimeRange} />
             <Route path="index" component={Index} />
-            <Route path="events" component={Events} />
+            <Route path="event" component={Event} />
+            <Route path="timerangeevent" component={TimeRangeEvent} />
+            <Route path="indexedevent" component={IndexedEvent} />
             <Route path="collection" component={Collection} />
             <Route path="timeseries" component={TimeSeries} />
             <Route path="pipeline" component={Pipeline} />

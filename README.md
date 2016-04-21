@@ -2,13 +2,17 @@
 
 ----
 
-A library build on top of immutable.js to provide time-based data structures and processing within ESnet tools. For data structures it unifies the use of time ranges, events and timeseries. For processing it provides a chained operations interface to aggregate and collect streams of events.
+Pond.js is a library build on top of [immutable.js](https://facebook.github.io/immutable-js/) to provide time-based data structures, serialization and processing within our tools.
 
-We are still developing Pond as it integrates further into our code, so it may change or be incomplete in parts. That said it has a growing collection of tests and we will strive not to break those without careful consideration. See the CHANGES.md document for version updates.
+For data structures it unifies the use of time ranges, events and collections and time series. For processing it provides a chained pipeline interface to aggregate, collect and process batches or streams of events.
+
+We are still developing Pond.js as it integrates further into our code, so it may change or be incomplete in parts. That said, it has a growing collection of tests and we will strive not to break those without careful consideration.
+
+See the CHANGES.md document for version updates.
 
 ## Rational
 
-We consume timeseries data throughout our network visualization applications and data processing chains so we needed to build a Javascript library to work with that was consistent and immutable way. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated. Not only do we need to deal with different formats at all layers of the system, we also repeat our processing code over and over.
+ESnet runs a large research network for the US Department of Energy. Our tools consume events and time series data throughout our network visualization applications and data processing chains. As our tool set grew, so did our need to build a Javascript library to work with this type of data that was consistent and dependable. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated. Not only do we need to deal with different formats at all layers of the system, we also repeat our processing code over and over. Pond.js was built to address these pain points.
 
 The result might be as simple as comparing two time ranges:
 
@@ -44,17 +48,17 @@ Or much higher level stream processing:
 
 Pond has three main goals:
 
- 1. provide basic time-related data structures built on Immutable.js
+ 1. provide a robust set of time-related data structures, built on Immutable.js
  2. provide serialization of these structures for transmission across the wire
- 3. provide processing operations to work with those structures.
+ 3. provide processing operations to work with those structures
 
 Here is a summary of what is provided:
 
 * **TimeRange** - a begin and end time, packaged together.
 * **Index** - A time range denoted by a string, for example "5m-1234" is a specific 5 minute time range, or "2014-09" is September 2014.
-* **Events** - A timestamp and a data object packaged together.
-* **IndexedEvents** - An Index and a data object packaged together. e.g. 1hr max.
-* **TimeRangeEvents** - A TimeRange and a data object packaged together. e.g. outage event.
+* **Event** - A timestamp and a data object packaged together.
+* **IndexedEvents** - An Index and a data object packaged together. e.g. 1hr max value.
+* **TimeRangeEvents** - A TimeRange and a data object packaged together. e.g. outage event occurred from 9:10am until 10:15am.
 
 And forming together collections of events:
 
@@ -63,11 +67,11 @@ And forming together collections of events:
 
 And then high level processing via Event pipelines:
 
-* **Pipeline** - Stream or batch processing of Events. Supports windowing, grouping and aggregation.
+* **Pipeline** - Stream or batch processing of Events. Supports windowing, grouping and aggregation. Still under development.
 
 # Getting started
 
-Pond will run in node.js or in the browser (ideally via webpack).
+Pond will run in Node or in the browser (ideally via webpack).
 
 Install from npm:
 
@@ -95,7 +99,7 @@ This code is distributed under a BSD style license, see the LICENSE file for com
 
 # Copyright
 
-ESnet Timeseries Library ("Pond"), Copyright (c) 2015, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+ESnet Timeseries Library ("Pond.js"), Copyright (c) 2015, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
  
 If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's Innovation & Partnerships Office at  IPO@lbl.gov.
  

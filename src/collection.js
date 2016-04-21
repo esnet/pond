@@ -11,21 +11,43 @@
 import _ from "underscore";
 import Immutable from "immutable";
 import TimeRange from "./range";
-import { Event } from "./event";
+import Event from "./event";
 import { BoundedIn } from "./in";
 import { sum, avg, max, min, first, last, median, stdev } from "./functions";
 
 /**
- * A collection is a list of Events. You can construct one out of either
- * another collection, or a list of Events. You can addEvent() to a collection
- * and a new collection will be returned.
+ * A collection is an abstraction for a bag of Events.
+ *
+ * You typically construct a Collection from a list of Events, which
+ * may be either within an Immutable.List or an Array. You can also
+ * copy another Collection or create an empty one.
+ *
+ * You can mutate a collection in a number of ways. In each instance
+ * a new Collection will be returned.
  *
  * Basic operations on the list of events are also possible. You
  * can iterate over the collection with a for..of loop, get the size()
  * of the collection and access a specific element with at().
+ *
+ * You can also perform aggregations of the events, map them, filter them
+ * and clean them.
+ *
+ * Collections form the backing structure for a TimeSeries, as well as
+ * in Pipeline event processing.
  */
 class Collection extends BoundedIn {
 
+    /**
+     * Construct a new Collection.
+     *
+     * @param  {Collection|array|Immutable.List}  arg1 Initial data for
+     * the collection. If arg1 is another Collection, this will act as
+     * a copy constructor.
+     * @param  {Boolean} [copyEvents] When using a the copy constructor
+     * this specified whether or not to also copy all the events in this
+     * collection. Generally you'll want to let it copy the events.
+     * @return {Collection} The constructed Collection.
+     */
     constructor(arg1, copyEvents = true) {
         super();
 
@@ -56,23 +78,39 @@ class Collection extends BoundedIn {
         }
     }
 
+    /**
+     * Returns the Collection as a regular JSON object.
+     * @return {Object} The JSON representation of this Collection
+     */
     toJSON() {
         return this._eventList.toJS();
     }
 
+    /**
+     * Serialize out the Collection as a string. This will be the
+     * string representation of `toJSON()`.
+     * @return {string} The Collection serialized as a string.
+     */
     toString() {
         return JSON.stringify(this.toJSON());
     }
 
     /**
-     * Returns the Event object type in this collection
+     * Returns the Event object type in this collection. Since
+     * Collections my only have one type of Event (Event, IndexedEvent
+     * or TimeRangeEvent) this will return that type. If no events
+     * have been added to the Collection it will return undefined.
+     *
+     * @return {Event|IndexedEvent|TimeRangeEvent} - The class of the type
+     * of events contained in this Collection.
      */
     type() {
         return this._type;
     }
 
     /**
-     * Returns the number of items in this collection
+     * Returns the number of events in this collection
+     * @return {number} Count of events
      */
     size() {
         return this._eventList.size;
@@ -81,9 +119,11 @@ class Collection extends BoundedIn {
     /**
      * Returns the number of valid items in this collection.
      *
-     * Uses the fieldName and optionally a function passed in
-     * to look up values in all events. It then counts the number
-     * that are considered valid, i.e. are not NaN, undefined or null.
+     * Uses the fieldSpec to look up values in all events.
+     * It then counts the number that are considered valid,
+     * i.e. are not NaN, undefined or null.
+     *
+     * @return {number} Count of valid events
      */
     sizeValid(fieldSpec = "value") {
         let count = 0;
@@ -94,13 +134,28 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Returns an item in the collection by its position
+     * Returns an event in the Collection by its position.
+     * @example
+     * ```
+     * for (let row=0; row < series.size(); row++) {
+     *   const event = series.at(row);
+     *   console.log(event.toString());
+     * }
+     * ```
+     * @param  {number} pos The position of the event
+     * @return {Event|TimeRangeEvent|IndexedEvent}     Returns the
+     * event at the pos specified.
      */
     at(pos) {
         const event = new this._type(this._eventList.get(pos));
         return event;
     }
 
+    /**
+     * Returns an event in the Collection by its time.
+     * @param  {Date} time The time of the event.
+     * @return {Event|TimeRangeEvent|IndexedEvent}
+     */
     atTime(time) {
         const pos = this.bisect(time);
         if (pos && pos < this.size()) {
@@ -108,18 +163,33 @@ class Collection extends BoundedIn {
         }
     }
 
+    /**
+     * Returns the first event in the Collection.
+     * @return {Event|TimeRangeEvent|IndexedEvent}
+     */
     atFirst() {
         if (this.size()) {
             return this.at(0);
         }
     }
 
+    /**
+     * Returns the last event in the Collection.
+     * @return {Event|TimeRangeEvent|IndexedEvent}
+     */
     atLast() {
         if (this.size()) {
             return this.at(this.size() - 1);
         }
     }
 
+    /**
+     * Returns the index that bisects the Collection at
+     * the time specified
+     * @param  {Data} t The time to bisect the Collection with
+     * @param  {number} b The position to begin searching at
+     * @return {number}   The row number that is the greatest, but still below t.
+     */
     bisect(t, b) {
         const tms = t.getTime();
         const size = this.size();
@@ -140,16 +210,33 @@ class Collection extends BoundedIn {
         return i - 1;
     }
 
+    /**
+     * Generator to return all the events in the collection.
+     * @example
+     * ```
+     * for (let event of series.events()) {
+     *     console.log(event.toString());
+     * }
+     * ```
+     */
     * events() {
         for (let i = 0; i < this.size(); i++) {
             yield this.at(i);
         }
     }
 
+    /**
+     * Returns the raw Immutable event list
+     * @return {Immutable.List} All events as an Immutable List.
+     */
     eventList() {
         return this._eventList;
     }
 
+    /**
+     * Returns a Javascript array of events
+     * @return {Array} All events as a Javascript Array.
+     */
     eventListAsArray() {
         const events = [];
         for (const e of this.events()) {
@@ -182,7 +269,9 @@ class Collection extends BoundedIn {
     //
 
     /**
-     * Adds an event to the collection, returns a new collection
+     * Adds an event to the collection, returns a new Collection
+     * @param {Event|TimeRangeEvent|IndexedEvent} event The event being added.
+     * @return {Collection} A new, modified, Collection.
      */
     addEvent(event) {
         this._check(event);
@@ -195,6 +284,9 @@ class Collection extends BoundedIn {
      * Perform a slice of events within the Collection, returns a new
      * Collection representing a portion of this TimeSeries from begin up to
      * but not including end.
+     * @param {Number} begin The position to begin slicing
+     * @param {Number} end The position to end slicing
+     * @return {Collection} A new, modified, Collection.
      */
     slice(begin, end) {
         const sliced = new Collection(this._eventList.slice(begin, end));
@@ -204,6 +296,10 @@ class Collection extends BoundedIn {
 
     /**
      * Filter the collection's event list with the supplied function
+     *
+     * @param {function} func The filter function, that should return
+     * true or false when passed in an event.
+     * @return {Collection} A new, modified, Collection.
      */
     filter(func) {
         const filteredEventList = [];
@@ -218,6 +314,9 @@ class Collection extends BoundedIn {
     /**
      * Map the collection's event list to a new event list with
      * the supplied function.
+     * @param {function} func The mapping function, that should return
+     * a new event when passed in the old event.
+     * @return {Collection} A new, modified, Collection.
      */
     map(func) {
         const result = [];
@@ -230,7 +329,11 @@ class Collection extends BoundedIn {
     /**
      * Returns a new Collection by testing the fieldSpec
      * values for being valid (not NaN, null or undefined).
-     * The resulting Collection will be clean for that fieldSpec.
+     *
+     * The resulting Collection will be clean (for that fieldSpec).
+     *
+     * @param {string} fieldSpec The field to test
+     * @return {Collection} A new, modified, Collection.
      */
     clean(fieldSpec = "value") {
         const fs = this._fieldSpecToArray(fieldSpec);
@@ -247,46 +350,98 @@ class Collection extends BoundedIn {
     // Aggregate the event list to a single value
     //
 
+    /**
+     * Returns the number of events in this collection
+     * @return {number} The number of events
+     */
     count() {
         return this.size();
     }
 
+    /**
+     * Returns the first value in the Collection for the fieldspec
+     */
     first(fieldSpec = "value") {
         return this.aggregate(first, fieldSpec);
     }
 
+    /**
+     * Returns the last value in the Collection for the fieldspec
+     */
     last(fieldSpec = "value") {
         return this.aggregate(last, fieldSpec);
     }
 
+    /**
+     * Returns the sum Collection for the fieldspec
+     */
     sum(fieldSpec = "value") {
         return this.aggregate(sum, fieldSpec);
     }
 
+    /**
+     * Aggregates the events down to their average
+     * @param  {String} fieldSpec The field to aggregate
+     * @return {number}           The resulting value
+     */
     avg(fieldSpec = "value") {
         return this.aggregate(avg, fieldSpec);
     }
 
+    /**
+     * Aggregates the events down to their maximum value
+     * @param  {String} fieldSpec The field to aggregate
+     * @return {number}           The resulting value
+     */
     max(fieldSpec = "value") {
         return this.aggregate(max, fieldSpec);
     }
 
+    /**
+     * Aggregates the events down to their minimum value
+     * @param  {String} fieldSpec The field to aggregate
+     * @return {number}           The resulting value
+     */
     min(fieldSpec = "value") {
         return this.aggregate(min, fieldSpec);
     }
 
+    /**
+     * Aggregates the events down to their mean
+     * @param  {String} fieldSpec The field to aggregate
+     * @return {number}           The resulting value
+     */
     mean(fieldSpec = "value") {
         return this.avg(fieldSpec);
     }
 
+    /**
+     * Aggregates the events down to their medium value
+     * @param  {String} fieldSpec The field to aggregate
+     * @return {number}           The resulting value
+     */
     median(fieldSpec = "value") {
         return this.aggregate(median, fieldSpec);
     }
 
+    /**
+     * Aggregates the events down to their stdev
+     * @param  {String} fieldSpec The field to aggregate
+     * @return {number}           The resulting value
+     */
     stdev(fieldSpec = "value") {
         return this.aggregate(stdev, fieldSpec);
     }
 
+    /**
+     * Aggregates the events down using a user defined function to
+     * do the reduction.
+     *
+     * @param  {function} func User defined reduction function. Will be
+     * passed a list of values. Should return a singe value.
+     * @param  {String} fieldSpec The field to aggregate
+     * @return {number}           The resulting value
+     */
     aggregate(func, fieldSpec = "value") {
         const fs = this._fieldSpecToArray(fieldSpec);
         const result = Event.mapReduce(this.eventListAsArray(), [fs], func);
@@ -298,6 +453,8 @@ class Collection extends BoundedIn {
      * return it as an array if it isn't already one. Using
      * arrays in inner loops is faster than splitting
      * a string repeatedly.
+     *
+     * @private
      */
     _fieldSpecToArray(fieldSpec) {
         if (_.isArray(fieldSpec)) {

@@ -11,15 +11,30 @@
 import util from "./util";
 
 /**
- * An index that represents as a string a range of time. That range may either
- * be in UTC or local time. UTC is the default.
- *
- * The actual derived timerange can be found using asRange(). This will return
- * a TimeRange instance.
- *
- * The original string representation can be found with toString(). A nice
- * version for date based indexes (e.g. 2015-03) can be generated with
- * toNiceString(format) (e.g. March, 2015).
+An index is simply a string that represents a fixed range of time. There are two basic types:
+ * *Multiplier index* - the number of some unit of time (hours, days etc) since the UNIX epoch.
+ * *Calendar index* - The second represents a calendar range, such as Oct 2014.
+
+For the first type, a multiplier index, an example might be:
+
+```text
+    1d-12355      //  30th Oct 2003 (GMT), the 12355th day since the UNIX epoch
+```
+
+You can also use seconds (e.g. 30s), minutes (e.g. 5m), hours (e.g. 1h) or days (e.g. 7d).
+
+Here are several examples of a calendar index:
+
+```text
+    2003-10-30    // 30th Oct 2003
+    2014-09       // Sept 2014
+    2015          // All of the year 2015
+```
+
+An Index is a nice representation of certain types of time intervals because it can be cached with its string representation as a key. A specific chunk of time, and associated data can be looked up based on that string. It also allows us to represent things like months, which have variable length.
+
+An Index is also useful when collecting into specific time ranges, for example generating all the 5 min ("5m") maximum rollups within a specific day ("1d"). See the processing section within these docs.
+
  */
 class Index {
 
