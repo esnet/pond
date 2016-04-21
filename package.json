@@ -7,7 +7,7 @@
     "lint": "eslint src test/tests website/modules/*.jsx",
     "test": "npm run lint && npm run build && mocha --compilers js:babel-core/register",
     "test-only": "npm run build && mocha --compilers js:babel-core/register",
-    "cover": "istanbul cover _mocha -- --compilers js:babel-core/register && ./node_modules/.bin/codecov",
+    "cover": "istanbul cover _mocha -- --compilers js:babel-core/register -R spec && ./node_modules/.bin/codecov",
     "docs": "./scripts/docs.sh",
     "build": ". ./scripts/build.sh",
     "build-website": "webpack --config webpack.website.config.js",
