@@ -28,7 +28,6 @@
   },
   "license": "BSD-3-Clause-LBNL",
   "dependencies": {
-    "avsc": "^3.4.1",
     "babel-runtime": "^6.5.0",
     "immutable": "^3.6.4",
     "immutable-devtools": "0.0.4",

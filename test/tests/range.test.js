@@ -75,17 +75,6 @@ describe("Time range", () => {
             done();
         });
 
-        it("can serialize to an avro buffer", done => {
-            const beginTime = moment.utc("2012-01-11 11:11", fmt).toDate();
-            const endTime = moment.utc("2012-02-22 12:12", fmt).toDate();
-            const range1 = new TimeRange(beginTime, endTime);
-            const buf = range1.serialize();
-            // Send across the wire
-            const range2 = new TimeRange(buf);
-            expect(range1.toString()).to.equal("[1326280260000,1329912720000]");
-            expect(range2.toString()).to.equal("[1326280260000,1329912720000]");
-            done();
-        });
     });
 
     describe("human friendly display code", () => {

@@ -11,16 +11,6 @@
 import _ from "underscore";
 import Immutable from "immutable";
 import moment from "moment";
-import avro from "avsc";
-
-const avroType = avro.parse({
-    name: "TimeRange",
-    type: "array",
-    items: {
-        name:"Range",
-        type:"long"
-    }
-});
 
 /**
 A time range is a simple representation of a begin and end time, used
@@ -59,10 +49,6 @@ class TimeRange {
         if (arg1 instanceof TimeRange) {
             const other = arg1;
             this._range = other._range;
-        } else if (arg1 instanceof Uint8Array) {
-            const d = avroType.fromBuffer(arg1);
-            this._range = new Immutable.List([new Date(d[0]),
-                                              new Date(d[1])]);
         } else if (arg1 instanceof Immutable.List) {
             const rangeList = arg1;
             this._range = rangeList;
@@ -116,10 +102,6 @@ class TimeRange {
      */
     toString() {
         return JSON.stringify(this.toJSON());
-    }
-
-    serialize() {
-        return avroType.toBuffer(this.toJSON());
     }
 
     /**
@@ -312,14 +294,6 @@ class TimeRange {
      */
     humanizeDuration() {
         return moment.duration(this.duration()).humanize();
-    }
-
-    //
-    // Statics
-    //
-
-    static type() {
-        return avroType;
     }
 
     //
