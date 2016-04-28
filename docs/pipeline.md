@@ -24,7 +24,7 @@ We then want to offset the "in" value of each event by 1, and then by 2.
         .from(collection)   // From the source collection
         .offsetBy(1, "in")  // Process each event in the collection
         .offsetBy(2)        // Process again
-        .to(Collector, {}, c => /* result */ ); // Output to new Collection
+        .to(CollectionOut, c => /* result */ ); // Output to new Collection
 
 In this case, we use the from() operation to specify a Collection to take data from. Since a Collection is a bounded data source, the operation will be performed in batch. That is, all events in the collection will be piped though the transforms and the result collected at the end. This batching will happen when the Collector is added with the to() operation. As each event flows from the from collection to the end Collector, it is passed into the intermediate Processors. In this case it passes through two offsetBy Processors. Each of these is used to in some way process the event. In this case that means taking the input Event, changing a value (adding 1 to the "in" value), and outputting a new Event. As these are immutable objects, the output Events do not share data with the input Events.
 
@@ -40,7 +40,7 @@ As an event processing system, it makes sense that you can stream events though 
     Pipeline()
         .from(source)
         .offsetBy(3, "in")
-        .to(Collector, {}, c => out = c);
+        .to(CollectionOut, c => /* result */ );
 
     // Start adding events...
     source.addEvent(e1);
@@ -57,15 +57,14 @@ A common use-case for Pipelines is aggregation. Aggregation is performed on wind
 
 Here is a simple example:
 
-    const input = new UnboundedIn();
     const result = {};
-
     const p = Pipeline()
-        .from(input)
+        .from(stream)
         .windowBy("1h")           // 1 day fixed windows
         .emitOn("eachEvent")    // emit result on each event
         .aggregate({in: avg, out: avg})
-        .to(EventOut, {}, event => {
+        .to(EventOut, event => {
+            // resulting IndexedEvents...
             result[`${event.index()}`] = event;
         });
 
@@ -83,20 +82,20 @@ The output, an EventOut, will call the callback whenever a new aggregated event 
 
 Pipelines also support a groupBy() processor. In the following example each event has a field called "type". The result of this will be that aggregation collections will be further partitioned based on the group, in addition to the window.
 
-    const input = new UnboundedIn();
+    const stream = new UnboundedIn();
     const result = {};
 
     const p = Pipeline()
-        .from(input)
+        .from(stream)
         .groupBy("type")
         .windowBy("1h")           // 1 day fixed windows
         .emitOn("eachEvent")      // emit result on each event
-        .aggregate({type: keep, in: avg, out: avg}) // keep the type, avg the in and out
-        .to(EventOut, {}, event => {
+        .aggregate({type: keep, in: avg, out: avg})
+        .to(EventOut, event => {
             result[`${event.index()}:${event.get("type")}`] = event;
         });
 
-    eventsIn.forEach(event => input.addEvent(event));
+    eventsIn.forEach(event => stream.addEvent(event));
 
 During our aggregation, output IndexedEvents are formed with the average of "in", and the average of "out". The value of the "type" field is kept in the final result using the `keep` aggregation function.
 
@@ -120,9 +119,7 @@ Taking the first streaming example, we can convert the output IndexedEvents to a
         .emitOn("eachEvent")    // emit result on each event
         .aggregate({in: avg, out: avg})
         .asEvents()
-        .to(EventOut, {}, event => {
-            result[`${event.index()}`] = event;
-        });
+        .to(EventOut, event => /* result */ );
 ```
 
 ---
@@ -134,11 +131,11 @@ Pipelines can themselves be chained together.
         .from(collection)                  // This links to the src collection
         .offsetBy(1, "in")                 // Process each event
         .offsetBy(2)                       // Process again
-        .to(Collector, {}, c => c1 = c);
+        .to(CollectionOut, collection => /* result */ );
 
     const p2 = p1
-        .offsetBy(3, "in")                 // Transforms to a new collection
-        .to(Collector, {}, c => c2 = c);   // Evokes the action to pass collection
+        .offsetBy(3, "in")                    // Transforms to a new collection
+        .to(CollectionOut, collection => /* result */);
 
 In this example, the second pipeline will attach to the first pipeline. Currently batch pipelines support this, but only as a linear pipe. You cannot merge multiple bounded sources together. It is recommended that you do this manually by using, for example, Collection.combine() first, then running this through the Pipeline.
 
@@ -151,7 +148,7 @@ Pipelines can also be run directly off TimeSeries objects.
     timeseries.pipeline()
         .offsetBy(1, "in")
         .offsetBy(2)
-        .to(Collector, {}, c => out = c);
+        .to(Collector, {}, collection => /* result */ );
 
 ---
 ## API Reference
@@ -168,9 +165,12 @@ of collection data.
     * [.emitOn(trigger)](#Pipeline+emitOn) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.from(src)](#Pipeline+from) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.to()](#Pipeline+to) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.count(observer, force)](#Pipeline+count) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.offsetBy(by, fieldSpec)](#Pipeline+offsetBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.aggregate(fields)](#Pipeline+aggregate) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asEvents(options)](#Pipeline+asEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.take(limit)](#Pipeline+take) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asTimeRangeEvents(options)](#Pipeline+asTimeRangeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asIndexedEvents(options)](#Pipeline+asIndexedEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
 
@@ -221,7 +221,7 @@ aggregation would occur over any grouping specified.
 **Params**
 
 - k <code>function</code> | <code>array</code> | <code>string</code> - The key to group by.
-You can groupby using a function `(event) => return key`,
+You can groupBy using a function `(event) => return key`,
 a fieldSpec (a field name, or dot delimitted path to a field),
 or a array of fieldSpecs
 
@@ -259,7 +259,9 @@ from() returns a new Pipeline.
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 **Params**
 
-- src <code>In</code> - The source for the Pipeline.
+- src <code>BoundedIn</code> | <code>UnboundedIn</code> | <code>[Pipeline](#Pipeline)</code> - The source for the
+                                            Pipeline, or another
+                                            Pipeline.
 
 <a name="Pipeline+to"></a>
 
@@ -286,6 +288,22 @@ const p = Pipeline()
      result[`${event.index()}`] = event;
  });
 ```
+<a name="Pipeline+count"></a>
+
+### pipeline.count(observer, force) ⇒ <code>[Pipeline](#Pipeline)</code>
+Outputs the count of events
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- observer <code>function</code> - The callback function. This will be
+                             passed the count, the windowKey and
+                             the groupByKey
+- force <code>Boolean</code> <code> = true</code> - Flush at the end of processing batch
+                           events, output again with possibly partial
+                           result.
+
 <a name="Pipeline+offsetBy"></a>
 
 ### pipeline.offsetBy(by, fieldSpec) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -349,6 +367,28 @@ to convert a time range to a single time. There are three options:
  1. use the beginning time (options = {alignment: "lag"})
  2. use the center time (options = {alignment: "center"})
  3. use the end time (options = {alignment: "lead"})
+
+<a name="Pipeline+filter"></a>
+
+### pipeline.filter(op) ⇒ <code>[Pipeline](#Pipeline)</code>
+Filter the event stream using an operator
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- op <code>function</code> - A function that returns true or false
+
+<a name="Pipeline+take"></a>
+
+### pipeline.take(limit) ⇒ <code>[Pipeline](#Pipeline)</code>
+Take events up to the supplied limit, per key.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- limit <code>number</code> - Integer number of events to take
 
 <a name="Pipeline+asTimeRangeEvents"></a>
 

@@ -12,7 +12,7 @@ import _ from "underscore";
 import Immutable from "immutable";
 import TimeRange from "./range";
 import Event from "./event";
-import { BoundedIn } from "./in";
+import BoundedIn from "./pipeline-in-bounded";
 import { sum, avg, max, min, first, last, median, stdev } from "./functions";
 
 /**

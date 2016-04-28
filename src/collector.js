@@ -24,7 +24,14 @@ import Index from "./index";
 export default class Collector {
 
     constructor(options, onTrigger) {
-        const {windowType, windowDuration, groupBy, emitOn} = options;
+
+        const {
+            windowType,
+            windowDuration,
+            groupBy,
+            emitOn
+        } = options;
+
         this._groupBy = groupBy;
         this._emitOn = emitOn;
         this._windowType = windowType;
@@ -44,32 +51,31 @@ export default class Collector {
     emitCollections(collections) {
         if (this._onTrigger) {
             _.each(collections, c => {
-                const { collection, windowKey } = c;
-                this._onTrigger(collection, windowKey);
+                const { collection, windowKey, groupByKey } = c;
+                this._onTrigger && this._onTrigger(collection, windowKey, groupByKey);
             });
         }
     }
 
     addEvent(event) {
         const timestamp = event.timestamp();
-        const windowType = this._windowType;
 
+        const windowType = this._windowType;
         let windowKey;
         if (windowType === "fixed") {
             windowKey = Index.getIndexString(this._windowDuration, timestamp);
         } else {
             windowKey = windowType;
         }
-        
-        const groupbyKey = this._groupBy(event);
-        const collectionKey = groupbyKey ?
-            `${windowKey}::${groupbyKey}` : windowKey;
+        const groupByKey = this._groupBy(event);
+        const collectionKey = groupByKey ?
+            `${windowKey}::${groupByKey}` : windowKey;
 
         let discard = false;
         if (!_.has(this._collections, collectionKey)) {
             this._collections[collectionKey] = {
                 windowKey,
-                groupbyKey,
+                groupByKey,
                 collection: new Collection()
             };
             discard = true;
@@ -103,6 +109,10 @@ export default class Collector {
             _.each(Object.keys(discards), k => {
                 delete this._collections[k];
             });
+        } else if (emitOn === "flush") {
+            // pass
+        } else {
+            throw new Error("Unknown emit type supplied to Collector");
         }
     }
 }

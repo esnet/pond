@@ -11,14 +11,120 @@
 import Immutable from "immutable";
 import _ from "underscore";
 
-import { UnboundedIn, BoundedIn } from "./in";
+import UnboundedIn from "./pipeline-in-unbounded";
+import BoundedIn from "./pipeline-in-bounded";
+import CollectionOut from "./pipeline-out-collection";
 import Processor from "./processor";
 import Offset from "./offset";
+import Filter from "./filter";
+import Taker from "./taker";
 import Aggregator from "./aggregator";
 import Converter from "./converter";
 import Event from "./event";
+import TimeSeries from "./series";
 import TimeRangeEvent from "./timerangeevent";
 import IndexedEvent from "./indexedevent";
+
+/**
+ * A runner is used to extract the chain of processing operations
+ * from a Pipeline given an Output. The idea here is to traverse
+ * back up the Pipeline(s) and build an execution chain.
+ *
+ * When the runner is started, events from the "in" are streamed
+ * into the execution chain and outputed into the "out".
+ *
+ * Rebuilding in this way enables us to handle connected pipelines:
+ *
+ *                     |--
+ *  in --> pipeline ---.
+ *                     |----pipeline ---| -> out
+ *
+ * The runner breaks this into the following for execution:
+ *
+ *   _input        - the "in" or from() bounded input of
+ *                   the upstream pipeline
+ *   _processChain - the process nodes in the pipelines
+ *                   leading to the out
+ *   _output       - the supplied output destination for
+ *                   the batch process
+ *
+ * NOTE: There's no current way to merge multiple sources, though
+ *       a time series has a TimeSeries.merge() static method for
+ *       this purpose.
+ */
+class Runner {
+
+    /**
+     * Create a new batch runner.
+     * @param  {Pipeline} pipeline The pipeline to run
+     * @param  {PipelineOut} output   The output driving this runner
+     */
+    constructor(pipeline, output) {
+
+        this._output = output;
+
+        //
+        // We use the pipeline's chain() function to walk the
+        // DAG back up the tree to the "in" to:
+        // 1) assemble a list of process nodes that feed into
+        //    this pipeline, the processChain
+        // 2) determine the _input
+        //
+        // TODO: we do not currently support merging, so this is
+        // a linear chain.
+        //
+
+        let processChain = [];
+        if (pipeline.last()) {
+            processChain = pipeline.last().chain();
+            this._input = processChain[0].pipeline().in();
+        } else {
+            this._input = pipeline.in();
+        }
+
+        //
+        // Using the list of nodes of the tree that will be involved in
+        // out processing we can build the execution chain. This is the
+        // chain of processor clones, linked together for our specific
+        // processing pipeline.
+        //
+
+        this._executionChain = [this._output];
+
+        let prev = this._output;
+        processChain.forEach(p => {
+            if (p instanceof Processor) {
+                const processor = p.clone();
+                if (prev) processor.addObserver(prev);
+                this._executionChain.push(processor);
+                prev = processor;
+            }
+        });
+    }
+
+    /**
+     * Start the runner
+     * @param  {Boolean} force Force a flush at the end of the batch source
+     *                         to cause any buffers to emit.
+     */
+    start(force = false) {
+
+        //
+        // The head is the first process node in the execution chain.
+        // To process the source through the execution chain we add
+        // each event from the input to the head.
+        //
+
+        const head = this._executionChain.pop();
+        for (const e of this._input.events()) {
+            head.addEvent(e);
+        }
+
+        if (force) {
+            head.flush();
+        }
+    }
+}
 
 /**
  * A pipeline manages a processing chain, for either batch or stream processing
@@ -114,16 +220,20 @@ class Pipeline {
      */
     _setIn(input) {
         let mode;
-        if (input instanceof BoundedIn) {
+        let source = input;
+        if (input instanceof TimeSeries) {
+            mode = "batch";
+            source = input.collection();
+        } else if (input instanceof BoundedIn) {
             mode = "batch";
         } else if (input instanceof UnboundedIn) {
             mode = "stream";
         } else {
             throw new Error("Unknown input type", input);
         }
-        
+
         const d = this._d.withMutations(map => {
-            map.set("in", input)
+            map.set("in", source)
                .set("mode", mode);
         });
 
@@ -172,13 +282,6 @@ class Pipeline {
         return new Pipeline(d);
     }
 
-    _setState(key, value) {
-        const d = this._d.withMutations(map => {
-            map.set(key, value);
-        });
-        return new Pipeline(d);
-    }
-
     //
     // Pipeline state chained methods
     //
@@ -220,7 +323,7 @@ class Pipeline {
      * aggregation would occur over any grouping specified.
      *
      * @param {function|array|string} k The key to group by.
-     * You can groupby using a function `(event) => return key`,
+     * You can groupBy using a function `(event) => return key`,
      * a fieldSpec (a field name, or dot delimitted path to a field),
      * or a array of fieldSpecs
      *
@@ -244,7 +347,11 @@ class Pipeline {
             throw Error("Unable to interpret groupBy argument", k);
         }
 
-        return this._setState("groupBy", grp);
+        const d = this._d.withMutations(map => {
+            map.set("groupBy", grp);
+        });
+
+        return new Pipeline(d);
     }
 
     /**
@@ -280,8 +387,9 @@ class Pipeline {
      *
      * from() returns a new Pipeline.
      *
-     * @param {In} src The source for the Pipeline.
-     *
+     * @param {BoundedIn|UnboundedIn|Pipeline} src The source for the
+     *                                             Pipeline, or another
+     *                                             Pipeline.
      * @return {Pipeline} The Pipeline
      */
     from(src) {
@@ -333,47 +441,12 @@ class Pipeline {
         if (!this.in()) {
             throw new Error("Tried to eval pipeline without a In. Missing from() in chain?");
         }
+        
+        const out = new Out(this, options, observer);
+
         if (this.mode() === "batch") {
-            //
-            // Walk the DAG back up the tree to the source to assemble the
-            // process nodes that feed into this output. NOTE: we do not
-            // currently support merging, so this is a linear chain.
-            //
-
-            const processChain = this.last().chain();
-            const input = processChain[0].pipeline().in();
-
-            //
-            // Execution chain is the chain of processor clones, linked
-            // together for our specific batch processing pipeline.
-            //
-
-            const executionChain = [];
-            let prev = new Out(this, options, observer);
-            processChain.forEach(p => {
-                if (p instanceof Processor) {
-                    const processor = p.clone();
-                    if (prev) {
-                        processor.addObserver(prev);
-                    }
-                    executionChain.push(processor);
-                    prev = processor;
-                }
-            });
-
-            //
-            // The head is the first process node in the execution chain.
-            // To process the source through the execution chain we add
-            // each event from the input to the head.
-            //
-
-            const head = executionChain.pop();
-            for (const e of input.events()) {
-                head.addEvent(e);
-            }
-
-            if (force) head.flush();
- 
+            const runner = new Runner(this, out);
+            runner.start(force);
         } else if (this.mode() === "stream") {
             const out = new Out(this, options, observer);
             if (this.first()) {
@@ -389,6 +462,22 @@ class Pipeline {
         return this;
     }
 
+    /**
+     * Outputs the count of events
+     * @param  {function}  observer The callback function. This will be
+     *                              passed the count, the windowKey and
+     *                              the groupByKey
+     * @param  {Boolean} force    Flush at the end of processing batch
+     *                            events, output again with possibly partial
+     *                            result.
+     * @return {Pipeline} The Pipeline
+     */
+    count(observer, force = true) {
+        return this.to(CollectionOut, (collection, windowKey, groupByKey) => {
+            observer(collection.size(), windowKey, groupByKey);
+        }, force);
+    }
+
     //
     // Processors
     //
@@ -398,6 +487,7 @@ class Pipeline {
      * testing processor operations.
      * @param  {number} by              The amount to offset by
      * @param  {string|array} fieldSpec The field(s)
+     *
      * @return {Pipeline}               The modified Pipeline
      */
     offsetBy(by, fieldSpec) {
@@ -441,7 +531,7 @@ class Pipeline {
     aggregate(fields) {
         const p = new Aggregator(this, {
             fields,
-            prev: this._last ? this._last : this
+            prev: this.last() ? this.last() : this
         });
         
         return this._append(p);
@@ -466,9 +556,40 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this._last ? this._last : this
+            prev: this.last() ? this.last() : this
         });
         
+        return this._append(p);
+    }
+
+    /**
+     * Filter the event stream using an operator
+     *
+     * @param  {function} op A function that returns true or false
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    filter(op) {
+        const p = new Filter(this, {
+            op,
+            prev: this.last() ? this.last() : this
+        });
+
+        return this._append(p);
+    }
+
+    /**
+     * Take events up to the supplied limit, per key.
+     * @param  {number} limit Integer number of events to take
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    take(limit) {
+        const p = new Taker(this, {
+            limit,
+            prev: this.last() ? this.last() : this
+        });
+
         return this._append(p);
     }
 
@@ -496,7 +617,7 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this._last ? this._last : this
+            prev: this.last() ? this.last() : this
         });
         
         return this._append(p);
@@ -515,15 +636,12 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     asIndexedEvents(options) {
-        console.log("asIndexedEvents");
-
         const type = IndexedEvent;
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this._last ? this._last : this
+            prev: this.last() ? this.last() : this
         });
-        console.log(p);
         return this._append(p);
     }
 }

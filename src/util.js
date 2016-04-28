@@ -112,7 +112,7 @@ export default {
             case 1:
                 const year = parts[0];
                 beginTime = isUTC ? moment.utc([year]) :
-                                    moment.utc([year]);
+                                    moment([year]);
                 endTime = isUTC ? moment.utc(beginTime).endOf("year") :
                                   moment(beginTime).endOf("year");
                 break;

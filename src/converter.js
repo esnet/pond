@@ -72,7 +72,6 @@ export default class Converter extends Processor {
                 case "front":
                     begin = event.timestamp();
                     end = new Date(+event.timestamp() + this._duration);
-                    console.log(begin, +event.timestamp());
                     break;
                 case "center":
                     begin = new Date(+event.timestamp() - parseInt(this._duration / 2, 10));

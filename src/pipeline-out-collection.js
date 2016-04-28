@@ -9,56 +9,21 @@
  */
 
 import Collector from "./collector";
+import PipelineOut from "./pipeline-out";
 
-export class EventOut {
-
-    constructor(pipeline, options, callback) {
-        this._callback = callback;
-    }
-
-    addEvent(event) {
-        if (this._callback) {
-            this._callback(event);
-        }
-    }
-
-    onEmit(cb) {
-        this._callback = cb;
-    }
-    
-    done() {
-    }
-}
-
-export class ConsoleOut {
-
-    constructor(observer) {
-        this._observer = observer;
-    }
-
-    /**
-     * Add an event will add a key to the event and then emit the
-     * event with that key.
-     */
-    addEvent(event) {
-        console.log("OUT:", event.toString()); //eslint-disable-line
-    }
-
-    onEmit(observer) {
-        this._callback = observer;
-    }
-}
-
-export class CollectionOut {
+class CollectionOut extends PipelineOut {
 
     constructor(pipeline, options, callback) {
+        super();
         this._callback = callback;
         this._collector = new Collector({
             windowType: pipeline.getWindowType(),
             windowDuration: pipeline.getWindowDuration(),
             groupBy: pipeline.getGroupBy(),
             emitOn: pipeline.getEmitOn()
-        }, (collection, windowKey) => this._callback(collection, windowKey));
+        }, (collection, windowKey, groupByKey) => {
+            this._callback(collection, windowKey, groupByKey);
+        });
     }
 
     addEvent(event) {
@@ -69,6 +34,9 @@ export class CollectionOut {
         this._callback = cb;
     }
     
-    done() {
+    flush() {
+        this._collector.flushCollections();
     }
 }
+
+export default CollectionOut;

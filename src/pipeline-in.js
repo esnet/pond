@@ -14,11 +14,10 @@ import TimeRangeEvent from "./timerangeevent";
 import IndexedEvent from "./indexedevent";
 import Observable from "./observable";
 
-export class In extends Observable {
+class PipelineIn extends Observable {
 
     constructor() {
         super();
-
         this._id = _.uniqueId("in-");
         this._type = null;       // The type (class) of the events in this In
     }
@@ -40,57 +39,4 @@ export class In extends Observable {
     }
 }
 
-export class BoundedIn extends In {
-    constructor() {
-        super();
-    }
-
-    start() {
-        throw new Error("start() not supported on bounded source.");
-    }
-
-    stop() {
-        throw new Error("stop() not supported on bounded source.");
-    }
-
-    onEmit() {
-        throw new Error("You can not setup a listener to a bounded source.");
-    }
-}
-
-export class UnboundedIn extends In {
-
-    constructor() {
-        super();
-
-        this._running = true;
-    }
-
-    /**
-     * Start listening to events
-     */
-    start() {
-        this._running = true;
-    }
-
-    /**
-     * Stop listening to events
-     */
-    stop() {
-        this._running = false;
-    }
-
-    /**
-     * Add an incoming event to the source
-     */
-    addEvent(event) {
-        this._check(event);
-        if (this.hasObservers() && this._running) {
-            this.emit(event);
-        }
-    }
-
-    * events() {
-        throw new Error("Iteration across unbounded sources is not supported.");
-    }
-}
+export default PipelineIn;

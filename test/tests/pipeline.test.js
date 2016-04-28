@@ -16,8 +16,9 @@
 import { expect } from "chai";
 
 import { Pipeline } from "../../src/pipeline.js";
-import { UnboundedIn } from "../../src/in.js";
-import { ConsoleOut, EventOut, CollectionOut } from "../../src/out.js";
+import UnboundedIn from "../../src/pipeline-in-unbounded.js";
+import EventOut from "../../src/pipeline-out-event.js";
+import CollectionOut from "../../src/pipeline-out-collection.js";
 
 import Collection from "../../src/collection.js";
 import TimeSeries from "../../src/series.js";
@@ -348,6 +349,32 @@ describe("Pipeline", () => {
             done();
         });
 
+        it("should be able to batch a TimeSeries with an offset", done => {
+            const timeseries = new TimeSeries(sept2014Data);
+            const outputEvents = [];
+
+            Pipeline()
+                .from(timeseries)
+                .offsetBy(1, "value")
+                .offsetBy(2)
+                .to(EventOut, c => outputEvents.push(c));
+
+            expect(outputEvents.length).to.equal(timeseries.size());
+            done();
+        });
+
+        it("should be able to batch a TimeSeries with no processing nodes", done => {
+            const source = new TimeSeries(sept2014Data);
+            const outputEvents = [];
+
+            Pipeline()
+                .from(source)
+                .to(EventOut, c => outputEvents.push(c));
+
+            expect(outputEvents.length).to.equal(source.size());
+            done();
+        });
+
     });
 
     describe("aggregation", () => {
@@ -637,65 +664,132 @@ describe("Pipeline", () => {
         });
     });
 
-    /*
-    describe("Aggregation pipeline with emit on discards", () => {
-
-        const eventsIn = [];
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), 3));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), 9));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), 6));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), 4));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), 5));
-
-        it("can transform process events without a window avg", done => {
-            const input = new UnboundedIn();
-            const result = {};
-            const p = Pipeline()
-                .from(input)
-                .window("1h")           // 1 day fixed windows
-                .emitOn("discard")      // emit result each time we have a new window
-                .aggregate("avg")
-                .to(new EventOut(event => {
-                    console.log(`EVT: ${event.index()} - ${event}`);
-                    //result[`${event.index()}`] = event;
-                }));
-
-            eventsIn.forEach(event => input.addEvent(event));
-
-            //expect(result["1h-396199"].get("avg")).to.equal(6);
-            //expect(result["1h-396200"].get("avg")).to.equal(4.5);
+    describe("Filtering events in batch", () => {
+       
+        it("should be able to filter a TimeSeries", done => {
+            const outputEvents = [];
+            const timeseries = new TimeSeries(sept2014Data);
+            Pipeline()
+                .from(timeseries)
+                .filter(e => e.value() > 65)
+                .to(EventOut, c => outputEvents.push(c));
+            expect(outputEvents.length).to.equal(39);
             done();
         });
     });
 
-    describe("Aggregation pipeline with fieldSpec", () => {
+    describe("Take n events in batch", () => {
 
-        const eventsIn = [];
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {in: 3, out: {part1: 3, part2: 4}}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {in: 9, out: {part1: 4, part2: 4}}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {in: 6, out: {part1: 2, part2: 4}}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {in: 4, out: {part1: 2, part2: 4}}));
-        eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {in: 5, out: {part1: 1, part2: 4}}));
-
-        it("can transform process events without a window avg", done => {
-            const input = new UnboundedIn();
-            const result = {};
-
-            const p = Pipeline()
-                .from(input)
-                .window("1h")           // 1 day fixed windows
-                .emitOn("eachEvent")  // emit result on each event
-                .aggregate("avg", {avg_in: "in", avg_out: "out.part1"})
-                .to(new EventOut(event => result[`${event.index()}`] = event));
-
-            eventsIn.forEach(event => input.addEvent(event));
-
-            expect(result["1h-396199"].get("avg_in")).to.equal(6);
-            expect(result["1h-396199"].get("avg_out")).to.equal(3);
-            expect(result["1h-396200"].get("avg_in")).to.equal(4.5);
-            expect(result["1h-396200"].get("avg_out")).to.equal(1.5);
+        it("should be able to take 10 events from a TimeSeries", done => {
+            let result;
+            const timeseries = new TimeSeries(sept2014Data);
+            Pipeline()
+                .from(timeseries)
+                .take(10)
+                .to(CollectionOut,
+                    (c) => result = new TimeSeries({
+                        name: "result",
+                        collection: c
+                    })
+                );
+            expect(result.size()).to.equal(10);
             done();
         });
+
+        it("should be able to aggregate in batch global window", done => {
+            let result;
+            const timeseries = new TimeSeries(sept2014Data);
+
+            const p = Pipeline()
+                .from(timeseries)
+                .filter(e => e.value() < 50)
+                .take(10)
+                .emitOn("flush")    // emit result on each event
+                .aggregate({value: avg})
+                .to(EventOut, event => {
+                    result = event;
+                }, true);
+
+            expect(result.timerange().toString()).to.equal("[1409547600000,1409594400000]");
+            expect(result.value()).to.equal(29.4);
+            done();
+        });
+
+        it("should be able to collect first 10 events over 65", done => {
+            let result;
+            const timeseries = new TimeSeries(sept2014Data);
+
+            const p = Pipeline()
+                .from(timeseries)
+                .filter(e => e.value() > 65)
+                .take(10)
+                .emitOn("flush")    // emit result on each event
+                .to(CollectionOut, collection => {
+                    result = collection;
+                }, true);
+
+            expect(result.size()).to.equal(10);
+            expect(result.at(0).value()).to.equal(88);
+            expect(result.at(4).value()).to.equal(84);
+            expect(result.at(9).value()).to.equal(78);
+            done();
+        });
+        
+       
+        it("should be able to collect first 10 events over 65 and under 65", done => {
+            let result = {};
+            const timeseries = new TimeSeries(sept2014Data);
+
+            const p = Pipeline()
+                .from(timeseries)
+                .groupBy(e => e.value() > 65 ? "high" : "low")
+                .take(10)
+                .emitOn("flush")    // emit result on each event
+                .to(CollectionOut, (collection, windowKey, groupByKey) => {
+                    result[groupByKey] = collection;
+                }, true);
+
+            expect(result["low"].size()).to.equal(10);
+            expect(result["high"].size()).to.equal(10);
+            done();
+        });
+
+        it("should be able to collect first 10 events, then split over 65 and under 65", done => {
+            let result = {};
+            const timeseries = new TimeSeries(sept2014Data);
+
+            const p = Pipeline()
+                .from(timeseries)
+                .take(10)
+                .groupBy(e => e.value() > 65 ? "high" : "low")
+                .emitOn("flush")    // emit result on each event
+                .to(CollectionOut, (collection, windowKey, groupByKey) => {
+                    result[groupByKey] = collection;
+                }, true);
+
+            expect(result["high"].size()).to.equal(3);
+            expect(result["low"].size()).to.equal(7);
+            done();
+        });
+
+        it("should be able to count the split over 65 and under 65", done => {
+            let result = {};
+            const timeseries = new TimeSeries(sept2014Data);
+
+            const p = Pipeline()
+                .from(timeseries)
+                .take(10)
+                .groupBy(e => e.value() > 65 ? "high" : "low")
+                .emitOn("flush")    // emit result on each event
+                .count((count, windowKey, groupByKey) =>
+                    result[groupByKey] = count
+                );
+
+            expect(result["high"]).to.equal(3);
+            expect(result["low"]).to.equal(7);
+            done();
+        });
+
     });
-    */
+
 });

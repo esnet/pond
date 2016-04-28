@@ -8,27 +8,30 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+import _ from "underscore";
+
 /**
  * Base class for objects in the processing chain which
  * need other object to listen to them. It provides a basic
  * interface to define the relationships and to emit events
  * to the interested observers.
  */
-export default class Observable {
+class Observable {
 
     constructor() {
+        this._id = _.uniqueId("id-");
         this._observers = [];
     }
 
     emit(event) {
-        this._observers.forEach(observer => observer.addEvent(event));
+        this._observers.forEach(observer => {
+            observer.addEvent(event);
+        });
     }
 
     flush() {
         this._observers.forEach(observer => {
-            if (observer instanceof Observable) {
-                observer.flush();
-            }
+            observer.flush();
         });
     }
 
@@ -47,3 +50,5 @@ export default class Observable {
         return this._observers.length > 0;
     }
 }
+
+export default Observable;

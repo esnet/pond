@@ -14,23 +14,21 @@ import { isPipeline } from "./pipeline";
 function addPrevToChain(n, chain) {
     chain.push(n);
     if (isPipeline(n.prev())) {
-        chain.push(n.prev()._in);
+        chain.push(n.prev().in());
         return chain;
     } else {
         return addPrevToChain(n.prev(), chain);
     }
 }
 
-export default class Processor extends Observable {
+class Processor extends Observable {
 
     constructor(arg1, options) {
         super();
-
         if (isPipeline(arg1)) {
             this._pipeline = arg1;
             this._prev = options.prev;
         }
-
     }
 
     prev() {
@@ -43,11 +41,17 @@ export default class Processor extends Observable {
 
     chain() {
         const chain = [ this ];
-        return addPrevToChain(this.prev(), chain);
+        if (isPipeline(this.prev())) {
+            chain.push(this.prev().in());
+            return chain;
+        } else {
+            return addPrevToChain(this.prev(), chain);
+        }
     }
 
     flush() {
         super.flush();
     }
-
 }
+
+export default Processor;
