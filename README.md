@@ -84,7 +84,9 @@ To explore via the node REPL:
 
 For further information see the [Getting started](http://software.es.net/pond/#/start) guide.
 
-# Tests
+# Contributing
+
+Read the [contribution guidelines](./CONTRIBUTING.md).
 
 The library has Mocha tests. To run the tests interactively, use:
 
