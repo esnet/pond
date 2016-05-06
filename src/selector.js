@@ -20,7 +20,7 @@ export default class Selector extends Processor {
     constructor(arg1, options, observer) {
         super(arg1, options, observer);
 
-        if(arg1 instanceof Selector) {
+        if (arg1 instanceof Selector) {
             const other = arg1;
             this._fieldSpec = other._fieldSpec;
         } else if (isPipeline(arg1)) {
