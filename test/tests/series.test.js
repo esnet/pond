@@ -798,4 +798,32 @@ describe("TimeSeries", () => {
             done();
         });
     });
+
+    describe("TimeSeries column selection", () => {
+
+        it("can select a single column from a TimeSeries", (done) => {
+            const timeseries = new TimeSeries(interfaceData);
+            expect(timeseries.columns()).to.eql(["in", "out"]);
+
+            timeseries.select("in", (ts) => {
+                expect(ts.columns()).to.eql(["in"]);
+                expect(ts.name()).to.equal("star-cr5:to_anl_ip-a_v4");
+            });
+
+            done();
+        });
+
+        it("can select multiple columns from a TimeSeries", (done => {
+            const timeseries = new TimeSeries(availabilitySeries);
+            expect(timeseries.columns()).to.eql(["uptime", "notes", "outages"]);
+
+            timeseries.select(["uptime", "notes"], (ts) => {
+                expect(ts.columns()).to.eql(["uptime", "notes"]);
+                expect(ts.name()).to.equal("availability");
+            });
+
+            done();
+        }));
+    });
+
 });
