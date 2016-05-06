@@ -166,6 +166,16 @@ const sept2014Data = {
     ]
 };
 
+const inOutData = {
+    name: "traffic",
+    columns: ["time", "in", "out", "perpendicular"],
+    points: [
+        [1409529600000, 80, 37, 1000],
+        [1409533200000, 88, 22, 1001],
+        [1409536800000, 52, 56, 1002]
+    ]
+};
+
 describe("Pipeline", () => {
 
 
@@ -674,6 +684,31 @@ describe("Pipeline", () => {
                 .filter(e => e.value() > 65)
                 .to(EventOut, c => outputEvents.push(c));
             expect(outputEvents.length).to.equal(39);
+            done();
+        });
+    });
+
+    describe("Selecting subset of columns from a TimeSeries in batch", () => {
+
+        it("should be able select a single column", done => {
+            let result;
+            const timeseries = new TimeSeries(inOutData);
+            Pipeline()
+                .from(timeseries)
+                .select("in")
+                .to(CollectionOut, c => result = new TimeSeries({name: "newTimeseries", collection: c}));
+            expect(result.columns()).to.eql(["in"]);
+            done();
+        });
+
+        it("should be able select a subset of columns", done => {
+            let result;
+            const timeseries = new TimeSeries(inOutData);
+            Pipeline()
+                .from(timeseries)
+                .select(["out", "perpendicular"])
+                .to(CollectionOut, c => result = new TimeSeries({name: "subset", collection: c}));
+            expect(result.columns()).to.eql(["out", "perpendicular"]);
             done();
         });
     });
