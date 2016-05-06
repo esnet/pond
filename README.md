@@ -77,9 +77,16 @@ Install from npm:
 
     npm install pondjs --save
 
+To explore via the node REPL:
+
+    node
+    > const pond = require("./lib/entry.js");
+
 For further information see the [Getting started](http://software.es.net/pond/#/start) guide.
 
-# Tests
+# Contributing
+
+Read the [contribution guidelines](./CONTRIBUTING.md).
 
 The library has Mocha tests. To run the tests interactively, use:
 
