@@ -12,6 +12,7 @@ import _ from "underscore";
 import Immutable from "immutable";
 
 import Collection from "./collection";
+import CollectionOut from "./pipeline-out-collection";
 import Index from "./index";
 import Event from "./event";
 import TimeRangeEvent from "./timerangeevent";
@@ -467,6 +468,14 @@ class TimeSeries {
     pipeline() {
         return new Pipeline()
             .from(this._collection);
+    }
+
+    select(fieldSpec, cb) {
+        this.pipeline()
+            .select(fieldSpec)
+            .to(CollectionOut, collection => {
+                cb(new TimeSeries({...this._data.toJSON(), collection}));
+            });
     }
 
     /**

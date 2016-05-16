@@ -24,6 +24,7 @@ import Event from "./event";
 import TimeSeries from "./series";
 import TimeRangeEvent from "./timerangeevent";
 import IndexedEvent from "./indexedevent";
+import Selector from "./selector";
 
 /**
  * A runner is used to extract the chain of processing operations
@@ -572,6 +573,22 @@ class Pipeline {
     filter(op) {
         const p = new Filter(this, {
             op,
+            prev: this.last() ? this.last() : this
+        });
+
+        return this._append(p);
+    }
+
+    /**
+     * Select a subset of columns
+     *
+     * @param {array|String} fieldSpec The columns to include in the output
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    select(fieldSpec) {
+        const p = new Selector(this, {
+            fieldSpec,
             prev: this.last() ? this.last() : this
         });
 

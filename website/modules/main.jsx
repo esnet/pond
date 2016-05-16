@@ -7,7 +7,6 @@
  *  This source code is licensed under the BSD-style license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
 /* eslint max-len:0 */
 
 import React from "react";

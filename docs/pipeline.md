@@ -170,6 +170,7 @@ of collection data.
     * [.aggregate(fields)](#Pipeline+aggregate) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asEvents(options)](#Pipeline+asEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.select(fieldSpec)](#Pipeline+select) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.take(limit)](#Pipeline+take) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asTimeRangeEvents(options)](#Pipeline+asTimeRangeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asIndexedEvents(options)](#Pipeline+asIndexedEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -378,6 +379,17 @@ Filter the event stream using an operator
 **Params**
 
 - op <code>function</code> - A function that returns true or false
+
+<a name="Pipeline+select"></a>
+
+### pipeline.select(fieldSpec) ⇒ <code>[Pipeline](#Pipeline)</code>
+Select a subset of columns
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- fieldSpec <code>array</code> | <code>String</code> - The columns to include in the output
 
 <a name="Pipeline+take"></a>
 

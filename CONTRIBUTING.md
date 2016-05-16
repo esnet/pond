@@ -27,7 +27,9 @@ new website docs page.  If you are adding a smaller feature you may just wish to
 augment one of the existing docs/website pages.
 
 5. *Tests.* We have mocha tests for this library. Please add tests for any
-new functionality and of course make sure all existing tests pass.
+new functionality and of course make sure all existing tests pass. See the
+[Contributing](./README.md#contributing) section in the README for more
+details on the tests.
 
 The [jQuery guidlines](http://contribute.jquery.org/commits-and-pull-requests/)
 have some good suggestions for rectifying common Git mistakes
