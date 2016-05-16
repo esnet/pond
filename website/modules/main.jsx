@@ -8,9 +8,6 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-// Import the require hook for babel runtime
-import "babel/register";
-
 /* eslint max-len:0 */
 
 import React from "react";

@@ -167,9 +167,24 @@ describe("Events", () => {
                 new Event(t, {a: 1, b: 2, c: 3})
             ];
             const result = Event.sum(events);
-            expect(result[0].get("a")).to.equal(8);
-            expect(result[0].get("b")).to.equal(11);
-            expect(result[0].get("c")).to.equal(14);
+            expect(result.get("a")).to.equal(8);
+            expect(result.get("b")).to.equal(11);
+            expect(result.get("c")).to.equal(14);
+            done();
+        });
+
+        it("can't sum multiple events together if they have different timestamps", done => {
+            const t1 = new Date("2015-04-22T03:30:00Z");
+            const t2 = new Date("2015-04-22T04:00:00Z");
+            const t3 = new Date("2015-04-22T04:30:00Z");
+            const events = [
+                new Event(t1, {a: 5, b: 6, c: 7}),
+                new Event(t2, {a: 2, b: 3, c: 4}),
+                new Event(t3, {a: 1, b: 2, c: 3})
+            ];
+
+            expect(Event.sum.bind(this, events)).to.throw("sum() expects all events to have the same timestamp");
+
             done();
         });
     });
