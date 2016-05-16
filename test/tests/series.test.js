@@ -19,6 +19,7 @@ import Event from "../../src/event";
 import TimeRangeEvent from "../../src/timerangeevent";
 import TimeSeries from "../../src/series.js";
 import TimeRange from "../../src/range.js";
+import { sum, max, avg } from "../../src/functions";
 
 const data = {
     name: "traffic",
@@ -288,6 +289,27 @@ const outageEvents = [
         type: "Planned"
     }
 ];
+
+const sumPart1 = {
+    name: "part1",
+    columns: ["time", "in", "out"],
+    points: [
+        [1400425951000, 1, 6],
+        [1400425952000, 2, 7],
+        [1400425953000, 3, 8],
+        [1400425954000, 4, 9]
+    ]
+};
+const sumPart2 = {
+    name: "part2",
+    columns: ["time", "in", "out"],
+    points: [
+        [1400425951000, 9, 1],
+        [1400425952000, 7, 2],
+        [1400425953000, 5, 3],
+        [1400425954000, 3, 4]
+    ]
+};
 
 describe("TimeSeries", () => {
 
@@ -795,6 +817,64 @@ describe("TimeSeries", () => {
             expect(trafficSeries.at(0).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:12:30 GMT");
             expect(trafficSeries.at(1).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:13:00 GMT");
             expect(trafficSeries.at(2).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:13:30 GMT");
+            done();
+        });
+    });
+
+    describe("TimeSeries sum static function", () => {
+
+        it("can merge two timeseries into a new timeseries that is the sum", (done) => {
+            const part1 = new TimeSeries(sumPart1);
+            const part2 = new TimeSeries(sumPart2);
+            const sum = TimeSeries.sum({name: "sum"}, [part1, part2], ["in", "out"]);
+
+            //10, 9, 8, 7
+            expect(sum.at(0).get("in")).to.equal(10);
+            expect(sum.at(1).get("in")).to.equal(9);
+            expect(sum.at(2).get("in")).to.equal(8);
+            expect(sum.at(3).get("in")).to.equal(7);
+
+            //7, 9, 11, 13
+            expect(sum.at(0).get("out")).to.equal(7);
+            expect(sum.at(1).get("out")).to.equal(9);
+            expect(sum.at(2).get("out")).to.equal(11);
+            expect(sum.at(3).get("out")).to.equal(13);
+
+            done();
+        });
+    });
+
+    describe("TimeSeries collapse", () => {
+
+        it("can collapse a timeseries into a new timeseries that is the sum of two columns", (done) => {
+            const ts = new TimeSeries(sumPart1);
+            const sums = ts.collapse(["in", "out"], "sum", sum, false);
+
+            // 7, 9, 11, 13
+            expect(sums.at(0).get("sum")).to.equal(7);
+            expect(sums.at(1).get("sum")).to.equal(9);
+            expect(sums.at(2).get("sum")).to.equal(11);
+            expect(sums.at(3).get("sum")).to.equal(13);
+
+            done();
+        });
+
+        it("can collapse a timeseries into a new timeseries that is the max of two columns", (done) => {
+            const ts = new TimeSeries(sumPart2);
+            const tss = ts
+                .collapse(["in", "out"], "max_in_out", max)
+                .collapse(["in", "out"], "avg_in_out", avg);
+
+            expect(tss.at(0).get("max_in_out")).to.equal(9);
+            expect(tss.at(1).get("max_in_out")).to.equal(7);
+            expect(tss.at(2).get("max_in_out")).to.equal(5);
+            expect(tss.at(3).get("max_in_out")).to.equal(4);
+
+            expect(tss.at(0).get("avg_in_out")).to.equal(5);
+            expect(tss.at(1).get("avg_in_out")).to.equal(4.5);
+            expect(tss.at(2).get("avg_in_out")).to.equal(4);
+            expect(tss.at(3).get("avg_in_out")).to.equal(3.5);
+
             done();
         });
     });

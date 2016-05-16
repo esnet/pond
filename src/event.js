@@ -266,6 +266,19 @@ class Event {
         return JSON.stringify(this.data());
     }
 
+    /**
+     * Collapses this event's columns, represented by the fieldSpecList
+     * into a single column. The collapsing itself is done with the reducer
+     * function. Optionally the collapsed column could be appended to the
+     * existing columns, or replace them (the default).
+     */
+    collapse(fieldSpecList, name, reducer, append = false) {
+        const data = append ? this.data().toJS() : {};
+        const d = fieldSpecList.map(fs => this.get(fs));
+        data[name] = reducer(d);
+        return this.setData(data);
+    }
+
     /*
     fill(type, arg1, arg2) {
         if (type === "NaN") {
@@ -469,12 +482,30 @@ class Event {
         });
     }
 
+    /**
+     * Sum takes multiple events of the same time and uses
+     * combine() to add them together
+     */
     static sum(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, sum);
+        // Since all the events should be of the same time
+        // we can just take the first result from combine
+        let t;
+        events.forEach(e => {
+            if (!t) t = e.timestamp().getTime();
+            if (t !== e.timestamp().getTime()) {
+                throw new Error("sum() expects all events to have the same timestamp");
+            }
+        });
+
+        return Event.combine(events, fieldSpec, sum)[0];
     }
 
+    /**
+     * Avg takes multiple events of the same time and uses
+     * combine() to avg them
+     */
     static avg(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, avg);
+        return Event.combine(events, fieldSpec, avg)[0];
     }
 
     /**

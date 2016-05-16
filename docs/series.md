@@ -105,8 +105,11 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.begin()](#TimeSeries+begin) ⇒ <code>Date</code>
         * [.end()](#TimeSeries+end) ⇒ <code>Date</code>
         * [.at()](#TimeSeries+at)
+        * [.setCollection(collection)](#TimeSeries+setCollection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.bisect()](#TimeSeries+bisect)
         * [.slice()](#TimeSeries+slice)
+        * [.clean()](#TimeSeries+clean)
+        * [.collapse(fieldSpecList, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>Collection</code>
         * [.events()](#TimeSeries+events)
         * [.index()](#TimeSeries+index)
         * [.collection()](#TimeSeries+collection)
@@ -116,6 +119,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.count()](#TimeSeries+count) ⇒ <code>number</code>
     * _static_
         * [.equal()](#TimeSeries.equal)
+        * [.sum(data, seriesList, fieldSpec)](#TimeSeries.sum) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 
 <a name="TimeSeries+toJSON"></a>
 
@@ -155,6 +159,17 @@ Gets the latest time represented in the TimeSeries.
 Access the series events via index
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+setCollection"></a>
+
+### timeSeries.setCollection(collection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Sets a new underlying collection for this TimeSeries.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - A new TimeSeries  
+**Params**
+
+- collection <code>Collection</code> - The new collection
+
 <a name="TimeSeries+bisect"></a>
 
 ### timeSeries.bisect()
@@ -174,6 +189,30 @@ TimeSeries representing a portion of this TimeSeries from begin up to
 but not including end.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+clean"></a>
+
+### timeSeries.clean()
+Perform a basic cleaning operation of the fieldSpec specified
+by removing all events in the underlying collection which are
+NaN, null or undefined.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+collapse"></a>
+
+### timeSeries.collapse(fieldSpecList, name, reducer, append) ⇒ <code>Collection</code>
+Takes a fieldSpecList (list of column names) and collapses
+them to a new column which is the reduction of the matched columns
+in the fieldSpecList.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>Collection</code> - A new, modified, Collection  
+**Params**
+
+- fieldSpecList <code>array</code> - The list of columns
+- name <code>string</code> - The resulting summed column name
+- reducer <code>function</code> - Reducer function e.g. sum
+- append <code>boolean</code> <code> = true</code> - Append the summed column, rather than replace
+
 <a name="TimeSeries+events"></a>
 
 ### timeSeries.events()
@@ -223,3 +262,23 @@ Returns the number of rows in the series. (Same as size())
 STATIC
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries.sum"></a>
+
+### TimeSeries.sum(data, seriesList, fieldSpec) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Takes a list of TimeSeries and sums them together to form a new
+Timeseries.
+
+**Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting TimeSeries  
+**Params**
+
+- data <code>object</code> - Meta data for the new TimeSeries
+- seriesList <code>array</code> - A list of TimeSeries
+- fieldSpec <code>object</code> | <code>array</code> | <code>string</code> - Which fields to use in the sum
+
+**Example**  
+```
+const ts1 = new TimeSeries(weather1);
+const ts2 = new TimeSeries(weather2);
+const sum = TimeSeries.sum({name: "sum"}, [ts1, ts2], ["temp"]);
+```

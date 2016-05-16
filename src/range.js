@@ -344,6 +344,15 @@ class TimeRange {
         const beginTime = endTime.clone().subtract(90, "days");
         return new TimeRange(beginTime, endTime);
     }
+
+    /**
+     * @return {TimeRange} The last year, as a TimeRange
+     */
+    static lastYear() {
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(1, "year");
+        return new TimeRange(beginTime, endTime);
+    }
 }
 
 export default TimeRange;

@@ -56,6 +56,7 @@ var range = new TimeRange([1326309060000, 1329941520000]);
         * [.lastThirtyDays()](#TimeRange.lastThirtyDays) ⇒ <code>[TimeRange](#TimeRange)</code>
         * [.lastMonth()](#TimeRange.lastMonth) ⇒ <code>[TimeRange](#TimeRange)</code>
         * [.lastNinetyDays()](#TimeRange.lastNinetyDays) ⇒ <code>[TimeRange](#TimeRange)</code>
+        * [.lastYear()](#TimeRange.lastYear) ⇒ <code>[TimeRange](#TimeRange)</code>
 
 <a name="new_TimeRange_new"></a>
 
@@ -274,3 +275,8 @@ other combined.
 ### TimeRange.lastNinetyDays() ⇒ <code>[TimeRange](#TimeRange)</code>
 **Kind**: static method of <code>[TimeRange](#TimeRange)</code>  
 **Returns**: <code>[TimeRange](#TimeRange)</code> - The last 90 days, as a TimeRange  
+<a name="TimeRange.lastYear"></a>
+
+### TimeRange.lastYear() ⇒ <code>[TimeRange](#TimeRange)</code>
+**Kind**: static method of <code>[TimeRange](#TimeRange)</code>  
+**Returns**: <code>[TimeRange](#TimeRange)</code> - The last year, as a TimeRange  

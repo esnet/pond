@@ -283,6 +283,17 @@ class TimeSeries {
     }
 
     /**
+     * Sets a new underlying collection for this TimeSeries.
+     * @param {Collection} collection The new collection
+     * @return {TimeSeries} A new TimeSeries
+     */
+    setCollection(collection) {
+        const result = new TimeSeries(this);
+        result._collection = collection;
+        return result;
+    }
+
+    /**
      * Finds the index that is just less than the time t supplied.
      * In other words every event at the returned index or less
      * has a time before the supplied t, and every sample after the
@@ -301,16 +312,34 @@ class TimeSeries {
      */
     slice(begin, end) {
         const sliced = this._collection.slice(begin, end);
-        const result = new TimeSeries(this);
-        result._collection = sliced;
-        return result;
+        return this.setCollection(sliced);
     }
 
+    /**
+     * Perform a basic cleaning operation of the fieldSpec specified
+     * by removing all events in the underlying collection which are
+     * NaN, null or undefined.
+     */
     clean(fieldSpec) {
         const cleaned = this._collection.clean(fieldSpec);
-        const result = new TimeSeries(this);
-        result._collection = cleaned;
-        return result;
+        return this.setCollection(cleaned);
+    }
+
+    /**
+     * Takes a fieldSpecList (list of column names) and collapses
+     * them to a new column which is the reduction of the matched columns
+     * in the fieldSpecList.
+     *
+     * @param  {array}      fieldSpecList  The list of columns
+     * @param  {string}     name           The resulting summed column name
+     * @param  {function}   reducer        Reducer function e.g. sum
+     * @param  {boolean}    append         Append the summed column, rather than replace
+     * @return {Collection}                A new, modified, Collection
+     */
+    collapse(fieldSpecList, name, reducer, append = true) {
+        const collapsed =
+            this._collection.collapse(fieldSpecList, name, reducer, append);
+        return this.setCollection(collapsed);
     }
 
     /**
@@ -471,7 +500,7 @@ class TimeSeries {
                 Immutable.is(series1._times, series2._times));
     }
 
-    static map(data, seriesList, mapper) {
+    static map(data, seriesList, mapper, fieldSpec) {
         // for each series, map events to the same timestamp/index
         const eventMap = {};
         _.each(seriesList, (series) => {
@@ -496,15 +525,35 @@ class TimeSeries {
         // for each key, merge the events associated with that key
         const events = [];
         _.each(eventMap, (eventsList) => {
-            const event = mapper(eventsList);
+            const event = mapper(eventsList, fieldSpec);
             events.push(event);
         });
 
         return new TimeSeries({...data, events});
     }
 
-    static merge(data, seriesList) {
-        return TimeSeries.map(data, seriesList, Event.merge);
+    static merge(data, seriesList, fieldSpec) {
+        return TimeSeries.map(data, seriesList, Event.merge, fieldSpec);
+    }
+
+    /**
+     * Takes a list of TimeSeries and sums them together to form a new
+     * Timeseries.
+     * @example
+     *
+     * ```
+     * const ts1 = new TimeSeries(weather1);
+     * const ts2 = new TimeSeries(weather2);
+     * const sum = TimeSeries.sum({name: "sum"}, [ts1, ts2], ["temp"]);
+     * ```
+     *
+     * @param  {object}              data       Meta data for the new TimeSeries
+     * @param  {array}               seriesList A list of TimeSeries
+     * @param  {object|array|string} fieldSpec  Which fields to use in the sum
+     * @return {TimeSeries}                     The resulting TimeSeries
+     */
+    static sum(data, seriesList, fieldSpec) {
+        return TimeSeries.map(data, seriesList, Event.sum, fieldSpec);
     }
 }
 

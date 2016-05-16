@@ -301,10 +301,10 @@ class Collection extends BoundedIn {
      * true or false when passed in an event.
      * @return {Collection} A new, modified, Collection.
      */
-    filter(func) {
+    filter(filterFunc) {
         const filteredEventList = [];
         for (const e of this.events()) {
-            if (func(e)) {
+            if (filterFunc(e)) {
                 filteredEventList.push(e);
             }
         }
@@ -318,10 +318,10 @@ class Collection extends BoundedIn {
      * a new event when passed in the old event.
      * @return {Collection} A new, modified, Collection.
      */
-    map(func) {
+    map(mapFunc) {
         const result = [];
         for (const e of this.events()) {
-            result.push(func(e));
+            result.push(mapFunc(e));
         }
         return new Collection(result);
     }
@@ -332,8 +332,8 @@ class Collection extends BoundedIn {
      *
      * The resulting Collection will be clean (for that fieldSpec).
      *
-     * @param {string} fieldSpec The field to test
-     * @return {Collection} A new, modified, Collection.
+     * @param {string}      fieldSpec The field to test
+     * @return {Collection}           A new, modified, Collection.
      */
     clean(fieldSpec = "value") {
         const fs = this._fieldSpecToArray(fieldSpec);
@@ -344,6 +344,22 @@ class Collection extends BoundedIn {
             }
         }
         return new Collection(filteredEvents);
+    }
+
+    /**
+     * Takes a fieldSpecList (list of column names) and collapses
+     * them to a new column which is the reduction of the matched columns
+     * in the fieldSpecList.
+     *
+     * @param  {array}      fieldSpecList  The list of columns
+     * @param  {string}     name           The resulting summed column name
+     * @param  {function}   reducer        Reducer function e.g. sum
+     * @param  {boolean}    append         Append the summed column, rather than replace
+     * @return {Collection}                A new, modified, Collection
+     */
+    collapse(fieldSpecList, name, reducer, append = true) {
+        const fsl = fieldSpecList.map(fieldSpec => this._fieldSpecToArray(fieldSpec));
+        return this.map(e => e.collapse(fsl, name, reducer, append));
     }
 
     //

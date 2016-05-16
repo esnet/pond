@@ -92,10 +92,13 @@ to fetch the whole data object, which will be an Immutable Map.
         * [.setData()](#Event+setData)
         * [.get()](#Event+get)
         * [.value()](#Event+value)
+        * [.collapse()](#Event+collapse)
     * _static_
         * [.isValidValue()](#Event.isValidValue)
         * [.selector()](#Event.selector)
         * [.combine()](#Event.combine)
+        * [.sum()](#Event.sum)
+        * [.avg()](#Event.avg)
         * [.map()](#Event.map)
         * [.reduce()](#Event.reduce)
 
@@ -193,6 +196,15 @@ A fieldSpec could be "a.b"
 Alias for get()
 
 **Kind**: instance method of <code>[Event](#Event)</code>  
+<a name="Event+collapse"></a>
+
+### event.collapse()
+Collapses this event's columns, represented by the fieldSpecList
+into a single column. The collapsing itself is done with the reducer
+function. Optionally the collapsed column could be appended to the
+existing columns, or replace them (the default).
+
+**Kind**: instance method of <code>[Event](#Event)</code>  
 <a name="Event.isValidValue"></a>
 
 ### Event.isValidValue()
@@ -219,6 +231,20 @@ The function returns a new event.
 Combines multiple events with the same time together
 to form a new event. Doesn't currently work on IndexedEvents
 or TimeRangeEvents.
+
+**Kind**: static method of <code>[Event](#Event)</code>  
+<a name="Event.sum"></a>
+
+### Event.sum()
+Sum takes multiple events of the same time and uses
+combine() to add them together
+
+**Kind**: static method of <code>[Event](#Event)</code>  
+<a name="Event.avg"></a>
+
+### Event.avg()
+Avg takes multiple events of the same time and uses
+combine() to avg them
 
 **Kind**: static method of <code>[Event](#Event)</code>  
 <a name="Event.map"></a>

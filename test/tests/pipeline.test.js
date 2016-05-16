@@ -27,7 +27,7 @@ import Event from "../../src/event";
 import TimeRangeEvent from "../../src/timerangeevent";
 import IndexedEvent from "../../src/indexedevent";
 
-import { keep, avg } from "../../src/functions.js";
+import { keep, avg, sum } from "../../src/functions.js";
 
 const eventList1 = [
     new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
@@ -713,6 +713,25 @@ describe("Pipeline", () => {
         });
     });
 
+    describe("Collapsing in batch", () => {
+
+        it("should be able collapse a subset of columns", done => {
+
+            const timeseries = new TimeSeries(inOutData);
+            Pipeline()
+                .from(timeseries)
+                .collapse(["in", "out"], "in_out_sum", sum)
+                .emitOn("flush")
+                .to(CollectionOut, c => {
+                    const ts = new TimeSeries({name: "subset", collection: c});
+                    expect(ts.at(0).get("in_out_sum")).to.equal(117);
+                    expect(ts.at(1).get("in_out_sum")).to.equal(110);
+                    expect(ts.at(2).get("in_out_sum")).to.equal(108);
+                    done();
+                }, /*flush=*/true);
+        });
+    });
+
     describe("Take n events in batch", () => {
 
         it("should be able to take 10 events from a TimeSeries", done => {
@@ -758,7 +777,7 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .filter(e => e.value() > 65)
                 .take(10)
-                .emitOn("flush")    // emit result on each event
+                .emitOn("flush")    // emit result on end of batch
                 .to(CollectionOut, collection => {
                     result = collection;
                 }, true);
@@ -779,7 +798,7 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .groupBy(e => e.value() > 65 ? "high" : "low")
                 .take(10)
-                .emitOn("flush")    // emit result on each event
+                .emitOn("flush")    // emit result on end of batch
                 .to(CollectionOut, (collection, windowKey, groupByKey) => {
                     result[groupByKey] = collection;
                 }, true);
