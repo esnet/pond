@@ -463,6 +463,7 @@ describe("TimeSeries", () => {
             expect(TimeSeries.is(series, otherSeries)).to.be.true;
             done();
         });
+
     });
 
     describe("TimeSeries reducing functions", () => {

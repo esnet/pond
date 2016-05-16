@@ -479,6 +479,20 @@ class Collection extends BoundedIn {
             return fieldSpec.split(".");
         }
     }
+
+    /**
+     * STATIC
+     */
+
+    static equal(collection1, collection2) {
+        return (collection1._type === collection2._type &&
+                collection1._eventList === collection2._eventList);
+    }
+
+    static is(collection1, collection2) {
+        return (collection1._type === collection2._type &&
+                Immutable.is(collection1._eventList, collection2._eventList));
+    }
 }
 
 export default Collection;
