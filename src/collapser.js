@@ -35,7 +35,7 @@ export default class Collapser extends Processor {
             this._reducer = options.reducer;
             this._append = options.append;
         } else {
-            throw new Error("Unknown arg to filter constructor", arg1);
+            throw new Error("Unknown arg to Collapser constructor", arg1);
         }
     }
 

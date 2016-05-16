@@ -46,7 +46,7 @@ in Pipeline event processing.
     * [.filter(func)](#Collection+filter) ⇒ <code>[Collection](#Collection)</code>
     * [.map(func)](#Collection+map) ⇒ <code>[Collection](#Collection)</code>
     * [.clean(fieldSpec)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
-    * [.collapse(fieldSpecList, nane, reducer, append)](#Collection+collapse) ⇒ <code>[Collection](#Collection)</code>
+    * [.collapse(fieldSpecList, name, reducer, append)](#Collection+collapse) ⇒ <code>[Collection](#Collection)</code>
     * [.count()](#Collection+count) ⇒ <code>number</code>
     * [.first()](#Collection+first)
     * [.last()](#Collection+last)
@@ -271,7 +271,7 @@ The resulting Collection will be clean (for that fieldSpec).
 
 <a name="Collection+collapse"></a>
 
-### collection.collapse(fieldSpecList, nane, reducer, append) ⇒ <code>[Collection](#Collection)</code>
+### collection.collapse(fieldSpecList, name, reducer, append) ⇒ <code>[Collection](#Collection)</code>
 Takes a fieldSpecList (list of column names) and collapses
 them to a new column which is the reduction of the matched columns
 in the fieldSpecList.
@@ -281,9 +281,9 @@ in the fieldSpecList.
 **Params**
 
 - fieldSpecList <code>array</code> - The list of columns
-- nane <code>string</code> - The resulting summed column name
+- name <code>string</code> - The resulting summed column name
 - reducer <code>function</code> - Reducer function e.g. sum
-- append <code>boolean</code> - Append the summed column, rather than replace
+- append <code>boolean</code> <code> = true</code> - Append the summed column, rather than replace
 
 <a name="Collection+count"></a>
 

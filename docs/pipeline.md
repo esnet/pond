@@ -171,6 +171,7 @@ of collection data.
     * [.asEvents(options)](#Pipeline+asEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.select(fieldSpec)](#Pipeline+select) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.collapse(fieldSpec, name, append)](#Pipeline+collapse) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.take(limit)](#Pipeline+take) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asTimeRangeEvents(options)](#Pipeline+asTimeRangeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asIndexedEvents(options)](#Pipeline+asIndexedEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -390,6 +391,19 @@ Select a subset of columns
 **Params**
 
 - fieldSpec <code>array</code> | <code>String</code> - The columns to include in the output
+
+<a name="Pipeline+collapse"></a>
+
+### pipeline.collapse(fieldSpec, name, append) ⇒ <code>[Pipeline](#Pipeline)</code>
+Select a subset of columns
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- fieldSpec <code>array</code> | <code>String</code> - The columns to include in the output
+- name <code>string</code> - The result column name
+- append <code>boolean</code> - Add the new column to the existing ones, or replace them.
 
 <a name="Pipeline+take"></a>
 

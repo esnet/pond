@@ -109,7 +109,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.bisect()](#TimeSeries+bisect)
         * [.slice()](#TimeSeries+slice)
         * [.clean()](#TimeSeries+clean)
-        * [.collapse(fieldSpecList, nane, reducer, append)](#TimeSeries+collapse) ⇒ <code>Collection</code>
+        * [.collapse(fieldSpecList, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>Collection</code>
         * [.events()](#TimeSeries+events)
         * [.index()](#TimeSeries+index)
         * [.collection()](#TimeSeries+collection)
@@ -199,7 +199,7 @@ NaN, null or undefined.
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+collapse"></a>
 
-### timeSeries.collapse(fieldSpecList, nane, reducer, append) ⇒ <code>Collection</code>
+### timeSeries.collapse(fieldSpecList, name, reducer, append) ⇒ <code>Collection</code>
 Takes a fieldSpecList (list of column names) and collapses
 them to a new column which is the reduction of the matched columns
 in the fieldSpecList.
@@ -209,9 +209,9 @@ in the fieldSpecList.
 **Params**
 
 - fieldSpecList <code>array</code> - The list of columns
-- nane <code>string</code> - The resulting summed column name
+- name <code>string</code> - The resulting summed column name
 - reducer <code>function</code> - Reducer function e.g. sum
-- append <code>boolean</code> - Append the summed column, rather than replace
+- append <code>boolean</code> <code> = true</code> - Append the summed column, rather than replace
 
 <a name="TimeSeries+events"></a>
 

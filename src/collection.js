@@ -352,7 +352,7 @@ class Collection extends BoundedIn {
      * in the fieldSpecList.
      *
      * @param  {array}      fieldSpecList  The list of columns
-     * @param  {string}     nane           The resulting summed column name
+     * @param  {string}     name           The resulting summed column name
      * @param  {function}   reducer        Reducer function e.g. sum
      * @param  {boolean}    append         Append the summed column, rather than replace
      * @return {Collection}                A new, modified, Collection
