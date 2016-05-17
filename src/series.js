@@ -326,23 +326,6 @@ class TimeSeries {
     }
 
     /**
-     * Takes a fieldSpecList (list of column names) and collapses
-     * them to a new column which is the reduction of the matched columns
-     * in the fieldSpecList.
-     *
-     * @param  {array}      fieldSpecList  The list of columns
-     * @param  {string}     name           The resulting summed column name
-     * @param  {function}   reducer        Reducer function e.g. sum
-     * @param  {boolean}    append         Append the summed column, rather than replace
-     * @return {Collection}                A new, modified, Collection
-     */
-    collapse(fieldSpecList, name, reducer, append = true) {
-        const collapsed =
-            this._collection.collapse(fieldSpecList, name, reducer, append);
-        return this.setCollection(collapsed);
-    }
-
-    /**
      *  Generator to allow for..of loops over series.events()
      */
     * events() {
@@ -465,17 +448,53 @@ class TimeSeries {
         return this._collection.aggregate(func, fieldSpec);
     }
 
+    /**
+     * Returns a new Pipeline with input source being this TimeSeries.
+     * @return {Pipeline} The Pipeline.
+     */
     pipeline() {
         return new Pipeline()
             .from(this._collection);
     }
 
+    /**
+     * Takes a fieldSpec (list of column names) and outputs to the callback just those
+     * columns in a new TimeSeries.
+     *
+     * @param  {array}      fieldSpec     The list of columns
+     * @param  {function}   cb            Callback containing a collapsed TimeSeries
+     */
     select(fieldSpec, cb) {
         this.pipeline()
             .select(fieldSpec)
             .to(CollectionOut, collection => {
-                cb(new TimeSeries({...this._data.toJSON(), collection}));
+                cb(this.setCollection(collection));
             });
+    }
+
+    /**
+     * Takes a fieldSpec (list of column names) and collapses
+     * them to a new column named `name` which is the reduction (using
+     * the `reducer` function) of the matched columns in the fieldSpecList.
+     *
+     * The column may be appended to the existing columns, or replace them,
+     * using the `append` boolean.
+     *
+     * The result, a new TimeSeries, will be passed to the supplied callback.
+     *
+     * @param  {array}      fieldSpec      The list of columns
+     * @param  {string}     name           The resulting summed column name
+     * @param  {function}   reducer        Reducer function e.g. sum
+     * @param  {boolean}    append         Append the summed column, rather than replace
+     * @param  {function}   cb             Callback containing a collapsed TimeSeries
+     */
+    collapse(fieldSpec, name, reducer, append, cb) {
+        this.pipeline()
+            .collapse(fieldSpec, name, reducer, append)
+            .emitOn("flush")
+            .to(CollectionOut, collection => {
+                cb(this.setCollection(collection));
+            }, true);
     }
 
     /**

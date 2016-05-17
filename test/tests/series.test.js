@@ -19,7 +19,7 @@ import Event from "../../src/event";
 import TimeRangeEvent from "../../src/timerangeevent";
 import TimeSeries from "../../src/series.js";
 import TimeRange from "../../src/range.js";
-import { sum, max, avg } from "../../src/functions";
+import { sum, max } from "../../src/functions";
 
 const data = {
     name: "traffic",
@@ -848,35 +848,28 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the sum of two columns", (done) => {
             const ts = new TimeSeries(sumPart1);
-            const sums = ts.collapse(["in", "out"], "sum", sum, false);
+            ts.collapse(["in", "out"], "sum", sum, false, sums => {
+                expect(sums.at(0).get("sum")).to.equal(7);
+                expect(sums.at(1).get("sum")).to.equal(9);
+                expect(sums.at(2).get("sum")).to.equal(11);
+                expect(sums.at(3).get("sum")).to.equal(13);
 
-            // 7, 9, 11, 13
-            expect(sums.at(0).get("sum")).to.equal(7);
-            expect(sums.at(1).get("sum")).to.equal(9);
-            expect(sums.at(2).get("sum")).to.equal(11);
-            expect(sums.at(3).get("sum")).to.equal(13);
-
-            done();
+                done();
+            });
         });
 
         it("can collapse a timeseries into a new timeseries that is the max of two columns", (done) => {
-            const ts = new TimeSeries(sumPart2);
-            const tss = ts
-                .collapse(["in", "out"], "max_in_out", max)
-                .collapse(["in", "out"], "avg_in_out", avg);
-
-            expect(tss.at(0).get("max_in_out")).to.equal(9);
-            expect(tss.at(1).get("max_in_out")).to.equal(7);
-            expect(tss.at(2).get("max_in_out")).to.equal(5);
-            expect(tss.at(3).get("max_in_out")).to.equal(4);
-
-            expect(tss.at(0).get("avg_in_out")).to.equal(5);
-            expect(tss.at(1).get("avg_in_out")).to.equal(4.5);
-            expect(tss.at(2).get("avg_in_out")).to.equal(4);
-            expect(tss.at(3).get("avg_in_out")).to.equal(3.5);
-
-            done();
+            const timeseries = new TimeSeries(sumPart2);
+            timeseries
+                .collapse(["in", "out"], "max_in_out", max, true, ts => {
+                    expect(ts.at(0).get("max_in_out")).to.equal(9);
+                    expect(ts.at(1).get("max_in_out")).to.equal(7);
+                    expect(ts.at(2).get("max_in_out")).to.equal(5);
+                    expect(ts.at(3).get("max_in_out")).to.equal(4);
+                    done();
+                });
         });
+
     });
 
     describe("TimeSeries column selection", () => {

@@ -109,7 +109,6 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.bisect()](#TimeSeries+bisect)
         * [.slice()](#TimeSeries+slice)
         * [.clean()](#TimeSeries+clean)
-        * [.collapse(fieldSpecList, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>Collection</code>
         * [.events()](#TimeSeries+events)
         * [.index()](#TimeSeries+index)
         * [.collection()](#TimeSeries+collection)
@@ -117,6 +116,9 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.size()](#TimeSeries+size)
         * [.sizeValid()](#TimeSeries+sizeValid)
         * [.count()](#TimeSeries+count) ⇒ <code>number</code>
+        * [.pipeline()](#TimeSeries+pipeline) ⇒ <code>Pipeline</code>
+        * [.select(fieldSpec, cb)](#TimeSeries+select)
+        * [.collapse(fieldSpec, name, reducer, append, cb)](#TimeSeries+collapse)
     * _static_
         * [.equal()](#TimeSeries.equal)
         * [.sum(data, seriesList, fieldSpec)](#TimeSeries.sum) ⇒ <code>[TimeSeries](#TimeSeries)</code>
@@ -197,22 +199,6 @@ by removing all events in the underlying collection which are
 NaN, null or undefined.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-<a name="TimeSeries+collapse"></a>
-
-### timeSeries.collapse(fieldSpecList, name, reducer, append) ⇒ <code>Collection</code>
-Takes a fieldSpecList (list of column names) and collapses
-them to a new column which is the reduction of the matched columns
-in the fieldSpecList.
-
-**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>Collection</code> - A new, modified, Collection  
-**Params**
-
-- fieldSpecList <code>array</code> - The list of columns
-- name <code>string</code> - The resulting summed column name
-- reducer <code>function</code> - Reducer function e.g. sum
-- append <code>boolean</code> <code> = true</code> - Append the summed column, rather than replace
-
 <a name="TimeSeries+events"></a>
 
 ### timeSeries.events()
@@ -256,6 +242,46 @@ Returns the number of rows in the series. (Same as size())
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>number</code> - Size of the series  
+<a name="TimeSeries+pipeline"></a>
+
+### timeSeries.pipeline() ⇒ <code>Pipeline</code>
+Returns a new Pipeline with input source being this TimeSeries.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>Pipeline</code> - The Pipeline.  
+<a name="TimeSeries+select"></a>
+
+### timeSeries.select(fieldSpec, cb)
+Takes a fieldSpec (list of column names) and outputs to the callback just those
+columns in a new TimeSeries.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Params**
+
+- fieldSpec <code>array</code> - The list of columns
+- cb <code>function</code> - Callback containing a collapsed TimeSeries
+
+<a name="TimeSeries+collapse"></a>
+
+### timeSeries.collapse(fieldSpec, name, reducer, append, cb)
+Takes a fieldSpec (list of column names) and collapses
+them to a new column named `name` which is the reduction (using
+the `reducer` function) of the matched columns in the fieldSpecList.
+
+The column may be appended to the existing columns, or replace them,
+using the `append` boolean.
+
+The result, a new TimeSeries, will be passed to the supplied callback.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Params**
+
+- fieldSpec <code>array</code> - The list of columns
+- name <code>string</code> - The resulting summed column name
+- reducer <code>function</code> - Reducer function e.g. sum
+- append <code>boolean</code> - Append the summed column, rather than replace
+- cb <code>function</code> - Callback containing a collapsed TimeSeries
+
 <a name="TimeSeries.equal"></a>
 
 ### TimeSeries.equal()

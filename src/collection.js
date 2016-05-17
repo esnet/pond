@@ -346,22 +346,6 @@ class Collection extends BoundedIn {
         return new Collection(filteredEvents);
     }
 
-    /**
-     * Takes a fieldSpecList (list of column names) and collapses
-     * them to a new column which is the reduction of the matched columns
-     * in the fieldSpecList.
-     *
-     * @param  {array}      fieldSpecList  The list of columns
-     * @param  {string}     name           The resulting summed column name
-     * @param  {function}   reducer        Reducer function e.g. sum
-     * @param  {boolean}    append         Append the summed column, rather than replace
-     * @return {Collection}                A new, modified, Collection
-     */
-    collapse(fieldSpecList, name, reducer, append = true) {
-        const fsl = fieldSpecList.map(fieldSpec => this._fieldSpecToArray(fieldSpec));
-        return this.map(e => e.collapse(fsl, name, reducer, append));
-    }
-
     //
     // Aggregate the event list to a single value
     //
