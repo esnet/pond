@@ -169,6 +169,7 @@ of collection data.
     * [.offsetBy(by, fieldSpec)](#Pipeline+offsetBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.aggregate(fields)](#Pipeline+aggregate) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asEvents(options)](#Pipeline+asEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.map(op)](#Pipeline+map) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.select(fieldSpec)](#Pipeline+select) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.collapse(fieldSpec, name, append)](#Pipeline+collapse) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -369,6 +370,17 @@ to convert a time range to a single time. There are three options:
  1. use the beginning time (options = {alignment: "lag"})
  2. use the center time (options = {alignment: "center"})
  3. use the end time (options = {alignment: "lead"})
+
+<a name="Pipeline+map"></a>
+
+### pipeline.map(op) ⇒ <code>[Pipeline](#Pipeline)</code>
+Map the event stream using an operator
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- op <code>function</code> - A function that returns a new Event
 
 <a name="Pipeline+filter"></a>
 

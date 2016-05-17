@@ -458,6 +458,23 @@ class TimeSeries {
     }
 
     /**
+     * Takes an operator that is used to remap events from this TimeSeries to
+     * a new set of Events. The result is returned via the callback.
+     *
+     * @param  {function}   operator      An operator which will be passed each event and
+     *                                    which should return a new event.
+     * @param  {function}   cb            Callback containing a collapsed TimeSeries
+     */
+    map(op, cb) {
+        this.pipeline()
+            .emitOn("flush")
+            .map(op)
+            .to(CollectionOut, collection => {
+                cb(this.setCollection(collection));
+            }, true);
+    }
+
+    /**
      * Takes a fieldSpec (list of column names) and outputs to the callback just those
      * columns in a new TimeSeries.
      *
@@ -466,10 +483,11 @@ class TimeSeries {
      */
     select(fieldSpec, cb) {
         this.pipeline()
+            .emitOn("flush")
             .select(fieldSpec)
             .to(CollectionOut, collection => {
                 cb(this.setCollection(collection));
-            });
+            }, true);
     }
 
     /**

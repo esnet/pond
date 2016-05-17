@@ -26,6 +26,8 @@ import TimeRangeEvent from "./timerangeevent";
 import IndexedEvent from "./indexedevent";
 import Selector from "./selector";
 import Collapser from "./collapser";
+import Mapper from "./mapper";
+
 
 /**
  * A runner is used to extract the chain of processing operations
@@ -561,6 +563,22 @@ class Pipeline {
             prev: this.last() ? this.last() : this
         });
         
+        return this._append(p);
+    }
+
+    /**
+     * Map the event stream using an operator
+     *
+     * @param  {function} op A function that returns a new Event
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    map(op) {
+        const p = new Mapper(this, {
+            op,
+            prev: this.last() ? this.last() : this
+        });
+
         return this._append(p);
     }
 

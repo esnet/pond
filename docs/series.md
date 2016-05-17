@@ -117,6 +117,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.sizeValid()](#TimeSeries+sizeValid)
         * [.count()](#TimeSeries+count) ⇒ <code>number</code>
         * [.pipeline()](#TimeSeries+pipeline) ⇒ <code>Pipeline</code>
+        * [.map(operator, cb)](#TimeSeries+map)
         * [.select(fieldSpec, cb)](#TimeSeries+select)
         * [.collapse(fieldSpec, name, reducer, append, cb)](#TimeSeries+collapse)
     * _static_
@@ -249,6 +250,19 @@ Returns a new Pipeline with input source being this TimeSeries.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>Pipeline</code> - The Pipeline.  
+<a name="TimeSeries+map"></a>
+
+### timeSeries.map(operator, cb)
+Takes an operator that is used to remap events from this TimeSeries to
+a new set of Events. The result is returned via the callback.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Params**
+
+- operator <code>function</code> - An operator which will be passed each event and
+                                   which should return a new event.
+- cb <code>function</code> - Callback containing a collapsed TimeSeries
+
 <a name="TimeSeries+select"></a>
 
 ### timeSeries.select(fieldSpec, cb)

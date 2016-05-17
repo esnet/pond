@@ -757,6 +757,25 @@ describe("Pipeline", () => {
 
     });
 
+    describe("Mapping in batch", () => {
+
+        it("should be able map one event to a modified event", done => {
+
+            const timeseries = new TimeSeries(inOutData);
+            Pipeline()
+                .from(timeseries)
+                .map(e => e.setData({in: e.get("out"), out: e.get("in")}))
+                .emitOn("flush")
+                .to(CollectionOut, c => {
+                    const ts = new TimeSeries({name: "subset", collection: c});
+                    expect(ts.at(0).get("in")).to.equal(37);
+                    expect(ts.at(0).get("out")).to.equal(80);
+                    expect(ts.size()).to.equal(3);
+                    done();
+                }, /*flush=*/true);
+        });
+    });
+
     describe("Take n events in batch", () => {
 
         it("should be able to take 10 events from a TimeSeries", done => {

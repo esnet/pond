@@ -163,9 +163,9 @@ const trafficNEWYtoBNL = {
     name: "NEWY to BNL",
     columns: ["time","out"],
     points: [
-        [1441051950000,22034579982.4],
-        [1441051980000,24783871443.2],
-        [1441052010000,26907368572.800003]
+        [1441051950000, 22034579982.4],
+        [1441051980000, 24783871443.2],
+        [1441052010000, 26907368572.800003]
     ]
 };
 
@@ -897,6 +897,23 @@ describe("TimeSeries", () => {
 
             done();
         }));
+    });
+
+    describe("TimeSeries remapping", () => {
+
+        it("can reverse the values in this timeseries", (done) => {
+            const timeseries = new TimeSeries(interfaceData);
+            expect(timeseries.columns()).to.eql(["in", "out"]);
+
+            timeseries.map(e => e.setData({in: e.get("out"), out: e.get("in")}), ts => {
+                expect(ts.at(0).get("in")).to.equal(34);
+                expect(ts.at(0).get("out")).to.equal(52);
+                expect(ts.size()).to.equal(timeseries.size());
+            });
+
+            done();
+        });
+
     });
 
 });
