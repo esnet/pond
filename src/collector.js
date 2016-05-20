@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2016, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -9,96 +9,110 @@
  */
 
 import _ from "underscore";
-import Generator from "./generator";
+import Collection from "./collection";
+import Index from "./index";
 
 /**
- * A collector takes the following options:
+ * A Collector is used to accumulate events into multiple collections,
+ * based on potentially many strategies. In this current implementation
+ * a collection is partitioned based on the window that it falls in
+ * and the group it is part of.
  *
- *     - 'window'        - size of the window to collect over (e.g. "1d")
- *     - 'convertToTimes'- to transform IndexedEvents to Events during collection
- *     - 'emit'         - (optional) Rate to emit events. Either:
- *                             "always" - emit an event on every change
- *                             "next" - just when we advance to the next bucket
- *
- * TODO: It might make more sense to make an event transformer for
- *       converting between a stream of IndexedEvents to Events...
+ * Collections are emitted from this class to the supplied onTrigger
+ * callback.
  */
 export default class Collector {
 
-    constructor(options, observer) {
-        if (!_.has(options, "window")) {
-            throw new Error("Collector: constructor needs 'window' in options");
-        }
-        this._emitFrequency = options.emit || "next";
-        if (["always", "next"].indexOf(this._emitFrequency) === -1) {
-            throw new Error("Collector: emitFrequency options should be 'always' or 'next'");
-        }
-        this._convertToTimes = options.convertToTimes || false;
-        this._generator = new Generator(options.window);
-        this._buckets = {};
-        this._observer = observer;
+    constructor(options, onTrigger) {
+
+        const {
+            windowType,
+            windowDuration,
+            groupBy,
+            emitOn
+        } = options;
+
+        this._groupBy = groupBy;
+        this._emitOn = emitOn;
+        this._windowType = windowType;
+        this._windowDuration = windowDuration;
+
+        // Callback for trigger
+        this._onTrigger = onTrigger;
+
+        // Maintained collections
+        this._collections = {};
     }
 
-    /**
-     * Forces the current bucket to emit
-     */
-    flush() {
-        _.each(this._buckets, (bucket, key) => {
-            this._buckets[key].collect(series => {
-                if (this._observer) {
-                    this._observer(series);
-                }
-            }, this._convertToTimes);
-        });
-        this._buckets = {};
+    flushCollections() {
+        this.emitCollections(this._collections);
     }
 
-    /**
-     * Add an event, which will be assigned to a bucket
-     */
-    addEvent(event, cb) {
-        const key = event.key() === "" ? "_default_" : event.key();
+    emitCollections(collections) {
+        if (this._onTrigger) {
+            _.each(collections, c => {
+                const { collection, windowKey, groupByKey } = c;
+                this._onTrigger && this._onTrigger(collection, windowKey, groupByKey);
+            });
+        }
+    }
+
+    addEvent(event) {
         const timestamp = event.timestamp();
-        const index = this._generator.bucketIndex(timestamp);
-        const currentBucket = this._buckets[key];
-        const currentBucketIndex = currentBucket ? currentBucket.index().asString() : "";
 
-        // See if we need a new bucket
-        if (index !== currentBucketIndex) {
-            // Emit the old bucket if we are emitting on 'next'
-            if (currentBucket && this._emitFrequency === "next") {
-                currentBucket.collect(series => {
-                    if (this._observer) {
-                        this._observer(series);
-                    }
-                }, this._convertToTimes);
-            }
-            // And now make the new bucket to add our event to
-            this._buckets[key] = this._generator.bucket(timestamp, key);
+        const windowType = this._windowType;
+        let windowKey;
+        if (windowType === "fixed") {
+            windowKey = Index.getIndexString(this._windowDuration, timestamp);
+        } else {
+            windowKey = windowType;
+        }
+        const groupByKey = this._groupBy(event);
+        const collectionKey = groupByKey ?
+            `${windowKey}::${groupByKey}` : windowKey;
+
+        let discard = false;
+        if (!_.has(this._collections, collectionKey)) {
+            this._collections[collectionKey] = {
+                windowKey,
+                groupByKey,
+                collection: new Collection()
+            };
+            discard = true;
+        }
+        this._collections[collectionKey].collection =
+            this._collections[collectionKey].collection.addEvent(event);
+        
+        //
+        // If fixed windows, collect together old collections that
+        // will be discarded
+        //
+        
+        const discards = {};
+        if (discard && windowType === "fixed") {
+            _.each(this._collections, (c, k) => {
+                if (windowKey !== c.windowKey) {
+                    discards[k] = c;
+                }
+            });
         }
 
-        // Add our event to the current/new bucket
-        const bucket = this._buckets[key];
-        bucket.addEvent(event, err => {
-            if (cb) {
-                cb(err);
-            }
-        });
+        //
+        // Emit
+        //
 
-        // Finally, emit the current/new bucket with the new event in it, if
-        // we have been asked to always emit
-        if (this._emitFrequency === "always") {
-            if (bucket) {
-                bucket.collect(series => {
-                    if (this._observer) {
-                        this._observer(series);
-                    }
-                }, this._convertToTimes);
-            }
+        const emitOn = this._emitOn;
+        if (emitOn === "eachEvent") {
+            this.emitCollections(this._collections);
+        } else if (emitOn === "discard") {
+            this.emitCollections(discards);
+            _.each(Object.keys(discards), k => {
+                delete this._collections[k];
+            });
+        } else if (emitOn === "flush") {
+            // pass
+        } else {
+            throw new Error("Unknown emit type supplied to Collector");
         }
-    }
-
-    onEmit(cb) {
-        this._observer = cb;
     }
 }

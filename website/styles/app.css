@@ -3,6 +3,21 @@ body {
     font-family: 'Arial';
 }
 
+code {
+  padding: 0px !important;
+  border-radius: 0px !important;
+}
+
+pre {
+    font-size: 12px !important;
+    border: none !important;
+    border-radius: 0px !important;
+}
+
+h3 {
+  font-size: 18px
+}
+
 .navbar-fixed-top {
     background: #000000 !important;
     border-bottom-style: solid !important;

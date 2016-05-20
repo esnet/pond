@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2016, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -9,108 +9,109 @@
  */
 
 import _ from "underscore";
-import Generator from "./generator";
+
+import Processor from "./processor";
+import Collector from "./collector";
+import IndexedEvent from "./indexedevent";
+import TimeRangeEvent from "./timerangeevent";
+import { isPipeline } from "./pipeline";
 
 /**
- * An aggregator takes the following options:
- *
- *     - 'window'    -     size of the window to aggregate over (e.g. "5m")
- *     - 'operator'  -     function (e.g. avg)
-  *    - 'fieldSpec' -     (optional) describes what part of the events to
- *                         include in the aggregation. May be a string, list
- *                         of strings for each event column, or a function.
- *                         If a function it should return a list of key/values
- *                         in an object.
- *     - 'emit'      - (optional) Rate to emit events. Either:
- *                         "always" - emit an event on every change
- *                         "next" - just when we advance to the next bucket
+ * An Aggregator takes incoming events and adds them to a Collector
+ * with given windowing and grouping parameters. As each Collection is
+ * emitted from the Collector it is aggregated into a new event
+ * and emitted from this Processor.
  */
-export default class Aggregator {
 
-    constructor(options, observer) {
-        if (!options) {
-            throw new Error("Aggregator: no options supplied");
-        }
-        if (!_.has(options, "window")) {
-            throw new Error("Aggregator: constructor needs 'window' in options");
-        }
-        if (!_.has(options, "operator")) {
-            throw new Error("Aggregator: constructor needs 'operator' function in options");
-        }
-        this._generator = new Generator(options.window);
-        this._operator = options.operator;
-        this._fieldSpec = options.fieldSpec;
-        this._emitFrequency = options.emit || "next";
-        if (["always", "next"].indexOf(this._emitFrequency) === -1) {
-            throw new Error("Aggregator: emitFrequency options should be 'always' or 'next'");
-        }
-        this._buckets = {};
-        this._observer = observer;
-    }
+class Aggregator extends Processor {
 
-    /**
-     * Forces the current bucket to emit
-     */
-    flush() {
-        _.each(this._buckets, (bucket, key) => {
-            this._buckets[key].aggregate(this._operator, this._fieldSpec, event => {
-                if (this._observer) {
-                    this._observer(event);
+    constructor(arg1, options, observer) {
+        super(arg1, options, observer);
+
+        if (arg1 instanceof Aggregator) {
+            const other = arg1;
+            this._fields = other._fields;
+            this._windowType = other._windowType;
+            this._windowDuration = other._windowDuration;
+            this._groupBy = other._groupBy;
+            this._emitOn = other._emitOn;
+
+        } else if (isPipeline(arg1)) {
+            const pipeline = arg1;
+            this._windowType = pipeline.getWindowType();
+            this._windowDuration = pipeline.getWindowDuration();
+            this._groupBy = pipeline.getGroupBy();
+            this._emitOn = pipeline.getEmitOn();
+
+            if (!_.has(options, "fields")) {
+                throw new Error("Aggregator: constructor needs an aggregator field mapping");
+            }
+
+            // Check each of the aggregator -> field mappings
+            _.forEach(options.fields, (operator, field) => {
+                // Field should either be an array or a string
+                if (!_.isString(field) && !_.isArray(field)) {
+                    throw new Error("Aggregator: field of unknown type: " + field);
                 }
             });
-        });
-        this._buckets = {};
-    }
 
-    /**
-     * Add an event, which will be assigned to a bucket
-     */
-    addEvent(event, cb) {
-        const key = event.key() === "" ? "_default_" : event.key();
-        const timestamp = event.timestamp();
-        const index = this._generator.bucketIndex(timestamp);
-        const currentBucket = this._buckets[key];
-        const currentBucketIndex = currentBucket ? currentBucket.index().asString() : "";
-
-        // See if we need a new bucket
-        if (index !== currentBucketIndex) {
-            // Emit the old bucket if we are emitting on 'next'
-            if (currentBucket && this._emitFrequency === "next") {
-                currentBucket.aggregate(this._operator, this._fieldSpec, event => {
-                    if (this._observer) {
-                        this._observer(event);
-                    }
-                });
+            if (pipeline.mode() === "stream") {
+                if (!pipeline.getWindowType() || !pipeline.getWindowDuration()) {
+                    throw new Error("Unable to aggregate because no windowing strategy was specified in pipeline");
+                }
             }
-            // And now make the new bucket to add our event to
-            this._buckets[key] = this._generator.bucket(timestamp, key);
+            this._fields = options.fields;
+
+        } else {
+            throw new Error("Unknown arg to Filter constructor", arg1);
         }
 
-        // Add our event to the current/new bucket
-        const bucket = this._buckets[key];
-        bucket.addEvent(event, err => {
-            if (cb) {
-                cb(err);
-            }
-        });
-
-        // Finally, emit the current/new bucket with the new event in it, if
-        // we have been asked to always emit
-        if (this._emitFrequency === "always") {
-            if (bucket) {
-                bucket.aggregate(this._operator, this._fieldSpec, event => {
-                    if (this._observer) {
-                        this._observer(event);
-                    }
-                });
-            }
-        }
+        this._collector = new Collector({
+            windowType: this._windowType,
+            windowDuration: this._windowDuration,
+            groupBy: this._groupBy,
+            emitOn: this._emitOn
+        }, (collection, windowKey, groupByKey) =>
+            this.handleTrigger(collection, windowKey, groupByKey)
+        );
     }
 
-    /**
-     * Set the emit callback after the constructor
-     */
-    onEmit(cb) {
-        this._observer = cb;
+
+    clone() {
+        return new Aggregator(this);
+    }
+
+    handleTrigger(collection, windowKey) {
+        const d = {};
+        _.each(this._fields, (operator, fields) => {
+            const fieldList = _.isString(fields) ? [fields] : fields;
+            _.each(fieldList, fieldSpec => {
+                const fieldValue = collection.aggregate(operator, fieldSpec);
+                const fieldName = fieldSpec.split(".").pop();
+                d[fieldName] = fieldValue;
+            });
+        });
+
+        let event;
+        if (windowKey === "global") {
+            event = new TimeRangeEvent(collection.range(), d);
+        } else {
+            event = new IndexedEvent(windowKey, d);
+        }
+
+        this.emit(event);
+    }
+
+    flush() {
+        this._collector.flushCollections();
+        super.flush();
+    }
+
+    addEvent(event) {
+        if (this.hasObservers()) {
+            this._collector.addEvent(event);
+        }
     }
 }
+
+export default Aggregator;

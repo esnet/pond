@@ -8,9 +8,9 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-require("babel/polyfill");
+import "babel-polyfill";
 
-// Chrome debugging
+// Chrome debugging for the tests
 import Immutable from "immutable";
 import installDevTools from "immutable-devtools";
 if (typeof window !== "undefined") {
@@ -20,5 +20,6 @@ if (typeof window !== "undefined") {
 require("./tests/index.test.js");
 require("./tests/range.test.js");
 require("./tests/event.test.js");
-require("./tests/process.test.js");
+require("./tests/collection.test.js");
+require("./tests/pipeline.test.js");
 require("./tests/series.test.js");

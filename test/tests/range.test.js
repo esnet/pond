@@ -19,9 +19,10 @@ import TimeRange from "../../src/range.js";
 const fmt = "YYYY-MM-DD HH:mm";
 const fmt2 = "YYYY-MM-DD HH:mm:ss";
 
-describe("Time ranges", () => {
+describe("Time range", () => {
 
-    describe("TimeRange creation", () => {
+    describe("creation", () => {
+
         it("can create a new range with a begin and end time", done => {
             const beginTime = moment("2012-01-11 11:11", fmt).toDate();
             const endTime = moment("2012-02-22 12:12", fmt).toDate();
@@ -30,15 +31,18 @@ describe("Time ranges", () => {
             expect(range.end().getTime()).to.equal(endTime.getTime());
             done();
         });
+
         it("can create a new range with two UNIX epoch times in an array", done => {
             const range = new TimeRange([1326309060000, 1329941520000]);
             expect(range.toJSON()).to.deep.equal([1326309060000, 1329941520000]);
             done();
         });
+
     });
 
-    describe("TimeRange copying", () => {
-        it("can be copied to give a new range", done => {
+    describe("copy constructor", () => {
+
+        it("can be used to give a new range", done => {
             const beginTime = moment("2012-01-11 1:11", fmt).toDate();
             const endTime = moment("2012-02-12 2:12", fmt).toDate();
             const rangeOrig = new TimeRange(beginTime, endTime);
@@ -50,9 +54,10 @@ describe("Time ranges", () => {
             expect(rangeCopy.end().getTime()).to.equal(endTime.getTime());
             done();
         });
+
     });
 
-    describe("TimeRange serialization", () => {
+    describe("serialization", () => {
 
         it("can output JSON in the correct format", done => {
             const beginTime = moment.utc("2012-01-11 11:11", fmt).toDate();
@@ -72,9 +77,9 @@ describe("Time ranges", () => {
 
     });
 
-    describe("TimeRange human friendly display", () => {
+    describe("human friendly display code", () => {
 
-        it("can display range as a human friendly string", done => {
+        it("can display a range as a human friendly string", done => {
             const beginTime = moment("2014-08-01 05:19:59", fmt2).toDate();
             const endTime = moment("2014-08-01 07:41:06", fmt2).toDate();
             const range = new TimeRange(beginTime, endTime);
@@ -83,15 +88,43 @@ describe("Time ranges", () => {
             done();
         });
 
-        it("can display relative ranges as a human friendly string", done => {
+        it("can display last day as a human friendly string", done => {
+            const range = TimeRange.lastDay();
+            const expected = "a day ago to a few seconds ago";
+            expect(range.relativeString()).to.equal(expected);
+            done();
+        });
+
+        it("can display last 7 days as a human friendly string", done => {
+            const range = TimeRange.lastSevenDays();
+            const expected = "7 days ago to a few seconds ago";
+            expect(range.relativeString()).to.equal(expected);
+            done();
+        });
+
+        it("can display last 30 days as a human friendly string", done => {
             const range = TimeRange.lastThirtyDays();
-            const expected = "a few seconds ago to a month ago";
+            const expected = "a month ago to a few seconds ago";
+            expect(range.relativeString()).to.equal(expected);
+            done();
+        });
+
+        it("can display last month as a human friendly string", done => {
+            const range = TimeRange.lastMonth();
+            const expected = "a month ago to a few seconds ago";
+            expect(range.relativeString()).to.equal(expected);
+            done();
+        });
+
+        it("can display last 90 days as a human friendly string", done => {
+            const range = TimeRange.lastNinetyDays();
+            const expected = "3 months ago to a few seconds ago";
             expect(range.relativeString()).to.equal(expected);
             done();
         });
     });
 
-    describe("TimeRange mutation", () => {
+    describe("mutation", () => {
 
         it("can be mutatated to form a new range", done => {
             const beginTime = moment("2012-01-11 1:11", fmt).toDate();

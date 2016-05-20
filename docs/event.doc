@@ -1,0 +1,14 @@
+## Event
+
+---
+
+{{#class name="Event"~}}
+
+{{>body~}}
+
+## API Reference
+
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}

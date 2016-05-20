@@ -1,0 +1,14 @@
+## Collection
+
+---
+
+{{#class name="Collection"~}}
+
+{{>body~}}
+
+## API Reference
+
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}

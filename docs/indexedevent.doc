@@ -1,0 +1,14 @@
+## IndexedEvent
+
+---
+
+{{#class name="IndexedEvent"~}}
+
+{{>body~}}
+
+## API Reference
+
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}

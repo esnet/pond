@@ -1,0 +1,14 @@
+## Index
+
+---
+
+{{#class name="Index"~}}
+
+{{>body~}}
+
+## API Reference
+
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}

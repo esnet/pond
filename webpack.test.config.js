@@ -3,20 +3,30 @@ var path = require("path");
 
 module.exports = {
     entry: {
-        "bucket_test":   "mocha!./test/index"
+        test: "mocha!./test/index"
     },
     output: {
-        "path":          "./devserver/tests/",
-        "filename":      "tests.js"
+        path: "./devserver/tests/",
+        filename: "tests.js"
     },
     module: {
         loaders: [
-          { test: /\.(js|jsx)$/, loader: 'babel?optional=es7.objectRestSpread', exclude: /node_modules/ },
-          { test: /\.json$/, loader: "json-loader" },
+            {
+                test: /\.js$/,
+                loader: "babel",
+                exclude: /node_modules/
+            },
+            {
+                test: /\.json$/,
+                loader: "json-loader"
+            }
         ]
+    },
+    node: {
+        fs: "empty"
     },
     resolve: {
         extensions: ["", ".js"],
         modulesDirectories: ["node_modules", "."]
-    },
+    }
 };

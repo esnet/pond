@@ -1,0 +1,14 @@
+## TimeSeries
+
+---
+
+{{#class name="TimeSeries"~}}
+
+{{>body~}}
+
+## API Reference
+
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}

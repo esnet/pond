@@ -11,9 +11,8 @@
 /* eslint-disable max-len */
 
 import React from "react";
-import Router from "react-router";
+import { Link } from "react-router";
 
-const {RouteHandler, Link} = Router;
 const logo = document.createElement("img");
 logo.src = require("../img/logo.png");
 
@@ -26,33 +25,26 @@ export default React.createClass({
                 <div className="col-sm-3 col-md-2 sidebar">
                     <p />
                     <ul className="nav nav-sidebar">
-                        <li><Link to="intro">Introduction</Link></li>
+                        <li><Link to="/">Introduction</Link></li>
                         <li><Link to="start">Getting started</Link></li>
-                    </ul>
-
-                    <div className="sidebar-heading">Examples</div>
-
-                    <ul className="nav nav-sidebar">
-                        <li><Link to="rollups">Rollups</Link></li>
                     </ul>
 
                     <div className="sidebar-heading">Structures</div>
 
                     <ul className="nav nav-sidebar">
-                        <li><Link to="time">Time</Link></li>
                         <li><Link to="timerange">TimeRange</Link></li>
                         <li><Link to="index">Index</Link></li>
-                        <li><Link to="events">Events</Link></li>
+                        <li><Link to="event">Event</Link></li>
+                        <li><Link to="timerangeevent">TimeRangeEvent</Link></li>
+                        <li><Link to="indexedevent">IndexedEvent</Link></li>
+                        <li><Link to="collection">Collection</Link></li>
                         <li><Link to="timeseries">TimeSeries</Link></li>
                     </ul>
 
                     <div className="sidebar-heading">Processing</div>
 
                     <ul className="nav nav-sidebar">
-                        <li><Link to="aggregators">Aggregators</Link></li>
-                        <li><Link to="collectors">Collectors</Link></li>
-                        <li><Link to="binners">Binners</Link></li>
-                        <li><Link to="processor">Processor</Link></li>
+                        <li><Link to="pipeline">Pipeline</Link></li>
                     </ul>
 
                     <div className="sidebar-heading">Links</div>
@@ -72,7 +64,7 @@ export default React.createClass({
                 </div>
 
                 <div className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                    <RouteHandler />
+                    {this.props.children}
                 </div>
 
             </div>

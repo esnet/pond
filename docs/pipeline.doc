@@ -1,0 +1,164 @@
+## Pipeline
+
+---
+
+Pipelines are used to transform Pond data. They allow a chain of operations to be applied to streaming Events, Collections or TimeSeries.
+
+A general Pipeline has a source (`from(source)`), a chain of Processors, and a destination (`to(dest)`). Events pass through the Pipeline, read from the source, processed one by one, and output to the destination. The source my be bounded, such as a TimeSeries or Collection, or unbounded where events arrive as a stream and are added to the Pipeline one by one.
+
+Pipelines can also define a set of state that applies within all or part of the chain.
+
+This state maybe a combination of:
+ * windows, such as a 5 minute collection window
+ * groups, such as the type of the Event
+  
+These states would be applied where appropriate, for example, when aggregating.
+
+### Example
+
+Let's look at what that looks like. Imagine we have a collection of Events and each event has a timestamp along with an "in" and "out" value, such as we have with network traffic data.
+
+We then want to offset the "in" value of each event by 1, and then by 2.
+
+    Pipeline()
+        .from(collection)   // From the source collection
+        .offsetBy(1, "in")  // Process each event in the collection
+        .offsetBy(2)        // Process again
+        .to(CollectionOut, c => /* result */ ); // Output to new Collection
+
+In this case, we use the from() operation to specify a Collection to take data from. Since a Collection is a bounded data source, the operation will be performed in batch. That is, all events in the collection will be piped though the transforms and the result collected at the end. This batching will happen when the Collector is added with the to() operation. As each event flows from the from collection to the end Collector, it is passed into the intermediate Processors. In this case it passes through two offsetBy Processors. Each of these is used to in some way process the event. In this case that means taking the input Event, changing a value (adding 1 to the "in" value), and outputting a new Event. As these are immutable objects, the output Events do not share data with the input Events.
+
+This raises probably the most important part of how Pipelines work: they are foremost an event processing pipeline. Events are passed into each Processor (e.g. offsetBy) and the result is zero, one or many output events. Events are passed down the line of Processors until they reach a `to()`, which causes some kind of output (which could be a stream of Events, a Collection, or something else). This is distinct from systems which essentially transform between collection of items or micro-batch.
+
+---
+
+### Event streaming
+
+As an event processing system, it makes sense that you can stream events though a pipeline. In this example we create a simple UnboundedIn. This forms a target for adding events. A Pipeline similar to the above examples follows. As each event is added to the source, those events flow into the Pipeline and are collected at the bottom.
+
+    const source = new UnboundedIn();
+    Pipeline()
+        .from(source)
+        .offsetBy(3, "in")
+        .to(CollectionOut, c => /* result */ );
+
+    // Start adding events...
+    source.addEvent(e1);
+    source.addEvent(e2);
+
+Note that in this case the Collection will be updated each time new data appears, and that Collection is global (i.e. not windowed). It is possible to change how often the collection is updated, as well as provide windowing to output collections per window, or per window per groupedBy key.
+
+It is also possible to derive a class from UnboundedIn() that can produce Events itself, for instance if your events are coming from a Pubsub subscription.
+
+---
+### Aggregation
+
+A common use-case for Pipelines is aggregation. Aggregation is performed on windowed (and grouped) events. There must currently be a window defined for a Pipeline to aggregate.
+
+Here is a simple example:
+
+    const result = {};
+    const p = Pipeline()
+        .from(stream)
+        .windowBy("1h")           // 1 day fixed windows
+        .emitOn("eachEvent")    // emit result on each event
+        .aggregate({in: avg, out: avg})
+        .to(EventOut, event => {
+            // resulting IndexedEvents...
+            result[`${event.index()}`] = event;
+        });
+
+As in the streaming example above, we make an UnboundedIn onto which we add Events.
+
+What's new here is the state that is being set in the Pipeline:
+ * windowBy - sets windowing to be 1 hour
+ * emitOn - sets the triggering of aggregation to be each time a new event comes in. This will mean the same output will be generated multiple times, each time with an updated aggregation. The alternative is "discard" which would only emit when an event moves into another window
+
+Once this state is established the aggregate() processor can be used. The argument to this is a field specification that tells the emit code which fields of the collected window of events should be aggregated together and what function to use.
+
+The output, an EventOut, will call the callback whenever a new aggregated event is emitted. Since the triggering (emitOn) is set to "eachEvent", it will be called multiple times. In this case we just re-add it, but the index, to our result map.
+
+### Aggregation with grouping
+
+Pipelines also support a groupBy() processor. In the following example each event has a field called "type". The result of this will be that aggregation collections will be further partitioned based on the group, in addition to the window.
+
+    const stream = new UnboundedIn();
+    const result = {};
+
+    const p = Pipeline()
+        .from(stream)
+        .groupBy("type")
+        .windowBy("1h")           // 1 day fixed windows
+        .emitOn("eachEvent")      // emit result on each event
+        .aggregate({type: keep, in: avg, out: avg})
+        .to(EventOut, event => {
+            result[`${event.index()}:${event.get("type")}`] = event;
+        });
+
+    eventsIn.forEach(event => stream.addEvent(event));
+
+During our aggregation, output IndexedEvents are formed with the average of "in", and the average of "out". The value of the "type" field is kept in the final result using the `keep` aggregation function.
+
+In this case we simply want to collect the events. To do this we separate the output events using both the IndexEvent's Index (which describes the windowed timerange of the event), joined with the value of the "type" field that we preserved in our aggregation.
+
+---
+
+### Conversions
+
+There are three types of events in Pond: regular `Events`, which have a single timestamp, `TimeRangeEvents` which have a `TimeRange` (begin and end time) associated with them, and `IndexedEvents` which have a string that represents a time range. Sometimes it is helpful to convert between these Event types. To do this you can use the `asEvents()`, `asIndexedEvents()` and `asTimeRangeEvent()` processors.
+
+Taking the first streaming example, we can convert the output IndexedEvents to a basic Event like so:
+
+```
+    const input = new UnboundedIn();
+    const result = {};
+
+    const p = Pipeline()
+        .from(input)
+        .windowBy("1h")           // 1 day fixed windows
+        .emitOn("eachEvent")    // emit result on each event
+        .aggregate({in: avg, out: avg})
+        .asEvents()
+        .to(EventOut, event => /* result */ );
+```
+
+---
+### Merging pipelines
+
+Pipelines can themselves be chained together.
+
+    const p1 = Pipeline()
+        .from(collection)                  // This links to the src collection
+        .offsetBy(1, "in")                 // Process each event
+        .offsetBy(2)                       // Process again
+        .to(CollectionOut, collection => /* result */ );
+
+    const p2 = p1
+        .offsetBy(3, "in")                    // Transforms to a new collection
+        .to(CollectionOut, collection => /* result */);
+
+In this example, the second pipeline will attach to the first pipeline. Currently batch pipelines support this, but only as a linear pipe. You cannot merge multiple bounded sources together. It is recommended that you do this manually by using, for example, Collection.combine() first, then running this through the Pipeline.
+
+---
+### TimeSeries pipelines
+
+Pipelines can also be run directly off TimeSeries objects.
+
+    const timeseries = new TimeSeries(data);
+    timeseries.pipeline()
+        .offsetBy(1, "in")
+        .offsetBy(2)
+        .to(Collector, {}, collection => /* result */ );
+
+---
+## API Reference
+
+{{#class name="Pipeline"~}}
+{{>body~}}
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}
+
+
+

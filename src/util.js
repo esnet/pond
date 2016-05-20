@@ -32,6 +32,30 @@ const units = {
  */
 export default {
 
+    /**
+     * Returns a duration in milliseconds given a window duration string.
+     * For example "30s" (30 seconds) should return 30000ms. Accepts
+     * seconds (e.g. "30s"), minutes (e.g. "5m"), hours (e.g. "6h") and
+     * days (e.g. "30d")
+     */
+    windowDuration(w) {
+        // window should be two parts, a number and a letter if it's a
+        // range based index, e.g "1h".
+        const regex = /([0-9]+)([smhd])/;
+        const parts = regex.exec(w);
+        if (parts && parts.length >= 3) {
+            const num = parseInt(parts[1], 10);
+            const unit = parts[2];
+            return num * units[unit].length * 1000;
+        }
+    },
+
+    windowPositionFromDate(w, date) {
+        const duration = this.windowDuration(w);
+        let dd = moment.utc(date).valueOf();
+        return parseInt(dd /= duration, 10);
+    },
+
     rangeFromIndexString(index, utc) {
         const isUTC = !_.isUndefined(utc) ? utc : true;
         const parts = index.split("-");
@@ -88,7 +112,7 @@ export default {
             case 1:
                 const year = parts[0];
                 beginTime = isUTC ? moment.utc([year]) :
-                                    moment.utc([year]);
+                                    moment([year]);
                 endTime = isUTC ? moment.utc(beginTime).endOf("year") :
                                   moment(beginTime).endOf("year");
                 break;

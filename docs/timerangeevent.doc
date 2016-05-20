@@ -1,0 +1,14 @@
+## TimeRangeEvent
+
+---
+
+{{#class name="TimeRangeEvent"~}}
+
+{{>body~}}
+
+## API Reference
+
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}

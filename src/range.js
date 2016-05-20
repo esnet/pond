@@ -12,7 +12,30 @@ import _ from "underscore";
 import Immutable from "immutable";
 import moment from "moment";
 
-export default class TimeRange {
+/**
+A time range is a simple representation of a begin and end time, used
+to maintain consistency across an application.
+
+### Construction
+
+You can define a TimeRange with moments, Javascript Date objects
+or ms since UNIX epoch. Here we construct one with two moments:
+
+```js
+var fmt = "YYYY-MM-DD HH:mm";
+var beginTime = moment("2012-01-11 11:11", fmt);
+var endTime =   moment("2012-02-22 12:12", fmt);
+var range = new TimeRange(beginTime, endTime);
+```
+
+or with ms times:
+
+```js
+var range = new TimeRange([1326309060000, 1329941520000]);
+```
+
+ */
+class TimeRange {
 
     /**
      * Builds a new TimeRange which may be of several different formats:
@@ -50,7 +73,9 @@ export default class TimeRange {
 
     /**
      * Returns the internal range, which is an Immutable List containing
-     * begin and end keys
+     * begin and end times.
+     *
+     * @return {Immutable.List} List containing the begin and end of the time range.
      */
     range() {
         return this._range;
@@ -63,6 +88,7 @@ export default class TimeRange {
     /**
      * Returns the TimeRange as JSON, which will be a Javascript array
      * of two ms timestamps.
+     *
      * @return {number[]} JSON representation of the TimeRange
      */
     toJSON() {
@@ -71,6 +97,7 @@ export default class TimeRange {
 
     /**
      * Returns the TimeRange as a string, useful for serialization.
+     *
      * @return {string} String representation of the TimeRange
      */
     toString() {
@@ -79,6 +106,7 @@ export default class TimeRange {
 
     /**
      * Returns the TimeRange as a string expressed in local time
+     *
      * @return {string} String representation of the TimeRange
      */
     toLocalString() {
@@ -87,6 +115,7 @@ export default class TimeRange {
 
     /**
      * Returns the TimeRange as a string expressed in UTC time
+     *
      * @return {string} String representation of the TimeRange
      */
     toUTCString() {
@@ -96,6 +125,7 @@ export default class TimeRange {
     /**
      * Returns a human friendly version of the TimeRange, e.g.
      * "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am"
+     *
      * @return {string} Human friendly string representation of the TimeRange
      */
     humanize() {
@@ -108,8 +138,10 @@ export default class TimeRange {
     }
 
     /**
-     * Returns a human friendly version of the TimeRange, e.g.
-     * e.g. "a few seconds ago to a month ago"
+     * Returns a human friendly version of the TimeRange
+     * @example
+     * "a few seconds ago to a month ago"
+     *
      * @return {string} Human friendly string representation of the TimeRange
      */
     relativeString() {
@@ -120,7 +152,8 @@ export default class TimeRange {
 
     /**
      * Returns the begin time of the TimeRange.
-     * @return {Date} Begin time
+     *
+     * @return {Date} The begin time of the TimeRange
      */
     begin() {
         return this._range.get(0);
@@ -128,7 +161,8 @@ export default class TimeRange {
 
     /**
      * Returns the end time of the TimeRange.
-     * @return {Date} End time
+     *
+     * @return {Date} The end time of the TimeRange
      */
     end() {
         return this._range.get(1);
@@ -137,13 +171,20 @@ export default class TimeRange {
     /**
      * Sets a new begin time on the TimeRange. The result will be
      * a new TimeRange.
+     *
+     * @param {Date} t Time to set the begin time to
+     * @return {TimeRange} The new mutated TimeRange
      */
     setBegin(t) {
         return new TimeRange(this._range.set(0, t));
     }
 
     /**
-     * Sets a new end time on the TimeRange. The result will be a new TimeRange.
+     * Sets a new end time on the TimeRange. The result will be
+     * a new TimeRange.
+     *
+     * @param {Date} t Time to set the end time to
+     * @return {TimeRange} The new mutated TimeRange
      */
     setEnd(t) {
         return new TimeRange(this._range.set(1, t));
@@ -152,6 +193,9 @@ export default class TimeRange {
     /**
      * Returns if the two TimeRanges can be considered equal,
      * in that they have the same times.
+     *
+     * @param {TimeRange} other The TimeRange to compare to
+     * @return {boolean} Result
      */
     equals(other) {
         return this.begin().getTime() === other.begin().getTime() &&
@@ -160,6 +204,9 @@ export default class TimeRange {
 
     /**
      * Returns true if other is completely inside this.
+     *
+     * @param {TimeRange} other The TimeRange to compare to
+     * @return {boolean} Result
      */
     contains(other) {
         if (_.isDate(other)) {
@@ -174,6 +221,9 @@ export default class TimeRange {
     /**
      * Returns true if this TimeRange is completely within the supplied
      * other TimeRange.
+     *
+     * @param {TimeRange} other The TimeRange to compare to
+     * @return {boolean} Result
      */
     within(other) {
         return this.begin() >= other.begin() &&
@@ -182,6 +232,9 @@ export default class TimeRange {
 
     /**
      * Returns true if the passed in other TimeRange overlaps this time Range.
+     *
+     * @param {TimeRange} other The TimeRange to compare to
+     * @return {boolean} Result
      */
     overlaps(other) {
         if (this.contains(other.begin()) && !this.contains(other.end()) ||
@@ -195,15 +248,19 @@ export default class TimeRange {
     /**
      * Returns true if the passed in other Range in no way
      * overlaps this time Range.
+     *
+     * @param {TimeRange} other The TimeRange to compare to
+     * @return {boolean} Result
      */
     disjoint(other) {
         return (this.end() < other.begin() || this.begin() > other.end());
     }
 
     /**
-    * Returns a new Timerange which covers the extents of this and
-    * other combined.
-    */
+     * @param {TimeRange} other The TimeRange to extend with
+     * @return {TimeRange} a new Timerange which covers the extents of this and
+     * other combined.
+     */
     extents(other) {
         const b = this.begin() < other.begin() ? this.begin() : other.begin();
         const e = this.end() > other.end() ? this.end() : other.end();
@@ -211,9 +268,10 @@ export default class TimeRange {
     }
 
     /**
-    * Returns a new TimeRange which represents the intersection
-    * (overlapping) part of this and other.
-    */
+     * @param {TimeRange} other The TimeRange to intersect with
+     * @return {TimeRange} A new TimeRange which represents the intersection
+     * (overlapping) part of this and other.
+     */
     intersection(other) {
         if (this.disjoint(other)) {
             return undefined;
@@ -224,10 +282,16 @@ export default class TimeRange {
                              new Date(e.getTime()));
     }
 
+    /**
+     * @return {number} The duration of the TimeRange in milliseconds
+     */
     duration() {
         return this.end().getTime() - this.begin().getTime();
     }
 
+    /**
+     * @return {string} A user friendly version of the duration.
+     */
     humanizeDuration() {
         return moment.duration(this.duration()).humanize();
     }
@@ -236,27 +300,59 @@ export default class TimeRange {
     // Static TimeRange creators
     //
 
+    /**
+     * @return {TimeRange} The last day, as a TimeRange
+     */
     static lastDay() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(24, "hours");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(24, "hours");
         return new TimeRange(beginTime, endTime);
     }
 
+    /**
+     * @return {TimeRange} The last seven days, as a TimeRange
+     */
     static lastSevenDays() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(7, "days");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(7, "days");
         return new TimeRange(beginTime, endTime);
     }
 
+    /**
+     * @return {TimeRange} The last thirty days, as a TimeRange
+     */
     static lastThirtyDays() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(30, "days");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(30, "days");
         return new TimeRange(beginTime, endTime);
     }
 
+    /**
+     * @return {TimeRange} The last month, as a TimeRange
+     */
+    static lastMonth() {
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(1, "month");
+        return new TimeRange(beginTime, endTime);
+    }
+
+    /**
+     * @return {TimeRange} The last 90 days, as a TimeRange
+     */
     static lastNinetyDays() {
-        const beginTime = moment();
-        const endTime = beginTime.clone().subtract(90, "days");
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(90, "days");
+        return new TimeRange(beginTime, endTime);
+    }
+
+    /**
+     * @return {TimeRange} The last year, as a TimeRange
+     */
+    static lastYear() {
+        const endTime = moment();
+        const beginTime = endTime.clone().subtract(1, "year");
         return new TimeRange(beginTime, endTime);
     }
 }
+
+export default TimeRange;

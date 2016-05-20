@@ -1,0 +1,14 @@
+## TimeRange
+
+---
+
+{{#class name="TimeRange"~}}
+
+{{>body~}}
+
+## API Reference
+
+{{>member-index~}}
+{{>separator~}}
+{{>members~}}
+{{/class}}
