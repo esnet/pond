@@ -121,7 +121,8 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.select(fieldSpec, cb)](#TimeSeries+select)
         * [.collapse(fieldSpec, name, reducer, append, cb)](#TimeSeries+collapse)
     * _static_
-        * [.equal()](#TimeSeries.equal)
+        * [.equal(series1, series2)](#TimeSeries.equal) ⇒ <code>bool</code>
+        * [.is(series1, series2)](#TimeSeries.is) ⇒ <code>bool</code>
         * [.sum(data, seriesList, fieldSpec)](#TimeSeries.sum) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 
 <a name="TimeSeries+toJSON"></a>
@@ -298,10 +299,30 @@ The result, a new TimeSeries, will be passed to the supplied callback.
 
 <a name="TimeSeries.equal"></a>
 
-### TimeSeries.equal()
-STATIC
+### TimeSeries.equal(series1, series2) ⇒ <code>bool</code>
+Static function to compare two TimeSeries to each other. If the TimeSeries
+are of the same instance as each other then equals will return true.
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>bool</code> - result  
+**Params**
+
+- series1 <code>[TimeSeries](#TimeSeries)</code>
+- series2 <code>[TimeSeries](#TimeSeries)</code>
+
+<a name="TimeSeries.is"></a>
+
+### TimeSeries.is(series1, series2) ⇒ <code>bool</code>
+Static function to compare two TimeSeries to each other. If the TimeSeries
+are of the same value as each other then equals will return true.
+
+**Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>bool</code> - result  
+**Params**
+
+- series1 <code>[TimeSeries](#TimeSeries)</code>
+- series2 <code>[TimeSeries](#TimeSeries)</code>
+
 <a name="TimeSeries.sum"></a>
 
 ### TimeSeries.sum(data, seriesList, fieldSpec) ⇒ <code>[TimeSeries](#TimeSeries)</code>

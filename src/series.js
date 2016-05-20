@@ -519,22 +519,28 @@ class TimeSeries {
      * STATIC
      */
 
+     /**
+      * Static function to compare two TimeSeries to each other. If the TimeSeries
+      * are of the same instance as each other then equals will return true.
+      * @param  {TimeSeries} series1
+      * @param  {TimeSeries} series2
+      * @return {bool} result
+      */
     static equal(series1, series2) {
-        return (series1._name === series2._name &&
-                series1._meta === series2._meta &&
-                series1._utc === series2._utc &&
-                series1._columns === series2._columns &&
-                series1._data === series2._data &&
-                series1._times === series2._times);
+        return (series1._data === series2._data &&
+                series1._collection === series2._collection);
     }
 
+     /**
+      * Static function to compare two TimeSeries to each other. If the TimeSeries
+      * are of the same value as each other then equals will return true.
+      * @param  {TimeSeries} series1
+      * @param  {TimeSeries} series2
+      * @return {bool} result
+      */
     static is(series1, series2) {
-        return (series1._name === series2._name &&
-                series1._utc === series2._utc &&
-                Immutable.is(series1._meta, series2._meta) &&
-                Immutable.is(series1._columns, series2._columns) &&
-                Immutable.is(series1._data, series2._data) &&
-                Immutable.is(series1._times, series2._times));
+        return (Immutable.is(series1._data, series2._data) &&
+                Collection.is(series1._collection, series2._collection));
     }
 
     static map(data, seriesList, mapper, fieldSpec) {

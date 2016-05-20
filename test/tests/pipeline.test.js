@@ -178,47 +178,6 @@ const inOutData = {
 
 describe("Pipeline", () => {
 
-
-    describe("Collections", () => {
-
-        it("can create a Collection from an event list", done => {
-            const collection = new Collection(eventList1);
-            expect(collection).to.be.ok;
-            done();
-        });
-
-        it("can use size() and at() to get to Collection items", done => {
-            const collection = new Collection(eventList1);
-            expect(collection.size()).to.equal(3);
-            expect(Event.is(collection.at(0), eventList1[0])).to.be.true;
-            expect(Event.is(collection.at(1), eventList1[1])).to.be.true;
-            expect(Event.is(collection.at(2), eventList1[2])).to.be.true;
-            done();
-        });
-
-        it("can loop (for .. of) over a Collection's events", done => {
-            const collection = new Collection(eventList1);
-            const events = [];
-            for (const e of collection.events()) {
-                events.push(e);
-            }
-            expect(events.length).to.equal(3);
-            expect(Event.is(events[0], eventList1[0])).to.be.true;
-            expect(Event.is(events[1], eventList1[1])).to.be.true;
-            expect(Event.is(events[2], eventList1[2])).to.be.true;
-            done();
-        });
-
-        it("can add an event and get a new Collection back", done => {
-            const collection = new Collection(eventList1);
-            const event = new Event(new Date("2015-04-22T03:32:00Z"), {in: 1, out: 2});
-            const newCollection = collection.addEvent(event);
-            expect(newCollection.size()).to.equal(4);
-            done();
-        });
-
-    });
-
     describe("test processor using offsetBy", () => {
 
         it("can transform process events with an offsetBy chain", done => {
