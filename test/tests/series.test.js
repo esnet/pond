@@ -787,7 +787,8 @@ describe("TimeSeries", () => {
         it("can merge two timeseries columns together using merge", (done) => {
             const inTraffic = new TimeSeries(trafficDataIn);
             const outTraffic = new TimeSeries(trafficDataOut);
-            const trafficSeries = TimeSeries.merge({name: "traffic"}, [inTraffic, outTraffic]);
+            const trafficSeries = TimeSeries.timeSeriesListMerge(
+                {name: "traffic"}, [inTraffic, outTraffic]);
             expect(trafficSeries.at(2).get("in")).to.equal(26);
             expect(trafficSeries.at(2).get("out")).to.equal(67);
             done();
@@ -796,7 +797,9 @@ describe("TimeSeries", () => {
         it("can append two timeseries together using merge", (done) => {
             const tile1 = new TimeSeries(partialTraffic1);
             const tile2 = new TimeSeries(partialTraffic2);
-            const trafficSeries = TimeSeries.merge({name: "traffic", source: "router"}, [tile1, tile2]);
+            const trafficSeries = TimeSeries.timeSeriesListMerge(
+                {name: "traffic", source: "router"}, [tile1, tile2]
+            );
             expect(trafficSeries.size()).to.equal(8);
             expect(trafficSeries.at(0).get()).to.equal(34);
             expect(trafficSeries.at(1).get()).to.equal(13);
@@ -814,7 +817,9 @@ describe("TimeSeries", () => {
         it("can merge two series and preserve the correct time format", (done) => {
             const inTraffic = new TimeSeries(trafficBNLtoNEWY);
             const outTraffic = new TimeSeries(trafficNEWYtoBNL);
-            const trafficSeries = TimeSeries.merge({name: "traffic"}, [inTraffic, outTraffic]);
+            const trafficSeries = TimeSeries.timeSeriesListMerge(
+                {name: "traffic"}, [inTraffic, outTraffic]
+            );
             expect(trafficSeries.at(0).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:12:30 GMT");
             expect(trafficSeries.at(1).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:13:00 GMT");
             expect(trafficSeries.at(2).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:13:30 GMT");
@@ -827,7 +832,11 @@ describe("TimeSeries", () => {
         it("can merge two timeseries into a new timeseries that is the sum", (done) => {
             const part1 = new TimeSeries(sumPart1);
             const part2 = new TimeSeries(sumPart2);
-            const sum = TimeSeries.sum({name: "sum"}, [part1, part2], ["in", "out"]);
+            const sum = TimeSeries.timeSeriesListSum(
+                {name: "sum"},
+                [part1, part2],
+                ["in", "out"]
+            );
 
             //10, 9, 8, 7
             expect(sum.at(0).get("in")).to.equal(10);

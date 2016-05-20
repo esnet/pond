@@ -134,7 +134,6 @@ class Runner {
  * A pipeline manages a processing chain, for either batch or stream processing
  * of collection data.
  */
-
 class Pipeline {
 
     /**
@@ -295,8 +294,10 @@ class Pipeline {
      * is an object with {type, duration}.
      * type may be:
      *  * "Fixed"
+     *  * other types coming
+     *
      * duration is of the form:
-     *  * "30s", "5m" or "1d" etc
+     *  * "30s" or "1d" etc
      *
      * @return {Pipeline} The Pipeline
      */
@@ -359,11 +360,20 @@ class Pipeline {
     }
 
     /**
-     * Sets the condition under which accumulated collection will
+     * Sets the condition under which an accumulated collection will
      * be emitted. If specified before an aggregation this will control
      * when the resulting event will be emitted relative to the
-     * window accumulation. Current options are to emit on every event
-     * or just when the collection is complete.
+     * window accumulation. Current options are:
+     *  * to emit on every event, or
+     *  * just when the collection is complete, or
+     *  * when a flush signal is received, either manually calling done(),
+     *    or at the end of a bounded source
+     *
+     * The difference will depend on the output you want, how often
+     * you want to get updated, and if you need to get a partial state.
+     * There's currently no support for late data or watermarks. If an
+     * event passes comes in after a collection window, that collection
+     * is considered finished.
      *
      * @param {string} trigger A string indicating how to trigger a
      * Collection should be emitted. May be:
@@ -371,6 +381,7 @@ class Pipeline {
      *                     maintained collections will emit their result
      *     * "discard"   - when a collection is to be discarded,
      *                     first it will emit. But only then.
+     *     * "flush"     - when a flush signal is received
      *
      * @return {Pipeline} The Pipeline
      */
@@ -384,12 +395,13 @@ class Pipeline {
     //
 
     /**
-     * The "In" to get events from. The In needs to be able to
-     * iterate its events using for..of loop for bounded Ins, or
-     * be able to emit for unbounded Ins. The actual batch, or stream
-     * connection occurs when an output is defined with to().
+     * The source to get events from. The source needs to be able to
+     * iterate its events using `for..of` loop for bounded Ins, or
+     * be able to emit() for unbounded Ins. The actual batch, or stream
+     * connection occurs when an output is defined with `to()`.
      *
-     * from() returns a new Pipeline.
+     * Pipelines can be chained together since a source may be another
+     * Pipeline.
      *
      * @param {BoundedIn|UnboundedIn|Pipeline} src The source for the
      *                                             Pipeline, or another
@@ -406,17 +418,17 @@ class Pipeline {
     }
 
     /**
-     * Sets up the destination sink for the pipeline. The output should
-     * be a BatchOut subclass for a bounded input and a StreamOut subclass
-     * for an unbounded input.
+     * Sets up the destination sink for the pipeline.
      *
-     * For a batch mode connection, the output is connected and then the
-     * source input is iterated over to process all events into the pipeline and
-     * down to the out.
+     * For a batch mode connection, i.e. one with a Bounded source,
+     * the output is connected to a clone of the parts of the Pipeline dependencies
+     * that lead to this output. This is done by a Runner. The source input is
+     * then iterated over to process all events into the pipeline and though to the Out.
      *
      * For stream mode connections, the output is connected and from then on
      * any events added to the input will be processed down the pipeline to
      * the out.
+     *
      * @example
      * ```
      * const p = Pipeline()
@@ -468,6 +480,7 @@ class Pipeline {
 
     /**
      * Outputs the count of events
+     *
      * @param  {function}  observer The callback function. This will be
      *                              passed the count, the windowKey and
      *                              the groupByKey
@@ -488,7 +501,8 @@ class Pipeline {
     
     /**
      * Processor to offset a set of fields by a value. Mostly used for
-     * testing processor operations.
+     * testing processor and pipeline operations with a simple operation.
+     *
      * @param  {number} by              The amount to offset by
      * @param  {string|array} fieldSpec The field(s)
      *
@@ -507,6 +521,7 @@ class Pipeline {
     /**
      * Uses the current Pipeline windowing and grouping
      * state to build collections of events and aggregate them.
+     *
      * `IndexedEvent`s will be emitted out of the aggregator based
      * on the `emitOn` state of the Pipeline.
      *
@@ -516,18 +531,21 @@ class Pipeline {
      *
      * @example
      *
+     * ```
      * import { Pipeline, EventOut, functions } from "pondjs";
      * const { avg } = functions;
      *
      * const p = Pipeline()
      *   .from(input)
      *   .windowBy("1h")           // 1 day fixed windows
-     *   .emitOn("eachEvent")    // emit result on each event
+     *   .emitOn("eachEvent")      // emit result on each event
      *   .aggregate({in: avg, out: avg})
      *   .asEvents()
      *   .to(EventOut, {}, event => {
-     *      result[`${event.index()}`] = event;
+     *      result[`${event.index()}`] = event; // Result
      *   });
+     * ```
+     *
      * @param  {object} fields Fields and operators to be aggregated
      *
      * @return {Pipeline} The Pipeline
@@ -615,12 +633,27 @@ class Pipeline {
     }
 
     /**
-     * Select a subset of columns
+     * Collapse a subset of columns using a reducer function
      *
-     * @param {array|String} fieldSpec The columns to include in the output
-     * @param {string} name The result column name
-     * @param {boolean} append Add the new column to the existing ones, or replace them.
-     * @return {Pipeline} The Pipeline
+     * @example
+     *
+     * ```
+     *  const timeseries = new TimeSeries(inOutData);
+     *  Pipeline()
+     *      .from(timeseries)
+     *      .collapse(["in", "out"], "in_out_sum", sum)
+     *      .emitOn("flush")
+     *      .to(CollectionOut, c => {
+     *           const ts = new TimeSeries({name: "subset", collection: c});
+     *           ...
+     *      }, true);
+     * ```
+     * @param {array|String} fieldSpec The columns to collapse into the output
+     * @param {string}       name      The resulting output column's name
+     * @param {function}     reducer   Function to use to do the reduction
+     * @param {boolean}      append    Add the new column to the existing ones, or replace them.
+     *
+     * @return {Pipeline}              The Pipeline
      */
     collapse(fieldSpec, name, reducer, append) {
         const p = new Collapser(this, {
@@ -636,6 +669,7 @@ class Pipeline {
 
     /**
      * Take events up to the supplied limit, per key.
+     *
      * @param  {number} limit Integer number of events to take
      *
      * @return {Pipeline} The Pipeline
@@ -650,8 +684,7 @@ class Pipeline {
     }
 
     /**
-     * Converts incoming Events or IndexedEvents to
-     * TimeRangeEvents.
+     * Converts incoming Events or IndexedEvents to TimeRangeEvents.
      *
      * @param {object} options To convert from an Event you need
      * to convert a single time to a time range. To control this you
