@@ -479,7 +479,34 @@ class Collection extends BoundedIn {
             return fieldSpec.split(".");
         }
     }
+
+    /**
+     * STATIC
+     */
+
+     /**
+      * Static function to compare two collections to each other. If the collections
+      * are of the same instance as each other then equals will return true.
+      * @param  {Collection} collection1
+      * @param  {Collection} collection2
+      * @return {bool} result
+      */
+    static equal(collection1, collection2) {
+        return (collection1._type === collection2._type &&
+                collection1._eventList === collection2._eventList);
+    }
+
+     /**
+      * Static function to compare two collections to each other. If the collections
+      * are of the same value as each other then equals will return true.
+      * @param  {Collection} collection1
+      * @param  {Collection} collection2
+      * @return {bool} result
+      */
+    static is(collection1, collection2) {
+        return (collection1._type === collection2._type &&
+                Immutable.is(collection1._eventList, collection2._eventList));
+    }
 }
 
 export default Collection;
-

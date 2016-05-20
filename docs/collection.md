@@ -27,37 +27,41 @@ in Pipeline event processing.
 
 * [Collection](#Collection)
     * [new Collection(arg1, [copyEvents])](#new_Collection_new)
-    * [.toJSON()](#Collection+toJSON) ⇒ <code>Object</code>
-    * [.toString()](#Collection+toString) ⇒ <code>string</code>
-    * [.type()](#Collection+type) ⇒ <code>Event</code> &#124; <code>IndexedEvent</code> &#124; <code>TimeRangeEvent</code>
-    * [.size()](#Collection+size) ⇒ <code>number</code>
-    * [.sizeValid()](#Collection+sizeValid) ⇒ <code>number</code>
-    * [.at(pos)](#Collection+at) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-    * [.atTime(time)](#Collection+atTime) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-    * [.atFirst()](#Collection+atFirst) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-    * [.atLast()](#Collection+atLast) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-    * [.bisect(t, b)](#Collection+bisect) ⇒ <code>number</code>
-    * [.events()](#Collection+events)
-    * [.eventList()](#Collection+eventList) ⇒ <code>Immutable.List</code>
-    * [.eventListAsArray()](#Collection+eventListAsArray) ⇒ <code>Array</code>
-    * [.range()](#Collection+range) ⇒ <code>TimeRange</code>
-    * [.addEvent(event)](#Collection+addEvent) ⇒ <code>[Collection](#Collection)</code>
-    * [.slice(begin, end)](#Collection+slice) ⇒ <code>[Collection](#Collection)</code>
-    * [.filter(func)](#Collection+filter) ⇒ <code>[Collection](#Collection)</code>
-    * [.map(func)](#Collection+map) ⇒ <code>[Collection](#Collection)</code>
-    * [.clean(fieldSpec)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
-    * [.collapse(fieldSpecList, name, reducer, append)](#Collection+collapse) ⇒ <code>[Collection](#Collection)</code>
-    * [.count()](#Collection+count) ⇒ <code>number</code>
-    * [.first()](#Collection+first)
-    * [.last()](#Collection+last)
-    * [.sum()](#Collection+sum)
-    * [.avg(fieldSpec)](#Collection+avg) ⇒ <code>number</code>
-    * [.max(fieldSpec)](#Collection+max) ⇒ <code>number</code>
-    * [.min(fieldSpec)](#Collection+min) ⇒ <code>number</code>
-    * [.mean(fieldSpec)](#Collection+mean) ⇒ <code>number</code>
-    * [.median(fieldSpec)](#Collection+median) ⇒ <code>number</code>
-    * [.stdev(fieldSpec)](#Collection+stdev) ⇒ <code>number</code>
-    * [.aggregate(func, fieldSpec)](#Collection+aggregate) ⇒ <code>number</code>
+    * _instance_
+        * [.toJSON()](#Collection+toJSON) ⇒ <code>Object</code>
+        * [.toString()](#Collection+toString) ⇒ <code>string</code>
+        * [.type()](#Collection+type) ⇒ <code>Event</code> &#124; <code>IndexedEvent</code> &#124; <code>TimeRangeEvent</code>
+        * [.size()](#Collection+size) ⇒ <code>number</code>
+        * [.sizeValid()](#Collection+sizeValid) ⇒ <code>number</code>
+        * [.at(pos)](#Collection+at) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.atTime(time)](#Collection+atTime) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.atFirst()](#Collection+atFirst) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.atLast()](#Collection+atLast) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.bisect(t, b)](#Collection+bisect) ⇒ <code>number</code>
+        * [.events()](#Collection+events)
+        * [.eventList()](#Collection+eventList) ⇒ <code>Immutable.List</code>
+        * [.eventListAsArray()](#Collection+eventListAsArray) ⇒ <code>Array</code>
+        * [.range()](#Collection+range) ⇒ <code>TimeRange</code>
+        * [.addEvent(event)](#Collection+addEvent) ⇒ <code>[Collection](#Collection)</code>
+        * [.slice(begin, end)](#Collection+slice) ⇒ <code>[Collection](#Collection)</code>
+        * [.filter(func)](#Collection+filter) ⇒ <code>[Collection](#Collection)</code>
+        * [.map(func)](#Collection+map) ⇒ <code>[Collection](#Collection)</code>
+        * [.clean(fieldSpec)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
+        * [.collapse(fieldSpecList, name, reducer, append)](#Collection+collapse) ⇒ <code>[Collection](#Collection)</code>
+        * [.count()](#Collection+count) ⇒ <code>number</code>
+        * [.first()](#Collection+first)
+        * [.last()](#Collection+last)
+        * [.sum()](#Collection+sum)
+        * [.avg(fieldSpec)](#Collection+avg) ⇒ <code>number</code>
+        * [.max(fieldSpec)](#Collection+max) ⇒ <code>number</code>
+        * [.min(fieldSpec)](#Collection+min) ⇒ <code>number</code>
+        * [.mean(fieldSpec)](#Collection+mean) ⇒ <code>number</code>
+        * [.median(fieldSpec)](#Collection+median) ⇒ <code>number</code>
+        * [.stdev(fieldSpec)](#Collection+stdev) ⇒ <code>number</code>
+        * [.aggregate(func, fieldSpec)](#Collection+aggregate) ⇒ <code>number</code>
+    * _static_
+        * [.equal(collection1, collection2)](#Collection.equal) ⇒ <code>bool</code>
+        * [.is(collection1, collection2)](#Collection.is) ⇒ <code>bool</code>
 
 <a name="new_Collection_new"></a>
 
@@ -389,4 +393,30 @@ do the reduction.
 - func <code>function</code> - User defined reduction function. Will be
 passed a list of values. Should return a singe value.
 - fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+
+<a name="Collection.equal"></a>
+
+### Collection.equal(collection1, collection2) ⇒ <code>bool</code>
+Static function to compare two collections to each other. If the collections
+are of the same instance as each other then equals will return true.
+
+**Kind**: static method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>bool</code> - result  
+**Params**
+
+- collection1 <code>[Collection](#Collection)</code>
+- collection2 <code>[Collection](#Collection)</code>
+
+<a name="Collection.is"></a>
+
+### Collection.is(collection1, collection2) ⇒ <code>bool</code>
+Static function to compare two collections to each other. If the collections
+are of the same value as each other then equals will return true.
+
+**Kind**: static method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>bool</code> - result  
+**Params**
+
+- collection1 <code>[Collection](#Collection)</code>
+- collection2 <code>[Collection](#Collection)</code>
 
