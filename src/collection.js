@@ -10,6 +10,7 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
+
 import TimeRange from "./range";
 import Event from "./event";
 import BoundedIn from "./pipeline-in-bounded";
@@ -30,10 +31,11 @@ import { sum, avg, max, min, first, last, median, stdev } from "./functions";
  * of the collection and access a specific element with at().
  *
  * You can also perform aggregations of the events, map them, filter them
- * and clean them.
+ * clean them, etc.
  *
  * Collections form the backing structure for a TimeSeries, as well as
- * in Pipeline event processing.
+ * in Pipeline event processing. They are an instance of a BoundedIn, so
+ * they can be used as a pipeline source.
  */
 class Collection extends BoundedIn {
 
@@ -46,6 +48,7 @@ class Collection extends BoundedIn {
      * @param  {Boolean} [copyEvents] When using a the copy constructor
      * this specified whether or not to also copy all the events in this
      * collection. Generally you'll want to let it copy the events.
+     *
      * @return {Collection} The constructed Collection.
      */
     constructor(arg1, copyEvents = true) {
@@ -80,6 +83,7 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the Collection as a regular JSON object.
+     *
      * @return {Object} The JSON representation of this Collection
      */
     toJSON() {
@@ -89,6 +93,7 @@ class Collection extends BoundedIn {
     /**
      * Serialize out the Collection as a string. This will be the
      * string representation of `toJSON()`.
+     *
      * @return {string} The Collection serialized as a string.
      */
     toString() {
@@ -96,13 +101,15 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Returns the Event object type in this collection. Since
-     * Collections my only have one type of Event (Event, IndexedEvent
-     * or TimeRangeEvent) this will return that type. If no events
-     * have been added to the Collection it will return undefined.
+     * Returns the Event object type in this Collection.
+     *
+     * Since Collections may only have one type of event (`Event`, `IndexedEvent`
+     * or `TimeRangeEvent`) this will return that type. If no events
+     * have been added to the Collection it will return `undefined`.
      *
      * @return {Event|IndexedEvent|TimeRangeEvent} - The class of the type
-     * of events contained in this Collection.
+     *                                               of events contained in
+     *                                               this Collection.
      */
     type() {
         return this._type;
@@ -110,6 +117,7 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the number of events in this collection
+     *
      * @return {number} Count of events
      */
     size() {
@@ -120,8 +128,8 @@ class Collection extends BoundedIn {
      * Returns the number of valid items in this collection.
      *
      * Uses the fieldSpec to look up values in all events.
-     * It then counts the number that are considered valid,
-     * i.e. are not NaN, undefined or null.
+     * It then counts the number that are considered valid, which
+     * specifically are not NaN, undefined or null.
      *
      * @return {number} Count of valid events
      */
@@ -152,7 +160,9 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Returns an event in the Collection by its time.
+     * Returns an event in the Collection by its time. This is the same
+     * as calling `bisect` first and then using `at` with the index.
+     *
      * @param  {Date} time The time of the event.
      * @return {Event|TimeRangeEvent|IndexedEvent}
      */
@@ -165,6 +175,7 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the first event in the Collection.
+     *
      * @return {Event|TimeRangeEvent|IndexedEvent}
      */
     atFirst() {
@@ -175,6 +186,7 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the last event in the Collection.
+     *
      * @return {Event|TimeRangeEvent|IndexedEvent}
      */
     atLast() {
@@ -184,11 +196,12 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Returns the index that bisects the Collection at
-     * the time specified
-     * @param  {Data} t The time to bisect the Collection with
-     * @param  {number} b The position to begin searching at
-     * @return {number}   The row number that is the greatest, but still below t.
+     * Returns the index that bisects the Collection at the time specified.
+     *
+     * @param  {Data}    t   The time to bisect the Collection with
+     * @param  {number}  b   The position to begin searching at
+     *
+     * @return {number}      The row number that is the greatest, but still below t.
      */
     bisect(t, b) {
         const tms = t.getTime();
@@ -212,6 +225,7 @@ class Collection extends BoundedIn {
 
     /**
      * Generator to return all the events in the collection.
+     * 
      * @example
      * ```
      * for (let event of series.events()) {
@@ -227,6 +241,7 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the raw Immutable event list
+     *
      * @return {Immutable.List} All events as an Immutable List.
      */
     eventList() {
@@ -234,7 +249,8 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Returns a Javascript array of events
+     * Returns a Javascript array representation of the event list
+     *
      * @return {Array} All events as a Javascript Array.
      */
     eventListAsArray() {
@@ -251,7 +267,9 @@ class Collection extends BoundedIn {
 
     /**
      * From the range of times, or Indexes within the TimeSeries, return
-     * the extents of the TimeSeries as a TimeRange.
+     * the extents of the TimeSeries as a TimeRange. This is currently implemented
+     * by walking the events.
+     *
      * @return {TimeRange} The extents of the TimeSeries
      */
     range() {
@@ -269,9 +287,13 @@ class Collection extends BoundedIn {
     //
 
     /**
-     * Adds an event to the collection, returns a new Collection
+     * Adds an event to the collection, returns a new Collection. The event added
+     * can be an Event, TimeRangeEvent or IndexedEvent, but it must be of the
+     * same type as other events within the Collection.
+     *
      * @param {Event|TimeRangeEvent|IndexedEvent} event The event being added.
-     * @return {Collection} A new, modified, Collection.
+     *
+     * @return {Collection} A new, modified, Collection containing the new event.
      */
     addEvent(event) {
         this._check(event);
@@ -284,9 +306,11 @@ class Collection extends BoundedIn {
      * Perform a slice of events within the Collection, returns a new
      * Collection representing a portion of this TimeSeries from begin up to
      * but not including end.
-     * @param {Number} begin The position to begin slicing
-     * @param {Number} end The position to end slicing
-     * @return {Collection} A new, modified, Collection.
+     *
+     * @param {Number} begin   The position to begin slicing
+     * @param {Number} end     The position to end slicing
+     *
+     * @return {Collection}    The new, sliced, Collection.
      */
     slice(begin, end) {
         const sliced = new Collection(this._eventList.slice(begin, end));
@@ -298,8 +322,9 @@ class Collection extends BoundedIn {
      * Filter the collection's event list with the supplied function
      *
      * @param {function} func The filter function, that should return
-     * true or false when passed in an event.
-     * @return {Collection} A new, modified, Collection.
+     *                        true or false when passed in an event.
+     *
+     * @return {Collection}   A new, filtered, Collection.
      */
     filter(filterFunc) {
         const filteredEventList = [];
@@ -346,28 +371,13 @@ class Collection extends BoundedIn {
         return new Collection(filteredEvents);
     }
 
-    /**
-     * Takes a fieldSpecList (list of column names) and collapses
-     * them to a new column which is the reduction of the matched columns
-     * in the fieldSpecList.
-     *
-     * @param  {array}      fieldSpecList  The list of columns
-     * @param  {string}     name           The resulting summed column name
-     * @param  {function}   reducer        Reducer function e.g. sum
-     * @param  {boolean}    append         Append the summed column, rather than replace
-     * @return {Collection}                A new, modified, Collection
-     */
-    collapse(fieldSpecList, name, reducer, append = true) {
-        const fsl = fieldSpecList.map(fieldSpec => this._fieldSpecToArray(fieldSpec));
-        return this.map(e => e.collapse(fsl, name, reducer, append));
-    }
-
     //
     // Aggregate the event list to a single value
     //
 
     /**
      * Returns the number of events in this collection
+     *
      * @return {number} The number of events
      */
     count() {
@@ -376,6 +386,10 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the first value in the Collection for the fieldspec
+     *
+     * @param {string} fieldSpec The field to fetch
+     *
+     * @return {number} The first value
      */
     first(fieldSpec = "value") {
         return this.aggregate(first, fieldSpec);
@@ -383,6 +397,10 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the last value in the Collection for the fieldspec
+     *
+     * @param {string} fieldSpec The field to fetch
+     *
+     * @return {number} The last value
      */
     last(fieldSpec = "value") {
         return this.aggregate(last, fieldSpec);
@@ -390,6 +408,10 @@ class Collection extends BoundedIn {
 
     /**
      * Returns the sum Collection for the fieldspec
+     *
+     * @param {string} fieldSpec The field to sum over the collection
+     *
+     * @return {number} The sum
      */
     sum(fieldSpec = "value") {
         return this.aggregate(sum, fieldSpec);
@@ -397,8 +419,10 @@ class Collection extends BoundedIn {
 
     /**
      * Aggregates the events down to their average
-     * @param  {String} fieldSpec The field to aggregate
-     * @return {number}           The resulting value
+     *
+     * @param  {String} fieldSpec The field to average over the collection
+     *
+     * @return {number}           The average
      */
     avg(fieldSpec = "value") {
         return this.aggregate(avg, fieldSpec);
@@ -406,8 +430,10 @@ class Collection extends BoundedIn {
 
     /**
      * Aggregates the events down to their maximum value
-     * @param  {String} fieldSpec The field to aggregate
-     * @return {number}           The resulting value
+     *
+     * @param  {String} fieldSpec The field to find the max within the collection
+     *
+     * @return {number}           The max value for the field
      */
     max(fieldSpec = "value") {
         return this.aggregate(max, fieldSpec);
@@ -415,17 +441,21 @@ class Collection extends BoundedIn {
 
     /**
      * Aggregates the events down to their minimum value
-     * @param  {String} fieldSpec The field to aggregate
-     * @return {number}           The resulting value
+     *
+     * @param  {String} fieldSpec The field to find the min within the collection
+     *
+     * @return {number}           The min value for the field
      */
     min(fieldSpec = "value") {
         return this.aggregate(min, fieldSpec);
     }
 
     /**
-     * Aggregates the events down to their mean
-     * @param  {String} fieldSpec The field to aggregate
-     * @return {number}           The resulting value
+     * Aggregates the events down to their mean (same as avg)
+     *
+     * @param  {String} fieldSpec The field to find the mean of within the collection
+     *
+     * @return {number}           The mean
      */
     mean(fieldSpec = "value") {
         return this.avg(fieldSpec);
@@ -433,8 +463,10 @@ class Collection extends BoundedIn {
 
     /**
      * Aggregates the events down to their medium value
-     * @param  {String} fieldSpec The field to aggregate
-     * @return {number}           The resulting value
+     *
+     * @param  {String} fieldSpec The field to aggregate over
+     *
+     * @return {number}           The resulting median value
      */
     median(fieldSpec = "value") {
         return this.aggregate(median, fieldSpec);
@@ -442,8 +474,10 @@ class Collection extends BoundedIn {
 
     /**
      * Aggregates the events down to their stdev
-     * @param  {String} fieldSpec The field to aggregate
-     * @return {number}           The resulting value
+     *
+     * @param  {String} fieldSpec The field to aggregate over
+     *
+     * @return {number}           The resulting stdev value
      */
     stdev(fieldSpec = "value") {
         return this.aggregate(stdev, fieldSpec);
@@ -453,9 +487,11 @@ class Collection extends BoundedIn {
      * Aggregates the events down using a user defined function to
      * do the reduction.
      *
-     * @param  {function} func User defined reduction function. Will be
-     * passed a list of values. Should return a singe value.
-     * @param  {String} fieldSpec The field to aggregate
+     * @param  {function} func    User defined reduction function. Will be
+     *                            passed a list of values. Should return a
+     *                            singe value.
+     * @param  {String} fieldSpec The field to aggregate over
+     *
      * @return {number}           The resulting value
      */
     aggregate(func, fieldSpec = "value") {
@@ -487,8 +523,10 @@ class Collection extends BoundedIn {
      /**
       * Static function to compare two collections to each other. If the collections
       * are of the same instance as each other then equals will return true.
+      *
       * @param  {Collection} collection1
       * @param  {Collection} collection2
+      *
       * @return {bool} result
       */
     static equal(collection1, collection2) {
@@ -499,8 +537,10 @@ class Collection extends BoundedIn {
      /**
       * Static function to compare two collections to each other. If the collections
       * are of the same value as each other then equals will return true.
+      *
       * @param  {Collection} collection1
       * @param  {Collection} collection2
+      *
       * @return {bool} result
       */
     static is(collection1, collection2) {

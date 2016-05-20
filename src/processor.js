@@ -21,6 +21,9 @@ function addPrevToChain(n, chain) {
     }
 }
 
+/**
+ * Base class for all Pipeline processors
+ */
 class Processor extends Observable {
 
     constructor(arg1, options) {

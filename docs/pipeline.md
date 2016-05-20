@@ -169,9 +169,10 @@ of collection data.
     * [.offsetBy(by, fieldSpec)](#Pipeline+offsetBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.aggregate(fields)](#Pipeline+aggregate) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asEvents(options)](#Pipeline+asEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.map(op)](#Pipeline+map) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.select(fieldSpec)](#Pipeline+select) ⇒ <code>[Pipeline](#Pipeline)</code>
-    * [.collapse(fieldSpec, name, append)](#Pipeline+collapse) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.collapse(fieldSpec, name, reducer, append)](#Pipeline+collapse) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.take(limit)](#Pipeline+take) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asTimeRangeEvents(options)](#Pipeline+asTimeRangeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asIndexedEvents(options)](#Pipeline+asIndexedEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -204,8 +205,10 @@ Set the window, returning a new Pipeline. The argument here
 is an object with {type, duration}.
 type may be:
  * "Fixed"
+ * other types coming
+
 duration is of the form:
- * "30s", "5m" or "1d" etc
+ * "30s" or "1d" etc
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
@@ -230,11 +233,20 @@ or a array of fieldSpecs
 <a name="Pipeline+emitOn"></a>
 
 ### pipeline.emitOn(trigger) ⇒ <code>[Pipeline](#Pipeline)</code>
-Sets the condition under which accumulated collection will
+Sets the condition under which an accumulated collection will
 be emitted. If specified before an aggregation this will control
 when the resulting event will be emitted relative to the
-window accumulation. Current options are to emit on every event
-or just when the collection is complete.
+window accumulation. Current options are:
+ * to emit on every event, or
+ * just when the collection is complete, or
+ * when a flush signal is received, either manually calling done(),
+   or at the end of a bounded source
+
+The difference will depend on the output you want, how often
+you want to get updated, and if you need to get a partial state.
+There's currently no support for late data or watermarks. If an
+event passes comes in after a collection window, that collection
+is considered finished.
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
@@ -246,16 +258,18 @@ Collection should be emitted. May be:
                     maintained collections will emit their result
     * "discard"   - when a collection is to be discarded,
                     first it will emit. But only then.
+    * "flush"     - when a flush signal is received
 
 <a name="Pipeline+from"></a>
 
 ### pipeline.from(src) ⇒ <code>[Pipeline](#Pipeline)</code>
-The "In" to get events from. The In needs to be able to
-iterate its events using for..of loop for bounded Ins, or
-be able to emit for unbounded Ins. The actual batch, or stream
-connection occurs when an output is defined with to().
+The source to get events from. The source needs to be able to
+iterate its events using `for..of` loop for bounded Ins, or
+be able to emit() for unbounded Ins. The actual batch, or stream
+connection occurs when an output is defined with `to()`.
 
-from() returns a new Pipeline.
+Pipelines can be chained together since a source may be another
+Pipeline.
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
@@ -268,13 +282,12 @@ from() returns a new Pipeline.
 <a name="Pipeline+to"></a>
 
 ### pipeline.to() ⇒ <code>[Pipeline](#Pipeline)</code>
-Sets up the destination sink for the pipeline. The output should
-be a BatchOut subclass for a bounded input and a StreamOut subclass
-for an unbounded input.
+Sets up the destination sink for the pipeline.
 
-For a batch mode connection, the output is connected and then the
-source input is iterated over to process all events into the pipeline and
-down to the out.
+For a batch mode connection, i.e. one with a Bounded source,
+the output is connected to a clone of the parts of the Pipeline dependencies
+that lead to this output. This is done by a Runner. The source input is
+then iterated over to process all events into the pipeline and though to the Out.
 
 For stream mode connections, the output is connected and from then on
 any events added to the input will be processed down the pipeline to
@@ -310,7 +323,7 @@ Outputs the count of events
 
 ### pipeline.offsetBy(by, fieldSpec) ⇒ <code>[Pipeline](#Pipeline)</code>
 Processor to offset a set of fields by a value. Mostly used for
-testing processor operations.
+testing processor and pipeline operations with a simple operation.
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The modified Pipeline  
@@ -324,6 +337,7 @@ testing processor operations.
 ### pipeline.aggregate(fields) ⇒ <code>[Pipeline](#Pipeline)</code>
 Uses the current Pipeline windowing and grouping
 state to build collections of events and aggregate them.
+
 `IndexedEvent`s will be emitted out of the aggregator based
 on the `emitOn` state of the Pipeline.
 
@@ -338,18 +352,18 @@ object. This is a map from fieldName to operator.
 - fields <code>object</code> - Fields and operators to be aggregated
 
 **Example**  
-```js
+```
 import { Pipeline, EventOut, functions } from "pondjs";
 const { avg } = functions;
 
 const p = Pipeline()
   .from(input)
   .windowBy("1h")           // 1 day fixed windows
-  .emitOn("eachEvent")    // emit result on each event
+  .emitOn("eachEvent")      // emit result on each event
   .aggregate({in: avg, out: avg})
   .asEvents()
   .to(EventOut, {}, event => {
-     result[`${event.index()}`] = event;
+     result[`${event.index()}`] = event; // Result
   });
 ```
 <a name="Pipeline+asEvents"></a>
@@ -369,6 +383,17 @@ to convert a time range to a single time. There are three options:
  1. use the beginning time (options = {alignment: "lag"})
  2. use the center time (options = {alignment: "center"})
  3. use the end time (options = {alignment: "lead"})
+
+<a name="Pipeline+map"></a>
+
+### pipeline.map(op) ⇒ <code>[Pipeline](#Pipeline)</code>
+Map the event stream using an operator
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- op <code>function</code> - A function that returns a new Event
 
 <a name="Pipeline+filter"></a>
 
@@ -394,17 +419,30 @@ Select a subset of columns
 
 <a name="Pipeline+collapse"></a>
 
-### pipeline.collapse(fieldSpec, name, append) ⇒ <code>[Pipeline](#Pipeline)</code>
-Select a subset of columns
+### pipeline.collapse(fieldSpec, name, reducer, append) ⇒ <code>[Pipeline](#Pipeline)</code>
+Collapse a subset of columns using a reducer function
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 **Params**
 
-- fieldSpec <code>array</code> | <code>String</code> - The columns to include in the output
-- name <code>string</code> - The result column name
+- fieldSpec <code>array</code> | <code>String</code> - The columns to collapse into the output
+- name <code>string</code> - The resulting output column's name
+- reducer <code>function</code> - Function to use to do the reduction
 - append <code>boolean</code> - Add the new column to the existing ones, or replace them.
 
+**Example**  
+```
+ const timeseries = new TimeSeries(inOutData);
+ Pipeline()
+     .from(timeseries)
+     .collapse(["in", "out"], "in_out_sum", sum)
+     .emitOn("flush")
+     .to(CollectionOut, c => {
+          const ts = new TimeSeries({name: "subset", collection: c});
+          ...
+     }, true);
+```
 <a name="Pipeline+take"></a>
 
 ### pipeline.take(limit) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -419,8 +457,7 @@ Take events up to the supplied limit, per key.
 <a name="Pipeline+asTimeRangeEvents"></a>
 
 ### pipeline.asTimeRangeEvents(options) ⇒ <code>[Pipeline](#Pipeline)</code>
-Converts incoming Events or IndexedEvents to
-TimeRangeEvents.
+Converts incoming Events or IndexedEvents to TimeRangeEvents.
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  

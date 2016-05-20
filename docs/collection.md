@@ -16,10 +16,11 @@ can iterate over the collection with a for..of loop, get the size()
 of the collection and access a specific element with at().
 
 You can also perform aggregations of the events, map them, filter them
-and clean them.
+clean them, etc.
 
 Collections form the backing structure for a TimeSeries, as well as
-in Pipeline event processing.
+in Pipeline event processing. They are an instance of a BoundedIn, so
+they can be used as a pipeline source.
 
 **Kind**: global class  
 ## API Reference
@@ -47,11 +48,10 @@ in Pipeline event processing.
         * [.filter(func)](#Collection+filter) ⇒ <code>[Collection](#Collection)</code>
         * [.map(func)](#Collection+map) ⇒ <code>[Collection](#Collection)</code>
         * [.clean(fieldSpec)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
-        * [.collapse(fieldSpecList, name, reducer, append)](#Collection+collapse) ⇒ <code>[Collection](#Collection)</code>
         * [.count()](#Collection+count) ⇒ <code>number</code>
-        * [.first()](#Collection+first)
-        * [.last()](#Collection+last)
-        * [.sum()](#Collection+sum)
+        * [.first(fieldSpec)](#Collection+first) ⇒ <code>number</code>
+        * [.last(fieldSpec)](#Collection+last) ⇒ <code>number</code>
+        * [.sum(fieldSpec)](#Collection+sum) ⇒ <code>number</code>
         * [.avg(fieldSpec)](#Collection+avg) ⇒ <code>number</code>
         * [.max(fieldSpec)](#Collection+max) ⇒ <code>number</code>
         * [.min(fieldSpec)](#Collection+min) ⇒ <code>number</code>
@@ -95,14 +95,16 @@ string representation of `toJSON()`.
 <a name="Collection+type"></a>
 
 ### collection.type() ⇒ <code>Event</code> &#124; <code>IndexedEvent</code> &#124; <code>TimeRangeEvent</code>
-Returns the Event object type in this collection. Since
-Collections my only have one type of Event (Event, IndexedEvent
-or TimeRangeEvent) this will return that type. If no events
-have been added to the Collection it will return undefined.
+Returns the Event object type in this Collection.
+
+Since Collections may only have one type of event (`Event`, `IndexedEvent`
+or `TimeRangeEvent`) this will return that type. If no events
+have been added to the Collection it will return `undefined`.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>Event</code> &#124; <code>IndexedEvent</code> &#124; <code>TimeRangeEvent</code> - - The class of the type
-of events contained in this Collection.  
+                                              of events contained in
+                                              this Collection.  
 <a name="Collection+size"></a>
 
 ### collection.size() ⇒ <code>number</code>
@@ -116,8 +118,8 @@ Returns the number of events in this collection
 Returns the number of valid items in this collection.
 
 Uses the fieldSpec to look up values in all events.
-It then counts the number that are considered valid,
-i.e. are not NaN, undefined or null.
+It then counts the number that are considered valid, which
+specifically are not NaN, undefined or null.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - Count of valid events  
@@ -143,7 +145,8 @@ for (let row=0; row < series.size(); row++) {
 <a name="Collection+atTime"></a>
 
 ### collection.atTime(time) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-Returns an event in the Collection by its time.
+Returns an event in the Collection by its time. This is the same
+as calling `bisect` first and then using `at` with the index.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Params**
@@ -165,8 +168,7 @@ Returns the last event in the Collection.
 <a name="Collection+bisect"></a>
 
 ### collection.bisect(t, b) ⇒ <code>number</code>
-Returns the index that bisects the Collection at
-the time specified
+Returns the index that bisects the Collection at the time specified.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The row number that is the greatest, but still below t.  
@@ -197,7 +199,7 @@ Returns the raw Immutable event list
 <a name="Collection+eventListAsArray"></a>
 
 ### collection.eventListAsArray() ⇒ <code>Array</code>
-Returns a Javascript array of events
+Returns a Javascript array representation of the event list
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>Array</code> - All events as a Javascript Array.  
@@ -205,17 +207,20 @@ Returns a Javascript array of events
 
 ### collection.range() ⇒ <code>TimeRange</code>
 From the range of times, or Indexes within the TimeSeries, return
-the extents of the TimeSeries as a TimeRange.
+the extents of the TimeSeries as a TimeRange. This is currently implemented
+by walking the events.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>TimeRange</code> - The extents of the TimeSeries  
 <a name="Collection+addEvent"></a>
 
 ### collection.addEvent(event) ⇒ <code>[Collection](#Collection)</code>
-Adds an event to the collection, returns a new Collection
+Adds an event to the collection, returns a new Collection. The event added
+can be an Event, TimeRangeEvent or IndexedEvent, but it must be of the
+same type as other events within the Collection.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection.  
+**Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection containing the new event.  
 **Params**
 
 - event <code>Event</code> | <code>TimeRangeEvent</code> | <code>IndexedEvent</code> - The event being added.
@@ -228,7 +233,7 @@ Collection representing a portion of this TimeSeries from begin up to
 but not including end.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection.  
+**Returns**: <code>[Collection](#Collection)</code> - The new, sliced, Collection.  
 **Params**
 
 - begin <code>Number</code> - The position to begin slicing
@@ -240,11 +245,11 @@ but not including end.
 Filter the collection's event list with the supplied function
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection.  
+**Returns**: <code>[Collection](#Collection)</code> - A new, filtered, Collection.  
 **Params**
 
 - func <code>function</code> - The filter function, that should return
-true or false when passed in an event.
+                       true or false when passed in an event.
 
 <a name="Collection+map"></a>
 
@@ -273,22 +278,6 @@ The resulting Collection will be clean (for that fieldSpec).
 
 - fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to test
 
-<a name="Collection+collapse"></a>
-
-### collection.collapse(fieldSpecList, name, reducer, append) ⇒ <code>[Collection](#Collection)</code>
-Takes a fieldSpecList (list of column names) and collapses
-them to a new column which is the reduction of the matched columns
-in the fieldSpecList.
-
-**Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection  
-**Params**
-
-- fieldSpecList <code>array</code> - The list of columns
-- name <code>string</code> - The resulting summed column name
-- reducer <code>function</code> - Reducer function e.g. sum
-- append <code>boolean</code> <code> = true</code> - Append the summed column, rather than replace
-
 <a name="Collection+count"></a>
 
 ### collection.count() ⇒ <code>number</code>
@@ -298,32 +287,47 @@ Returns the number of events in this collection
 **Returns**: <code>number</code> - The number of events  
 <a name="Collection+first"></a>
 
-### collection.first()
+### collection.first(fieldSpec) ⇒ <code>number</code>
 Returns the first value in the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>number</code> - The first value  
+**Params**
+
+- fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to fetch
+
 <a name="Collection+last"></a>
 
-### collection.last()
+### collection.last(fieldSpec) ⇒ <code>number</code>
 Returns the last value in the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>number</code> - The last value  
+**Params**
+
+- fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to fetch
+
 <a name="Collection+sum"></a>
 
-### collection.sum()
+### collection.sum(fieldSpec) ⇒ <code>number</code>
 Returns the sum Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>number</code> - The sum  
+**Params**
+
+- fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to sum over the collection
+
 <a name="Collection+avg"></a>
 
 ### collection.avg(fieldSpec) ⇒ <code>number</code>
 Aggregates the events down to their average
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting value  
+**Returns**: <code>number</code> - The average  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+- fieldSpec <code>String</code> <code> = value</code> - The field to average over the collection
 
 <a name="Collection+max"></a>
 
@@ -331,10 +335,10 @@ Aggregates the events down to their average
 Aggregates the events down to their maximum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting value  
+**Returns**: <code>number</code> - The max value for the field  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+- fieldSpec <code>String</code> <code> = value</code> - The field to find the max within the collection
 
 <a name="Collection+min"></a>
 
@@ -342,21 +346,21 @@ Aggregates the events down to their maximum value
 Aggregates the events down to their minimum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting value  
+**Returns**: <code>number</code> - The min value for the field  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+- fieldSpec <code>String</code> <code> = value</code> - The field to find the min within the collection
 
 <a name="Collection+mean"></a>
 
 ### collection.mean(fieldSpec) ⇒ <code>number</code>
-Aggregates the events down to their mean
+Aggregates the events down to their mean (same as avg)
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting value  
+**Returns**: <code>number</code> - The mean  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+- fieldSpec <code>String</code> <code> = value</code> - The field to find the mean of within the collection
 
 <a name="Collection+median"></a>
 
@@ -364,10 +368,10 @@ Aggregates the events down to their mean
 Aggregates the events down to their medium value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting value  
+**Returns**: <code>number</code> - The resulting median value  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate over
 
 <a name="Collection+stdev"></a>
 
@@ -375,10 +379,10 @@ Aggregates the events down to their medium value
 Aggregates the events down to their stdev
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting value  
+**Returns**: <code>number</code> - The resulting stdev value  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate over
 
 <a name="Collection+aggregate"></a>
 
@@ -391,8 +395,9 @@ do the reduction.
 **Params**
 
 - func <code>function</code> - User defined reduction function. Will be
-passed a list of values. Should return a singe value.
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate
+                           passed a list of values. Should return a
+                           singe value.
+- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate over
 
 <a name="Collection.equal"></a>
 

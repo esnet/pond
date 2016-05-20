@@ -27,7 +27,7 @@ import Event from "../../src/event";
 import TimeRangeEvent from "../../src/timerangeevent";
 import IndexedEvent from "../../src/indexedevent";
 
-import { keep, avg, sum } from "../../src/functions.js";
+import { keep, avg, sum, max } from "../../src/functions.js";
 
 const eventList1 = [
     new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
@@ -686,6 +686,50 @@ describe("Pipeline", () => {
                     expect(ts.at(0).get("in_out_sum")).to.equal(117);
                     expect(ts.at(1).get("in_out_sum")).to.equal(110);
                     expect(ts.at(2).get("in_out_sum")).to.equal(108);
+                    done();
+                }, /*flush=*/true);
+        });
+
+        it("should be able chain collapse operations together", done => {
+
+            const timeseries = new TimeSeries(inOutData);
+            Pipeline()
+                .from(timeseries)
+                .collapse(["in", "out"], "in_out_sum", sum, true)
+                .collapse(["in", "out"], "in_out_max", max, true)
+                .emitOn("flush")
+                .to(CollectionOut, c => {
+                    
+                    const ts = new TimeSeries({name: "subset", collection: c});
+                    
+                    expect(ts.at(0).get("in_out_sum")).to.equal(117);
+                    expect(ts.at(1).get("in_out_sum")).to.equal(110);
+                    expect(ts.at(2).get("in_out_sum")).to.equal(108);
+
+                    expect(ts.at(0).get("in_out_max")).to.equal(80);
+                    expect(ts.at(1).get("in_out_max")).to.equal(88);
+                    expect(ts.at(2).get("in_out_max")).to.equal(56);
+
+                    done();
+                }, /*flush=*/true);
+        });
+
+    });
+
+    describe("Mapping in batch", () => {
+
+        it("should be able map one event to a modified event", done => {
+
+            const timeseries = new TimeSeries(inOutData);
+            Pipeline()
+                .from(timeseries)
+                .map(e => e.setData({in: e.get("out"), out: e.get("in")}))
+                .emitOn("flush")
+                .to(CollectionOut, c => {
+                    const ts = new TimeSeries({name: "subset", collection: c});
+                    expect(ts.at(0).get("in")).to.equal(37);
+                    expect(ts.at(0).get("out")).to.equal(80);
+                    expect(ts.size()).to.equal(3);
                     done();
                 }, /*flush=*/true);
         });
