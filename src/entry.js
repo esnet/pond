@@ -30,4 +30,16 @@ export EventOut from "./pipeline-out-event";
 export CollectionOut from "./pipeline-out-collection";
 export Offset from "./offset.js";
 export Converter from "./offset.js";
-export Functions from "./functions.js";
+export {
+    keep,
+    sum,
+    avg,
+    max,
+    min,
+    cound,
+    first,
+    last,
+    difference,
+    median,
+    stdev
+} from "./functions";
