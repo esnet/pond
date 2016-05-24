@@ -22,7 +22,9 @@ export Index from "./index.js";
 export TimeRange from "./range.js";
 export Collection from "./collection.js";
 export TimeSeries from "./series.js";
-export Pipeline from "./pipeline.js";
+export {
+    Pipeline
+} from "./pipeline.js";
 export UnboundedIn from "./pipeline-in-unbounded";
 export BoundedIn from "./pipeline-in-bounded";
 export PipelineOut from "./pipeline-out";
