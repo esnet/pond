@@ -91,18 +91,18 @@ const availabilityData = {
     name: "availability",
     columns: ["index", "uptime"],
     points: [
-        ["2015-06", "100%"],
-        ["2015-05", "92%"],
-        ["2015-04", "87%"],
-        ["2015-03", "99%"],
-        ["2015-02", "92%"],
-        ["2015-01", "100%"],
-        ["2014-12", "99%"],
-        ["2014-11", "91%"],
-        ["2014-10", "99%"],
-        ["2014-09", "95%"],
+        ["2014-07", "100%"],
         ["2014-08", "88%"],
-        ["2014-07", "100%"]
+        ["2014-09", "95%"],
+        ["2014-10", "99%"],
+        ["2014-11", "91%"],
+        ["2014-12", "99%"],
+        ["2015-01", "100%"],
+        ["2015-02", "92%"],
+        ["2015-03", "99%"],
+        ["2015-04", "87%"],
+        ["2015-05", "92%"],
+        ["2015-06", "100%"]
     ]
 };
 
@@ -110,18 +110,18 @@ const availabilitySeries = {
     name: "availability",
     columns: ["index", "uptime", "notes", "outages"],
     points: [
-        ["2015-06", 100, "", 0],
-        ["2015-05", 92, "Router failure June 12", 26],
-        ["2015-04", 87, "Planned downtime in April", 82],
-        ["2015-03", 99, "Minor outage March 2", 4],
-        ["2015-02", 92, "",12],
-        ["2015-01", 100, "", 0],
-        ["2014-12", 99, "", 3],
-        ["2014-11", 91, "", 14],
-        ["2014-10", 99, "", 3],
-        ["2014-09", 95, "", 6],
+        ["2014-07", 100, "", 2],
         ["2014-08", 88, "", 17],
-        ["2014-09", 100, "", 2]
+        ["2014-09", 95, "", 6],
+        ["2014-10", 99, "", 3],
+        ["2014-11", 91, "", 14],
+        ["2014-12", 99, "", 3],
+        ["2015-01", 100, "", 0],
+        ["2015-02", 92, "",12],
+        ["2015-03", 99, "Minor outage March 2", 4],
+        ["2015-04", 87, "Planned downtime in April", 82],
+        ["2015-05", 92, "Router failure June 12", 26],
+        ["2015-06", 100, "", 0]
     ]
 };
 
@@ -258,6 +258,16 @@ const noDataSeries = new TimeSeries({
 
 const outageEvents = [
     {
+        startTime: "2015-03-04T09:00:00Z",
+        endTime: "2015-03-04T14:00:00Z",
+        title: "ANL Scheduled Maintenance",
+        description: "ANL will be switching border routers...",
+        completed: true,
+        external_ticket: "",
+        esnet_ticket: "ESNET-20150302-002",
+        organization: "ANL",
+        type: "Planned"
+    }, {
         startTime: "2015-04-22T03:30:00Z",
         endTime: "2015-04-22T13:00:00Z",
         description: "At 13:33 pacific circuit 06519 went down.",
@@ -268,7 +278,7 @@ const outageEvents = [
         organization: "Internet2 / Level 3",
         type: "Unplanned"
     }, {
-        startTime: "2015-04-22T03:30:00Z",
+        startTime: "2015-04-22T03:35:00Z",
         endTime: "2015-04-22T16:50:00Z",
         title: "STAR-CR5 < 100 ge 06519 > ANL  - Outage",
         description: "The listed circuit was unavailable due to bent pins.",
@@ -277,16 +287,6 @@ const outageEvents = [
         esnet_ticket: "ESNET-20150421-013",
         organization: "Internet2 / Level 3",
         type: "Unplanned"
-    }, {
-        startTime: "2015-03-04T09:00:00Z",
-        endTime: "2015-03-04T14:00:00Z",
-        title: "ANL Scheduled Maintenance",
-        description: "ANL will be switching border routers...",
-        completed: true,
-        external_ticket: "",
-        esnet_ticket: "ESNET-20150302-002",
-        organization: "ANL",
-        type: "Planned"
     }
 ];
 
@@ -583,7 +583,7 @@ describe("TimeSeries", () => {
             expect(series.avg()).to.equal(15);
             done();
         });
-
+       
         it("can avg series with deep data", done => {
             const series = new TimeSeries({
                 name: "Map Traffic",
@@ -726,7 +726,7 @@ describe("TimeSeries", () => {
 
         it("can make a timeseries that can be serialized to a string", done => {
             const series = new TimeSeries({name: "outages", events});
-            const expected = `{"name":"outages","utc":true,"columns":["timerange","description","title","completed","external_ticket","esnet_ticket","organization","type"],"points":[[[1429673400000,1429707600000],"At 13:33 pacific circuit 06519 went down.","STAR-CR5 < 100 ge 06519 > ANL  - Outage",true,"","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1429673400000,1429721400000],"STAR-CR5 < 100 ge 06519 > ANL  - Outage","The listed circuit was unavailable due to bent pins.",true,"3576:144","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1425459600000,1425477600000],"ANL Scheduled Maintenance","ANL will be switching border routers...",true,"","ESNET-20150302-002","ANL","Planned"]]}`;
+            const expected = `{"name":"outages","utc":true,"columns":["timerange","title","description","completed","external_ticket","esnet_ticket","organization","type"],"points":[[[1425459600000,1425477600000],"ANL Scheduled Maintenance","ANL will be switching border routers...",true,"","ESNET-20150302-002","ANL","Planned"],[[1429673400000,1429707600000],"At 13:33 pacific circuit 06519 went down.","STAR-CR5 < 100 ge 06519 > ANL  - Outage",true,"","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1429673700000,1429721400000],"STAR-CR5 < 100 ge 06519 > ANL  - Outage","The listed circuit was unavailable due to bent pins.",true,"3576:144","ESNET-20150421-013","Internet2 / Level 3","Unplanned"]]}`;
             expect(series.toString()).to.equal(expected);
             done();
         });
@@ -758,7 +758,7 @@ describe("TimeSeries", () => {
         it("can create an series with indexed data (in UTC time)", done => {
             const series = new TimeSeries(availabilityData);
             const event = series.at(2);
-            expect(event.timerangeAsUTCString()).to.equal("[Wed, 01 Apr 2015 00:00:00 GMT, Thu, 30 Apr 2015 23:59:59 GMT]");
+            expect(event.timerangeAsUTCString()).to.equal("[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]");
             expect(series.range().begin().getTime()).to.equal(1404172800000);
             expect(series.range().end().getTime()).to.equal(1435708799999);
             done();
@@ -769,13 +769,13 @@ describe("TimeSeries", () => {
 
         it("can create a slice of a series", done => {
             const series = new TimeSeries(availabilityData);
-            const expectedLastTwo = `{"name":"availability","utc":true,"columns":["index","uptime"],"points":[["2014-08","88%"],["2014-07","100%"]]}`;
+            const expectedLastTwo = `{"name":"availability","utc":true,"columns":["index","uptime"],"points":[["2015-05","92%"],["2015-06","100%"]]}`;
             const lastTwo = series.slice(-2);
             expect(lastTwo.toString()).to.equal(expectedLastTwo);
-            const expectedFirstThree = `{"name":"availability","utc":true,"columns":["index","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"]]}`;
+            const expectedFirstThree = `{"name":"availability","utc":true,"columns":["index","uptime"],"points":[["2014-07","100%"],["2014-08","88%"],["2014-09","95%"]]}`;
             const firstThree = series.slice(0, 3);
             expect(firstThree.toString()).to.equal(expectedFirstThree);
-            const expectedAll = `{"name":"availability","utc":true,"columns":["index","uptime"],"points":[["2015-06","100%"],["2015-05","92%"],["2015-04","87%"],["2015-03","99%"],["2015-02","92%"],["2015-01","100%"],["2014-12","99%"],["2014-11","91%"],["2014-10","99%"],["2014-09","95%"],["2014-08","88%"],["2014-07","100%"]]}`;
+            const expectedAll = `{"name":"availability","utc":true,"columns":["index","uptime"],"points":[["2014-07","100%"],["2014-08","88%"],["2014-09","95%"],["2014-10","99%"],["2014-11","91%"],["2014-12","99%"],["2015-01","100%"],["2015-02","92%"],["2015-03","99%"],["2015-04","87%"],["2015-05","92%"],["2015-06","100%"]]}`;
             const sliceAll = series.slice();
             expect(sliceAll.toString()).to.equal(expectedAll);
             done();
@@ -878,6 +878,14 @@ describe("TimeSeries", () => {
                     expect(ts.at(3).get("max_in_out")).to.equal(4);
                     done();
                 });
+        });
+
+        it("can collapse a timeseries into a new timeseries that is the sum of two columns, then find the max", (done) => {
+            const ts = new TimeSeries(sumPart1);
+            ts.collapse(["in", "out"], "value", sum, false, sums => {
+                expect(sums.max()).to.equal(13);
+                done();
+            });
         });
 
     });

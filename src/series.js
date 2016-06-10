@@ -176,14 +176,19 @@ class TimeSeries {
                 //
 
                 const { events, ...meta1 } = obj; //eslint-disable-line
-
                 this._collection = new Collection(events);
                 this._data = buildMetaData(meta1);
 
             } else if (_.has(obj, "collection")) {
+
+                //
+                // Initialized from a Collection
+                //
+
                 const { collection, ...meta3 } = obj; //eslint-disable-line
                 this._collection = collection;
                 this._data = buildMetaData(meta3);
+
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
 
                 //
@@ -209,6 +214,10 @@ class TimeSeries {
 
                 this._collection = new Collection(events);
                 this._data = buildMetaData(meta2);
+            }
+
+            if (!this._collection.isChronological()) {
+                throw new Error("Events supplied to TimeSeries constructor must be chronological");
             }
         }
     }
@@ -288,6 +297,51 @@ class TimeSeries {
     }
 
     /**
+     * Returns an event in the series by its time. This is the same
+     * as calling `bisect` first and then using `at` with the index.
+     *
+     * @param  {Date} time The time of the event.
+     * @return {Event|TimeRangeEvent|IndexedEvent}
+     */
+    atTime(time) {
+        return this._collection.atTime(time);
+    }
+
+    /**
+     * Returns the first event in the series.
+     *
+     * @return {Event|TimeRangeEvent|IndexedEvent}
+     */
+    atFirst() {
+        return this._collection.atFirst();
+    }
+
+    /**
+     * Returns the last event in the series.
+     *
+     * @return {Event|TimeRangeEvent|IndexedEvent}
+     */
+    atLast() {
+        return this._collection.atLast();
+    }
+
+    /**
+     * Generator to return all the events in the series
+     *
+     * @example
+     * ```
+     * for (let event of series.events()) {
+     *     console.log(event.toString());
+     * }
+     * ```
+     */
+    * events() {
+        for (let i = 0; i < this.size(); i++) {
+            yield this.at(i);
+        }
+    }
+
+    /**
      * Sets a new underlying collection for this TimeSeries.
      *
      * @param {Collection}  collection The new collection
@@ -295,6 +349,9 @@ class TimeSeries {
      * @return {TimeSeries}            A new TimeSeries
      */
     setCollection(collection) {
+        if (!collection.isChronological()) {
+            throw new Error("Collection supplied is not chronological");
+        }
         const result = new TimeSeries(this);
         result._collection = collection;
         return result;
@@ -303,7 +360,7 @@ class TimeSeries {
     /**
      * Returns the index that bisects the TimeSeries at the time specified.
      *
-     * @param  {Data}    t   The time to bisect the TimeSeries with
+     * @param  {Date}    t   The time to bisect the TimeSeries with
      * @param  {number}  b   The position to begin searching at
      *
      * @return {number}      The row number that is the greatest, but still below t.
@@ -325,6 +382,20 @@ class TimeSeries {
     slice(begin, end) {
         const sliced = this._collection.slice(begin, end);
         return this.setCollection(sliced);
+    }
+
+    /**
+     * Crop the TimeSeries to the specified TimeRange and
+     * return a new TimeSeries.
+     *
+     * @param {TimeRange} timerange   The bounds of the new TimeSeries
+     *
+     * @return {TimeSeries}    The new, cropped, TimeSeries.
+     */
+    crop(timerange) {
+        const beginPos = this.bisect(timerange.begin());
+        const endPos = this.bisect(timerange.end(), beginPos);
+        return this.slice(beginPos, endPos);
     }
 
     /**

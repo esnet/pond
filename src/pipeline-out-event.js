@@ -13,13 +13,15 @@ import PipelineOut from "./pipeline-out";
 class EventOut extends PipelineOut {
 
     constructor(pipeline, options, callback) {
-        super();
+        super(pipeline);
         this._callback = callback;
     }
 
     addEvent(event) {
         if (this._callback) {
             this._callback(event);
+        } else {
+            this._pipeline.addResult(event);
         }
     }
 
@@ -28,7 +30,9 @@ class EventOut extends PipelineOut {
     }
 
     flush() {
-
+        if (!this._callback) {
+            this._pipeline.resultsDone();
+        }
     }
 }
 

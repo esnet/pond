@@ -19,6 +19,10 @@ module.exports = {
             {
                 test: /\.json$/,
                 loader: "json-loader"
+            },
+            {
+                test: /\.csv$/,
+                loader: "dsv-loader"
             }
         ]
     },
@@ -26,7 +30,7 @@ module.exports = {
         fs: "empty"
     },
     resolve: {
-        extensions: ["", ".js"],
+        extensions: ["", ".js", ".csv"],
         modulesDirectories: ["node_modules", "."]
     }
 };

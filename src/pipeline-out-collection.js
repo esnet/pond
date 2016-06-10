@@ -14,7 +14,8 @@ import PipelineOut from "./pipeline-out";
 class CollectionOut extends PipelineOut {
 
     constructor(pipeline, options, callback) {
-        super();
+        super(pipeline);
+        
         this._callback = callback;
         this._collector = new Collector({
             windowType: pipeline.getWindowType(),
@@ -22,7 +23,11 @@ class CollectionOut extends PipelineOut {
             groupBy: pipeline.getGroupBy(),
             emitOn: pipeline.getEmitOn()
         }, (collection, windowKey, groupByKey) => {
-            this._callback(collection, windowKey, groupByKey);
+            if (this._callback) {
+                this._callback(collection, windowKey, groupByKey);
+            } else {
+                this._pipeline.addResult(`${windowKey}-${groupByKey}`, collection);
+            }
         });
     }
 
@@ -36,6 +41,9 @@ class CollectionOut extends PipelineOut {
     
     flush() {
         this._collector.flushCollections();
+        if (!this._callback) {
+            this._pipeline.resultsDone();
+        }
     }
 }
 

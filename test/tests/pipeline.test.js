@@ -195,7 +195,9 @@ describe("Pipeline", () => {
                 .to(CollectionOut, c => c1 = c);       // --> Specified output, evokes batch op
             const p2 = p1                              //            ||
                 .offsetBy(3, "in")                     //     - Transforms to a new collection
-                .to(CollectionOut, c => c2 = c);       // --> Specified output, evokes batch op
+                .to(CollectionOut, c => {
+                    c2 = c;
+                });       // --> Specified output, evokes batch op
 
             expect(c1.size()).to.equal(3);
             expect(c1.at(0).get("in")).to.equal(4);
@@ -209,7 +211,7 @@ describe("Pipeline", () => {
 
             done();
         });
-        
+
         it("can stream from an unbounded source directly to output", done => {
             let out;
             const events = eventList1;
@@ -714,6 +716,52 @@ describe("Pipeline", () => {
                 }, /*flush=*/true);
         });
 
+        it("should be able sum element-wise and then find the max", done => {
+            const timeseries = new TimeSeries(inOutData);
+            Pipeline()
+                .from(timeseries)
+                .collapse(["in", "out"], "total", sum)
+                .emitOn("flush")
+                .aggregate({total: max})
+                .to(EventOut, e => {
+                    expect(e.get("total")).to.equal(117);
+                    done();
+                }, /*flush=*/true);
+        });
+    });
+
+    describe("Batch pipeline with return value", () => {
+
+        it("should be able sum element-wise and then find the max and get the result out", done => {
+            const timeseries = new TimeSeries(inOutData);
+            const result = Pipeline()
+                .from(timeseries)
+                .emitOn("flush")
+                .collapse(["in", "out"], "total", sum)
+                .aggregate({total: max})
+                .toEventList();
+
+            //const maxTotal = pipeline.latestValue();
+            //expect(maxTotal).to.equal(117);
+            done();
+
+        });
+
+        it("should be able to collect first 10 events over 65 and under 65", done => {
+            let result = {};
+            const timeseries = new TimeSeries(sept2014Data);
+
+            const collections = Pipeline()
+                .from(timeseries)
+                .emitOn("flush")
+                .groupBy(e => e.value() > 65 ? "high" : "low")
+                .take(10)
+                .toKeyedCollections();
+
+            //expect(result["low"].size()).to.equal(10);
+            //expect(result["high"].size()).to.equal(10);
+            done();
+        });
     });
 
     describe("Mapping in batch", () => {
@@ -761,7 +809,6 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .filter(e => e.value() < 50)
                 .take(10)
-                .emitOn("flush")    // emit result on each event
                 .aggregate({value: avg})
                 .to(EventOut, event => {
                     result = event;
@@ -780,7 +827,6 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .filter(e => e.value() > 65)
                 .take(10)
-                .emitOn("flush")    // emit result on end of batch
                 .to(CollectionOut, collection => {
                     result = collection;
                 }, true);
@@ -801,7 +847,6 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .groupBy(e => e.value() > 65 ? "high" : "low")
                 .take(10)
-                .emitOn("flush")    // emit result on end of batch
                 .to(CollectionOut, (collection, windowKey, groupByKey) => {
                     result[groupByKey] = collection;
                 }, true);
@@ -819,7 +864,6 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .take(10)
                 .groupBy(e => e.value() > 65 ? "high" : "low")
-                .emitOn("flush")    // emit result on each event
                 .to(CollectionOut, (collection, windowKey, groupByKey) => {
                     result[groupByKey] = collection;
                 }, true);

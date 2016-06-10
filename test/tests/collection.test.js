@@ -24,15 +24,11 @@ const eventList1 = [
     new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
 ];
 
-const inOutData = {
-    name: "traffic",
-    columns: ["time", "in", "out", "perpendicular"],
-    points: [
-        [1409529600000, 80, 37, 1000],
-        [1409533200000, 88, 22, 1001],
-        [1409536800000, 52, 56, 1002]
-    ]
-};
+const unorderedEventList = [
+    new Event(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
+    new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
+    new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
+];
 
 /**
  * Note the Collections are currently moslty tested through either
@@ -101,6 +97,23 @@ describe("Collections", () => {
         const event = new Event(new Date("2015-04-22T03:32:00Z"), {in: 1, out: 2});
         const newCollection = collection.addEvent(event);
         expect(newCollection.size()).to.equal(4);
+        done();
+    });
+
+
+    it("can sort the collection by time", done => {
+        const collection = new Collection(unorderedEventList);
+        const sortedCollection = collection.sortByTime();
+        expect(sortedCollection.at(1).timestamp().getTime() >
+            sortedCollection.at(0).timestamp().getTime()).to.be.true;
+        done();
+    });
+
+    it("can determine if a collection is chronological", done => {
+        const collection = new Collection(unorderedEventList);
+        expect(collection.isChronological()).to.be.false;
+        const sortedCollection = collection.sortByTime();
+        expect(sortedCollection.isChronological()).to.be.true;
         done();
     });
 
