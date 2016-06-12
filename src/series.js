@@ -12,12 +12,13 @@ import _ from "underscore";
 import Immutable from "immutable";
 
 import Collection from "./collection";
-import CollectionOut from "./pipeline-out-collection";
 import Index from "./index";
 import Event from "./event";
 import TimeRangeEvent from "./timerangeevent";
 import IndexedEvent from "./indexedevent";
 import { Pipeline } from "./pipeline.js";
+// import EventOut from "./pipeline-out-event.js";
+// import CollectionOut from "./pipeline-out-collection.js";
 
 function buildMetaData(meta) {
     let d = meta ? meta : {};
@@ -669,29 +670,24 @@ class TimeSeries {
      *                                    which should return a new event.
      * @param  {function}   cb            Callback containing a collapsed TimeSeries
      */
-    map(op, cb) {
-        this.pipeline()
-            .emitOn("flush")
+    map(op) {
+        const collections = this.pipeline()
             .map(op)
-            .to(CollectionOut, collection => {
-                cb(this.setCollection(collection));
-            }, true);
+            .toKeyedCollections();
+        return this.setCollection(collections["all"]);
     }
 
     /**
      * Takes a fieldSpec (list of column names) and outputs to the callback just those
      * columns in a new TimeSeries.
      *
-     * @param  {array}      fieldSpec     The list of columns
-     * @param  {function}   cb            Callback containing a collapsed TimeSeries
+     * @return {Collection} A collection containing only the selected fields
      */
-    select(fieldSpec, cb) {
-        this.pipeline()
-            .emitOn("flush")
+    select(fieldSpec) {
+        const collections = this.pipeline()
             .select(fieldSpec)
-            .to(CollectionOut, collection => {
-                cb(this.setCollection(collection));
-            }, true);
+            .toKeyedCollections();
+        return this.setCollection(collections["all"]);
     }
 
     /**
@@ -708,15 +704,76 @@ class TimeSeries {
      * @param  {string}     name           The resulting summed column name
      * @param  {function}   reducer        Reducer function e.g. sum
      * @param  {boolean}    append         Append the summed column, rather than replace
-     * @param  {function}   cb             Callback containing a collapsed TimeSeries
+     *
+     * @return {Collection} A collapsed collection
      */
-    collapse(fieldSpec, name, reducer, append, cb) {
-        this.pipeline()
+    collapse(fieldSpec, name, reducer, append) {
+        const collections = this.pipeline()
             .collapse(fieldSpec, name, reducer, append)
-            .emitOn("flush")
-            .to(CollectionOut, collection => {
-                cb(this.setCollection(collection));
-            }, true);
+            .toKeyedCollections();
+        return this.setCollection(collections["all"]);
+    }
+
+    /**
+     * Builds a new TimeSeries by dividing events within the TimeSeries
+     * across multiple fixed windows of size `windowSize`.
+     *
+     * Note that these are windows defined relative to Jan 1st, 1970,
+     * and are UTC, so this is best suited to smaller window sizes
+     * (hourly, 5m, 30s, 1s etc), or in situations where you don't care
+     * about the specific window, just that the data is smaller.
+     *
+     * Each window then has an aggregation specification applied as
+     * `aggregation`. This specification describes a mapping of fieldNames
+     * to aggregation functions. For example:
+     * ```
+     * {in: avg, out: avg}
+     * ```
+     * will aggregate both "in" and "out" using the average aggregation
+     * function.
+     *
+     * @example
+     * ```
+     * const timeseries = new TimeSeries(data);
+     * const dailyAvg = timeseries.rollupByFixedWindow("1d", {value: avg});
+     * ```
+     *
+     * @param  {string} windowSize  The size of the window. e.g. "6h" or "5m"
+     * @param  {object} aggregation The aggregation specification
+     * @return {TimeSeries}         The resulting rolled up TimeSeries
+     */
+    rollupByFixedWindow(windowSize, aggregation) {
+        const collections = this.pipeline()
+            .windowBy(windowSize)
+            .emitOn("discard")
+            .aggregate(aggregation)
+            .asEvents()
+            .clearWindow()
+            .toKeyedCollections();
+        return this.setCollection(collections["all"]);
+    }
+
+    /**
+     * Builds multiple Collections, each collects together
+     * events within a window of size `windowSize`. Note that these
+     * are windows defined relative to Jan 1st, 1970, and are UTC.
+     *
+     * @example
+     * ```
+     * const timeseries = new TimeSeries(data);
+     * const collections = timeseries.collectByFixedWindow("1d");
+     * console.log(collections); // {1d-16314: Collection, 1d-16315: Collection, ...}
+     * ```
+     *
+     * @param  {string} windowSize The size of the window. e.g. "6h" or "5m"
+     * @return {map}    The result is a mapping from window index to a
+     *                  Collection. e.g. "1d-16317" -> Collection
+     */
+    collectByFixedWindow(windowSize) {
+        return this.pipeline()
+            .windowBy(windowSize)
+            .emitOn("discard")
+            .toKeyedCollections();
     }
 
     /**

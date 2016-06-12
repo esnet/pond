@@ -23,10 +23,19 @@ class CollectionOut extends PipelineOut {
             groupBy: pipeline.getGroupBy(),
             emitOn: pipeline.getEmitOn()
         }, (collection, windowKey, groupByKey) => {
+            const groupBy = groupByKey ? groupByKey : "all";
             if (this._callback) {
-                this._callback(collection, windowKey, groupByKey);
+                this._callback(collection, windowKey, groupBy);
             } else {
-                this._pipeline.addResult(`${windowKey}-${groupByKey}`, collection);
+                let keys = [];
+                if (windowKey !== "global") {
+                    keys.push(windowKey);
+                }
+                if (groupBy !== "all") {
+                    keys.push(groupBy);
+                }
+                const k = keys.length > 0 ? keys.join("--") : "all";
+                this._pipeline.addResult(k, collection);
             }
         });
     }

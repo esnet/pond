@@ -25,14 +25,14 @@ export default class Converter extends Processor {
 
         if (arg1 instanceof Converter) {
             const other = arg1;
-            this._by = other._by;
-            this._fieldSpec = other._fieldSpec;
-
+            this._convertTo = other._convertTo;
+            this._duration = other._duration;
+            this._durationString = other._durationString;
+            this._alignment = other._alignment;
         } else if (isPipeline(arg1)) {
             if (!_.has(options, "type")) {
                 throw new Error("Converter: constructor needs 'type' in options");
             }
-
             if (options.type === Event ||
                 options.type === TimeRangeEvent ||
                 options.type === IndexedEvent) {
@@ -40,7 +40,6 @@ export default class Converter extends Processor {
             } else {
                 throw Error("Unable to interpret type argument passed to Converter constructor");
             }
-
             if (options.type === TimeRangeEvent || options.type === IndexedEvent) {
                 if (options.duration && _.isString(options.duration)) {
                     this._duration = Utils.windowDuration(options.duration);

@@ -19,7 +19,7 @@ import Event from "../../src/event";
 import TimeRangeEvent from "../../src/timerangeevent";
 import TimeSeries from "../../src/series.js";
 import TimeRange from "../../src/range.js";
-import { sum, max } from "../../src/functions";
+import { sum, max, avg } from "../../src/functions";
 
 const data = {
     name: "traffic",
@@ -308,6 +308,130 @@ const sumPart2 = {
         [1400425952000, 7, 2],
         [1400425953000, 5, 3],
         [1400425954000, 3, 4]
+    ]
+};
+
+const sept2014Data = {
+    utc: false,
+    name: "traffic",
+    columns: ["time", "value"],
+    points: [
+        [1409529600000, 80],
+        [1409533200000, 88],
+        [1409536800000, 52],
+        [1409540400000, 80],
+        [1409544000000, 26],
+        [1409547600000, 37],
+        [1409551200000, 6 ],
+        [1409554800000, 32],
+        [1409558400000, 69],
+        [1409562000000, 21],
+        [1409565600000, 6 ],
+        [1409569200000, 54],
+        [1409572800000, 88],
+        [1409576400000, 41],
+        [1409580000000, 35],
+        [1409583600000, 43],
+        [1409587200000, 84],
+        [1409590800000, 32],
+        [1409594400000, 41],
+        [1409598000000, 57],
+        [1409601600000, 27],
+        [1409605200000, 50],
+        [1409608800000, 13],
+        [1409612400000, 63],
+        [1409616000000, 58],
+        [1409619600000, 80],
+        [1409623200000, 59],
+        [1409626800000, 96],
+        [1409630400000, 2],
+        [1409634000000, 20],
+        [1409637600000, 64],
+        [1409641200000, 7],
+        [1409644800000, 50],
+        [1409648400000, 88],
+        [1409652000000, 34],
+        [1409655600000, 31],
+        [1409659200000, 16],
+        [1409662800000, 38],
+        [1409666400000, 94],
+        [1409670000000, 78],
+        [1409673600000, 86],
+        [1409677200000, 13],
+        [1409680800000, 34],
+        [1409684400000, 29],
+        [1409688000000, 48],
+        [1409691600000, 80],
+        [1409695200000, 30],
+        [1409698800000, 15],
+        [1409702400000, 62],
+        [1409706000000, 66],
+        [1409709600000, 44],
+        [1409713200000, 94],
+        [1409716800000, 78],
+        [1409720400000, 29],
+        [1409724000000, 21],
+        [1409727600000, 4 ],
+        [1409731200000, 83],
+        [1409734800000, 15],
+        [1409738400000, 89],
+        [1409742000000, 53],
+        [1409745600000, 70],
+        [1409749200000, 41],
+        [1409752800000, 47],
+        [1409756400000, 30],
+        [1409760000000, 68],
+        [1409763600000, 89],
+        [1409767200000, 29],
+        [1409770800000, 17],
+        [1409774400000, 38],
+        [1409778000000, 67],
+        [1409781600000, 75],
+        [1409785200000, 89],
+        [1409788800000, 47],
+        [1409792400000, 82],
+        [1409796000000, 33],
+        [1409799600000, 67],
+        [1409803200000, 93],
+        [1409806800000, 86],
+        [1409810400000, 97],
+        [1409814000000, 19],
+        [1409817600000, 19],
+        [1409821200000, 31],
+        [1409824800000, 56],
+        [1409828400000, 19],
+        [1409832000000, 43],
+        [1409835600000, 29],
+        [1409839200000, 72],
+        [1409842800000, 27],
+        [1409846400000, 21],
+        [1409850000000, 88],
+        [1409853600000, 18],
+        [1409857200000, 30],
+        [1409860800000, 46],
+        [1409864400000, 34],
+        [1409868000000, 31],
+        [1409871600000, 20],
+        [1409875200000, 45],
+        [1409878800000, 17],
+        [1409882400000, 24],
+        [1409886000000, 84],
+        [1409889600000, 6 ],
+        [1409893200000, 91],
+        [1409896800000, 82],
+        [1409900400000, 71],
+        [1409904000000, 97],
+        [1409907600000, 43],
+        [1409911200000, 38],
+        [1409914800000, 1],
+        [1409918400000, 71],
+        [1409922000000, 50],
+        [1409925600000, 19],
+        [1409929200000, 19],
+        [1409932800000, 86],
+        [1409936400000, 65],
+        [1409940000000, 93],
+        [1409943600000, 35]
     ]
 };
 
@@ -858,34 +982,32 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the sum of two columns", (done) => {
             const ts = new TimeSeries(sumPart1);
-            ts.collapse(["in", "out"], "sum", sum, false, sums => {
-                expect(sums.at(0).get("sum")).to.equal(7);
-                expect(sums.at(1).get("sum")).to.equal(9);
-                expect(sums.at(2).get("sum")).to.equal(11);
-                expect(sums.at(3).get("sum")).to.equal(13);
-
-                done();
-            });
+            const sums = ts.collapse(["in", "out"], "sum", sum, false);
+            
+            expect(sums.at(0).get("sum")).to.equal(7);
+            expect(sums.at(1).get("sum")).to.equal(9);
+            expect(sums.at(2).get("sum")).to.equal(11);
+            expect(sums.at(3).get("sum")).to.equal(13);
+            done();
         });
 
         it("can collapse a timeseries into a new timeseries that is the max of two columns", (done) => {
             const timeseries = new TimeSeries(sumPart2);
-            timeseries
-                .collapse(["in", "out"], "max_in_out", max, true, ts => {
-                    expect(ts.at(0).get("max_in_out")).to.equal(9);
-                    expect(ts.at(1).get("max_in_out")).to.equal(7);
-                    expect(ts.at(2).get("max_in_out")).to.equal(5);
-                    expect(ts.at(3).get("max_in_out")).to.equal(4);
-                    done();
-                });
+            const c = timeseries.collapse(["in", "out"], "max_in_out", max, true);
+
+            expect(c.at(0).get("max_in_out")).to.equal(9);
+            expect(c.at(1).get("max_in_out")).to.equal(7);
+            expect(c.at(2).get("max_in_out")).to.equal(5);
+            expect(c.at(3).get("max_in_out")).to.equal(4);
+            done();
         });
 
         it("can collapse a timeseries into a new timeseries that is the sum of two columns, then find the max", (done) => {
             const ts = new TimeSeries(sumPart1);
-            ts.collapse(["in", "out"], "value", sum, false, sums => {
-                expect(sums.max()).to.equal(13);
-                done();
-            });
+            const sums = ts.collapse(["in", "out"], "value", sum, false);
+
+            expect(sums.max()).to.equal(13);
+            done();
         });
 
     });
@@ -896,10 +1018,9 @@ describe("TimeSeries", () => {
             const timeseries = new TimeSeries(interfaceData);
             expect(timeseries.columns()).to.eql(["in", "out"]);
 
-            timeseries.select("in", (ts) => {
-                expect(ts.columns()).to.eql(["in"]);
-                expect(ts.name()).to.equal("star-cr5:to_anl_ip-a_v4");
-            });
+            const ts = timeseries.select("in");
+            expect(ts.columns()).to.eql(["in"]);
+            expect(ts.name()).to.equal("star-cr5:to_anl_ip-a_v4");
 
             done();
         });
@@ -908,10 +1029,9 @@ describe("TimeSeries", () => {
             const timeseries = new TimeSeries(availabilitySeries);
             expect(timeseries.columns()).to.eql(["uptime", "notes", "outages"]);
 
-            timeseries.select(["uptime", "notes"], (ts) => {
-                expect(ts.columns()).to.eql(["uptime", "notes"]);
-                expect(ts.name()).to.equal("availability");
-            });
+            const ts = timeseries.select(["uptime", "notes"]);
+            expect(ts.columns()).to.eql(["uptime", "notes"]);
+            expect(ts.name()).to.equal("availability");
 
             done();
         }));
@@ -921,17 +1041,45 @@ describe("TimeSeries", () => {
 
         it("can reverse the values in this timeseries", (done) => {
             const timeseries = new TimeSeries(interfaceData);
+            
             expect(timeseries.columns()).to.eql(["in", "out"]);
 
-            timeseries.map(e => e.setData({in: e.get("out"), out: e.get("in")}), ts => {
-                expect(ts.at(0).get("in")).to.equal(34);
-                expect(ts.at(0).get("out")).to.equal(52);
-                expect(ts.size()).to.equal(timeseries.size());
-            });
+            const ts = timeseries.map(e =>
+                e.setData({in: e.get("out"), out: e.get("in")})
+            );
+            
+            expect(ts.at(0).get("in")).to.equal(34);
+            expect(ts.at(0).get("out")).to.equal(52);
+            expect(ts.size()).to.equal(timeseries.size());
 
             done();
         });
 
     });
 
+    describe("TimeSeries rollup to a fixed window", () => {
+        it("can take 1 day avgs over a timeseries", (done) => {
+            const timeseries = new TimeSeries(sept2014Data);
+            const dailyAvg = timeseries.rollupByFixedWindow("1d", {value: avg});
+
+            expect(dailyAvg.size()).to.equal(5);
+            expect(dailyAvg.at(0).value()).to.equal(46.875);
+            expect(dailyAvg.at(2).value()).to.equal(54.083333333333336);
+            expect(dailyAvg.at(4).value()).to.equal(51.85);
+
+            done();
+        });
+    });
+
+    describe("TimeSeries collect by a fixed window", () => {
+        it("can make collections for each day in the timeseries", (done) => {
+            const timeseries = new TimeSeries(sept2014Data);
+            const collections = timeseries.collectByFixedWindow("1d");
+
+            expect(collections["1d-16314"].size()).to.equal(24);
+            expect(collections["1d-16318"].size()).to.equal(20);
+            
+            done();
+        });
+    });
 });

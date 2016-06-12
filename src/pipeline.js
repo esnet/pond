@@ -351,6 +351,9 @@ class Pipeline {
         } else if (_.isObject(w)) {
             type = w.type;
             duration = w.duration;
+        } else {
+            type = "global";
+            duration = null;
         }
 
         const d = this._d.withMutations(map => {
@@ -359,6 +362,19 @@ class Pipeline {
         });
 
         return new Pipeline(d);
+    }
+
+    /**
+     * Remove windowing from the Pipeline. This will
+     * return the pipeline to no window grouping. This is
+     * useful if you have first done some aggregated by
+     * some window size and then wish to collect together
+     * the all resulting events.
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    clearWindow() {
+        return this.windowBy();
     }
 
     /**
@@ -390,7 +406,8 @@ class Pipeline {
             grp = e =>
                 `${e.get(groupBy)}`;
         } else {
-            throw Error("Unable to interpret groupBy argument", k);
+            // Reset to no grouping
+            grp = () => "";
         }
 
         const d = this._d.withMutations(map => {
@@ -398,6 +415,16 @@ class Pipeline {
         });
 
         return new Pipeline(d);
+    }
+
+    /**
+     * Remove the grouping from the pipeline. In other words
+     * recombine the events.
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    clearGroupBy() {
+        return this.groupBy();
     }
 
     /**
@@ -604,7 +631,6 @@ class Pipeline {
             fields,
             prev: this.last() ? this.last() : this
         });
-        
         return this._append(p);
     }
 
