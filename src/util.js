@@ -33,6 +33,13 @@ const units = {
 export default {
 
     /**
+     * Single zero left padding, for days and months.
+     */
+    leftPad(value) {
+        return `${value < 10 ? "0" : ""}${value}`;
+    },
+
+    /**
      * Returns a duration in milliseconds given a window duration string.
      * For example "30s" (30 seconds) should return 30000ms. Accepts
      * seconds (e.g. "30s"), minutes (e.g. "5m"), hours (e.g. "6h") and
@@ -95,7 +102,6 @@ export default {
                                         moment(pos * length);
                     endTime = isUTC ? moment.utc((pos + 1) * length) :
                                       moment((pos + 1) * length);
-
                 // A month and year e.g 2015-09
                 } else if (!_.isNaN(parseInt(parts[0], 10)) &&
                     !_.isNaN(parseInt(parts[1], 10))) {

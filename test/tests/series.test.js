@@ -1060,7 +1060,7 @@ describe("TimeSeries", () => {
     describe("TimeSeries rollup to a fixed window", () => {
         it("can take 1 day avgs over a timeseries", (done) => {
             const timeseries = new TimeSeries(sept2014Data);
-            const dailyAvg = timeseries.rollupByFixedWindow("1d", {value: avg});
+            const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
 
             expect(dailyAvg.size()).to.equal(5);
             expect(dailyAvg.at(0).value()).to.equal(46.875);
@@ -1071,6 +1071,25 @@ describe("TimeSeries", () => {
         });
     });
 
+    /*
+    Since this is all in local time, testing this is kind of problematic
+    Removing for now :(
+        
+    describe("TimeSeries daily rollup", () => {
+        it("can take daily avgs over a timeseries", (done) => {
+            const timeseries = new TimeSeries(sept2014Data);
+            const dailyAvg = timeseries.dailyRollup({value: avg});
+
+            expect(dailyAvg.size()).to.equal(6);
+            expect(dailyAvg.at(0).indexAsString()).to.equal("2014-08-31");
+            //expect(dailyAvg.at(2).value()).to.equal(54.083333333333336);
+            //expect(dailyAvg.at(4).value()).to.equal(51.85);
+
+            done();
+        });
+    });
+    */
+   
     describe("TimeSeries collect by a fixed window", () => {
         it("can make collections for each day in the timeseries", (done) => {
             const timeseries = new TimeSeries(sept2014Data);
@@ -1078,7 +1097,7 @@ describe("TimeSeries", () => {
 
             expect(collections["1d-16314"].size()).to.equal(24);
             expect(collections["1d-16318"].size()).to.equal(20);
-            
+
             done();
         });
     });

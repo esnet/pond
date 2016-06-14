@@ -29,7 +29,9 @@ class Aggregator extends Processor {
         super(arg1, options, observer);
 
         if (arg1 instanceof Aggregator) {
+            
             const other = arg1;
+            
             this._fields = other._fields;
             this._windowType = other._windowType;
             this._windowDuration = other._windowDuration;
@@ -37,7 +39,9 @@ class Aggregator extends Processor {
             this._emitOn = other._emitOn;
 
         } else if (isPipeline(arg1)) {
+
             const pipeline = arg1;
+
             this._windowType = pipeline.getWindowType();
             this._windowDuration = pipeline.getWindowDuration();
             this._groupBy = pipeline.getGroupBy();
@@ -76,7 +80,6 @@ class Aggregator extends Processor {
         );
     }
 
-
     clone() {
         return new Aggregator(this);
     }
@@ -96,7 +99,9 @@ class Aggregator extends Processor {
         if (windowKey === "global") {
             event = new TimeRangeEvent(collection.range(), d);
         } else {
-            event = new IndexedEvent(windowKey, d);
+            //TODO: Specify UTC (or local) pipeline
+            const utc = this._windowType === "fixed";
+            event = new IndexedEvent(windowKey, d, utc);
         }
 
         this.emit(event);

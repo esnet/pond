@@ -60,14 +60,34 @@ export default class Collector {
     addEvent(event) {
         const timestamp = event.timestamp();
 
+        //
+        // Window key
+        //
+
         const windowType = this._windowType;
         let windowKey;
         if (windowType === "fixed") {
             windowKey = Index.getIndexString(this._windowDuration, timestamp);
+        } else if (windowType === "daily") {
+            windowKey = Index.getDailyIndexString(timestamp);
+        } else if (windowType === "monthly") {
+            windowKey = Index.getMonthlyIndexString(timestamp);
+        } else if (windowType === "yearly") {
+            windowKey = Index.getYearlyIndexString(timestamp);
         } else {
             windowKey = windowType;
         }
+
+        //
+        // Groupby key
+        //
+
         const groupByKey = this._groupBy(event);
+
+        //
+        // Collection key
+        //
+
         const collectionKey = groupByKey ?
             `${windowKey}::${groupByKey}` : windowKey;
 

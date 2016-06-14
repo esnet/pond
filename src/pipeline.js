@@ -88,10 +88,10 @@ class Runner {
         }
 
         //
-        // Using the list of nodes of the tree that will be involved in
+        // Using the list of nodes in the tree that will be involved in
         // our processing we can build an execution chain. This is the
         // chain of processor clones, linked together, for our specific
-        // processing pipeline. When then run that pipeline later by
+        // processing pipeline. We run this execution chain later by
         // evoking start().
         //
 
@@ -333,21 +333,27 @@ class Pipeline {
     /**
      * Set the window, returning a new Pipeline. The argument here
      * is an object with {type, duration}.
-     * type may be:
-     *  * "Fixed"
-     *  * other types coming
+     *
+     * Window `w` may be:
+     *  * A fixed interval: "fixed"
+     *  * A calendar interval: "day", "month" or "year"
+     *  * ...
      *
      * duration is of the form:
-     *  * "30s" or "1d" etc
+     *  * "30s" or "1d" etc (supports seconds (s), minutes (m), hours (h))
      *
      * @return {Pipeline} The Pipeline
      */
     windowBy(w) {
         let type, duration;
         if (_.isString(w)) {
-            // assume fixed window with size w
-            type = "fixed";
-            duration = w;
+            if (w === "daily" || w === "monthly" || w === "yearly") {
+                type = w;
+            } else {
+                // assume fixed window with size w
+                type = "fixed";
+                duration = w;
+            }
         } else if (_.isObject(w)) {
             type = w.type;
             duration = w.duration;

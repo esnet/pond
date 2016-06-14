@@ -107,4 +107,28 @@ describe("Indexes", () => {
             done();
         });
     });
+
+    describe("Index bucketing from a date", () => {
+
+        it("can create a day index for a date", done => {
+            const date = new Date(1429673400000);
+            const expected = "2015-04-21";
+            expect(Index.getDailyIndexString(date)).to.equal(expected);
+            done();
+        });
+
+        it("can create a month index for a date", done => {
+            const date = new Date(1429673400000);
+            const expected = "2015-04";
+            expect(Index.getMonthlyIndexString(date)).to.equal(expected);
+            done();
+        });
+
+        it("can create a year index for a date", done => {
+            const date = new Date(1429673400000);
+            const expected = "2015";
+            expect(Index.getYearlyIndexString(date)).to.equal(expected);
+            done();
+        });
+    });
 });

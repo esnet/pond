@@ -735,21 +735,83 @@ class TimeSeries {
      * @example
      * ```
      * const timeseries = new TimeSeries(data);
-     * const dailyAvg = timeseries.rollupByFixedWindow("1d", {value: avg});
+     * const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
      * ```
      *
      * @param  {string} windowSize  The size of the window. e.g. "6h" or "5m"
      * @param  {object} aggregation The aggregation specification
      * @return {TimeSeries}         The resulting rolled up TimeSeries
      */
-    rollupByFixedWindow(windowSize, aggregation) {
-        const collections = this.pipeline()
+    fixedWindowRollup(windowSize, aggregation, toEvents = false) {
+        const aggregatorPipeline = this.pipeline()
             .windowBy(windowSize)
             .emitOn("discard")
-            .aggregate(aggregation)
-            .asEvents()
+            .aggregate(aggregation);
+
+        const eventTypePipeline = toEvents ?
+            aggregatorPipeline.asEvents() : aggregatorPipeline;
+
+        const collections = eventTypePipeline
             .clearWindow()
             .toKeyedCollections();
+
+        return this.setCollection(collections["all"]);
+    }
+
+    /**
+     * Builds a new TimeSeries by dividing events into days. The days are
+     * in either local or UTC time, depending on if utc(true) is set on the
+     * Pipeline.
+     *
+     * Each window then has an aggregation specification applied as
+     * `aggregation`. This specification describes a mapping of fieldNames
+     * to aggregation functions. For example:
+     * ```
+     * {in: avg, out: avg}
+     * ```
+     * will aggregate both "in" and "out" using the average aggregation
+     * function across all events within each day.
+     *
+     * @example
+     * ```
+     * const timeseries = new TimeSeries(weatherData);
+     * const dailyMaxTemperature = timeseries.dailyRollup({temperature: max});
+     * ```
+     *
+     * @param  {string} windowSize  The size of the window. e.g. "6h" or "5m"
+     * @param  {object} aggregation The aggregation specification
+     * @return {TimeSeries}         The resulting rolled up TimeSeries
+     */
+
+    hourlyRollup(aggregation, toEvent = false) {
+        return this.fixedWindowRollup("1h", aggregation, toEvent);
+    }
+
+    dailyRollup(aggregation, toEvents = false) {
+        return this._rollup("daily", aggregation, toEvents);
+    }
+
+    monthlyRollup(aggregation, toEvents = false) {
+        return this._rollup("monthly", aggregation, toEvents);
+    }
+
+    yearlyRollup(aggregation, toEvents = false) {
+        return this._rollup("yearly", aggregation, toEvents);
+    }
+
+    _rollup(type, aggregation, toEvents = false) {
+        const aggregatorPipeline = this.pipeline()
+            .windowBy(type)
+            .emitOn("discard")
+            .aggregate(aggregation);
+
+        const eventTypePipeline = toEvents ?
+            aggregatorPipeline.asEvents() : aggregatorPipeline;
+
+        const collections = eventTypePipeline
+            .clearWindow()
+            .toKeyedCollections();
+
         return this.setCollection(collections["all"]);
     }
 
