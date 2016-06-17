@@ -14,7 +14,8 @@ import PipelineOut from "./pipeline-out";
 class CollectionOut extends PipelineOut {
 
     constructor(pipeline, options, callback) {
-        super();
+        super(pipeline);
+        
         this._callback = callback;
         this._collector = new Collector({
             windowType: pipeline.getWindowType(),
@@ -22,7 +23,20 @@ class CollectionOut extends PipelineOut {
             groupBy: pipeline.getGroupBy(),
             emitOn: pipeline.getEmitOn()
         }, (collection, windowKey, groupByKey) => {
-            this._callback(collection, windowKey, groupByKey);
+            const groupBy = groupByKey ? groupByKey : "all";
+            if (this._callback) {
+                this._callback(collection, windowKey, groupBy);
+            } else {
+                let keys = [];
+                if (windowKey !== "global") {
+                    keys.push(windowKey);
+                }
+                if (groupBy !== "all") {
+                    keys.push(groupBy);
+                }
+                const k = keys.length > 0 ? keys.join("--") : "all";
+                this._pipeline.addResult(k, collection);
+            }
         });
     }
 
@@ -36,6 +50,9 @@ class CollectionOut extends PipelineOut {
     
     flush() {
         this._collector.flushCollections();
+        if (!this._callback) {
+            this._pipeline.resultsDone();
+        }
     }
 }
 

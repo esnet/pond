@@ -45,13 +45,16 @@ class Collection extends BoundedIn {
      * @param  {Collection|array|Immutable.List}  arg1 Initial data for
      * the collection. If arg1 is another Collection, this will act as
      * a copy constructor.
-     * @param  {Boolean} [copyEvents] When using a the copy constructor
+     * @param  {Boolean} [arg2] When using a the copy constructor
      * this specified whether or not to also copy all the events in this
      * collection. Generally you'll want to let it copy the events.
+     * If arg1 is an Immutable.List, then arg2 will specify the type of
+     * the Events accepted into the Collection. This form is generally
+     * used internally.
      *
      * @return {Collection} The constructed Collection.
      */
-    constructor(arg1, copyEvents = true) {
+    constructor(arg1, arg2) {
         super();
 
         this._id = _.uniqueId("collection-");
@@ -62,6 +65,7 @@ class Collection extends BoundedIn {
             this._eventList = new Immutable.List();
         } else if (arg1 instanceof Collection) {
             const other = arg1;
+            const copyEvents = arg2 || true;
             // copyEvents is whether to copy events from other, default is true
             if (_.isUndefined(copyEvents) || copyEvents === true) {
                 this._eventList = other._eventList;
@@ -77,6 +81,11 @@ class Collection extends BoundedIn {
             });
             this._eventList = new Immutable.List(events);
         } else if (Immutable.List.isList(arg1)) {
+            const type = arg2;
+            if (!type) {
+                throw new Error("No type supplied to Collection constructor");
+            }
+            this._type = type;
             this._eventList = arg1;
         }
     }
@@ -198,7 +207,7 @@ class Collection extends BoundedIn {
     /**
      * Returns the index that bisects the Collection at the time specified.
      *
-     * @param  {Data}    t   The time to bisect the Collection with
+     * @param  {Date}    t   The time to bisect the Collection with
      * @param  {number}  b   The position to begin searching at
      *
      * @return {number}      The row number that is the greatest, but still below t.
@@ -224,11 +233,11 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Generator to return all the events in the collection.
-     * 
+     * Generator to return all the events in the Collection.
+     *
      * @example
      * ```
-     * for (let event of series.events()) {
+     * for (let event of collection.events()) {
      *     console.log(event.toString());
      * }
      * ```
@@ -237,6 +246,12 @@ class Collection extends BoundedIn {
         for (let i = 0; i < this.size(); i++) {
             yield this.at(i);
         }
+    }
+
+    setEvents(events) {
+        const result = new Collection(this);
+        result._eventList = events;
+        return result;
     }
 
     /**
@@ -259,6 +274,17 @@ class Collection extends BoundedIn {
             events.push(e);
         }
         return events;
+    }
+
+    //
+    // Sorting
+    //
+
+    sortByTime() {
+        return this.setEvents(this._eventList.sortBy(event => {
+            const e = new this._type(event);
+            return e.timestamp().getTime();
+        }));
     }
 
     //
@@ -313,9 +339,7 @@ class Collection extends BoundedIn {
      * @return {Collection}    The new, sliced, Collection.
      */
     slice(begin, end) {
-        const sliced = new Collection(this._eventList.slice(begin, end));
-        sliced._type = this._type;
-        return sliced;
+        return new Collection(this._eventList.slice(begin, end), this._type);
     }
 
     /**
@@ -498,6 +522,22 @@ class Collection extends BoundedIn {
         const fs = this._fieldSpecToArray(fieldSpec);
         const result = Event.mapReduce(this.eventListAsArray(), [fs], func);
         return result[fs];
+    }
+
+    isChronological() {
+        let result = true;
+        let t;
+        for (const e of this.events()) {
+            if (!t) {
+                t = e.timestamp().getTime();
+            } else {
+                if (e.timestamp() < t) {
+                    result = false;
+                }
+                t = e.timestamp();
+            }
+        }
+        return result;
     }
 
     /**

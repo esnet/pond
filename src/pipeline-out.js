@@ -12,8 +12,9 @@ import _ from "underscore";
 
 class PipelineOut {
 
-    constructor() {
+    constructor(pipeline) {
         this._id = _.uniqueId("id-");
+        this._pipeline = pipeline;
     }
 }
 

@@ -112,6 +112,25 @@ class Index {
         }
         return indexList;
     }
+
+    static getDailyIndexString(date, utc = false) {
+        let day = util.leftPad(utc ? date.getUTCDate() : date.getDate());
+        let month = util.leftPad(utc ? date.getUTCMonth() + 1 : date.getMonth() + 1);
+        const year = utc ? date.getUTCFullYear() : date.getFullYear();
+        return `${year}-${month}-${day}`;
+    }
+
+    static getMonthlyIndexString(date, utc = false) {
+        let month = util.leftPad(utc ? date.getUTCMonth() + 1 : date.getMonth() + 1);
+        const year = utc ? date.getUTCFullYear() : date.getFullYear();
+        return `${year}-${month}`;
+    }
+
+    static getYearlyIndexString(date, utc = false) {
+        const year = utc ? date.getUTCFullYear() : date.getFullYear();
+        return `${year}`;
+    }
+
 }
 
 export default Index;

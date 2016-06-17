@@ -13,7 +13,6 @@ import _ from "underscore";
 
 import UnboundedIn from "./pipeline-in-unbounded";
 import BoundedIn from "./pipeline-in-bounded";
-import CollectionOut from "./pipeline-out-collection";
 import Processor from "./processor";
 import Offset from "./offset";
 import Filter from "./filter";
@@ -27,7 +26,8 @@ import IndexedEvent from "./indexedevent";
 import Selector from "./selector";
 import Collapser from "./collapser";
 import Mapper from "./mapper";
-
+import EventOut from "./pipeline-out-event.js";
+import CollectionOut from "./pipeline-out-collection.js";
 
 /**
  * A runner is used to extract the chain of processing operations
@@ -66,6 +66,7 @@ class Runner {
     constructor(pipeline, output) {
 
         this._output = output;
+        this._pipeline = pipeline;
 
         //
         // We use the pipeline's chain() function to walk the
@@ -87,14 +88,14 @@ class Runner {
         }
 
         //
-        // Using the list of nodes of the tree that will be involved in
-        // out processing we can build the execution chain. This is the
-        // chain of processor clones, linked together for our specific
-        // processing pipeline.
+        // Using the list of nodes in the tree that will be involved in
+        // our processing we can build an execution chain. This is the
+        // chain of processor clones, linked together, for our specific
+        // processing pipeline. We run this execution chain later by
+        // evoking start().
         //
 
         this._executionChain = [this._output];
-
         let prev = this._output;
         processChain.forEach(p => {
             if (p instanceof Processor) {
@@ -113,6 +114,9 @@ class Runner {
      */
     start(force = false) {
 
+        // Clear any results ready for the run
+        this._pipeline.clearResults();
+
         //
         // The head is the first process node in the execution chain.
         // To process the source through the execution chain we add
@@ -123,6 +127,12 @@ class Runner {
         for (const e of this._input.events()) {
             head.addEvent(e);
         }
+
+        //
+        // The runner indicates that it is finished with the bounded
+        // data by sending a flush() call down the chain. If force is
+        // set to false (the default) this is never called.
+        //
 
         if (force) {
             head.flush();
@@ -151,7 +161,7 @@ class Pipeline {
      * @example
      * ```
      * import { Pipeline } from "pondjs";
-     * const process = Pipeline()...`
+     * const p = Pipeline()...`
      * ```
      *
      * @return {Pipeline} The Pipeline
@@ -174,6 +184,7 @@ class Pipeline {
                 emitOn: "eachEvent"
             });
         }
+        this._results = [];
     }
 
     //
@@ -210,6 +221,36 @@ class Pipeline {
 
     getEmitOn() {
         return this._d.get("emitOn");
+    }
+
+    //
+    // Results
+    //
+
+    clearResults() {
+        this._resultsDone = false;
+        this._results = null;
+    }
+    
+    addResult(arg1, arg2) {
+        if (!this._results) {
+            if (_.isString(arg1) && arg2) {
+                this._results = {};
+            } else {
+                this._results = [];
+            }
+        }
+
+        if (_.isString(arg1) && arg2) {
+            this._results[arg1] = arg2;
+        } else {
+            this._results.push(arg1);
+        }
+        this._resultsDone = false;
+    }
+
+    resultsDone() {
+        this._resultsDone = true;
     }
 
     //
@@ -292,24 +333,33 @@ class Pipeline {
     /**
      * Set the window, returning a new Pipeline. The argument here
      * is an object with {type, duration}.
-     * type may be:
-     *  * "Fixed"
-     *  * other types coming
+     *
+     * Window `w` may be:
+     *  * A fixed interval: "fixed"
+     *  * A calendar interval: "day", "month" or "year"
+     *  * ...
      *
      * duration is of the form:
-     *  * "30s" or "1d" etc
+     *  * "30s" or "1d" etc (supports seconds (s), minutes (m), hours (h))
      *
      * @return {Pipeline} The Pipeline
      */
     windowBy(w) {
         let type, duration;
         if (_.isString(w)) {
-            // assume fixed window with size w
-            type = "fixed";
-            duration = w;
+            if (w === "daily" || w === "monthly" || w === "yearly") {
+                type = w;
+            } else {
+                // assume fixed window with size w
+                type = "fixed";
+                duration = w;
+            }
         } else if (_.isObject(w)) {
             type = w.type;
             duration = w.duration;
+        } else {
+            type = "global";
+            duration = null;
         }
 
         const d = this._d.withMutations(map => {
@@ -318,6 +368,19 @@ class Pipeline {
         });
 
         return new Pipeline(d);
+    }
+
+    /**
+     * Remove windowing from the Pipeline. This will
+     * return the pipeline to no window grouping. This is
+     * useful if you have first done some aggregated by
+     * some window size and then wish to collect together
+     * the all resulting events.
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    clearWindow() {
+        return this.windowBy();
     }
 
     /**
@@ -349,7 +412,8 @@ class Pipeline {
             grp = e =>
                 `${e.get(groupBy)}`;
         } else {
-            throw Error("Unable to interpret groupBy argument", k);
+            // Reset to no grouping
+            grp = () => "";
         }
 
         const d = this._d.withMutations(map => {
@@ -357,6 +421,16 @@ class Pipeline {
         });
 
         return new Pipeline(d);
+    }
+
+    /**
+     * Remove the grouping from the pipeline. In other words
+     * recombine the events.
+     *
+     * @return {Pipeline} The Pipeline
+     */
+    clearGroupBy() {
+        return this.groupBy();
     }
 
     /**
@@ -417,6 +491,14 @@ class Pipeline {
         }
     }
 
+    toEventList() {
+        return this.to(EventOut);
+    }
+
+    toKeyedCollections() {
+        return this.to(CollectionOut);
+    }
+
     /**
      * Sets up the destination sink for the pipeline.
      *
@@ -439,30 +521,30 @@ class Pipeline {
      * ```
      * @return {Pipeline} The Pipeline
      */
-    to(arg1, arg2, arg3, arg4) {
+    to(arg1, arg2, arg3) {
         const Out = arg1;
-        let force = false;
-        let observer = () => {};
+        let observer;
         let options = {};
 
         if (_.isFunction(arg2)) {
             observer = arg2;
-            force = arg3 ? arg3 : false;
         } else if (_.isObject(arg2)) {
             options = arg2;
             observer = arg3;
-            force = arg4 ? arg4 : false;
         }
 
         if (!this.in()) {
             throw new Error("Tried to eval pipeline without a In. Missing from() in chain?");
         }
-        
+       
         const out = new Out(this, options, observer);
 
         if (this.mode() === "batch") {
             const runner = new Runner(this, out);
-            runner.start(force);
+            runner.start(true);
+            if (this._resultsDone && !observer) {
+                return this._results;
+            }
         } else if (this.mode() === "stream") {
             const out = new Out(this, options, observer);
             if (this.first()) {
@@ -555,7 +637,6 @@ class Pipeline {
             fields,
             prev: this.last() ? this.last() : this
         });
-        
         return this._append(p);
     }
 

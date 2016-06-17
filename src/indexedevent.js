@@ -12,9 +12,9 @@ import _ from "underscore";
 import Immutable from "immutable";
 import Index from "./index";
 
-function indexFromArgs(arg1, arg2) {
+function indexFromArgs(arg1, arg2 = true) {
     if (_.isString(arg1)) {
-        return new Index(arg1, arg2 || true);
+        return new Index(arg1, arg2);
     } else if (arg1 instanceof Index) {
         return arg1;
     } else {
