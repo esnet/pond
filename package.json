@@ -1,6 +1,6 @@
 {
   "name": "pondjs",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "main": "lib/entry",
   "description": "A timeseries library build on top of immutable.js",
   "scripts": {
