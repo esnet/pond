@@ -1,3 +1,72 @@
+## 0.6
+
+This update concentrates on providing a better API for processing a TimeSeries object. It updates the Pipeline code to be able to return the results as an alternative to evoking a callback function. Using this API several methods on the TimeSeries have been reworked to directly return their results as a new TimeSeries. In addition, TimeSeries now has several new methods to do roll-ups aggregations and collections directly.
+
+**TimeSeries**
+
+Construction:
+ - a TimeSeries is now checked for chronological events and the code will throw if there is. This is because there are several methods on the TimeSeries that will produce incorrect results if this is the case and it is far from intuitive why.
+
+With the change to the batch API we can now greatly simplify several methods on TimeSeries. These three methods now directly return a new TimeSeries:
+ - `map()`
+ - `select()`
+ - `collapse()`.
+
+New methods that use Pipelines internally to perform common roll-up processing of TimeSeries:
+ - `fixedWindowRollup()`
+ - `hourlyRollup()`
+ - `dailyRollup()`
+ - `monthlyRollup()`
+ - `yearlyRollup()`
+ - `collectByFixedWindow()` - to build a map of new Collections given a fixed window (like "5m"). The result is a map from the window name (e.g. "5m-12345") to a Collection. This is essentially tiling the TimeSeries.
+
+Additional new methods:
+ - `crop()` - you could always use slice() but this is simpler. Just give it a TimeRange and you get back a new TimeSeries.
+ - `atTime()`, `atFirst()`, `atLast()` and  `* events()` generator - Convenience methods so you don't have to go through the TimeSeries' Collection.
+
+**Pipelines:**
+
+Implements #22 - when processing a synchronous source we can just accumulate the result (either EventList or CollectionMap) on the Pipeline and return that result directly. This enables methods to be built on TimeSeries, for example, that can simply return a new TimeSeries and not dump the user into a callback or force them to guess if they can assume the function will be called synchronously. See #22 for a more detailed discussion about this. Note: This is pretty experimental and there's no facility to cope with an async source at the moment. In that case there just won't be a return value and no warning or error will be given. We don't currently use such a source, but others might. Regardless, this API extension is not appropriate in that case.
+
+Adds two new methods to a Pipeline() to expose this to the Pipeline user:
+ - `toCollectionMap()` - maps a mapping of the key of the collection to the Collection itself. The key comes from a combination of the groupBy() and windowBy() directives on the Pipeline. The key is determined like this:
+    - If there isn't a window or group key, the collection will output to "all" -> collection.
+    - If one type of grouping, that grouping will be used. window name or group by.
+    - If both, they will be concatenated together with a "--".
+ - `toEventList()` - puts every event output into a list.
+
+Windowing changes:
+ - `clearWindow()` - remove the window, i.e. reset to a global window
+ - `clearGroupBy()` - remove the groupby setting
+ - "daily", "monthly" and "yearly" window types are now supported
+ - If building with a non-fixed or non-global window, we build IndexedEvents with local time. We could possibly allow the user to determine this but this is probably the best default behavior. (note, there's no tests for this. This is rather hard to test with JS)
+
+Other bug fixes:
+ - Fixes a bug where a Converter would not work correctly in batch mode because it wasn't being cloned correctly.
+
+**Collection:**
+
+Construction:
+ - Require the type to be passed in when constructing with an Immutable.List (Fixes #16). This is generally only used internally.
+
+New methods:
+ - `isChronological()` - return if a Collection's events are chronological.
+ - `sortByTime()` - Reorder Collection events to be chronological.
+
+**Index:**
+
+Static functions to build an Index strings for daily, monthly and yearly rollups:
+ - `getDailyIndexString()`
+ - `getMonthlyIndexString()`
+ - `getYearlyIndexString()`
+
+**IndexedEvents:**
+ - Fixes a bug where the UTC flag was not being correctly set on IndexedEvents.
+
+**Collector:**
+ - Ability to collect based on daily, monthly or yearly buckets.
+
+
 ## 0.5
 
 Large update causing many API changes, especially within what was previously the Processor pipeline (now Pipeline). The core structures such as Events and TimeSeries remain largely the same, at least from an API perspective, with mostly feature additions and bug fixes. We are still evolving the pipeline code but feel this is a significant step forward and one which we can build on going forward.

@@ -21,26 +21,30 @@ The result might be as simple as comparing two time ranges:
     timerange.asRelativeString();  // "a few seconds ago to a month ago"
 ```
 
-Or finding the average value in a timeseries:
+Or simply getting the average value in a timeseries:
 
 ```js
     timeseries.avg("sensor");
 ```
 
-Or much higher level stream processing:
+Or quickly performing aggregations on a timeseries:
 
 ```js
-    Pipeline()
-        .from(input)                            // input (unbounded)
-        .windowBy("1h")                         //  - 1 day fixed windows
-        .emitOn("eachEvent")                    //  - emit result on each event
-        .aggregate({in: avg, out: avg})         //  - emit new events, 1hr avg
-        .to(EventOut, event => {                // output
-            result[`${event.index()}`] = event; //  - result
-        });
+    const timeseries = new TimeSeries(weatherData);
+    const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
+```
 
-    // As events come in...
-    input.addEvents(incomingEvents);
+Or much higher level batch or stream processing using the Pipeline API:
+
+```js
+    const p = Pipeline()
+        .from(timeseries)
+        .take(10)
+        .groupBy(e => e.value() > 65 ? "high" : "low")
+        .emitOn("flush")
+        .to(CollectionOut, (collection, windowKey, groupByKey) => {
+            result[groupByKey] = collection;
+        }, true);
 
 ```
 
@@ -106,7 +110,7 @@ This code is distributed under a BSD style license, see the LICENSE file for com
 
 # Copyright
 
-ESnet Timeseries Library ("Pond.js"), Copyright (c) 2015, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
+ESnet Timeseries Library ("Pond.js"), Copyright (c) 2015-2016, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
  
 If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's Innovation & Partnerships Office at  IPO@lbl.gov.
  
