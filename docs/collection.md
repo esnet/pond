@@ -27,7 +27,7 @@ they can be used as a pipeline source.
 
 
 * [Collection](#Collection)
-    * [new Collection(arg1, [copyEvents])](#new_Collection_new)
+    * [new Collection(arg1, [arg2])](#new_Collection_new)
     * _instance_
         * [.toJSON()](#Collection+toJSON) ⇒ <code>Object</code>
         * [.toString()](#Collection+toString) ⇒ <code>string</code>
@@ -65,7 +65,7 @@ they can be used as a pipeline source.
 
 <a name="new_Collection_new"></a>
 
-### new Collection(arg1, [copyEvents])
+### new Collection(arg1, [arg2])
 Construct a new Collection.
 
 **Params**
@@ -73,9 +73,12 @@ Construct a new Collection.
 - arg1 <code>[Collection](#Collection)</code> | <code>array</code> | <code>Immutable.List</code> - Initial data for
 the collection. If arg1 is another Collection, this will act as
 a copy constructor.
-- [copyEvents] <code>Boolean</code> <code> = true</code> - When using a the copy constructor
+- [arg2] <code>Boolean</code> - When using a the copy constructor
 this specified whether or not to also copy all the events in this
 collection. Generally you'll want to let it copy the events.
+If arg1 is an Immutable.List, then arg2 will specify the type of
+the Events accepted into the Collection. This form is generally
+used internally.
 
 <a name="Collection+toJSON"></a>
 
@@ -174,18 +177,18 @@ Returns the index that bisects the Collection at the time specified.
 **Returns**: <code>number</code> - The row number that is the greatest, but still below t.  
 **Params**
 
-- t <code>Data</code> - The time to bisect the Collection with
+- t <code>Date</code> - The time to bisect the Collection with
 - b <code>number</code> - The position to begin searching at
 
 <a name="Collection+events"></a>
 
 ### collection.events()
-Generator to return all the events in the collection.
+Generator to return all the events in the Collection.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Example**  
 ```
-for (let event of series.events()) {
+for (let event of collection.events()) {
     console.log(event.toString());
 }
 ```

@@ -664,11 +664,11 @@ class TimeSeries {
 
     /**
      * Takes an operator that is used to remap events from this TimeSeries to
-     * a new set of Events. The result is returned via the callback.
+     * a new set of Events.
      *
      * @param  {function}   operator      An operator which will be passed each event and
      *                                    which should return a new event.
-     * @param  {function}   cb            Callback containing a collapsed TimeSeries
+     * @return {Collection} A Collection containing the remapped events
      */
     map(op) {
         const collections = this.pipeline()

@@ -108,9 +108,14 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.begin()](#TimeSeries+begin) ⇒ <code>Date</code>
         * [.end()](#TimeSeries+end) ⇒ <code>Date</code>
         * [.at(pos)](#TimeSeries+at)
+        * [.atTime(time)](#TimeSeries+atTime) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.atFirst()](#TimeSeries+atFirst) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.atLast()](#TimeSeries+atLast) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.events()](#TimeSeries+events)
         * [.setCollection(collection)](#TimeSeries+setCollection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.bisect(t, b)](#TimeSeries+bisect) ⇒ <code>number</code>
         * [.slice(begin, end)](#TimeSeries+slice) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.crop(timerange)](#TimeSeries+crop) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.clean(fieldSpec)](#TimeSeries+clean) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.events()](#TimeSeries+events)
         * [.name()](#TimeSeries+name) ⇒ <code>string</code>
@@ -131,9 +136,12 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.stdev(fieldSpec)](#TimeSeries+stdev) ⇒ <code>number</code>
         * [.aggregate(func, fieldSpec)](#TimeSeries+aggregate) ⇒ <code>number</code>
         * [.pipeline()](#TimeSeries+pipeline) ⇒ <code>Pipeline</code>
-        * [.map(operator, cb)](#TimeSeries+map)
-        * [.select(fieldSpec, cb)](#TimeSeries+select)
-        * [.collapse(fieldSpec, name, reducer, append, cb)](#TimeSeries+collapse)
+        * [.map(operator)](#TimeSeries+map) ⇒ <code>Collection</code>
+        * [.select()](#TimeSeries+select) ⇒ <code>Collection</code>
+        * [.collapse(fieldSpec, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>Collection</code>
+        * [.fixedWindowRollup(windowSize, aggregation)](#TimeSeries+fixedWindowRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.hourlyRollup(windowSize, aggregation)](#TimeSeries+hourlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.collectByFixedWindow(windowSize)](#TimeSeries+collectByFixedWindow) ⇒ <code>map</code>
     * _static_
         * [.equal(series1, series2)](#TimeSeries.equal) ⇒ <code>bool</code>
         * [.is(series1, series2)](#TimeSeries.is) ⇒ <code>bool</code>
@@ -183,6 +191,41 @@ Access a specific TimeSeries event via its position
 
 - pos <code>number</code> - The event position
 
+<a name="TimeSeries+atTime"></a>
+
+### timeSeries.atTime(time) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+Returns an event in the series by its time. This is the same
+as calling `bisect` first and then using `at` with the index.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Params**
+
+- time <code>Date</code> - The time of the event.
+
+<a name="TimeSeries+atFirst"></a>
+
+### timeSeries.atFirst() ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+Returns the first event in the series.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+atLast"></a>
+
+### timeSeries.atLast() ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+Returns the last event in the series.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+events"></a>
+
+### timeSeries.events()
+Generator to return all the events in the series
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Example**  
+```
+for (let event of series.events()) {
+    console.log(event.toString());
+}
+```
 <a name="TimeSeries+setCollection"></a>
 
 ### timeSeries.setCollection(collection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
@@ -203,7 +246,7 @@ Returns the index that bisects the TimeSeries at the time specified.
 **Returns**: <code>number</code> - The row number that is the greatest, but still below t.  
 **Params**
 
-- t <code>Data</code> - The time to bisect the TimeSeries with
+- t <code>Date</code> - The time to bisect the TimeSeries with
 - b <code>number</code> - The position to begin searching at
 
 <a name="TimeSeries+slice"></a>
@@ -219,6 +262,18 @@ begin up to but not including end.
 
 - begin <code>Number</code> - The position to begin slicing
 - end <code>Number</code> - The position to end slicing
+
+<a name="TimeSeries+crop"></a>
+
+### timeSeries.crop(timerange) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Crop the TimeSeries to the specified TimeRange and
+return a new TimeSeries.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The new, cropped, TimeSeries.  
+**Params**
+
+- timerange <code>TimeRange</code> - The bounds of the new TimeSeries
 
 <a name="TimeSeries+clean"></a>
 
@@ -431,32 +486,28 @@ timeseries.pipeline()
 ```
 <a name="TimeSeries+map"></a>
 
-### timeSeries.map(operator, cb)
+### timeSeries.map(operator) ⇒ <code>Collection</code>
 Takes an operator that is used to remap events from this TimeSeries to
-a new set of Events. The result is returned via the callback.
+a new set of Events.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>Collection</code> - A Collection containing the remapped events  
 **Params**
 
 - operator <code>function</code> - An operator which will be passed each event and
                                    which should return a new event.
-- cb <code>function</code> - Callback containing a collapsed TimeSeries
 
 <a name="TimeSeries+select"></a>
 
-### timeSeries.select(fieldSpec, cb)
+### timeSeries.select() ⇒ <code>Collection</code>
 Takes a fieldSpec (list of column names) and outputs to the callback just those
 columns in a new TimeSeries.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Params**
-
-- fieldSpec <code>array</code> - The list of columns
-- cb <code>function</code> - Callback containing a collapsed TimeSeries
-
+**Returns**: <code>Collection</code> - A collection containing only the selected fields  
 <a name="TimeSeries+collapse"></a>
 
-### timeSeries.collapse(fieldSpec, name, reducer, append, cb)
+### timeSeries.collapse(fieldSpec, name, reducer, append) ⇒ <code>Collection</code>
 Takes a fieldSpec (list of column names) and collapses
 them to a new column named `name` which is the reduction (using
 the `reducer` function) of the matched columns in the fieldSpecList.
@@ -467,14 +518,94 @@ using the `append` boolean.
 The result, a new TimeSeries, will be passed to the supplied callback.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>Collection</code> - A collapsed collection  
 **Params**
 
 - fieldSpec <code>array</code> - The list of columns
 - name <code>string</code> - The resulting summed column name
 - reducer <code>function</code> - Reducer function e.g. sum
 - append <code>boolean</code> - Append the summed column, rather than replace
-- cb <code>function</code> - Callback containing a collapsed TimeSeries
 
+<a name="TimeSeries+fixedWindowRollup"></a>
+
+### timeSeries.fixedWindowRollup(windowSize, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Builds a new TimeSeries by dividing events within the TimeSeries
+across multiple fixed windows of size `windowSize`.
+
+Note that these are windows defined relative to Jan 1st, 1970,
+and are UTC, so this is best suited to smaller window sizes
+(hourly, 5m, 30s, 1s etc), or in situations where you don't care
+about the specific window, just that the data is smaller.
+
+Each window then has an aggregation specification applied as
+`aggregation`. This specification describes a mapping of fieldNames
+to aggregation functions. For example:
+```
+{in: avg, out: avg}
+```
+will aggregate both "in" and "out" using the average aggregation
+function.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Params**
+
+- windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
+- aggregation <code>object</code> - The aggregation specification
+
+**Example**  
+```
+const timeseries = new TimeSeries(data);
+const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
+```
+<a name="TimeSeries+hourlyRollup"></a>
+
+### timeSeries.hourlyRollup(windowSize, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Builds a new TimeSeries by dividing events into days. The days are
+in either local or UTC time, depending on if utc(true) is set on the
+Pipeline.
+
+Each window then has an aggregation specification applied as
+`aggregation`. This specification describes a mapping of fieldNames
+to aggregation functions. For example:
+```
+{in: avg, out: avg}
+```
+will aggregate both "in" and "out" using the average aggregation
+function across all events within each day.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Params**
+
+- windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
+- aggregation <code>object</code> - The aggregation specification
+
+**Example**  
+```
+const timeseries = new TimeSeries(weatherData);
+const dailyMaxTemperature = timeseries.dailyRollup({temperature: max});
+```
+<a name="TimeSeries+collectByFixedWindow"></a>
+
+### timeSeries.collectByFixedWindow(windowSize) ⇒ <code>map</code>
+Builds multiple Collections, each collects together
+events within a window of size `windowSize`. Note that these
+are windows defined relative to Jan 1st, 1970, and are UTC.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>map</code> - The result is a mapping from window index to a
+                 Collection. e.g. "1d-16317" -> Collection  
+**Params**
+
+- windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
+
+**Example**  
+```
+const timeseries = new TimeSeries(data);
+const collections = timeseries.collectByFixedWindow("1d");
+console.log(collections); // {1d-16314: Collection, 1d-16315: Collection, ...}
+```
 <a name="TimeSeries.equal"></a>
 
 ### TimeSeries.equal(series1, series2) ⇒ <code>bool</code>

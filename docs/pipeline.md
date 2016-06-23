@@ -161,7 +161,9 @@ of collection data.
 * [Pipeline](#Pipeline)
     * [new Pipeline([arg])](#new_Pipeline_new)
     * [.windowBy()](#Pipeline+windowBy) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.clearWindow()](#Pipeline+clearWindow) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.groupBy(k)](#Pipeline+groupBy) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.clearGroupBy()](#Pipeline+clearGroupBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.emitOn(trigger)](#Pipeline+emitOn) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.from(src)](#Pipeline+from) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.to()](#Pipeline+to) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -196,19 +198,32 @@ function, rather than this object directly with `new`.
 **Example**  
 ```
 import { Pipeline } from "pondjs";
-const process = Pipeline()...`
+const p = Pipeline()...`
 ```
 <a name="Pipeline+windowBy"></a>
 
 ### pipeline.windowBy() ⇒ <code>[Pipeline](#Pipeline)</code>
 Set the window, returning a new Pipeline. The argument here
 is an object with {type, duration}.
-type may be:
- * "Fixed"
- * other types coming
+
+Window `w` may be:
+ * A fixed interval: "fixed"
+ * A calendar interval: "day", "month" or "year"
+ * ...
 
 duration is of the form:
- * "30s" or "1d" etc
+ * "30s" or "1d" etc (supports seconds (s), minutes (m), hours (h))
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+<a name="Pipeline+clearWindow"></a>
+
+### pipeline.clearWindow() ⇒ <code>[Pipeline](#Pipeline)</code>
+Remove windowing from the Pipeline. This will
+return the pipeline to no window grouping. This is
+useful if you have first done some aggregated by
+some window size and then wish to collect together
+the all resulting events.
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
@@ -230,6 +245,14 @@ You can groupBy using a function `(event) => return key`,
 a fieldSpec (a field name, or dot delimitted path to a field),
 or a array of fieldSpecs
 
+<a name="Pipeline+clearGroupBy"></a>
+
+### pipeline.clearGroupBy() ⇒ <code>[Pipeline](#Pipeline)</code>
+Remove the grouping from the pipeline. In other words
+recombine the events.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 <a name="Pipeline+emitOn"></a>
 
 ### pipeline.emitOn(trigger) ⇒ <code>[Pipeline](#Pipeline)</code>

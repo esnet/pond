@@ -22,7 +22,7 @@ module.exports = {
                 exclude: /node_modules/
             },
             { test: /\.css$/, loader: "style-loader!css-loader" },
-            { test: /\.(png|jpg|gif)$/, loader: "url-loader?limit=20000"},
+            { test: /\.(png|jpg|gif)$/, loader: "url-loader?limit=32000"},
             { test: /\.json$/, loader: "json-loader" }
         ]
     },
