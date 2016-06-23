@@ -154,6 +154,7 @@ class TimeSeries {
             const other = arg;
             this._data = other._data;
             this._collection = other._collection;
+
         } else if (_.isObject(arg)) {
 
             //
@@ -196,7 +197,7 @@ class TimeSeries {
                 // Initialized from the wire format
                 //
 
-                const { columns, points, ...meta2 } = obj; //eslint-disable-line
+                const { columns, points, utc = true, ...meta2 } = obj; //eslint-disable-line
                 const [eventType, ...eventFields] = columns;
                 const events = points.map(point => {
                     const [t, ...eventValues] = point;
@@ -207,7 +208,7 @@ class TimeSeries {
                         case "timerange":
                             return new TimeRangeEvent(t, d);
                         case "index":
-                            return new IndexedEvent(t, d);
+                            return new IndexedEvent(t, d, utc);
                         default:
                             throw new Error(`Unknown event type: ${eventType}`);
                     }
