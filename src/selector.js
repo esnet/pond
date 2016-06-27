@@ -17,8 +17,8 @@ import { isPipeline } from "./pipeline";
  * and returns a new event with only the selected columns
  */
 export default class Selector extends Processor {
-    constructor(arg1, options, observer) {
-        super(arg1, options, observer);
+    constructor(arg1, options) {
+        super(arg1, options);
 
         if (arg1 instanceof Selector) {
             const other = arg1;

@@ -21,8 +21,8 @@ import { isPipeline } from "./pipeline";
  */
 export default class Taker extends Processor {
 
-    constructor(arg1, options, observer) {
-        super(arg1, options, observer);
+    constructor(arg1, options) {
+        super(arg1, options);
 
         if (arg1 instanceof Taker) {
             const other = arg1;

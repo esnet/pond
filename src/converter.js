@@ -20,8 +20,8 @@ import Processor from "./processor";
 
 export default class Converter extends Processor {
 
-    constructor(arg1, options, observer) {
-        super(arg1, options, observer);
+    constructor(arg1, options) {
+        super(arg1, options);
 
         if (arg1 instanceof Converter) {
             const other = arg1;

@@ -18,8 +18,8 @@ import { isPipeline } from "./pipeline";
  */
 export default class Filter extends Processor {
 
-    constructor(arg1, options, observer) {
-        super(arg1, options, observer);
+    constructor(arg1, options) {
+        super(arg1, options);
 
         if (arg1 instanceof Filter) {
             const other = arg1;

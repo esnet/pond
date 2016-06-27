@@ -20,8 +20,8 @@ import { isPipeline } from "./pipeline";
  */
 export default class Collapser extends Processor {
 
-    constructor(arg1, options, observer) {
-        super(arg1, options, observer);
+    constructor(arg1, options) {
+        super(arg1, options);
 
         if (arg1 instanceof Collapser) {
             const other = arg1;
