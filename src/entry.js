@@ -43,5 +43,6 @@ export {
     last,
     difference,
     median,
-    stdev
+    stdev,
+    percentile
 } from "./functions";

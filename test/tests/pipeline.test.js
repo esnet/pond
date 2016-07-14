@@ -27,7 +27,7 @@ import Event from "../../src/event";
 import TimeRangeEvent from "../../src/timerangeevent";
 import IndexedEvent from "../../src/indexedevent";
 
-import { keep, avg, sum, max } from "../../src/functions.js";
+import { keep, avg, sum, median, min, max, percentile } from "../../src/functions.js";
 
 const eventList1 = [
     new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
@@ -366,17 +366,20 @@ describe("Pipeline", () => {
                 .from(input)
                 .windowBy("1h")           // 1 day fixed windows
                 .emitOn("eachEvent")    // emit result on each event
-                .aggregate({in: avg, out: avg})
+                .aggregate({
+                    in_avg: {in: avg},
+                    out_avg: {out: avg}
+                })
                 .to(EventOut, event => {
                     result[`${event.index()}`] = event;
                 });
 
             eventsIn.forEach(event => input.addEvent(event));
 
-            expect(result["1h-396199"].get("in")).to.equal(6);
-            expect(result["1h-396199"].get("out")).to.equal(3);
-            expect(result["1h-396200"].get("in")).to.equal(4.5);
-            expect(result["1h-396200"].get("out")).to.equal(8);
+            expect(result["1h-396199"].get("in_avg")).to.equal(6);
+            expect(result["1h-396199"].get("out_avg")).to.equal(3);
+            expect(result["1h-396200"].get("in_avg")).to.equal(4.5);
+            expect(result["1h-396200"].get("out_avg")).to.equal(8);
 
             done();
         });
@@ -397,22 +400,24 @@ describe("Pipeline", () => {
                 .from(input)
                 .groupBy("type")
                 .windowBy("1h")           // 1 day fixed windows
-                .emitOn("eachEvent")    // emit result on each event
-                .aggregate({type: keep, in: avg, out: avg})
-                .to(EventOut, event => {
-                    result[`${event.index()}:${event.get("type")}`] = event;
-                });
+                .emitOn("eachEvent")      // emit result on each event
+                .aggregate({
+                    type: {type: keep},   // keep the type
+                    in_avg: {in: avg},    // avg in  -> in_avg
+                    out_avg: {out: avg}   // avg out -> out_avg
+                })
+                .to(EventOut, event => result[`${event.index()}:${event.get("type")}`] = event);
 
             eventsIn.forEach(event => input.addEvent(event));
 
-            expect(result["1h-396199:a"].get("in")).to.equal(6);
-            expect(result["1h-396199:a"].get("out")).to.equal(1.5);
-            expect(result["1h-396199:b"].get("in")).to.equal(6);
-            expect(result["1h-396199:b"].get("out")).to.equal(6);
-            expect(result["1h-396200:a"].get("in")).to.equal(4);
-            expect(result["1h-396200:a"].get("out")).to.equal(7);
-            expect(result["1h-396200:b"].get("in")).to.equal(5);
-            expect(result["1h-396200:b"].get("out")).to.equal(9);
+            expect(result["1h-396199:a"].get("in_avg")).to.equal(6);
+            expect(result["1h-396199:a"].get("out_avg")).to.equal(1.5);
+            expect(result["1h-396199:b"].get("in_avg")).to.equal(6);
+            expect(result["1h-396199:b"].get("out_avg")).to.equal(6);
+            expect(result["1h-396200:a"].get("in_avg")).to.equal(4);
+            expect(result["1h-396200:a"].get("out_avg")).to.equal(7);
+            expect(result["1h-396200:b"].get("in_avg")).to.equal(5);
+            expect(result["1h-396200:b"].get("out_avg")).to.equal(9);
 
             done();
         });
@@ -433,7 +438,10 @@ describe("Pipeline", () => {
                 .from(input)
                 .windowBy("1h")           // 1 day fixed windows
                 .emitOn("eachEvent")    // emit result on each event
-                .aggregate({in: avg, out: avg})
+                .aggregate({
+                    in_avg: {in: avg},
+                    out_avg: {out: avg}
+                })
                 .asTimeRangeEvents({alignment: "lag"})
                 .to(EventOut, event => {
                     result[`${+event.timestamp()}`] = event;
@@ -441,13 +449,53 @@ describe("Pipeline", () => {
 
             eventsIn.forEach(event => input.addEvent(event));
 
-            expect(result["1426294800000"].get("in")).to.equal(6);
-            expect(result["1426294800000"].get("out")).to.equal(3);
-            expect(result["1426298400000"].get("in")).to.equal(4.5);
-            expect(result["1426298400000"].get("out")).to.equal(8);
+            expect(result["1426294800000"].get("in_avg")).to.equal(6);
+            expect(result["1426294800000"].get("out_avg")).to.equal(3);
+            expect(result["1426298400000"].get("in_avg")).to.equal(4.5);
+            expect(result["1426298400000"].get("out_avg")).to.equal(8);
            
             done();
         });
+
+        it("can aggregate events to get percentiles", done => {
+
+            const eventsIn = [];
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 57, 0), {in: 3, out: 1}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 58, 0), {in: 9, out: 2}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 59, 0), {in: 6, out: 6}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 0, 0), {in: 4, out: 7}));
+            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 1, 0), {in: 5, out: 9}));
+
+            const input = new UnboundedIn();
+            const result = {};
+
+            Pipeline()
+                .from(input)
+                .windowBy("1h")           // 1 day fixed windows
+                .emitOn("eachEvent")    // emit result on each event
+                .aggregate({
+                    in_low: {in: min},
+                    in_25th: {in: percentile(25)},
+                    in_median: {in: median},
+                    in_75th: {in: percentile(75)},
+                    in_high: {in: max},
+                })
+                .asEvents()
+                .to(EventOut, event => {
+                    result[`${+event.timestamp()}`] = event;
+                });
+
+            eventsIn.forEach(event => input.addEvent(event));
+
+            expect(result["1426296600000"].get("in_low")).to.equal(3);
+            expect(result["1426296600000"].get("in_25th")).to.equal(4.5);
+            expect(result["1426296600000"].get("in_median")).to.equal(6);
+            expect(result["1426296600000"].get("in_75th")).to.equal(7.5);
+            expect(result["1426296600000"].get("in_high")).to.equal(9);
+
+            done();
+        });
+
     });
 
     describe("Pipeline event conversion", () => {
@@ -722,9 +770,11 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .collapse(["in", "out"], "total", sum)
                 .emitOn("flush")
-                .aggregate({total: max})
+                .aggregate({
+                    max_total: {total: max}
+                })
                 .to(EventOut, e => {
-                    expect(e.get("total")).to.equal(117);
+                    expect(e.get("max_total")).to.equal(117);
                     done();
                 }, /*flush=*/true);
         });
@@ -732,13 +782,16 @@ describe("Pipeline", () => {
 
     describe("Batch pipeline with return value", () => {
 
+        /*
         it("should be able sum element-wise and then find the max and get the result out", done => {
             const timeseries = new TimeSeries(inOutData);
             const result = Pipeline()
                 .from(timeseries)
                 .emitOn("flush")
                 .collapse(["in", "out"], "total", sum)
-                .aggregate({total: max})
+                .aggregate({
+                    max_total: {total: max}
+                })
                 .toEventList();
 
             //const maxTotal = pipeline.latestValue();
@@ -746,7 +799,8 @@ describe("Pipeline", () => {
             done();
 
         });
-
+        */
+       
         it("should be able to collect first 10 events over 65 and under 65", done => {
             let result = {};
             const timeseries = new TimeSeries(sept2014Data);
@@ -809,7 +863,9 @@ describe("Pipeline", () => {
                 .from(timeseries)
                 .filter(e => e.value() < 50)
                 .take(10)
-                .aggregate({value: avg})
+                .aggregate({
+                    value: {value: avg}
+                })
                 .to(EventOut, event => {
                     result = event;
                 }, true);

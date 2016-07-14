@@ -701,7 +701,7 @@ describe("TimeSeries", () => {
     });
 
     describe("TimeSeries statistics functions", () => {
-        /*
+
         it("can avg the series", done => {
             const series = new TimeSeries(statsData);
             expect(series.avg()).to.equal(15);
@@ -804,7 +804,7 @@ describe("TimeSeries", () => {
             expect(series.stdev("NASA_south.out")).to.equal(15.435349040433131);
             done();
         });
-        */
+        
         it("can find the quantiles of a TimeSeries", done => {
             const series = new TimeSeries({
                 name: "Sensor values",
@@ -909,6 +909,7 @@ describe("TimeSeries", () => {
 
             done();
         });
+
     });
 
     describe("TimeSeries bisect function", () => {
@@ -1161,10 +1162,12 @@ describe("TimeSeries", () => {
 
     });
 
-    describe("TimeSeries rollup to a fixed window", () => {
+    describe.only("TimeSeries rollup to a fixed window", () => {
         it("can take 1 day avgs over a timeseries", (done) => {
             const timeseries = new TimeSeries(sept2014Data);
-            const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
+            const dailyAvg = timeseries.fixedWindowRollup("1d", {value: {value: avg}});
+
+            console.log(dailyAvg);
 
             expect(dailyAvg.size()).to.equal(5);
             expect(dailyAvg.at(0).value()).to.equal(46.875);

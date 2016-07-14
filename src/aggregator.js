@@ -86,13 +86,15 @@ class Aggregator extends Processor {
 
     handleTrigger(collection, windowKey) {
         const d = {};
-        _.each(this._fields, (operator, fields) => {
-            const fieldList = _.isString(fields) ? [fields] : fields;
-            _.each(fieldList, fieldSpec => {
-                const fieldValue = collection.aggregate(operator, fieldSpec);
-                const fieldName = fieldSpec.split(".").pop();
-                d[fieldName] = fieldValue;
-            });
+        _.each(this._fields, (f, fieldName) => {
+            const keys = Object.keys(f);
+            if (keys.length !== 1) {
+                throw new Error("Fields should contain exactly one field", f);
+            }
+            const field = keys[0];
+            const operator = f[field];
+
+            d[fieldName] = collection.aggregate(operator, field);
         });
 
         let event;

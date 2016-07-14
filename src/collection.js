@@ -14,7 +14,7 @@ import Immutable from "immutable";
 import TimeRange from "./range";
 import Event from "./event";
 import BoundedIn from "./pipeline-in-bounded";
-import { sum, avg, max, min, first, last, median, stdev } from "./functions";
+import { sum, avg, max, min, first, last, median, stdev, percentile } from "./functions";
 
 /**
  * A collection is an abstraction for a bag of Events.
@@ -590,41 +590,7 @@ class Collection extends BoundedIn {
      * @return {number}            The percentile
      */
     percentile(q, column = "value", interp = "linear") {
-        let v;
-        const sorted = this.sort(column);
-
-        if (q < 0 || q > 100) {
-            throw new Error("Percentile q must be between 0 and 100");
-        }
-
-        const i = q / 100;
-        const index = Math.floor((sorted.size() - 1) * i);
-
-        if (sorted.size() === 1 || q === 0) {
-            return sorted.first(column);
-        }
-
-        if (q === 100) {
-            return sorted.last(column);
-        }
-
-        if (index < sorted.size() - 1) {
-            const fraction = (sorted.size() - 1) * i - index;
-            const v0 = sorted.at(index).get(column);
-            const v1 = sorted.at(index + 1).get(column);
-            if (interp === "lower" || fraction === 0) {
-                v = v0;
-            } else if (interp === "linear") {
-                v = v0 + (v1 - v0) * fraction;
-            } else if (interp === "higher") {
-                v = v1;
-            } else if (interp === "nearest") {
-                v = fraction < 0.5 ? v0 : v1;
-            } else if (interp === "midpoint") {
-                v = (v0 + v1) / 2;
-            }
-        }
-        return v;
+        return this.aggregate(percentile(q, interp), column);
     }
 
     /**
@@ -638,9 +604,9 @@ class Collection extends BoundedIn {
      *
      * @return {number}           The resulting value
      */
-    aggregate(func, fieldSpec = "value") {
+    aggregate(func, fieldSpec = "value", options = {}) {
         const fs = this._fieldSpecToArray(fieldSpec);
-        const result = Event.mapReduce(this.eventListAsArray(), [fs], func);
+        const result = Event.mapReduce(this.eventListAsArray(), [fs], func, options);
         return result[fs];
     }
 

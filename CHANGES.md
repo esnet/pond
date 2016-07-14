@@ -1,3 +1,49 @@
+## 0.7
+
+This update is concerned with adding quantile and percentile calculations.
+
+The main breaking change here is `Pipeline.aggregate()` format has changed to allow better composition of emitted events.
+
+**Pipeline**
+
+ - Changes `aggregation` to more explicitly define the output fields. This allows you to perform multiple aggregations on the same input field, such as aggregating temperature over a collection window to average_temp and max_temp.
+
+Before:
+```
+const p = Pipeline()
+  ...
+  .aggregate({in: avg, out: avg})
+  ...
+```
+
+After:
+```
+const p = Pipeline()
+  ...
+  .aggregate({
+      in: {in: keep},
+      in_avg: {in: avg},
+      in_95th: {in: percentile(95)}}
+  })
+  ...
+```
+
+ - As shown in the above example, you can use the `percentile()` function. Note that this is a little different from the others in that you need to call the function with the percentile value you want. A second parameter controls the way the function behaves when a percentile does not land on a specific sample. The default is to linearly interpolate.
+
+ - BUGFIX: Fixes a bug where Pipeline.taker() would ignore the first event.
+
+**TimeSeries**
+
+ - Adds a `quantile()` function to return n evenly spaced quantiles within the TimeSeries.
+ - Adds a `percentile()` function to find a specific percentile within the TimeSeries
+
+**Collection**
+
+ - Adds a `quantile()` function to return n evenly spaced quantiles within the Collection.
+ - Adds a `percentile()` function to find a specific percentile within the Collection.
+
+---
+
 ## 0.6
 
 This update concentrates on providing a better API for processing a TimeSeries object. It updates the Pipeline code to be able to return the results as an alternative to evoking a callback function. Using this API several methods on the TimeSeries have been reworked to directly return their results as a new TimeSeries. In addition, TimeSeries now has several new methods to do roll-ups aggregations and collections directly.
@@ -66,6 +112,7 @@ Static functions to build an Index strings for daily, monthly and yearly rollups
 **Collector:**
  - Ability to collect based on daily, monthly or yearly buckets.
 
+---
 
 ## 0.5
 
@@ -98,6 +145,8 @@ Large update causing many API changes, especially within what was previously the
     - Added code coverage
     - Auto-build of docs for website
 
+---
+
 ## 0.4
 
 ### 0.4.2
@@ -128,6 +177,8 @@ Large update causing many API changes, especially within what was previously the
  * Events support keys to enable the ability to do groupBy operations. You can add a key to an `Event` with `setKey()`, and you'll get a new `Event` back which is the same as the old one, but with a key. You can query the key with, unsurprisingly, `key()`.
  * `Groupers` are a new `Event` processor which takes an incoming event stream and emits the same event but with a key on it. This enables downstream processing, such as aggregation, to group based on the key.
 
+---
+
 ## 0.3
 
 ### 0.3.0
@@ -140,6 +191,8 @@ Large update causing many API changes, especially within what was previously the
  * Added ability to convert to time based Events when inserting IndexedEvents into a collection. This can be much faster to query.
  * Began work on ability to do things like sum a series or isolate columns of a series.
  * Website update as well as uniform linting
+
+---
 
 ## 0.2
 

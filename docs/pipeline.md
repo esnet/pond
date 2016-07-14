@@ -53,7 +53,7 @@ It is also possible to derive a class from UnboundedIn() that can produce Events
 ---
 ### Aggregation
 
-A common use-case for Pipelines is aggregation. Aggregation is performed on windowed (and grouped) events. There must currently be a window defined for a Pipeline to aggregate.
+A common use-case for Pipelines is aggregation. Aggregation is performed on windowed (and grouped) events.
 
 Here is a simple example:
 
@@ -62,7 +62,10 @@ Here is a simple example:
         .from(stream)
         .windowBy("1h")           // 1 day fixed windows
         .emitOn("eachEvent")    // emit result on each event
-        .aggregate({in: avg, out: avg})
+        .aggregate({
+            in_avg: {in: avg},
+            out_avg: {in: avg}
+        })
         .to(EventOut, event => {
             // resulting IndexedEvents...
             result[`${event.index()}`] = event;
@@ -71,16 +74,16 @@ Here is a simple example:
 As in the streaming example above, we make an UnboundedIn onto which we add Events.
 
 What's new here is the state that is being set in the Pipeline:
- * windowBy - sets windowing to be 1 hour
- * emitOn - sets the triggering of aggregation to be each time a new event comes in. This will mean the same output will be generated multiple times, each time with an updated aggregation. The alternative is "discard" which would only emit when an event moves into another window
+ * `windowBy()` - sets windowing to be 1 hour
+ * `emitOn()` - sets the triggering of aggregation to be each time a new event comes in. This will mean the same output will be generated multiple times, each time with an updated aggregation. The alternative is "discard" which would only emit when an event moves into another window
 
-Once this state is established the aggregate() processor can be used. The argument to this is a field specification that tells the emit code which fields of the collected window of events should be aggregated together and what function to use.
+Once this state is established the `aggregate()` processor can be used. The argument to this is a specification that tells the emit code which fields of the collected window of events should be aggregated together, what function to use, and what the output field name should be.
 
-The output, an EventOut, will call the callback whenever a new aggregated event is emitted. Since the triggering (emitOn) is set to "eachEvent", it will be called multiple times. In this case we just re-add it, but the index, to our result map.
+The output, an `EventOut`, will call the callback whenever a new aggregated event is emitted. Since the triggering (`emitOn`) is set to "eachEvent", it will be called multiple times. In this case we just re-add it to our result map.
 
 ### Aggregation with grouping
 
-Pipelines also support a groupBy() processor. In the following example each event has a field called "type". The result of this will be that aggregation collections will be further partitioned based on the group, in addition to the window.
+Pipelines also support a `groupBy()` processor. In the following example each event has a field called "type". The result of this will be that aggregation collections will be further partitioned based on the group, in addition to the window.
 
     const stream = new UnboundedIn();
     const result = {};
@@ -90,7 +93,11 @@ Pipelines also support a groupBy() processor. In the following example each even
         .groupBy("type")
         .windowBy("1h")           // 1 day fixed windows
         .emitOn("eachEvent")      // emit result on each event
-        .aggregate({type: keep, in: avg, out: avg})
+        .aggregate({
+            type: {type: keep},
+            in_avg: {in: avg},
+            out_avg: {in: avg}
+        })
         .to(EventOut, event => {
             result[`${event.index()}:${event.get("type")}`] = event;
         });
@@ -99,7 +106,7 @@ Pipelines also support a groupBy() processor. In the following example each even
 
 During our aggregation, output IndexedEvents are formed with the average of "in", and the average of "out". The value of the "type" field is kept in the final result using the `keep` aggregation function.
 
-In this case we simply want to collect the events. To do this we separate the output events using both the IndexEvent's Index (which describes the windowed timerange of the event), joined with the value of the "type" field that we preserved in our aggregation.
+In this case we simply want to collect the events. To do this we separate the output events using both the `IndexEvent`'s `Index` (which describes the windowed time range of the event), joined with the value of the "type" field that we preserved in our aggregation.
 
 ---
 
@@ -107,7 +114,7 @@ In this case we simply want to collect the events. To do this we separate the ou
 
 There are three types of events in Pond: regular `Events`, which have a single timestamp, `TimeRangeEvents` which have a `TimeRange` (begin and end time) associated with them, and `IndexedEvents` which have a string that represents a time range. Sometimes it is helpful to convert between these Event types. To do this you can use the `asEvents()`, `asIndexedEvents()` and `asTimeRangeEvent()` processors.
 
-Taking the first streaming example, we can convert the output IndexedEvents to a basic Event like so:
+Taking the first streaming example, we can convert the output IndexedEvents to a basic `Event` like so:
 
 ```
     const input = new UnboundedIn();
@@ -117,7 +124,10 @@ Taking the first streaming example, we can convert the output IndexedEvents to a
         .from(input)
         .windowBy("1h")           // 1 day fixed windows
         .emitOn("eachEvent")    // emit result on each event
-        .aggregate({in: avg, out: avg})
+        .aggregate({
+            in_avg: {in: avg},
+            out_avg: {in: avg}
+        })
         .asEvents()
         .to(EventOut, event => /* result */ );
 ```
@@ -140,7 +150,7 @@ Pipelines can themselves be chained together.
 In this example, the second pipeline will attach to the first pipeline. Currently batch pipelines support this, but only as a linear pipe. You cannot merge multiple bounded sources together. It is recommended that you do this manually by using, for example, Collection.combine() first, then running this through the Pipeline.
 
 ---
-### TimeSeries pipelines
+### TimeSeries Pipelines
 
 Pipelines can also be run directly off TimeSeries objects.
 
@@ -149,6 +159,8 @@ Pipelines can also be run directly off TimeSeries objects.
         .offsetBy(1, "in")
         .offsetBy(2)
         .to(Collector, {}, collection => /* result */ );
+
+Also note that TimeSeries also have some helper functions to do common Pipeline tasks, such as rollups.
 
 ---
 ## API Reference
@@ -405,7 +417,10 @@ const p = Pipeline()
   .from(input)
   .windowBy("1h")           // 1 day fixed windows
   .emitOn("eachEvent")      // emit result on each event
-  .aggregate({in: avg, out: avg})
+  .aggregate({
+     in_avg: {in: avg},
+     out_avg: {in: avg}
+  })
   .asEvents()
   .to(EventOut, {}, event => {
      result[`${event.index()}`] = event; // Result
