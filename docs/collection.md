@@ -42,6 +42,7 @@ they can be used as a pipeline source.
         * [.events()](#Collection+events)
         * [.eventList()](#Collection+eventList) ⇒ <code>Immutable.List</code>
         * [.eventListAsArray()](#Collection+eventListAsArray) ⇒ <code>Array</code>
+        * [.sort()](#Collection+sort) ⇒ <code>TimeRange</code>
         * [.range()](#Collection+range) ⇒ <code>TimeRange</code>
         * [.addEvent(event)](#Collection+addEvent) ⇒ <code>[Collection](#Collection)</code>
         * [.slice(begin, end)](#Collection+slice) ⇒ <code>[Collection](#Collection)</code>
@@ -58,6 +59,8 @@ they can be used as a pipeline source.
         * [.mean(fieldSpec)](#Collection+mean) ⇒ <code>number</code>
         * [.median(fieldSpec)](#Collection+median) ⇒ <code>number</code>
         * [.stdev(fieldSpec)](#Collection+stdev) ⇒ <code>number</code>
+        * [.quantile(n, column, interp)](#Collection+quantile) ⇒ <code>array</code>
+        * [.percentile(q, column, interp)](#Collection+percentile) ⇒ <code>number</code>
         * [.aggregate(func, fieldSpec)](#Collection+aggregate) ⇒ <code>number</code>
     * _static_
         * [.equal(collection1, collection2)](#Collection.equal) ⇒ <code>bool</code>
@@ -206,6 +209,14 @@ Returns a Javascript array representation of the event list
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>Array</code> - All events as a Javascript Array.  
+<a name="Collection+sort"></a>
+
+### collection.sort() ⇒ <code>TimeRange</code>
+Sorts the Collection using the value referenced by
+the fieldSpec.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>TimeRange</code> - The extents of the TimeSeries  
 <a name="Collection+range"></a>
 
 ### collection.range() ⇒ <code>TimeRange</code>
@@ -386,6 +397,49 @@ Aggregates the events down to their stdev
 **Params**
 
 - fieldSpec <code>String</code> <code> = value</code> - The field to aggregate over
+
+<a name="Collection+quantile"></a>
+
+### collection.quantile(n, column, interp) ⇒ <code>array</code>
+Gets n quantiles within the Collection. This works the same way as numpy.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>array</code> - An array of n quantiles  
+**Params**
+
+- n <code>integer</code> - The number of quantiles to divide the
+                           Collection into.
+- column <code>string</code> <code> = &quot;value&quot;</code> - The field to return as the quantile
+- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
+                           to use when the desired quantile lies between
+                           two data points. Options are:
+                           options are:
+                            * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+                            * lower: i.
+                            * higher: j.
+                            * nearest: i or j whichever is nearest.
+                            * midpoint: (i + j) / 2.
+
+<a name="Collection+percentile"></a>
+
+### collection.percentile(q, column, interp) ⇒ <code>number</code>
+Gets percentile q within the Collection. This works the same way as numpy.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>number</code> - The percentile  
+**Params**
+
+- q <code>integer</code> - The percentile (should be between 0 and 100)
+- column <code>string</code> <code> = &quot;value&quot;</code> - The field to return as the quantile
+- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
+                           to use when the desired quantile lies between
+                           two data points. Options are:
+                           options are:
+                            * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+                            * lower: i.
+                            * higher: j.
+                            * nearest: i or j whichever is nearest.
+                            * midpoint: (i + j) / 2.
 
 <a name="Collection+aggregate"></a>
 

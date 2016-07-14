@@ -69,12 +69,12 @@ export default class Taker extends Processor {
             const collectionKey = groupByKey ?
                 `${windowKey}::${groupByKey}` : windowKey;
 
-            if (this._count[collectionKey] <= this._limit) {
-                this.emit(event);
-            }
-
             if (!_.has(this._count, collectionKey)) {
                 this._count[collectionKey] = 0;
+            }
+
+            if (this._count[collectionKey] < this._limit) {
+                this.emit(event);
             }
 
             this._count[collectionKey]++;

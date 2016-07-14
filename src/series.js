@@ -627,6 +627,48 @@ class TimeSeries {
     }
 
     /**
+     * Gets n quantiles within the TimeSeries. This works the same way as numpy's percentile().
+     * For example `timeseries.quantile(4)` would be the same as using percentile with q = 0.25, 0.5 and 0.75.
+     *
+     * @param  {integer} n        The number of quantiles to divide the
+     *                            TimeSeries into.
+     * @param  {string} column    The field to return as the quantile
+     * @param  {string} interp    Specifies the interpolation method
+     *                            to use when the desired quantile lies between
+     *                            two data points. Options are:
+     *                            options are:
+     *                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+     *                             * lower: i.
+     *                             * higher: j.
+     *                             * nearest: i or j whichever is nearest.
+     *                             * midpoint: (i + j) / 2.
+     * @return {array}            An array of n quantiles
+     */
+    quantile(quantity, column = "value", interp = "linear") {
+        return this._collection.quantile(quantity, column, interp);
+    }
+
+    /**
+     * Gets percentile q within the TimeSeries. This works the same way as numpy's percentile().
+     *
+     * @param  {integer} q        The percentile (should be between 0 and 100)
+     * @param  {string} column    The field to return as the quantile
+     * @param  {string} interp    Specifies the interpolation method
+     *                            to use when the desired quantile lies between
+     *                            two data points. Options are:
+     *                            options are:
+     *                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+     *                             * lower: i.
+     *                             * higher: j.
+     *                             * nearest: i or j whichever is nearest.
+     *                             * midpoint: (i + j) / 2.
+     * @return {number}           The percentile
+     */
+    percentile(q, column = "value", interp = "linear") {
+        return this._collection.percentile(q, column, interp);
+    }
+
+    /**
      * Aggregates the events down using a user defined function to
      * do the reduction.
      *

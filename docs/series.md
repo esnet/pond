@@ -134,6 +134,8 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.mean(fieldSpec)](#TimeSeries+mean) ⇒ <code>number</code>
         * [.median(fieldSpec)](#TimeSeries+median) ⇒ <code>number</code>
         * [.stdev(fieldSpec)](#TimeSeries+stdev) ⇒ <code>number</code>
+        * [.quantile(n, column, interp)](#TimeSeries+quantile) ⇒ <code>array</code>
+        * [.percentile(q, column, interp)](#TimeSeries+percentile) ⇒ <code>number</code>
         * [.aggregate(func, fieldSpec)](#TimeSeries+aggregate) ⇒ <code>number</code>
         * [.pipeline()](#TimeSeries+pipeline) ⇒ <code>Pipeline</code>
         * [.map(operator)](#TimeSeries+map) ⇒ <code>Collection</code>
@@ -451,6 +453,50 @@ Aggregates the events down to their stdev
 **Params**
 
 - fieldSpec <code>String</code> - The field to aggregate over
+
+<a name="TimeSeries+quantile"></a>
+
+### timeSeries.quantile(n, column, interp) ⇒ <code>array</code>
+Gets n quantiles within the TimeSeries. This works the same way as numpy's percentile().
+For example `timeseries.quantile(4)` would be the same as using percentile with q = 0.25, 0.5 and 0.75.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>array</code> - An array of n quantiles  
+**Params**
+
+- n <code>integer</code> - The number of quantiles to divide the
+                           TimeSeries into.
+- column <code>string</code> - The field to return as the quantile
+- interp <code>string</code> - Specifies the interpolation method
+                           to use when the desired quantile lies between
+                           two data points. Options are:
+                           options are:
+                            * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+                            * lower: i.
+                            * higher: j.
+                            * nearest: i or j whichever is nearest.
+                            * midpoint: (i + j) / 2.
+
+<a name="TimeSeries+percentile"></a>
+
+### timeSeries.percentile(q, column, interp) ⇒ <code>number</code>
+Gets percentile q within the TimeSeries. This works the same way as numpy's percentile().
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>number</code> - The percentile  
+**Params**
+
+- q <code>integer</code> - The percentile (should be between 0 and 100)
+- column <code>string</code> <code> = &quot;value&quot;</code> - The field to return as the quantile
+- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
+                           to use when the desired quantile lies between
+                           two data points. Options are:
+                           options are:
+                            * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+                            * lower: i.
+                            * higher: j.
+                            * nearest: i or j whichever is nearest.
+                            * midpoint: (i + j) / 2.
 
 <a name="TimeSeries+aggregate"></a>
 

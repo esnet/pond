@@ -160,7 +160,7 @@ of collection data.
 
 * [Pipeline](#Pipeline)
     * [new Pipeline([arg])](#new_Pipeline_new)
-    * [.windowBy()](#Pipeline+windowBy) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.windowBy(w)](#Pipeline+windowBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.clearWindow()](#Pipeline+clearWindow) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.groupBy(k)](#Pipeline+groupBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.clearGroupBy()](#Pipeline+clearGroupBy) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -202,20 +202,41 @@ const p = Pipeline()...`
 ```
 <a name="Pipeline+windowBy"></a>
 
-### pipeline.windowBy() ⇒ <code>[Pipeline](#Pipeline)</code>
-Set the window, returning a new Pipeline. The argument here
-is an object with {type, duration}.
+### pipeline.windowBy(w) ⇒ <code>[Pipeline](#Pipeline)</code>
+Set the window, returning a new Pipeline. A new window will
+have a type and duration associated with it. Current available
+types are:
+  * fixed (e.g. every 5m)
+  * calendar based windows (e.g. every month)
 
-Window `w` may be:
- * A fixed interval: "fixed"
- * A calendar interval: "day", "month" or "year"
- * ...
+Windows are a type of grouping. Typically you'd define a window
+on the pipeline before doing an aggregation or some other operation
+on the resulting grouped collection. You can combine window-based
+grouping with key-grouping (see groupBy()).
 
-duration is of the form:
- * "30s" or "1d" etc (supports seconds (s), minutes (m), hours (h))
+There are several ways to define a window. The general format is
+an options object containing a `type` field and a `duration` field.
+
+Currently the only accepted type is `fixed`, but others are planned.
+For duration, this is a duration string, for example "30s" or "1d".
+Supported are: seconds (s), minutes (m), hours (h) and days (d).
+
+If no arg is supplied, the window type is set to 'global' and there
+is no duration.
+
+There is also a short-cut notation for a fixed window or a calendar
+window. Simply supplying the duration string ("30s" for example) will
+result in a `fixed` window type with the supplied duration.
+
+Calendar types are specified by simply specifying "daily", "monthly"
+or "yearly".
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
+**Params**
+
+- w <code>string</code> | <code>object</code> - Window or duration - See above
+
 <a name="Pipeline+clearWindow"></a>
 
 ### pipeline.clearWindow() ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -230,11 +251,12 @@ the all resulting events.
 <a name="Pipeline+groupBy"></a>
 
 ### pipeline.groupBy(k) ⇒ <code>[Pipeline](#Pipeline)</code>
-Sets a new groupBy expression. Returns a new Pipeline.
+Sets a new key grouping. Returns a new Pipeline.
 
 Grouping is a state set on the Pipeline. Operations downstream
 of the group specification will use that state. For example, an
-aggregation would occur over any grouping specified.
+aggregation would occur over any grouping specified. You can
+combine a key grouping with windowing (see windowBy()).
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
@@ -242,8 +264,8 @@ aggregation would occur over any grouping specified.
 
 - k <code>function</code> | <code>array</code> | <code>string</code> - The key to group by.
 You can groupBy using a function `(event) => return key`,
-a fieldSpec (a field name, or dot delimitted path to a field),
-or a array of fieldSpecs
+a field path (a field name, or dot delimitted path to a field),
+or a array of field paths.
 
 <a name="Pipeline+clearGroupBy"></a>
 

@@ -50,21 +50,21 @@ const sept2014Data = {
         [1409529600000, 80],
         [1409533200000, 88],
         [1409536800000, 52],
-        [1409540400000, 80],
-        [1409544000000, 26],
-        [1409547600000, 37],
-        [1409551200000, 6 ],
-        [1409554800000, 32],
+        [1409540400000, 80], // < 50
+        [1409544000000, 26], //1
+        [1409547600000, 37], //2
+        [1409551200000, 6 ], //3
+        [1409554800000, 32], //4
         [1409558400000, 69],
-        [1409562000000, 21],
-        [1409565600000, 6 ],
+        [1409562000000, 21], //5
+        [1409565600000, 6 ], //6
         [1409569200000, 54],
         [1409572800000, 88],
-        [1409576400000, 41],
-        [1409580000000, 35],
-        [1409583600000, 43],
+        [1409576400000, 41], //7
+        [1409580000000, 35], //8
+        [1409583600000, 43], //9
         [1409587200000, 84],
-        [1409590800000, 32],
+        [1409590800000, 32], //10  avg= (26 + 37 + 6 + 32 + 21 + 6 + 41 + 35 + 43 + 32)/10 = 27.9
         [1409594400000, 41],
         [1409598000000, 57],
         [1409601600000, 27],
@@ -814,8 +814,9 @@ describe("Pipeline", () => {
                     result = event;
                 }, true);
 
-            expect(result.timerange().toString()).to.equal("[1409547600000,1409594400000]");
-            expect(result.value()).to.equal(29.4);
+            expect(result.timerange().toString()).to.equal("[1409544000000,1409590800000]");
+            expect(result.value()).to.equal(27.9);
+            
             done();
         });
 
@@ -832,13 +833,12 @@ describe("Pipeline", () => {
                 }, true);
 
             expect(result.size()).to.equal(10);
-            expect(result.at(0).value()).to.equal(88);
-            expect(result.at(4).value()).to.equal(84);
-            expect(result.at(9).value()).to.equal(78);
+            expect(result.at(0).value()).to.equal(80);
+            expect(result.at(1).value()).to.equal(88);
+            expect(result.at(5).value()).to.equal(84);
             done();
         });
         
-       
         it("should be able to collect first 10 events over 65 and under 65", done => {
             let result = {};
             const timeseries = new TimeSeries(sept2014Data);
@@ -856,7 +856,7 @@ describe("Pipeline", () => {
             done();
         });
 
-        it("should be able to collect first 10 events, then split over 65 and under 65", done => {
+        it("should be able to take the first 10 events, then split over 65 and under 65 into two collections", done => {
             let result = {};
             const timeseries = new TimeSeries(sept2014Data);
 
@@ -868,12 +868,12 @@ describe("Pipeline", () => {
                     result[groupByKey] = collection;
                 }, true);
 
-            expect(result["high"].size()).to.equal(3);
-            expect(result["low"].size()).to.equal(7);
+            expect(result["high"].size()).to.equal(4);
+            expect(result["low"].size()).to.equal(6);
             done();
         });
 
-        it("should be able to count the split over 65 and under 65", done => {
+        it("should be able to count() the split over 65 and under 65", done => {
             let result = {};
             const timeseries = new TimeSeries(sept2014Data);
 
@@ -886,8 +886,8 @@ describe("Pipeline", () => {
                     result[groupByKey] = count
                 );
 
-            expect(result["high"]).to.equal(3);
-            expect(result["low"]).to.equal(7);
+            expect(result["high"]).to.equal(4);
+            expect(result["low"]).to.equal(6);
             done();
         });
 

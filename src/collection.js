@@ -287,6 +287,20 @@ class Collection extends BoundedIn {
         }));
     }
 
+    /**
+     * Sorts the Collection using the value referenced by
+     * the fieldSpec.
+     *
+     * @return {TimeRange} The extents of the TimeSeries
+     */
+    sort(fieldSpec) {
+        const fs = this._fieldSpecToArray(fieldSpec);
+        return this.setEvents(this._eventList.sortBy(event => {
+            const e = new this._type(event);
+            return e.get(fs);
+        }));
+    }
+
     //
     // Series range
     //
@@ -505,6 +519,112 @@ class Collection extends BoundedIn {
      */
     stdev(fieldSpec = "value") {
         return this.aggregate(stdev, fieldSpec);
+    }
+
+    /**
+     * Gets n quantiles within the Collection. This works the same way as numpy.
+     *
+     * @param  {integer} n        The number of quantiles to divide the
+     *                            Collection into.
+     * @param  {string} column    The field to return as the quantile
+     * @param  {string} interp    Specifies the interpolation method
+     *                            to use when the desired quantile lies between
+     *                            two data points. Options are:
+     *                            options are:
+     *                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+     *                             * lower: i.
+     *                             * higher: j.
+     *                             * nearest: i or j whichever is nearest.
+     *                             * midpoint: (i + j) / 2.
+     * @return {array}            An array of n quantiles
+     */
+    quantile(n, column = "value", interp = "linear") {
+        const results = [];
+        const sorted = this.sort(column);
+        const subsets = 1.0 / n;
+
+        if (n > this.length) {
+            throw new Error("Subset n is greater than the Collection length");
+        }
+
+        for (let i = subsets; i < 1; i += subsets) {
+            const index = Math.floor((sorted.size() - 1) * i);
+            if (index < sorted.size() - 1) {
+                const fraction = (sorted.size() - 1) * i - index;
+                const v0 = sorted.at(index).get(column);
+                const v1 = sorted.at(index + 1).get(column);
+                let v;
+
+                if (interp === "lower" || fraction === 0) {
+                    v = v0;
+                } else if (interp === "linear") {
+                    v = v0 + (v1 - v0) * fraction;
+                } else if (interp === "higher") {
+                    v = v1;
+                } else if (interp === "nearest") {
+                    v = fraction < 0.5 ? v0 : v1;
+                } else if (interp === "midpoint") {
+                    v = (v0 + v1) / 2;
+                }
+
+                results.push(v);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Gets percentile q within the Collection. This works the same way as numpy.
+     *
+     * @param  {integer} q        The percentile (should be between 0 and 100)
+     * @param  {string} column    The field to return as the quantile
+     * @param  {string} interp    Specifies the interpolation method
+     *                            to use when the desired quantile lies between
+     *                            two data points. Options are:
+     *                            options are:
+     *                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+     *                             * lower: i.
+     *                             * higher: j.
+     *                             * nearest: i or j whichever is nearest.
+     *                             * midpoint: (i + j) / 2.
+     * @return {number}            The percentile
+     */
+    percentile(q, column = "value", interp = "linear") {
+        let v;
+        const sorted = this.sort(column);
+
+        if (q < 0 || q > 100) {
+            throw new Error("Percentile q must be between 0 and 100");
+        }
+
+        const i = q / 100;
+        const index = Math.floor((sorted.size() - 1) * i);
+
+        if (sorted.size() === 1 || q === 0) {
+            return sorted.first(column);
+        }
+
+        if (q === 100) {
+            return sorted.last(column);
+        }
+
+        if (index < sorted.size() - 1) {
+            const fraction = (sorted.size() - 1) * i - index;
+            const v0 = sorted.at(index).get(column);
+            const v1 = sorted.at(index + 1).get(column);
+            if (interp === "lower" || fraction === 0) {
+                v = v0;
+            } else if (interp === "linear") {
+                v = v0 + (v1 - v0) * fraction;
+            } else if (interp === "higher") {
+                v = v1;
+            } else if (interp === "nearest") {
+                v = fraction < 0.5 ? v0 : v1;
+            } else if (interp === "midpoint") {
+                v = (v0 + v1) / 2;
+            }
+        }
+        return v;
     }
 
     /**

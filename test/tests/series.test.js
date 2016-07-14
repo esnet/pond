@@ -701,7 +701,7 @@ describe("TimeSeries", () => {
     });
 
     describe("TimeSeries statistics functions", () => {
-
+        /*
         it("can avg the series", done => {
             const series = new TimeSeries(statsData);
             expect(series.avg()).to.equal(15);
@@ -804,7 +804,111 @@ describe("TimeSeries", () => {
             expect(series.stdev("NASA_south.out")).to.equal(15.435349040433131);
             done();
         });
+        */
+        it("can find the quantiles of a TimeSeries", done => {
+            const series = new TimeSeries({
+                name: "Sensor values",
+                columns: ["time", "temperature"],
+                points: [
+                    [1400425951000, 22.3],
+                    [1400425952000, 32.4],
+                    [1400425953000, 12.1],
+                    [1400425955000, 76.8],
+                    [1400425956000, 87.3],
+                    [1400425957000, 54.6],
+                    [1400425958000, 45.5],
+                    [1400425959000, 87.9]
+                ]
+            });
 
+            expect(series.quantile(4, "temperature")).to.deep.equal([ 29.875,  50.05 ,  79.425]);
+            expect(series.quantile(4, "temperature", "linear")).to.deep.equal([ 29.875,  50.05 ,  79.425]);
+            expect(series.quantile(4, "temperature", "lower")).to.deep.equal([ 22.3,  45.5,  76.8]);
+            expect(series.quantile(4, "temperature", "higher")).to.deep.equal([ 32.4,  54.6,  87.3]);
+            expect(series.quantile(4, "temperature", "nearest")).to.deep.equal([ 32.4,  54.6,  76.8]);
+            expect(series.quantile(4, "temperature", "midpoint")).to.deep.equal([ 27.35,  50.05,  82.05]);
+
+            expect(series.quantile(1, "temperature", "linear")).to.deep.equal([]);
+
+            done();
+        });
+
+        it("can find the percentiles of a TimeSeries", done => {
+            const series = new TimeSeries({
+                name: "Sensor values",
+                columns: ["time", "temperature"],
+                points: [
+                    [1400425951000, 22.3],
+                    [1400425952000, 32.4],
+                    [1400425953000, 12.1],
+                    [1400425955000, 76.8],
+                    [1400425956000, 87.3],
+                    [1400425957000, 54.6],
+                    [1400425958000, 45.5],
+                    [1400425959000, 87.9]
+                ]
+            });
+
+            expect(series.percentile(50, "temperature")).to.equal(50.05);
+            expect(series.percentile(95, "temperature")).closeTo(87.690, 0.001);
+            expect(series.percentile(99, "temperature")).closeTo(87.858, 0.001);
+
+            expect(series.percentile(99, "temperature", "lower")).equal(87.3);
+            expect(series.percentile(99, "temperature", "higher")).equal(87.9);
+            expect(series.percentile(99, "temperature", "nearest")).equal(87.9);
+            expect(series.percentile(99, "temperature", "midpoint")).equal(87.6);
+
+            expect(series.percentile(0, "temperature")).equal(12.1);
+            expect(series.percentile(100, "temperature")).equal(87.9);
+
+            done();
+        });
+
+        it("can find the percentiles of an empty TimeSeries", done => {
+            const series = new TimeSeries({
+                name: "Sensor values",
+                columns: ["time", "temperature"],
+                points: []
+            });
+
+            expect(series.percentile(0, "temperature")).to.be.undefined;
+            expect(series.percentile(100, "temperature")).to.be.undefined;
+
+            done();
+        });
+
+        it("can find the percentiles of a TimeSeries with one point", done => {
+            const series = new TimeSeries({
+                name: "Sensor values",
+                columns: ["time", "temperature"],
+                points: [
+                    [1400425951000, 22.3]
+                ]
+            });
+
+            expect(series.percentile(0, "temperature")).equal(22.3);
+            expect(series.percentile(50, "temperature")).equal(22.3);
+            expect(series.percentile(100, "temperature")).equal(22.3);
+
+            done();
+        });
+
+        it("can find the percentiles of a TimeSeries with two points", done => {
+            const series = new TimeSeries({
+                name: "Sensor values",
+                columns: ["time", "temperature"],
+                points: [
+                    [1400425951000, 4],
+                    [1400425952000, 5]
+                ]
+            });
+
+            expect(series.percentile(0, "temperature")).equal(4);
+            expect(series.percentile(50, "temperature")).equal(4.5);
+            expect(series.percentile(100, "temperature")).equal(5);
+
+            done();
+        });
     });
 
     describe("TimeSeries bisect function", () => {
