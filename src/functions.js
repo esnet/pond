@@ -10,94 +10,260 @@
 
 import _ from "underscore";
 
-export function keep(values) {
-    let result = first(values);
-    values.forEach(v => {
-        if (!_.isNull(v) && !_.isUndefined(v) && v !== result) {
-            return null;
-        }
-    });
-    return result;
+function isValid(v) {
+    return !(_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
 }
 
-export function sum(values) {
-    return _.reduce(values, (a, b) => a + b, 0);
-}
+//
+// Functions to process missing values out of a value list
+//
 
-export function avg(values) {
-    const sum = _.reduce(values, (a, b) => { return a + b; }, 0);
-    return sum / values.length;
-}
 
-export function max(values) {
-    const max = _.max(values);
-    if (_.isFinite(max)) {
-        return max;
-    }
-}
+const keepMissing = (values) => values;
+const ignoreMissing = values => values.filter(isValid);
+const zeroMissing = values => values.map(v => isValid(v) ? v : 0);
+const propagateMissing = values => ignoreMissing(values).length === values.length ? values : null;
 
-export function min(values) {
-    const min = _.min(values);
-    if (_.isFinite(min)) {
-        return min;
-    }
-}
+export const cleaners = {
+    keepMissing,
+    ignoreMissing,
+    zeroMissing,
+    propagateMissing
+};
 
-export function count(values) {
-    return values.length;
-}
-
-export function first(values) {
-    return values.length ? values[0] : undefined;
-}
-
-export function last(values) {
-    return values.length ? values[values.length - 1] : undefined;
-}
-
-export function difference(values) {
-    return _.max(values) - _.min(values);
-}
-
-export function median(values) {
-    const sorted = values.sort();
-    const i = Math.floor(sorted.length / 2);
-    if (sorted.length % 2 === 0) {
-        const a = sorted[i];
-        const b = sorted[i - 1];
-        return (a + b) / 2;
-    } else {
-        return sorted[i];
-    }
-}
-
-export function stdev(values) {
-    let sums = 0;
-    const mean = avg(values);
-    values.forEach(v => sums += Math.pow(v - mean, 2));
-    return Math.sqrt(sums / values.length);
+/**
+ * Like first() except it will return null if not all the values are
+ * the same. This can be used to transfer a value when doing aggregation.
+ * For instance you might group by the 'type', then avg the 'value', but
+ * you want to results to include the type. So you would 'keep' the type
+ * and 'avg' the value.
+ */
+export function keep(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        let result = first()(cleanValues);
+        cleanValues.forEach(v => {
+            if (v !== result) {
+                return null;
+            }
+        });
+        return result;
+    };
 }
 
 /**
- * Returns a function that gets percentile q within the a values list.
+ * Returns a sum function.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the sum calculation. Other possibilities are:
+ *     `propergateMissing` - which will cause the min itself to
+ *     be null if the values contain a missing value
+ *     `zeroMissing` - will replace missing values with a zero
+ */
+export function sum(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        return _.reduce(cleanValues, (a, b) => a + b, 0);
+    };
+}
+
+/**
+ * Returns a avg function.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the average calculation. Other possibilities are:
+ *     `propergateMissing` - which will cause the avg itself to
+ *     be null if the values contain a missing value
+ *     `zeroMissing` - will replace missing values with a zero
+ */
+export function avg(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        const sum = _.reduce(cleanValues, (a, b) => { return a + b; }, 0);
+        return sum / cleanValues.length;
+    };
+}
+
+/**
+ * Return a max function.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the maximum search. Other possibilities are:
+ *     `propergateMissing` - which will cause the max itself to
+ *     be null if the values contain a missing value
+ *     `zeroMissing` - will replace missing values with a zero
+ */
+export function max(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        const max = _.max(cleanValues);
+        if (_.isFinite(max)) {
+            return max;
+        }
+    };
+}
+
+/**
+ * Return a min function.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the minimum search. Other possibilities are:
+ *     `propergateMissing` - which will cause the min itself to
+ *     be null if the values contain a missing value
+ *     `zeroMissing` - will replace missing values with a zero
+ */
+export function min(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        const min = _.min(cleanValues);
+        if (_.isFinite(min)) {
+            return min;
+        }
+    };
+}
+
+/**
+ * Returns a count() function.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the count. Other possibilities are:
+ *     `propergateMissing` - which will cause the count itself to
+ *     be null if the values contain a missing value
+ */
+export function count(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        return cleanValues.length;
+    };
+}
+
+/**
+ * Returns a first() function, i.e. a function that returns the first
+ * value in the supplied values list.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the list, i.e to find the first non-missing value. Other
+ * possibilities are:
+ *     `keepMissing` - to return the first value, regardless of if
+ *     it is a missing value or not.
+ */
+export function first(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        return cleanValues.length ? cleanValues[0] : undefined;
+    };
+}
+
+/**
+ * Returns a last() function, i.e. a function that returns the list
+ * value in the supplied values list.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the list, i.e to find the last non-missing value. Other
+ * possibilities are:
+ *     `keepMissing` - to return the last value, regardless of if
+ *     it is a missing value or not.
+ */
+export function last(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        return cleanValues.length ?
+            cleanValues[cleanValues.length - 1] : undefined;
+    };
+}
+
+/**
+ * Returns a difference() function, i.e. a function that returns
+ * the difference between the min and max values.
+ *
+ * Optionally you can specify the method by which unclean values
+ * are treated. The default is to exclude missing values from
+ * the list, i.e to find the last non-missing value. Other
+ * possibilities are:
+ *     `propergateMissing` - which will cause the min itself to
+ *     be null if the values contain a missing value
+ *     `zeroMissing` - will replace missing values with a zero
+ */
+export function difference(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        return _.max(cleanValues) - _.min(cleanValues);
+    };
+}
+
+export function median(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        const sorted = cleanValues.sort();
+        const i = Math.floor(sorted.length / 2);
+        if (sorted.length % 2 === 0) {
+            const a = sorted[i];
+            const b = sorted[i - 1];
+            return (a + b) / 2;
+        } else {
+            return sorted[i];
+        }
+    };
+}
+
+
+export function stdev(clean = cleaners.ignoreMissing) {
+    return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+        let sums = 0;
+        const mean = avg(clean)(cleanValues);
+        cleanValues.forEach(v => sums += Math.pow(v - mean, 2));
+        return Math.sqrt(sums / values.length);
+    };
+}
+
+/**
+ * Returns a percentile function within the a values list.
  *
  * @param  {object}  options  The parameters controlling the function:
  *                             * q        The percentile (should be between 0 and 100)
- *                             * interp    Specifies the interpolation method
- *                                         to use when the desired quantile lies between
- *                                         two data points. Options are:
+ *                             * interp   Specifies the interpolation method
+ *                                        to use when the desired quantile lies between
+ *                                        two data points. Options are:
  *                                          * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
  *                                          * lower: i.
  *                                          * higher: j.
  *                                          * nearest: i or j whichever is nearest.
  *                                          * midpoint: (i + j) / 2.
+ *                             * clean    Strategy to use when encountering missing data:
+ *                                          * `propergateMissing` - which will cause the min
+ *                                             itself to be null if the values contain a
+ *                                             missing value
+ *                                          * `zeroMissing` - will replace missing values
+ *                                             with a zero
  * @return {number}            The percentile
  */
-export function percentile(q, interp = "linear") {
+export function percentile(q, interp = "linear", clean = cleaners.ignoreMissing) {
     return function (values) {
+        const cleanValues = clean(values);
+        if (!cleanValues) return null;
+
         let v;
 
-        const sorted = values.slice().sort();
+        const sorted = cleanValues.slice().sort();
         const size = sorted.length;
 
         if (q < 0 || q > 100) {

@@ -409,12 +409,20 @@ class Pipeline {
      * aggregation would occur over any grouping specified. You can
      * combine a key grouping with windowing (see windowBy()).
      *
-     * @param {function|array|string} k The key to group by.
-     * You can groupBy using a function `(event) => return key`,
-     * a field path (a field name, or dot delimitted path to a field),
-     * or a array of field paths.
+     * Note: the key, if it is a field path, is not a list of multiple
+     * columns, it is the path to a single column to pull group by keys
+     * from. For example, a column called 'status' that contains the
+     * values 'OK' and 'FAIL' - then the key would be 'status' and two
+     * collections OK and FAIL will be generated.
      *
-     * @return {Pipeline} The Pipeline
+     * @param {function|array|string}   k   The key to group by.
+     *                                      You can groupBy using a function
+     *                                      `(event) => return key`,
+     *                                      a field path (a field name, or dot
+     *                                      delimitted path to a field),
+     *                                      or a array of field paths.
+     *
+     * @return {Pipeline}                   The Pipeline
      */
     groupBy(k) {
         let grp;
@@ -496,24 +504,39 @@ class Pipeline {
      * Pipelines can be chained together since a source may be another
      * Pipeline.
      *
-     * @param {BoundedIn|UnboundedIn|Pipeline} src The source for the
-     *                                             Pipeline, or another
-     *                                             Pipeline.
+     * @param {BoundedIn|UnboundedIn} src The source for the Pipeline
      * @return {Pipeline} The Pipeline
      */
     from(src) {
-        if (src instanceof Pipeline) {
-            const pipelineIn = src.in();
-            return this._setIn(pipelineIn);
-        } else {
-            return this._setIn(src);
-        }
+        return this._setIn(src);
     }
 
+    /**
+     * Directly return the results from the processor rather than
+     * feeding to a callback. This breaks the chain, causing a result to
+     * be returned (the array of events) rather than a reference to the
+     * Pipeline itself. This function is only available for sync batch
+     * processing.
+     *
+     * @return {array|map}     Returns the _results attribute from a Pipeline
+     *                         object after processing. Will contain Collection
+     *                         objects.
+     */
     toEventList() {
         return this.to(EventOut);
     }
 
+    /**
+     * Directly return the results from the processor rather than
+     * passing a callback in. This breaks the chain, causing a result to
+     * be returned (the collections) rather than a reference to the
+     * Pipeline itself. This function is only available for sync batch
+     * processing.
+     *
+     * @return {array|map}     Returns the _results attribute from a Pipeline
+     *                         object after processing. Will contain Collection
+     *                         objects.
+     */
     toKeyedCollections() {
         return this.to(CollectionOut);
     }
@@ -722,7 +745,11 @@ class Pipeline {
     /**
      * Select a subset of columns
      *
-     * @param {array|String} fieldSpec The columns to include in the output
+     * @param {string|array} fieldSpec  Column or columns to look up. If you need
+     *                                  to retrieve multiple deep nested values that
+     *                                  ['can.be', 'done.with', 'this.notation'].
+     *                                  A single deep value with a string.like.this.
+     *                                  If not supplied, the 'value' column will be used.
      *
      * @return {Pipeline} The Pipeline
      */
@@ -751,16 +778,19 @@ class Pipeline {
      *           ...
      *      }, true);
      * ```
-     * @param {array|String} fieldSpec The columns to collapse into the output
-     * @param {string}       name      The resulting output column's name
-     * @param {function}     reducer   Function to use to do the reduction
-     * @param {boolean}      append    Add the new column to the existing ones, or replace them.
+     * @param {string|array} fieldSpecList  Column or columns to collapse. If you need
+     *                                      to retrieve multiple deep nested values that
+     *                                      ['can.be', 'done.with', 'this.notation'].
+     * @param {string}       name       The resulting output column's name
+     * @param {function}     reducer    Function to use to do the reduction
+     * @param {boolean}      append     Add the new column to the existing ones,
+     *                                  or replace them.
      *
-     * @return {Pipeline}              The Pipeline
+     * @return {Pipeline}               The Pipeline
      */
-    collapse(fieldSpec, name, reducer, append) {
+    collapse(fieldSpecList, name, reducer, append) {
         const p = new Collapser(this, {
-            fieldSpec,
+            fieldSpecList,
             name,
             reducer,
             append,

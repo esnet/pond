@@ -90,17 +90,18 @@ to fetch the whole data object, which will be an Immutable Map.
         * [.end()](#Event+end)
         * [.data()](#Event+data)
         * [.setData()](#Event+setData)
-        * [.get()](#Event+get)
-        * [.value()](#Event+value)
+        * [.get(fieldPath)](#Event+get) ⇒
+        * [.value(fieldPath)](#Event+value) ⇒
+        * [.stringify()](#Event+stringify) ⇒ <code>string</code>
         * [.collapse()](#Event+collapse)
     * _static_
-        * [.isValidValue()](#Event.isValidValue)
+        * [.isValidValue(event, The)](#Event.isValidValue)
         * [.selector()](#Event.selector)
-        * [.combine()](#Event.combine)
-        * [.sum()](#Event.sum)
-        * [.avg()](#Event.avg)
-        * [.map()](#Event.map)
-        * [.reduce()](#Event.reduce)
+        * [.combine(events, fieldSpec, reducer)](#Event.combine)
+        * [.sum(events, fieldSpec)](#Event.sum)
+        * [.avg(events, fieldSpec)](#Event.avg)
+        * [.map(fieldSpec)](#Event.map)
+        * [.reduce(mapped, reducer)](#Event.reduce)
 
 <a name="new_Event_new"></a>
 
@@ -184,18 +185,39 @@ Sets the data portion of the event and returns a new Event.
 **Kind**: instance method of <code>[Event](#Event)</code>  
 <a name="Event+get"></a>
 
-### event.get()
+### event.get(fieldPath) ⇒
 Get specific data out of the Event. The data will be converted
-to a js object. You can use a fieldSpec to address deep data.
-A fieldSpec could be "a.b"
+to a js object. You can use a fieldPath to address deep data.
 
 **Kind**: instance method of <code>[Event](#Event)</code>  
+**Returns**: The value of the field  
+**Params**
+
+- fieldPath <code>Array</code> - Name of value to look up. If not provided,
+                             defaults to ['value']. "Deep" syntax is
+                             ['deep', 'value'] or 'deep.value.'
+
 <a name="Event+value"></a>
 
-### event.value()
-Alias for get()
+### event.value(fieldPath) ⇒
+Get specific data out of the Event. Alias for get(). The data will
+be converted to a js object. You can use a fieldPath to address deep data.
 
 **Kind**: instance method of <code>[Event](#Event)</code>  
+**Returns**: The value of the field  
+**Params**
+
+- fieldPath <code>Array</code> - Name of value to look up. If not provided,
+                             defaults to ['value']. "Deep" syntax is
+                             ['deep', 'value'] or 'deep.value.'
+
+<a name="Event+stringify"></a>
+
+### event.stringify() ⇒ <code>string</code>
+Turn the Collection data into a string
+
+**Kind**: instance method of <code>[Event](#Event)</code>  
+**Returns**: <code>string</code> - The collection as a string  
 <a name="Event+collapse"></a>
 
 ### event.collapse()
@@ -207,18 +229,23 @@ existing columns, or replace them (the default).
 **Kind**: instance method of <code>[Event](#Event)</code>  
 <a name="Event.isValidValue"></a>
 
-### Event.isValidValue()
+### Event.isValidValue(event, The)
 The same as Event.value() only it will return false if the
 value is either undefined, NaN or Null.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
+**Params**
+
+- event <code>[Event](#Event)</code> - The Event to check
+- The <code>string</code> | <code>array</code> - field to check
+
 <a name="Event.selector"></a>
 
 ### Event.selector()
 Function to select specific fields of an event using
-a fieldSpec and return a new event with just those fields.
+a fieldPath and return a new event with just those fields.
 
-The fieldSpec currently can be:
+The fieldPath currently can be:
  * A single field name
  * An array of field names
 
@@ -227,50 +254,100 @@ The function returns a new event.
 **Kind**: static method of <code>[Event](#Event)</code>  
 <a name="Event.combine"></a>
 
-### Event.combine()
+### Event.combine(events, fieldSpec, reducer)
 Combines multiple events with the same time together
 to form a new event. Doesn't currently work on IndexedEvents
 or TimeRangeEvents.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
+**Params**
+
+- events <code>array</code> - Array of event objects
+- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you need
+                                 to retrieve multiple deep nested values that
+                                 ['can.be', 'done.with', 'this.notation'].
+                                 A single deep value with a string.like.this.
+                                 If not supplied, all columns will be operated on.
+- reducer <code>function</code> - Reducer function to apply to column data.
+
 <a name="Event.sum"></a>
 
-### Event.sum()
-Sum takes multiple events of the same time and uses
-combine() to add them together
+### Event.sum(events, fieldSpec)
+Sum takes multiple events, groups them by timestamp, and uses combine()
+to add them together. If the events do not have the same timestamp an
+exception will be thrown.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
+**Params**
+
+- events <code>array</code> - Array of event objects
+- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you need
+                                 to retrieve multiple deep nested values that
+                                 ['can.be', 'done.with', 'this.notation'].
+                                 A single deep value with a string.like.this.
+                                 If not supplied, all columns will be operated on.
+
 <a name="Event.avg"></a>
 
-### Event.avg()
-Avg takes multiple events of the same time and uses
-combine() to avg them
+### Event.avg(events, fieldSpec)
+Sum takes multiple events, groups them by timestamp, and uses combine()
+to average them. If the events do not have the same timestamp an
+exception will be thrown.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
+**Params**
+
+- events <code>array</code> - Array of event objects
+- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you need
+                                 to retrieve multiple deep nested values that
+                                 ['can.be', 'done.with', 'this.notation'].
+                                 A single deep value with a string.like.this.
+                                 If not supplied, all columns will be operated on.
+
 <a name="Event.map"></a>
 
-### Event.map()
+### Event.map(fieldSpec)
 Maps a list of events according to the fieldSpec
 passed in. The spec maybe a single field name, a
 list of field names, or a function that takes an
 event and returns a key/value pair.
 
-Example 1:
+**Kind**: static method of <code>[Event](#Event)</code>  
+**Params**
+
+- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you need
+                                 to retrieve multiple deep nested values that
+                                 ['can.be', 'done.with', 'this.notation'].
+                                 A single deep value with a string.like.this.
+                                 If not supplied, all columns will be operated on.
+                                 If field_spec is a function, the function should
+                                 return a map. The keys will be come the
+                                 "column names" that will be used in the map that
+                                 is returned.
+
+**Example**  
+````
         in   out
  3am    1    2
  4am    3    4
 
 Mapper result:  { in: [1, 3], out: [2, 4]}
-
-**Kind**: static method of <code>[Event](#Event)</code>  
+```
 <a name="Event.reduce"></a>
 
-### Event.reduce()
+### Event.reduce(mapped, reducer)
 Takes a list of events and a reducer function and returns
 a new Event with the result, for each column. The reducer is
 of the form:
+```
     function sum(valueList) {
         return calcValue;
     }
+```
 
 **Kind**: static method of <code>[Event](#Event)</code>  
+**Params**
+
+- mapped <code>map</code> - A map, as produced from map()
+- reducer <code>function</code> - The reducer function
+

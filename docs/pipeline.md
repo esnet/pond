@@ -178,6 +178,8 @@ of collection data.
     * [.clearGroupBy()](#Pipeline+clearGroupBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.emitOn(trigger)](#Pipeline+emitOn) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.from(src)](#Pipeline+from) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.toEventList()](#Pipeline+toEventList) ⇒ <code>array</code> &#124; <code>map</code>
+    * [.toKeyedCollections()](#Pipeline+toKeyedCollections) ⇒ <code>array</code> &#124; <code>map</code>
     * [.to()](#Pipeline+to) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.count(observer, force)](#Pipeline+count) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.offsetBy(by, fieldSpec)](#Pipeline+offsetBy) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -186,7 +188,7 @@ of collection data.
     * [.map(op)](#Pipeline+map) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.select(fieldSpec)](#Pipeline+select) ⇒ <code>[Pipeline](#Pipeline)</code>
-    * [.collapse(fieldSpec, name, reducer, append)](#Pipeline+collapse) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.collapse(fieldSpecList, name, reducer, append)](#Pipeline+collapse) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.take(limit)](#Pipeline+take) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asTimeRangeEvents(options)](#Pipeline+asTimeRangeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asIndexedEvents(options)](#Pipeline+asIndexedEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -270,14 +272,22 @@ of the group specification will use that state. For example, an
 aggregation would occur over any grouping specified. You can
 combine a key grouping with windowing (see windowBy()).
 
+Note: the key, if it is a field path, is not a list of multiple
+columns, it is the path to a single column to pull group by keys
+from. For example, a column called 'status' that contains the
+values 'OK' and 'FAIL' - then the key would be 'status' and two
+collections OK and FAIL will be generated.
+
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 **Params**
 
 - k <code>function</code> | <code>array</code> | <code>string</code> - The key to group by.
-You can groupBy using a function `(event) => return key`,
-a field path (a field name, or dot delimitted path to a field),
-or a array of field paths.
+                                     You can groupBy using a function
+                                     `(event) => return key`,
+                                     a field path (a field name, or dot
+                                     delimitted path to a field),
+                                     or a array of field paths.
 
 <a name="Pipeline+clearGroupBy"></a>
 
@@ -332,10 +342,34 @@ Pipeline.
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 **Params**
 
-- src <code>BoundedIn</code> | <code>UnboundedIn</code> | <code>[Pipeline](#Pipeline)</code> - The source for the
-                                            Pipeline, or another
-                                            Pipeline.
+- src <code>BoundedIn</code> | <code>UnboundedIn</code> - The source for the Pipeline
 
+<a name="Pipeline+toEventList"></a>
+
+### pipeline.toEventList() ⇒ <code>array</code> &#124; <code>map</code>
+Directly return the results from the processor rather than
+feeding to a callback. This breaks the chain, causing a result to
+be returned (the array of events) rather than a reference to the
+Pipeline itself. This function is only available for sync batch
+processing.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>array</code> &#124; <code>map</code> - Returns the _results attribute from a Pipeline
+                        object after processing. Will contain Collection
+                        objects.  
+<a name="Pipeline+toKeyedCollections"></a>
+
+### pipeline.toKeyedCollections() ⇒ <code>array</code> &#124; <code>map</code>
+Directly return the results from the processor rather than
+passing a callback in. This breaks the chain, causing a result to
+be returned (the collections) rather than a reference to the
+Pipeline itself. This function is only available for sync batch
+processing.
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>array</code> &#124; <code>map</code> - Returns the _results attribute from a Pipeline
+                        object after processing. Will contain Collection
+                        objects.  
 <a name="Pipeline+to"></a>
 
 ### pipeline.to() ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -475,21 +509,28 @@ Select a subset of columns
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 **Params**
 
-- fieldSpec <code>array</code> | <code>String</code> - The columns to include in the output
+- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you need
+                                 to retrieve multiple deep nested values that
+                                 ['can.be', 'done.with', 'this.notation'].
+                                 A single deep value with a string.like.this.
+                                 If not supplied, the 'value' column will be used.
 
 <a name="Pipeline+collapse"></a>
 
-### pipeline.collapse(fieldSpec, name, reducer, append) ⇒ <code>[Pipeline](#Pipeline)</code>
+### pipeline.collapse(fieldSpecList, name, reducer, append) ⇒ <code>[Pipeline](#Pipeline)</code>
 Collapse a subset of columns using a reducer function
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 **Params**
 
-- fieldSpec <code>array</code> | <code>String</code> - The columns to collapse into the output
+- fieldSpecList <code>string</code> | <code>array</code> - Column or columns to collapse. If you need
+                                     to retrieve multiple deep nested values that
+                                     ['can.be', 'done.with', 'this.notation'].
 - name <code>string</code> - The resulting output column's name
 - reducer <code>function</code> - Function to use to do the reduction
-- append <code>boolean</code> - Add the new column to the existing ones, or replace them.
+- append <code>boolean</code> - Add the new column to the existing ones,
+                                 or replace them.
 
 **Example**  
 ```

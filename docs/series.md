@@ -116,7 +116,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.bisect(t, b)](#TimeSeries+bisect) ⇒ <code>number</code>
         * [.slice(begin, end)](#TimeSeries+slice) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.crop(timerange)](#TimeSeries+crop) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.clean(fieldSpec)](#TimeSeries+clean) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.clean(fieldPath)](#TimeSeries+clean) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.events()](#TimeSeries+events)
         * [.name()](#TimeSeries+name) ⇒ <code>string</code>
         * [.index()](#TimeSeries+index) ⇒ <code>Index</code>
@@ -130,19 +130,24 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.sizeValid()](#TimeSeries+sizeValid) ⇒ <code>number</code>
         * [.count()](#TimeSeries+count) ⇒ <code>number</code>
         * [.sum(fieldSpec)](#TimeSeries+sum) ⇒ <code>number</code>
+        * [.max(fieldSpec)](#TimeSeries+max) ⇒ <code>number</code>
+        * [.min(fieldSpec)](#TimeSeries+min) ⇒ <code>number</code>
         * [.avg(fieldSpec)](#TimeSeries+avg) ⇒ <code>number</code>
         * [.mean(fieldSpec)](#TimeSeries+mean) ⇒ <code>number</code>
         * [.median(fieldSpec)](#TimeSeries+median) ⇒ <code>number</code>
         * [.stdev(fieldSpec)](#TimeSeries+stdev) ⇒ <code>number</code>
-        * [.quantile(n, column, interp)](#TimeSeries+quantile) ⇒ <code>array</code>
-        * [.percentile(q, column, interp)](#TimeSeries+percentile) ⇒ <code>number</code>
+        * [.percentile(q, fieldSpec, interp)](#TimeSeries+percentile) ⇒ <code>number</code>
         * [.aggregate(func, fieldSpec)](#TimeSeries+aggregate) ⇒ <code>number</code>
+        * [.quantile(n, column, interp)](#TimeSeries+quantile) ⇒ <code>array</code>
         * [.pipeline()](#TimeSeries+pipeline) ⇒ <code>Pipeline</code>
-        * [.map(operator)](#TimeSeries+map) ⇒ <code>Collection</code>
-        * [.select()](#TimeSeries+select) ⇒ <code>Collection</code>
-        * [.collapse(fieldSpec, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>Collection</code>
+        * [.map(operator)](#TimeSeries+map) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.select(fieldSpec)](#TimeSeries+select) ⇒ <code>Collection</code>
+        * [.collapse(fieldSpecList, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.fixedWindowRollup(windowSize, aggregation)](#TimeSeries+fixedWindowRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.hourlyRollup(windowSize, aggregation)](#TimeSeries+hourlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.hourlyRollup(toEvents, aggregation)](#TimeSeries+hourlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.dailyRollup(toEvents, aggregation)](#TimeSeries+dailyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.monthlyRollup(toEvents, aggregation)](#TimeSeries+monthlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.yearlyRollup(toEvents, aggregation)](#TimeSeries+yearlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.collectByFixedWindow(windowSize)](#TimeSeries+collectByFixedWindow) ⇒ <code>map</code>
     * _static_
         * [.equal(series1, series2)](#TimeSeries.equal) ⇒ <code>bool</code>
@@ -279,17 +284,19 @@ return a new TimeSeries.
 
 <a name="TimeSeries+clean"></a>
 
-### timeSeries.clean(fieldSpec) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-Returns a new Collection by testing the fieldSpec
+### timeSeries.clean(fieldPath) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Returns a new TimeSeries by testing the fieldPath
 values for being valid (not NaN, null or undefined).
 
-The resulting TimeSeries will be clean (for that fieldSpec).
+The resulting TimeSeries will be clean (for that fieldPath).
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - A new, modified, TimeSeries.  
 **Params**
 
-- fieldSpec <code>string</code> - The field to test
+- fieldPath <code>string</code> - Name of value to look up. If not supplied,
+                                 defaults to ['value']. "Deep" syntax is
+                                 ['deep', 'value'] or 'deep.value'
 
 <a name="TimeSeries+events"></a>
 
@@ -408,7 +415,44 @@ Returns the sum for the fieldspec
 **Returns**: <code>number</code> - The sum  
 **Params**
 
-- fieldSpec <code>string</code> - The field to sum over the TimeSeries
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
+
+<a name="TimeSeries+max"></a>
+
+### timeSeries.max(fieldSpec) ⇒ <code>number</code>
+Aggregates the events down to their maximum value
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>number</code> - The max value for the field  
+**Params**
+
+- fieldSpec <code>string</code> - Column or columns to find the max. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
+
+<a name="TimeSeries+min"></a>
+
+### timeSeries.min(fieldSpec) ⇒ <code>number</code>
+Aggregates the events down to their minimum value
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>number</code> - The min value for the field  
+**Params**
+
+- fieldSpec <code>string</code> - Column or columns to find the min. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="TimeSeries+avg"></a>
 
@@ -419,7 +463,12 @@ Aggregates the events in the TimeSeries down to their average
 **Returns**: <code>number</code> - The average  
 **Params**
 
-- fieldSpec <code>String</code> - The field to average over in the TimeSeries
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="TimeSeries+mean"></a>
 
@@ -430,7 +479,12 @@ Aggregates the events in the TimeSeries down to their mean (same as avg)
 **Returns**: <code>number</code> - The mean  
 **Params**
 
-- fieldSpec <code>String</code> - The field to find the mean of within the collection
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="TimeSeries+median"></a>
 
@@ -441,7 +495,12 @@ Aggregates the events down to their medium value
 **Returns**: <code>number</code> - The resulting median value  
 **Params**
 
-- fieldSpec <code>String</code> - The field to aggregate over
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="TimeSeries+stdev"></a>
 
@@ -452,6 +511,52 @@ Aggregates the events down to their stdev
 **Returns**: <code>number</code> - The resulting stdev value  
 **Params**
 
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
+
+<a name="TimeSeries+percentile"></a>
+
+### timeSeries.percentile(q, fieldSpec, interp) ⇒ <code>number</code>
+Gets percentile q within the TimeSeries. This works the same way as numpy.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>number</code> - The percentile  
+**Params**
+
+- q <code>integer</code> - The percentile (should be between 0 and 100)
+- fieldSpec <code>string</code> - Column or columns to find the stdev. If you
+                            need to retrieve multiple deep
+                            nested values that ['can.be', 'done.with',
+                            'this.notation']. A single deep value with a
+                            string.like.this.  If not supplied, all columns
+                            will be aggregated.
+- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
+                            to use when the desired quantile lies between
+                            two data points. Options are:
+                            options are:
+                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+                             * lower: i.
+                             * higher: j.
+                             * nearest: i or j whichever is nearest.
+                             * midpoint: (i + j) / 2.
+
+<a name="TimeSeries+aggregate"></a>
+
+### timeSeries.aggregate(func, fieldSpec) ⇒ <code>number</code>
+Aggregates the events down using a user defined function to
+do the reduction.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>number</code> - The resulting value  
+**Params**
+
+- func <code>function</code> - User defined reduction function. Will be
+                           passed a list of values. Should return a
+                           singe value.
 - fieldSpec <code>String</code> - The field to aggregate over
 
 <a name="TimeSeries+quantile"></a>
@@ -477,42 +582,6 @@ For example `timeseries.quantile(4)` would be the same as using percentile with 
                             * nearest: i or j whichever is nearest.
                             * midpoint: (i + j) / 2.
 
-<a name="TimeSeries+percentile"></a>
-
-### timeSeries.percentile(q, column, interp) ⇒ <code>number</code>
-Gets percentile q within the TimeSeries. This works the same way as numpy's percentile().
-
-**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>number</code> - The percentile  
-**Params**
-
-- q <code>integer</code> - The percentile (should be between 0 and 100)
-- column <code>string</code> <code> = &quot;value&quot;</code> - The field to return as the quantile
-- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
-                           to use when the desired quantile lies between
-                           two data points. Options are:
-                           options are:
-                            * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
-                            * lower: i.
-                            * higher: j.
-                            * nearest: i or j whichever is nearest.
-                            * midpoint: (i + j) / 2.
-
-<a name="TimeSeries+aggregate"></a>
-
-### timeSeries.aggregate(func, fieldSpec) ⇒ <code>number</code>
-Aggregates the events down using a user defined function to
-do the reduction.
-
-**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>number</code> - The resulting value  
-**Params**
-
-- func <code>function</code> - User defined reduction function. Will be
-                           passed a list of values. Should return a
-                           singe value.
-- fieldSpec <code>String</code> - The field to aggregate over
-
 <a name="TimeSeries+pipeline"></a>
 
 ### timeSeries.pipeline() ⇒ <code>Pipeline</code>
@@ -532,28 +601,37 @@ timeseries.pipeline()
 ```
 <a name="TimeSeries+map"></a>
 
-### timeSeries.map(operator) ⇒ <code>Collection</code>
+### timeSeries.map(operator) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Takes an operator that is used to remap events from this TimeSeries to
 a new set of Events.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>Collection</code> - A Collection containing the remapped events  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - A TimeSeries containing the remapped events  
 **Params**
 
-- operator <code>function</code> - An operator which will be passed each event and
-                                   which should return a new event.
+- operator <code>function</code> - An operator which will be passed each
+                                   event and which should return a new event.
 
 <a name="TimeSeries+select"></a>
 
-### timeSeries.select() ⇒ <code>Collection</code>
+### timeSeries.select(fieldSpec) ⇒ <code>Collection</code>
 Takes a fieldSpec (list of column names) and outputs to the callback just those
 columns in a new TimeSeries.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>Collection</code> - A collection containing only the selected fields  
+**Params**
+
+- fieldSpec <code>string</code> - Column or columns to find the stdev. If you
+                            need to retrieve multiple deep
+                            nested values that ['can.be', 'done.with',
+                            'this.notation']. A single deep value with a
+                            string.like.this.  If not supplied, all columns
+                            will be aggregated.
+
 <a name="TimeSeries+collapse"></a>
 
-### timeSeries.collapse(fieldSpec, name, reducer, append) ⇒ <code>Collection</code>
+### timeSeries.collapse(fieldSpecList, name, reducer, append) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Takes a fieldSpec (list of column names) and collapses
 them to a new column named `name` which is the reduction (using
 the `reducer` function) of the matched columns in the fieldSpecList.
@@ -564,10 +642,12 @@ using the `append` boolean.
 The result, a new TimeSeries, will be passed to the supplied callback.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>Collection</code> - A collapsed collection  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - A collapsed TimeSeries  
 **Params**
 
-- fieldSpec <code>array</code> - The list of columns
+- fieldSpecList <code>array</code> - The list of columns to collase. If you
+                                    need to retrieve deep nested values that
+                                    ['can.be', 'done.with', 'this.notation']
 - name <code>string</code> - The resulting summed column name
 - reducer <code>function</code> - Reducer function e.g. sum
 - append <code>boolean</code> - Append the summed column, rather than replace
@@ -584,13 +664,13 @@ and are UTC, so this is best suited to smaller window sizes
 about the specific window, just that the data is smaller.
 
 Each window then has an aggregation specification applied as
-`aggregation`. This specification describes a mapping of fieldNames
-to aggregation functions. For example:
+`aggregation`. This specification describes a mapping of output
+fieldNames to aggregation functions and their fieldPath. For example:
 ```
-{in: avg, out: avg}
+{in_avg: {in: avg()}, out_avg: {out: avg()}}
 ```
 will aggregate both "in" and "out" using the average aggregation
-function.
+function and return the result as in_avg and out_avg.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
@@ -602,36 +682,88 @@ function.
 **Example**  
 ```
 const timeseries = new TimeSeries(data);
-const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
+const dailyAvg = timeseries.fixedWindowRollup("1d", {value: {value: avg}});
 ```
 <a name="TimeSeries+hourlyRollup"></a>
 
-### timeSeries.hourlyRollup(windowSize, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-Builds a new TimeSeries by dividing events into days. The days are
-in either local or UTC time, depending on if utc(true) is set on the
-Pipeline.
+### timeSeries.hourlyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Builds a new TimeSeries by dividing events into hours.
 
-Each window then has an aggregation specification applied as
-`aggregation`. This specification describes a mapping of fieldNames
-to aggregation functions. For example:
+Each window then has an aggregation specification `aggregation`
+applied. This specification describes a mapping of output
+fieldNames to aggregation functions and their fieldPath. For example:
 ```
-{in: avg, out: avg}
+{in_avg: {in: avg()}, out_avg: {out: avg()}}
 ```
-will aggregate both "in" and "out" using the average aggregation
-function across all events within each day.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
 **Params**
 
-- windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
+- toEvents <code>bool</code> - Convert the rollup to Events, otherwise it
+                             will be returned as IndexedEvents.
 - aggregation <code>object</code> - The aggregation specification
 
-**Example**  
+<a name="TimeSeries+dailyRollup"></a>
+
+### timeSeries.dailyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Builds a new TimeSeries by dividing events into days.
+
+Each window then has an aggregation specification `aggregation`
+applied. This specification describes a mapping of output
+fieldNames to aggregation functions and their fieldPath. For example:
 ```
-const timeseries = new TimeSeries(weatherData);
-const dailyMaxTemperature = timeseries.dailyRollup({temperature: max});
+{in_avg: {in: avg()}, out_avg: {out: avg()}}
 ```
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Params**
+
+- toEvents <code>bool</code> <code> = false</code> - Convert the rollup to Events, otherwise it
+                             will be returned as IndexedEvents.
+- aggregation <code>object</code> - The aggregation specification
+
+<a name="TimeSeries+monthlyRollup"></a>
+
+### timeSeries.monthlyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Builds a new TimeSeries by dividing events into months.
+
+Each window then has an aggregation specification `aggregation`
+applied. This specification describes a mapping of output
+fieldNames to aggregation functions and their fieldPath. For example:
+```
+{in_avg: {in: avg()}, out_avg: {out: avg()}}
+```
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Params**
+
+- toEvents <code>bool</code> <code> = false</code> - Convert the rollup to Events, otherwise it
+                             will be returned as IndexedEvents.
+- aggregation <code>object</code> - The aggregation specification
+
+<a name="TimeSeries+yearlyRollup"></a>
+
+### timeSeries.yearlyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Builds a new TimeSeries by dividing events into years.
+
+Each window then has an aggregation specification `aggregation`
+applied. This specification describes a mapping of output
+fieldNames to aggregation functions and their fieldPath. For example:
+```
+{in_avg: {in: avg()}, out_avg: {out: avg()}}
+```
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Params**
+
+- toEvents <code>bool</code> <code> = false</code> - Convert the rollup to Events, otherwise it
+                             will be returned as IndexedEvents.
+- aggregation <code>object</code> - The aggregation specification
+
 <a name="TimeSeries+collectByFixedWindow"></a>
 
 ### timeSeries.collectByFixedWindow(windowSize) ⇒ <code>map</code>
@@ -694,7 +826,11 @@ collected together to form a new TimeSeries.
 - data <code>object</code> - Meta data for the resulting TimeSeries
 - seriesList <code>array</code> - A list of TimeSeries objects
 - reducer <code>func</code> - The reducer function
-- fieldSpec <code>string</code> - The fields to map
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                               need to retrieve multiple deep
+                               nested values that ['can.be', 'done.with',
+                               'this.notation']. A single deep value with a
+                               string.like.this.
 
 <a name="TimeSeries.timeSeriesListMerge"></a>
 
@@ -725,7 +861,12 @@ Timeseries.
 
 - data <code>object</code> - Meta data for the new TimeSeries
 - seriesList <code>array</code> - A list of TimeSeries
-- fieldSpec <code>object</code> | <code>array</code> | <code>string</code> - Which fields to use in the sum
+- fieldSpec <code>string</code> - Column or columns to sum. If you
+                                 need to retrieve multiple deep
+                                 nested values that ['can.be', 'done.with',
+                                 'this.notation']. A single deep value with a
+                                 string.like.this. If not supplied all columns
+                                 will be operated on.
 
 **Example**  
 ```

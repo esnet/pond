@@ -25,12 +25,12 @@ export default class Collapser extends Processor {
 
         if (arg1 instanceof Collapser) {
             const other = arg1;
-            this._fieldSpec = other._fieldSpec;
+            this._fieldSpecList = other._fieldSpecList;
             this._name = other._name;
             this._reducer = other._reducer;
             this._append = other._append;
         } else if (isPipeline(arg1)) {
-            this._fieldSpec = options.fieldSpec;
+            this._fieldSpecList = options.fieldSpecList;
             this._name = options.name;
             this._reducer = options.reducer;
             this._append = options.append;
@@ -45,7 +45,7 @@ export default class Collapser extends Processor {
 
     addEvent(event) {
         if (this.hasObservers()) {
-            this.emit(event.collapse(this._fieldSpec,
+            this.emit(event.collapse(this._fieldSpecList,
                                      this._name,
                                      this._reducer,
                                      this._append));

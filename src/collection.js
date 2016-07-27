@@ -14,6 +14,7 @@ import Immutable from "immutable";
 import TimeRange from "./range";
 import Event from "./event";
 import BoundedIn from "./pipeline-in-bounded";
+import util from "./util";
 import { sum, avg, max, min, first, last, median, stdev, percentile } from "./functions";
 
 /**
@@ -136,16 +137,16 @@ class Collection extends BoundedIn {
     /**
      * Returns the number of valid items in this collection.
      *
-     * Uses the fieldSpec to look up values in all events.
+     * Uses the fieldPath to look up values in all events.
      * It then counts the number that are considered valid, which
      * specifically are not NaN, undefined or null.
      *
      * @return {number} Count of valid events
      */
-    sizeValid(fieldSpec = "value") {
+    sizeValid(fieldPath = "value") {
         let count = 0;
         for (const e of this.events()) {
-            if (Event.isValidValue(e, fieldSpec)) count++;
+            if (Event.isValidValue(e, fieldPath)) count++;
         }
         return count;
     }
@@ -294,7 +295,7 @@ class Collection extends BoundedIn {
      * @return {TimeRange} The extents of the TimeSeries
      */
     sort(fieldSpec) {
-        const fs = this._fieldSpecToArray(fieldSpec);
+        const fs = util.fieldSpecToArray(fieldSpec);
         return this.setEvents(this._eventList.sortBy(event => {
             const e = new this._type(event);
             return e.get(fs);
@@ -390,16 +391,19 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Returns a new Collection by testing the fieldSpec
+     * Returns a new Collection by testing the fieldPath
      * values for being valid (not NaN, null or undefined).
      *
-     * The resulting Collection will be clean (for that fieldSpec).
+     * The resulting Collection will be clean (for that fieldPath).
      *
-     * @param {string}      fieldSpec The field to test
-     * @return {Collection}           A new, modified, Collection.
+     * @param  {string}      fieldPath  Name of value to look up. If not supplied,
+     *                                  defaults to ['value']. "Deep" syntax is
+     *                                  ['deep', 'value'] or 'deep.value'
+     *
+     * @return {Collection}             A new, modified, Collection.
      */
-    clean(fieldSpec = "value") {
-        const fs = this._fieldSpecToArray(fieldSpec);
+    clean(fieldPath) {
+        const fs = util.fieldSpecToArray(fieldPath);
         const filteredEvents = [];
         for (const e of this.events()) {
             if (Event.isValidValue(e, fs)) {
@@ -425,108 +429,159 @@ class Collection extends BoundedIn {
     /**
      * Returns the first value in the Collection for the fieldspec
      *
-     * @param {string} fieldSpec The field to fetch
+     * @param {string} fieldSpec    Column or columns to look up. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
      * @return {number} The first value
      */
-    first(fieldSpec = "value") {
+    first(fieldSpec) {
         return this.aggregate(first, fieldSpec);
     }
 
     /**
      * Returns the last value in the Collection for the fieldspec
      *
-     * @param {string} fieldSpec The field to fetch
+     * @param {string} fieldSpec    Column or columns to look up. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
      * @return {number} The last value
      */
-    last(fieldSpec = "value") {
+    last(fieldSpec) {
         return this.aggregate(last, fieldSpec);
     }
 
     /**
-     * Returns the sum Collection for the fieldspec
+     * Returns the sum of the Collection for the fieldspec
      *
-     * @param {string} fieldSpec The field to sum over the collection
+     * @param {string} fieldSpec    Column or columns to sum. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
      * @return {number} The sum
      */
-    sum(fieldSpec = "value") {
-        return this.aggregate(sum, fieldSpec);
+    sum(fieldSpec) {
+        return this.aggregate(sum(), fieldSpec);
     }
 
     /**
-     * Aggregates the events down to their average
+     * Aggregates the events down to their average(s)
      *
-     * @param  {String} fieldSpec The field to average over the collection
+     * @param {string} fieldSpec    Column or columns to average. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
-     * @return {number}           The average
+     * @return {number}             The average
      */
-    avg(fieldSpec = "value") {
-        return this.aggregate(avg, fieldSpec);
+    avg(fieldSpec) {
+        return this.aggregate(avg(), fieldSpec);
     }
 
     /**
      * Aggregates the events down to their maximum value
      *
-     * @param  {String} fieldSpec The field to find the max within the collection
+     * @param {string} fieldSpec    Column or columns to find the max. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
-     * @return {number}           The max value for the field
+     * @return {number}             The max value for the field
      */
-    max(fieldSpec = "value") {
-        return this.aggregate(max, fieldSpec);
+    max(fieldSpec) {
+        return this.aggregate(max(), fieldSpec);
     }
 
     /**
      * Aggregates the events down to their minimum value
      *
-     * @param  {String} fieldSpec The field to find the min within the collection
+     * @param {string} fieldSpec    Column or columns to find the min. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
-     * @return {number}           The min value for the field
+     * @return {number}             The min value for the field
      */
-    min(fieldSpec = "value") {
-        return this.aggregate(min, fieldSpec);
+    min(fieldSpec) {
+        return this.aggregate(min(), fieldSpec);
     }
 
     /**
      * Aggregates the events down to their mean (same as avg)
      *
-     * @param  {String} fieldSpec The field to find the mean of within the collection
+     * @param {string} fieldSpec    Column or columns to find the mean. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
-     * @return {number}           The mean
+     * @return {number}             The mean
      */
-    mean(fieldSpec = "value") {
+    mean(fieldSpec) {
         return this.avg(fieldSpec);
     }
 
     /**
-     * Aggregates the events down to their medium value
+     * Aggregates the events down to their minimum value
      *
-     * @param  {String} fieldSpec The field to aggregate over
+     * @param {string} fieldSpec    Column or columns to find the median. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
-     * @return {number}           The resulting median value
+     * @return {number}             The median value for the field
      */
-    median(fieldSpec = "value") {
-        return this.aggregate(median, fieldSpec);
+    median(fieldSpec) {
+        return this.aggregate(median(), fieldSpec);
     }
 
     /**
      * Aggregates the events down to their stdev
      *
-     * @param  {String} fieldSpec The field to aggregate over
+     * @param {string} fieldSpec    Column or columns to find the stdev. If you
+     *                              need to retrieve multiple deep
+     *                              nested values that ['can.be', 'done.with',
+     *                              'this.notation']. A single deep value with a
+     *                              string.like.this.  If not supplied, all columns
+     *                              will be aggregated.
      *
-     * @return {number}           The resulting stdev value
+     * @return {number}             The resulting stdev value
      */
-    stdev(fieldSpec = "value") {
-        return this.aggregate(stdev, fieldSpec);
+    stdev(fieldSpec) {
+        return this.aggregate(stdev(), fieldSpec);
     }
 
     /**
-     * Gets n quantiles within the Collection. This works the same way as numpy.
+     * Gets percentile q within the Collection. This works the same way as numpy.
      *
-     * @param  {integer} n        The number of quantiles to divide the
-     *                            Collection into.
-     * @param  {string} column    The field to return as the quantile
+     * @param  {integer} q        The percentile (should be between 0 and 100)
+     *
+     * @param {string} fieldSpec  Column or columns to find the stdev. If you
+     *                            need to retrieve multiple deep
+     *                            nested values that ['can.be', 'done.with',
+     *                            'this.notation']. A single deep value with a
+     *                            string.like.this.  If not supplied, all columns
+     *                            will be aggregated.
+     *
      * @param  {string} interp    Specifies the interpolation method
      *                            to use when the desired quantile lies between
      *                            two data points. Options are:
@@ -536,6 +591,31 @@ class Collection extends BoundedIn {
      *                             * higher: j.
      *                             * nearest: i or j whichever is nearest.
      *                             * midpoint: (i + j) / 2.
+     *
+     * @return {number}           The percentile
+     */
+    percentile(q, fieldSpec, interp = "linear") {
+        return this.aggregate(percentile(q, interp), fieldSpec);
+    }
+
+    /**
+     * Gets n quantiles within the Collection. This works the same way as numpy.
+     *
+     * @param  {integer} n        The number of quantiles to divide the
+     *                            Collection into.
+     *
+     * @param  {string} column    The field to return as the quantile
+     *
+     * @param  {string} interp    Specifies the interpolation method
+     *                            to use when the desired quantile lies between
+     *                            two data points. Options are:
+     *                            options are:
+     *                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+     *                             * lower: i.
+     *                             * higher: j.
+     *                             * nearest: i or j whichever is nearest.
+     *                             * midpoint: (i + j) / 2.
+     *
      * @return {array}            An array of n quantiles
      */
     quantile(n, column = "value", interp = "linear") {
@@ -574,42 +654,49 @@ class Collection extends BoundedIn {
     }
 
     /**
-     * Gets percentile q within the Collection. This works the same way as numpy.
-     *
-     * @param  {integer} q        The percentile (should be between 0 and 100)
-     * @param  {string} column    The field to return as the quantile
-     * @param  {string} interp    Specifies the interpolation method
-     *                            to use when the desired quantile lies between
-     *                            two data points. Options are:
-     *                            options are:
-     *                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
-     *                             * lower: i.
-     *                             * higher: j.
-     *                             * nearest: i or j whichever is nearest.
-     *                             * midpoint: (i + j) / 2.
-     * @return {number}            The percentile
-     */
-    percentile(q, column = "value", interp = "linear") {
-        return this.aggregate(percentile(q, interp), column);
-    }
-
-    /**
      * Aggregates the events down using a user defined function to
      * do the reduction.
      *
      * @param  {function} func    User defined reduction function. Will be
      *                            passed a list of values. Should return a
      *                            singe value.
+     *
      * @param  {String} fieldSpec The field to aggregate over
      *
      * @return {number}           The resulting value
      */
-    aggregate(func, fieldSpec = "value", options = {}) {
-        const fs = this._fieldSpecToArray(fieldSpec);
-        const result = Event.mapReduce(this.eventListAsArray(), [fs], func, options);
-        return result[fs];
+    aggregate(func, fieldPath, options = {}) {
+        let fpath;
+        if (!_.isFunction(func)) {
+            throw new Error("First arg to aggregate() must be a function");
+        }
+
+        if (_.isString(fieldPath)) {
+            fpath = fieldPath;
+        } else if (_.isArray(fieldPath)) {
+            // if the ['array', 'style', 'field_path'] is being used,
+            // we need to turn it back into a string since we are
+            // using a subset of the the map() functionality on
+            // a single column
+            fpath = fieldPath.split(".");
+        } else if (_.isUndefined(fieldPath)) {
+            // map() needs a field name to use as a key. Normally
+            // this case is normally handled by _field_spec_to_array()
+            // inside get(). Also, if map(func, field_spec=None) then
+            // it will map all the columns.
+            fpath = "value";
+        } else {
+            throw new Error("Collection.aggregate() takes a string/array fieldPath");
+        }
+
+        const result = Event.mapReduce(this.eventListAsArray(), fpath, func, options);
+        return result[fpath];
     }
 
+    /**
+     * Returns true if all events in this Collection are in chronological order.
+     * @return {Boolean} True if all events are in order, oldest events to newest.
+     */
     isChronological() {
         let result = true;
         let t;
@@ -624,22 +711,6 @@ class Collection extends BoundedIn {
             }
         }
         return result;
-    }
-
-    /**
-     * Internal function to take a fieldSpec and
-     * return it as an array if it isn't already one. Using
-     * arrays in inner loops is faster than splitting
-     * a string repeatedly.
-     *
-     * @private
-     */
-    _fieldSpecToArray(fieldSpec) {
-        if (_.isArray(fieldSpec)) {
-            return fieldSpec;
-        } else if (_.isString(fieldSpec)) {
-            return fieldSpec.split(".");
-        }
     }
 
     /**

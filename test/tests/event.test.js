@@ -255,13 +255,13 @@ describe("Events", () => {
                 sum: [13, 17, 21, 26]
             });
 
-            expect(Event.reduce(result, avg)).to.deep.equal({sum: 19.25});
+            expect(Event.reduce(result, avg())).to.deep.equal({sum: 19.25});
 
             done();
         });
 
         it("should be able to run a simple mapReduce calculation", done => {
-            const result = Event.mapReduce(events, ["in", "out"], avg);
+            const result = Event.mapReduce(events, ["in", "out"], avg());
             expect(result).to.deep.equal({ in: 5, out: 14.25 });
             done();
         });

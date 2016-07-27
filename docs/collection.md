@@ -48,7 +48,7 @@ they can be used as a pipeline source.
         * [.slice(begin, end)](#Collection+slice) ⇒ <code>[Collection](#Collection)</code>
         * [.filter(func)](#Collection+filter) ⇒ <code>[Collection](#Collection)</code>
         * [.map(func)](#Collection+map) ⇒ <code>[Collection](#Collection)</code>
-        * [.clean(fieldSpec)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
+        * [.clean(fieldPath)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
         * [.count()](#Collection+count) ⇒ <code>number</code>
         * [.first(fieldSpec)](#Collection+first) ⇒ <code>number</code>
         * [.last(fieldSpec)](#Collection+last) ⇒ <code>number</code>
@@ -59,9 +59,10 @@ they can be used as a pipeline source.
         * [.mean(fieldSpec)](#Collection+mean) ⇒ <code>number</code>
         * [.median(fieldSpec)](#Collection+median) ⇒ <code>number</code>
         * [.stdev(fieldSpec)](#Collection+stdev) ⇒ <code>number</code>
+        * [.percentile(q, fieldSpec, interp)](#Collection+percentile) ⇒ <code>number</code>
         * [.quantile(n, column, interp)](#Collection+quantile) ⇒ <code>array</code>
-        * [.percentile(q, column, interp)](#Collection+percentile) ⇒ <code>number</code>
         * [.aggregate(func, fieldSpec)](#Collection+aggregate) ⇒ <code>number</code>
+        * [.isChronological()](#Collection+isChronological) ⇒ <code>Boolean</code>
     * _static_
         * [.equal(collection1, collection2)](#Collection.equal) ⇒ <code>bool</code>
         * [.is(collection1, collection2)](#Collection.is) ⇒ <code>bool</code>
@@ -123,7 +124,7 @@ Returns the number of events in this collection
 ### collection.sizeValid() ⇒ <code>number</code>
 Returns the number of valid items in this collection.
 
-Uses the fieldSpec to look up values in all events.
+Uses the fieldPath to look up values in all events.
 It then counts the number that are considered valid, which
 specifically are not NaN, undefined or null.
 
@@ -280,17 +281,19 @@ a new event when passed in the old event.
 
 <a name="Collection+clean"></a>
 
-### collection.clean(fieldSpec) ⇒ <code>[Collection](#Collection)</code>
-Returns a new Collection by testing the fieldSpec
+### collection.clean(fieldPath) ⇒ <code>[Collection](#Collection)</code>
+Returns a new Collection by testing the fieldPath
 values for being valid (not NaN, null or undefined).
 
-The resulting Collection will be clean (for that fieldSpec).
+The resulting Collection will be clean (for that fieldPath).
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection.  
 **Params**
 
-- fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to test
+- fieldPath <code>string</code> - Name of value to look up. If not supplied,
+                                 defaults to ['value']. "Deep" syntax is
+                                 ['deep', 'value'] or 'deep.value'
 
 <a name="Collection+count"></a>
 
@@ -308,7 +311,12 @@ Returns the first value in the Collection for the fieldspec
 **Returns**: <code>number</code> - The first value  
 **Params**
 
-- fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to fetch
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+last"></a>
 
@@ -319,29 +327,44 @@ Returns the last value in the Collection for the fieldspec
 **Returns**: <code>number</code> - The last value  
 **Params**
 
-- fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to fetch
+- fieldSpec <code>string</code> - Column or columns to look up. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+sum"></a>
 
 ### collection.sum(fieldSpec) ⇒ <code>number</code>
-Returns the sum Collection for the fieldspec
+Returns the sum of the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The sum  
 **Params**
 
-- fieldSpec <code>string</code> <code> = &quot;value&quot;</code> - The field to sum over the collection
+- fieldSpec <code>string</code> - Column or columns to sum. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+avg"></a>
 
 ### collection.avg(fieldSpec) ⇒ <code>number</code>
-Aggregates the events down to their average
+Aggregates the events down to their average(s)
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The average  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to average over the collection
+- fieldSpec <code>string</code> - Column or columns to average. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+max"></a>
 
@@ -352,7 +375,12 @@ Aggregates the events down to their maximum value
 **Returns**: <code>number</code> - The max value for the field  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to find the max within the collection
+- fieldSpec <code>string</code> - Column or columns to find the max. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+min"></a>
 
@@ -363,7 +391,12 @@ Aggregates the events down to their minimum value
 **Returns**: <code>number</code> - The min value for the field  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to find the min within the collection
+- fieldSpec <code>string</code> - Column or columns to find the min. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+mean"></a>
 
@@ -374,18 +407,28 @@ Aggregates the events down to their mean (same as avg)
 **Returns**: <code>number</code> - The mean  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to find the mean of within the collection
+- fieldSpec <code>string</code> - Column or columns to find the mean. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+median"></a>
 
 ### collection.median(fieldSpec) ⇒ <code>number</code>
-Aggregates the events down to their medium value
+Aggregates the events down to their minimum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting median value  
+**Returns**: <code>number</code> - The median value for the field  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate over
+- fieldSpec <code>string</code> - Column or columns to find the median. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
 
 <a name="Collection+stdev"></a>
 
@@ -396,7 +439,38 @@ Aggregates the events down to their stdev
 **Returns**: <code>number</code> - The resulting stdev value  
 **Params**
 
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate over
+- fieldSpec <code>string</code> - Column or columns to find the stdev. If you
+                             need to retrieve multiple deep
+                             nested values that ['can.be', 'done.with',
+                             'this.notation']. A single deep value with a
+                             string.like.this.  If not supplied, all columns
+                             will be aggregated.
+
+<a name="Collection+percentile"></a>
+
+### collection.percentile(q, fieldSpec, interp) ⇒ <code>number</code>
+Gets percentile q within the Collection. This works the same way as numpy.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>number</code> - The percentile  
+**Params**
+
+- q <code>integer</code> - The percentile (should be between 0 and 100)
+- fieldSpec <code>string</code> - Column or columns to find the stdev. If you
+                           need to retrieve multiple deep
+                           nested values that ['can.be', 'done.with',
+                           'this.notation']. A single deep value with a
+                           string.like.this.  If not supplied, all columns
+                           will be aggregated.
+- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
+                           to use when the desired quantile lies between
+                           two data points. Options are:
+                           options are:
+                            * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+                            * lower: i.
+                            * higher: j.
+                            * nearest: i or j whichever is nearest.
+                            * midpoint: (i + j) / 2.
 
 <a name="Collection+quantile"></a>
 
@@ -409,27 +483,6 @@ Gets n quantiles within the Collection. This works the same way as numpy.
 
 - n <code>integer</code> - The number of quantiles to divide the
                            Collection into.
-- column <code>string</code> <code> = &quot;value&quot;</code> - The field to return as the quantile
-- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
-                           to use when the desired quantile lies between
-                           two data points. Options are:
-                           options are:
-                            * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
-                            * lower: i.
-                            * higher: j.
-                            * nearest: i or j whichever is nearest.
-                            * midpoint: (i + j) / 2.
-
-<a name="Collection+percentile"></a>
-
-### collection.percentile(q, column, interp) ⇒ <code>number</code>
-Gets percentile q within the Collection. This works the same way as numpy.
-
-**Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The percentile  
-**Params**
-
-- q <code>integer</code> - The percentile (should be between 0 and 100)
 - column <code>string</code> <code> = &quot;value&quot;</code> - The field to return as the quantile
 - interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
                            to use when the desired quantile lies between
@@ -454,8 +507,15 @@ do the reduction.
 - func <code>function</code> - User defined reduction function. Will be
                            passed a list of values. Should return a
                            singe value.
-- fieldSpec <code>String</code> <code> = value</code> - The field to aggregate over
+- fieldSpec <code>String</code> - The field to aggregate over
 
+<a name="Collection+isChronological"></a>
+
+### collection.isChronological() ⇒ <code>Boolean</code>
+Returns true if all events in this Collection are in chronological order.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>Boolean</code> - True if all events are in order, oldest events to newest.  
 <a name="Collection.equal"></a>
 
 ### Collection.equal(collection1, collection2) ⇒ <code>bool</code>

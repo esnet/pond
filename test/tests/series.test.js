@@ -925,7 +925,6 @@ describe("TimeSeries", () => {
 
         it("can find the bisect starting from an begin index", done => {
             const series = new TimeSeries(bisectTestData);
-
             expect(series.bisect(moment("2012-01-11 03:00", fmt).toDate(), 2)).to.equal(2);
             expect(series.bisect(moment("2012-01-11 03:30", fmt).toDate(), 3)).to.equal(2);
             expect(series.bisect(moment("2012-01-11 03:30", fmt).toDate(), 4)).to.equal(3);
@@ -1087,7 +1086,7 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the sum of two columns", (done) => {
             const ts = new TimeSeries(sumPart1);
-            const sums = ts.collapse(["in", "out"], "sum", sum, false);
+            const sums = ts.collapse(["in", "out"], "sum", sum(), false);
             
             expect(sums.at(0).get("sum")).to.equal(7);
             expect(sums.at(1).get("sum")).to.equal(9);
@@ -1098,7 +1097,7 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the max of two columns", (done) => {
             const timeseries = new TimeSeries(sumPart2);
-            const c = timeseries.collapse(["in", "out"], "max_in_out", max, true);
+            const c = timeseries.collapse(["in", "out"], "max_in_out", max(), true);
 
             expect(c.at(0).get("max_in_out")).to.equal(9);
             expect(c.at(1).get("max_in_out")).to.equal(7);
@@ -1109,7 +1108,7 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the sum of two columns, then find the max", (done) => {
             const ts = new TimeSeries(sumPart1);
-            const sums = ts.collapse(["in", "out"], "value", sum, false);
+            const sums = ts.collapse(["in", "out"], "value", sum(), false);
 
             expect(sums.max()).to.equal(13);
             done();
@@ -1162,12 +1161,10 @@ describe("TimeSeries", () => {
 
     });
 
-    describe.only("TimeSeries rollup to a fixed window", () => {
+    describe("TimeSeries rollup to a fixed window", () => {
         it("can take 1 day avgs over a timeseries", (done) => {
             const timeseries = new TimeSeries(sept2014Data);
-            const dailyAvg = timeseries.fixedWindowRollup("1d", {value: {value: avg}});
-
-            console.log(dailyAvg);
+            const dailyAvg = timeseries.fixedWindowRollup("1d", {value: {value: avg()}});
 
             expect(dailyAvg.size()).to.equal(5);
             expect(dailyAvg.at(0).value()).to.equal(46.875);

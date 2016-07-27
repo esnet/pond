@@ -367,8 +367,8 @@ describe("Pipeline", () => {
                 .windowBy("1h")           // 1 day fixed windows
                 .emitOn("eachEvent")    // emit result on each event
                 .aggregate({
-                    in_avg: {in: avg},
-                    out_avg: {out: avg}
+                    in_avg: {in: avg()},
+                    out_avg: {out: avg()}
                 })
                 .to(EventOut, event => {
                     result[`${event.index()}`] = event;
@@ -402,9 +402,9 @@ describe("Pipeline", () => {
                 .windowBy("1h")           // 1 day fixed windows
                 .emitOn("eachEvent")      // emit result on each event
                 .aggregate({
-                    type: {type: keep},   // keep the type
-                    in_avg: {in: avg},    // avg in  -> in_avg
-                    out_avg: {out: avg}   // avg out -> out_avg
+                    type: {type: keep()},   // keep the type
+                    in_avg: {in: avg()},    // avg in  -> in_avg
+                    out_avg: {out: avg()}   // avg out -> out_avg
                 })
                 .to(EventOut, event => result[`${event.index()}:${event.get("type")}`] = event);
 
@@ -439,8 +439,8 @@ describe("Pipeline", () => {
                 .windowBy("1h")           // 1 day fixed windows
                 .emitOn("eachEvent")    // emit result on each event
                 .aggregate({
-                    in_avg: {in: avg},
-                    out_avg: {out: avg}
+                    in_avg: {in: avg()},
+                    out_avg: {out: avg()}
                 })
                 .asTimeRangeEvents({alignment: "lag"})
                 .to(EventOut, event => {
@@ -474,11 +474,11 @@ describe("Pipeline", () => {
                 .windowBy("1h")           // 1 day fixed windows
                 .emitOn("eachEvent")    // emit result on each event
                 .aggregate({
-                    in_low: {in: min},
+                    in_low: {in: min()},
                     in_25th: {in: percentile(25)},
-                    in_median: {in: median},
+                    in_median: {in: median()},
                     in_75th: {in: percentile(75)},
-                    in_high: {in: max},
+                    in_high: {in: max()},
                 })
                 .asEvents()
                 .to(EventOut, event => {
@@ -729,7 +729,7 @@ describe("Pipeline", () => {
             const timeseries = new TimeSeries(inOutData);
             Pipeline()
                 .from(timeseries)
-                .collapse(["in", "out"], "in_out_sum", sum)
+                .collapse(["in", "out"], "in_out_sum", sum())
                 .emitOn("flush")
                 .to(CollectionOut, c => {
                     const ts = new TimeSeries({name: "subset", collection: c});
@@ -745,8 +745,8 @@ describe("Pipeline", () => {
             const timeseries = new TimeSeries(inOutData);
             Pipeline()
                 .from(timeseries)
-                .collapse(["in", "out"], "in_out_sum", sum, true)
-                .collapse(["in", "out"], "in_out_max", max, true)
+                .collapse(["in", "out"], "in_out_sum", sum(), true)
+                .collapse(["in", "out"], "in_out_max", max(), true)
                 .emitOn("flush")
                 .to(CollectionOut, c => {
                     
@@ -768,10 +768,10 @@ describe("Pipeline", () => {
             const timeseries = new TimeSeries(inOutData);
             Pipeline()
                 .from(timeseries)
-                .collapse(["in", "out"], "total", sum)
+                .collapse(["in", "out"], "total", sum())
                 .emitOn("flush")
                 .aggregate({
-                    max_total: {total: max}
+                    max_total: {total: max()}
                 })
                 .to(EventOut, e => {
                     expect(e.get("max_total")).to.equal(117);
@@ -864,7 +864,7 @@ describe("Pipeline", () => {
                 .filter(e => e.value() < 50)
                 .take(10)
                 .aggregate({
-                    value: {value: avg}
+                    value: {value: avg()}
                 })
                 .to(EventOut, event => {
                     result = event;

@@ -192,5 +192,26 @@ export default {
                 break;
         }
         return index;
+    },
+
+    /**
+     * Split the field spec if it is not already a list.
+     *
+     * Also, allow for deep fields to be passed in as a tuple because
+     * it will need to be used as a dict key in some of the processor
+     * Options.
+     *
+     * This is deployed in Event.get() to process anything passed
+     * to it, but this should also be deployed "upstream" to avoid
+     * having that split() done over and over in a loop.
+     */
+    fieldSpecToArray(fieldSpec) {
+        if (_.isArray(fieldSpec) || _.isFunction(fieldSpec)) {
+            return fieldSpec;
+        } else if (_.isString(fieldSpec)) {
+            return fieldSpec.split(".");
+        } else if (_.isUndefined(fieldSpec)) {
+            return ["value"];
+        }
     }
 };

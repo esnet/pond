@@ -14,7 +14,7 @@ import { isPipeline } from "./pipeline";
 
 /**
  * A processor which takes a fieldSpec as its only argument
- * and returns a new event with only the selected columns
+ * and returns a new event with only those selected columns
  */
 export default class Selector extends Processor {
     constructor(arg1, options) {

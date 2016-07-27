@@ -15,6 +15,7 @@ import Immutable from "immutable";
 import IndexedEvent from "./indexedevent";
 import TimeRangeEvent from "./timerangeevent";
 import { sum, avg } from "./functions";
+import util from "./util";
 
 function timestampFromArg(arg) {
     if (_.isNumber(arg)) {
@@ -237,18 +238,16 @@ class Event {
 
     /**
      * Get specific data out of the Event. The data will be converted
-     * to a js object. You can use a fieldSpec to address deep data.
-     * A fieldSpec could be "a.b"
+     * to a js object. You can use a fieldPath to address deep data.
+     * @param  {Array}  fieldPath   Name of value to look up. If not provided,
+     *                              defaults to ['value']. "Deep" syntax is
+     *                              ['deep', 'value'] or 'deep.value.'
+     * @return                      The value of the field
      */
-    get(fieldSpec = ["value"]) {
+    get(fieldPath) {
         let v;
-        if (_.isArray(fieldSpec)) {
-            v = this.data().getIn(fieldSpec);
-        } else if (_.isString(fieldSpec)) {
-            const searchKeyPath = fieldSpec.split(".");
-            v = this.data().getIn(searchKeyPath);
-        }
-
+        const fspec = util.fieldSpecToArray(fieldPath);
+        v = this.data().getIn(fspec);
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {
             return v.toJS();
         }
@@ -256,12 +255,21 @@ class Event {
     }
 
     /**
-     * Alias for get()
+     * Get specific data out of the Event. Alias for get(). The data will
+     * be converted to a js object. You can use a fieldPath to address deep data.
+     * @param  {Array}  fieldPath   Name of value to look up. If not provided,
+     *                              defaults to ['value']. "Deep" syntax is
+     *                              ['deep', 'value'] or 'deep.value.'
+     * @return                      The value of the field
      */
     value(fieldSpec) {
         return this.get(fieldSpec);
     }
 
+    /**
+     * Turn the Collection data into a string
+     * @return {string} The collection as a string
+     */
     stringify() {
         return JSON.stringify(this.data());
     }
@@ -307,31 +315,34 @@ class Event {
     /**
      * The same as Event.value() only it will return false if the
      * value is either undefined, NaN or Null.
+     *
+     * @param {Event} event The Event to check
+     * @param {string|array} The field to check
      */
-    static isValidValue(event, fieldSpec = "value") {
-        const v = event.value(fieldSpec);
+    static isValidValue(event, fieldPath) {
+        const v = event.value(fieldPath);
         const invalid = (_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
         return !invalid;
     }
 
     /**
      * Function to select specific fields of an event using
-     * a fieldSpec and return a new event with just those fields.
+     * a fieldPath and return a new event with just those fields.
      *
-     * The fieldSpec currently can be:
+     * The fieldPath currently can be:
      *  * A single field name
      *  * An array of field names
      *
      * The function returns a new event.
      */
-    static selector(event, fieldSpec) {
+    static selector(event, fieldPath) {
         const data = {};
-        if (_.isString(fieldSpec)) {
-            const fieldName = fieldSpec;
+        if (_.isString(fieldPath)) {
+            const fieldName = fieldPath;
             const value = event.get(fieldName);
             data[fieldName] = value;
-        } else if (_.isArray(fieldSpec)) {
-            _.each(fieldSpec, fieldName => {
+        } else if (_.isArray(fieldPath)) {
+            _.each(fieldPath, fieldName => {
                 const value = event.get(fieldName);
                 data[fieldName] = value;
             });
@@ -443,6 +454,14 @@ class Event {
      * Combines multiple events with the same time together
      * to form a new event. Doesn't currently work on IndexedEvents
      * or TimeRangeEvents.
+     *
+     * @param {array}        events     Array of event objects
+     * @param {string|array} fieldSpec  Column or columns to look up. If you need
+     *                                  to retrieve multiple deep nested values that
+     *                                  ['can.be', 'done.with', 'this.notation'].
+     *                                  A single deep value with a string.like.this.
+     *                                  If not supplied, all columns will be operated on.
+     * @param {function}     reducer    Reducer function to apply to column data.
      */
     static combine(events, fieldSpec, reducer) {
         if (events.length < 1) {
@@ -483,8 +502,16 @@ class Event {
     }
 
     /**
-     * Sum takes multiple events of the same time and uses
-     * combine() to add them together
+     * Sum takes multiple events, groups them by timestamp, and uses combine()
+     * to add them together. If the events do not have the same timestamp an
+     * exception will be thrown.
+     *
+     * @param {array}        events     Array of event objects
+     * @param {string|array} fieldSpec  Column or columns to look up. If you need
+     *                                  to retrieve multiple deep nested values that
+     *                                  ['can.be', 'done.with', 'this.notation'].
+     *                                  A single deep value with a string.like.this.
+     *                                  If not supplied, all columns will be operated on.
      */
     static sum(events, fieldSpec) {
         // Since all the events should be of the same time
@@ -497,15 +524,23 @@ class Event {
             }
         });
 
-        return Event.combine(events, fieldSpec, sum)[0];
+        return Event.combine(events, fieldSpec, sum())[0];
     }
 
     /**
-     * Avg takes multiple events of the same time and uses
-     * combine() to avg them
+     * Sum takes multiple events, groups them by timestamp, and uses combine()
+     * to average them. If the events do not have the same timestamp an
+     * exception will be thrown.
+     *
+     * @param {array}        events     Array of event objects
+     * @param {string|array} fieldSpec  Column or columns to look up. If you need
+     *                                  to retrieve multiple deep nested values that
+     *                                  ['can.be', 'done.with', 'this.notation'].
+     *                                  A single deep value with a string.like.this.
+     *                                  If not supplied, all columns will be operated on.
      */
     static avg(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, avg)[0];
+        return Event.combine(events, fieldSpec, avg())[0];
     }
 
     /**
@@ -514,12 +549,23 @@ class Event {
      * list of field names, or a function that takes an
      * event and returns a key/value pair.
      *
-     * Example 1:
+     * @example
+     * ````
      *         in   out
      *  3am    1    2
      *  4am    3    4
      *
      * Mapper result:  { in: [1, 3], out: [2, 4]}
+     * ```
+     * @param {string|array} fieldSpec  Column or columns to look up. If you need
+     *                                  to retrieve multiple deep nested values that
+     *                                  ['can.be', 'done.with', 'this.notation'].
+     *                                  A single deep value with a string.like.this.
+     *                                  If not supplied, all columns will be operated on.
+     *                                  If field_spec is a function, the function should
+     *                                  return a map. The keys will be come the
+     *                                  "column names" that will be used in the map that
+     *                                  is returned.
      */
     static map(evts, multiFieldSpec = "value") {
         const result = {};
@@ -580,9 +626,13 @@ class Event {
      * Takes a list of events and a reducer function and returns
      * a new Event with the result, for each column. The reducer is
      * of the form:
+     * ```
      *     function sum(valueList) {
      *         return calcValue;
      *     }
+     * ```
+     * @param {map}         mapped      A map, as produced from map()
+     * @param {function}    reducer     The reducer function
      */
     static reduce(mapped, reducer) {
         const result = {};
@@ -591,7 +641,15 @@ class Event {
         });
         return result;
     }
-
+    /*
+     * @param {array}        events     Array of event objects
+     * @param {string|array} fieldSpec  Column or columns to look up. If you need
+     *                                  to retrieve multiple deep nested values that
+     *                                  ['can.be', 'done.with', 'this.notation'].
+     *                                  A single deep value with a string.like.this.
+     *                                  If not supplied, all columns will be operated on.
+     * @param {function}     reducer    The reducer function
+     */
     static mapReduce(events, multiFieldSpec, reducer) {
         return Event.reduce(this.map(events, multiFieldSpec), reducer);
     }
