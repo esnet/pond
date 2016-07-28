@@ -15,7 +15,7 @@
 
 import { expect } from "chai";
 
-import { cleaners, sum, avg } from "../../src/functions.js";
+import { cleaners, sum, avg, percentile } from "../../src/functions.js";
 
 const goodValues = [1, 2, 3, 4, 5];
 const badValues = [1, 2, null, 4, 5];
@@ -98,6 +98,22 @@ describe("Function: avg()", () => {
     it("can use use the propagateMissing in avg function", done => {
         expect(avg(cleaners.propagateMissing)(goodValues)).to.equal(3);
         expect(avg(cleaners.propagateMissing)(badValues)).to.be.null;
+        done();
+    });
+
+});
+
+describe("Function: percentile()", () => {
+
+    it("can use the percentile function", done => {
+        const values = [1142, 944, 433, 367, 986];
+        expect(percentile(0)(values)).to.equal(367.0);
+        expect(percentile(25)(values)).to.equal(433.0);
+        expect(percentile(50)(values)).to.equal(944.0);
+        expect(percentile(75)(values)).to.equal(986.0);
+        expect(percentile(90)(values)).to.equal(1079.6);
+        expect(percentile(95)(values)).to.equal(1110.8);
+        expect(percentile(100)(values)).to.equal(1142.0);
         done();
     });
 

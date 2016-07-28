@@ -263,7 +263,7 @@ export function percentile(q, interp = "linear", clean = cleaners.ignoreMissing)
 
         let v;
 
-        const sorted = cleanValues.slice().sort();
+        const sorted = cleanValues.slice().sort((a, b) => a - b);
         const size = sorted.length;
 
         if (q < 0 || q > 100) {
