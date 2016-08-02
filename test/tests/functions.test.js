@@ -15,7 +15,7 @@
 
 import { expect } from "chai";
 
-import { cleaners, sum, avg, percentile } from "../../src/functions.js";
+import { filter, sum, avg, percentile } from "../../src/functions.js";
 
 const goodValues = [1, 2, 3, 4, 5];
 const badValues = [1, 2, null, 4, 5];
@@ -23,26 +23,26 @@ const badValues = [1, 2, null, 4, 5];
 describe("Functions to clean values", () => {
 
     it("can use use the keepMissing function to pass through values ", done => {
-        expect(cleaners.keepMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
-        expect(cleaners.keepMissing(badValues)).to.deep.equal([1, 2, null, 4, 5]);
+        expect(filter.keepMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
+        expect(filter.keepMissing(badValues)).to.deep.equal([1, 2, null, 4, 5]);
         done();
     });
 
     it("can use ignoreMissing to filter out missing values ", done => {
-        expect(cleaners.ignoreMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
-        expect(cleaners.ignoreMissing(badValues)).to.deep.equal([1, 2, 4, 5]);
+        expect(filter.ignoreMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
+        expect(filter.ignoreMissing(badValues)).to.deep.equal([1, 2, 4, 5]);
         done();
     });
 
     it("can use zeroMissing to replace missing values with zeros", done => {
-        expect(cleaners.zeroMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
-        expect(cleaners.zeroMissing(badValues)).to.deep.equal([1, 2, 0, 4, 5]);
+        expect(filter.zeroMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
+        expect(filter.zeroMissing(badValues)).to.deep.equal([1, 2, 0, 4, 5]);
         done();
     });
 
     it("can use propagateMissing to replace missing values with zeros", done => {
-        expect(cleaners.propagateMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
-        expect(cleaners.propagateMissing(badValues)).to.be.null;
+        expect(filter.propagateMissing(goodValues)).to.deep.equal([1, 2, 3, 4, 5]);
+        expect(filter.propagateMissing(badValues)).to.be.null;
         done();
     });
 });
@@ -50,26 +50,26 @@ describe("Functions to clean values", () => {
 describe("Function: sum()", () => {
 
     it("can use use the keepMissing function to pass through values ", done => {
-        expect(sum(cleaners.keepMissing)(goodValues)).to.equal(15);
-        expect(sum(cleaners.keepMissing)(badValues)).to.equal(12);
+        expect(sum(filter.keepMissing)(goodValues)).to.equal(15);
+        expect(sum(filter.keepMissing)(badValues)).to.equal(12);
         done();
     });
 
     it("can use use the ignoreMissing in sum function", done => {
-        expect(sum(cleaners.ignoreMissing)(goodValues)).to.equal(15);
-        expect(sum(cleaners.ignoreMissing)(badValues)).to.equal(12);
+        expect(sum(filter.ignoreMissing)(goodValues)).to.equal(15);
+        expect(sum(filter.ignoreMissing)(badValues)).to.equal(12);
         done();
     });
 
     it("can use use the zeroMissing in sum function", done => {
-        expect(sum(cleaners.zeroMissing)(goodValues)).to.equal(15);
-        expect(sum(cleaners.zeroMissing)(badValues)).to.equal(12);
+        expect(sum(filter.zeroMissing)(goodValues)).to.equal(15);
+        expect(sum(filter.zeroMissing)(badValues)).to.equal(12);
         done();
     });
 
     it("can use use the propagateMissing in sum function", done => {
-        expect(sum(cleaners.propagateMissing)(goodValues)).to.equal(15);
-        expect(sum(cleaners.propagateMissing)(badValues)).to.be.null;
+        expect(sum(filter.propagateMissing)(goodValues)).to.equal(15);
+        expect(sum(filter.propagateMissing)(badValues)).to.be.null;
         done();
     });
 
@@ -78,26 +78,26 @@ describe("Function: sum()", () => {
 describe("Function: avg()", () => {
 
     it("can use use the keepMissing function to pass through values ", done => {
-        expect(avg(cleaners.keepMissing)(goodValues)).to.equal(3);
-        expect(avg(cleaners.keepMissing)(badValues)).to.equal(2.4);
+        expect(avg(filter.keepMissing)(goodValues)).to.equal(3);
+        expect(avg(filter.keepMissing)(badValues)).to.equal(2.4);
         done();
     });
 
     it("can use use the ignoreMissing in avg function", done => {
-        expect(avg(cleaners.ignoreMissing)(goodValues)).to.equal(3);
-        expect(avg(cleaners.ignoreMissing)(badValues)).to.equal(3);
+        expect(avg(filter.ignoreMissing)(goodValues)).to.equal(3);
+        expect(avg(filter.ignoreMissing)(badValues)).to.equal(3);
         done();
     });
 
     it("can use use the zeroMissing in avg function", done => {
-        expect(avg(cleaners.zeroMissing)(goodValues)).to.equal(3);
-        expect(avg(cleaners.zeroMissing)(badValues)).to.equal(2.4);
+        expect(avg(filter.zeroMissing)(goodValues)).to.equal(3);
+        expect(avg(filter.zeroMissing)(badValues)).to.equal(2.4);
         done();
     });
 
     it("can use use the propagateMissing in avg function", done => {
-        expect(avg(cleaners.propagateMissing)(goodValues)).to.equal(3);
-        expect(avg(cleaners.propagateMissing)(badValues)).to.be.null;
+        expect(avg(filter.propagateMissing)(goodValues)).to.equal(3);
+        expect(avg(filter.propagateMissing)(badValues)).to.be.null;
         done();
     });
 

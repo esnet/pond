@@ -44,5 +44,6 @@ export {
     difference,
     median,
     stdev,
-    percentile
+    percentile,
+    filter
 } from "./functions";

@@ -24,7 +24,7 @@ const ignoreMissing = values => values.filter(isValid);
 const zeroMissing = values => values.map(v => isValid(v) ? v : 0);
 const propagateMissing = values => ignoreMissing(values).length === values.length ? values : null;
 
-export const cleaners = {
+export const filter = {
     keepMissing,
     ignoreMissing,
     zeroMissing,
@@ -38,7 +38,7 @@ export const cleaners = {
  * you want to results to include the type. So you would 'keep' the type
  * and 'avg' the value.
  */
-export function keep(clean = cleaners.ignoreMissing) {
+export function keep(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -62,7 +62,7 @@ export function keep(clean = cleaners.ignoreMissing) {
  *     be null if the values contain a missing value
  *     `zeroMissing` - will replace missing values with a zero
  */
-export function sum(clean = cleaners.ignoreMissing) {
+export function sum(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -80,7 +80,7 @@ export function sum(clean = cleaners.ignoreMissing) {
  *     be null if the values contain a missing value
  *     `zeroMissing` - will replace missing values with a zero
  */
-export function avg(clean = cleaners.ignoreMissing) {
+export function avg(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -99,7 +99,7 @@ export function avg(clean = cleaners.ignoreMissing) {
  *     be null if the values contain a missing value
  *     `zeroMissing` - will replace missing values with a zero
  */
-export function max(clean = cleaners.ignoreMissing) {
+export function max(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -120,7 +120,7 @@ export function max(clean = cleaners.ignoreMissing) {
  *     be null if the values contain a missing value
  *     `zeroMissing` - will replace missing values with a zero
  */
-export function min(clean = cleaners.ignoreMissing) {
+export function min(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -140,7 +140,7 @@ export function min(clean = cleaners.ignoreMissing) {
  *     `propergateMissing` - which will cause the count itself to
  *     be null if the values contain a missing value
  */
-export function count(clean = cleaners.ignoreMissing) {
+export function count(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -159,7 +159,7 @@ export function count(clean = cleaners.ignoreMissing) {
  *     `keepMissing` - to return the first value, regardless of if
  *     it is a missing value or not.
  */
-export function first(clean = cleaners.ignoreMissing) {
+export function first(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -178,7 +178,7 @@ export function first(clean = cleaners.ignoreMissing) {
  *     `keepMissing` - to return the last value, regardless of if
  *     it is a missing value or not.
  */
-export function last(clean = cleaners.ignoreMissing) {
+export function last(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -199,7 +199,7 @@ export function last(clean = cleaners.ignoreMissing) {
  *     be null if the values contain a missing value
  *     `zeroMissing` - will replace missing values with a zero
  */
-export function difference(clean = cleaners.ignoreMissing) {
+export function difference(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -207,7 +207,7 @@ export function difference(clean = cleaners.ignoreMissing) {
     };
 }
 
-export function median(clean = cleaners.ignoreMissing) {
+export function median(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -224,7 +224,7 @@ export function median(clean = cleaners.ignoreMissing) {
 }
 
 
-export function stdev(clean = cleaners.ignoreMissing) {
+export function stdev(clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
@@ -256,7 +256,7 @@ export function stdev(clean = cleaners.ignoreMissing) {
  *                                             with a zero
  * @return {number}            The percentile
  */
-export function percentile(q, interp = "linear", clean = cleaners.ignoreMissing) {
+export function percentile(q, interp = "linear", clean = filter.ignoreMissing) {
     return function (values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
