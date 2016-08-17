@@ -295,7 +295,7 @@ class Collection extends BoundedIn {
      * @return {TimeRange} The extents of the TimeSeries
      */
     sort(fieldSpec) {
-        const fs = util.fieldSpecToArray(fieldSpec);
+        const fs = util.fieldPathToArray(fieldSpec);
         return this.setEvents(this._eventList.sortBy(event => {
             const e = new this._type(event);
             return e.get(fs);
@@ -403,7 +403,7 @@ class Collection extends BoundedIn {
      * @return {Collection}             A new, modified, Collection.
      */
     clean(fieldPath) {
-        const fs = util.fieldSpecToArray(fieldPath);
+        const fs = util.fieldPathToArray(fieldPath);
         const filteredEvents = [];
         for (const e of this.events()) {
             if (Event.isValidValue(e, fs)) {
@@ -470,8 +470,8 @@ class Collection extends BoundedIn {
      *
      * @return {number} The sum
      */
-    sum(fieldSpec) {
-        return this.aggregate(sum(), fieldSpec);
+    sum(fieldSpec, filter) {
+        return this.aggregate(sum(filter), fieldSpec);
     }
 
     /**

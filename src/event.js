@@ -246,7 +246,7 @@ class Event {
      */
     get(fieldPath) {
         let v;
-        const fspec = util.fieldSpecToArray(fieldPath);
+        const fspec = util.fieldPathToArray(fieldPath);
         v = this.data().getIn(fspec);
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {
             return v.toJS();

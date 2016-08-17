@@ -24,4 +24,6 @@ require("./tests/collection.test.js");
 require("./tests/pipeline.test.js");
 require("./tests/series.test.js");
 require("./tests/functions.test.js");
+require("./tests/clean.test.js");
+
 require("./tests/aapl.test.js");

@@ -20,6 +20,7 @@ import Taker from "./taker";
 import Aggregator from "./aggregator";
 import Converter from "./converter";
 import Event from "./event";
+import Filler from "./filler";
 import TimeSeries from "./series";
 import TimeRangeEvent from "./timerangeevent";
 import IndexedEvent from "./indexedevent";
@@ -794,6 +795,34 @@ class Pipeline {
             name,
             reducer,
             append,
+            prev: this.last() ? this.last() : this
+        });
+
+        return this._append(p);
+    }
+
+    /**
+     * Take the data in this event steam and "fill" any missing
+     * or invalid values. This could be setting `null` values to `0`
+     * so mathematical operations will succeed, interpolate a new
+     * value, or pad with the previously given value.
+     *
+     * If one wishes to limit the number of filled events in the result
+     * set, use Pipeline.keep() in the chain. See: TimeSeries.fill()
+     * for an example.
+     *
+     * @param {string|array} fieldSpec  Column or columns to look up. If you need
+     *                                  to retrieve multiple deep nested values that
+     *                                  ['can.be', 'done.with', 'this.notation'].
+     *                                  A single deep value with a string.like.this.
+     * @param  {[type]}      method     Filling method: zero | linear | pad
+     * @return {Pipeline}               The Pipeline
+     */
+    fill(fieldSpec, method, fillLimit) {
+        const p = new Filler(this, {
+            fieldSpec,
+            method,
+            fillLimit,
             prev: this.last() ? this.last() : this
         });
 

@@ -825,6 +825,84 @@ class TimeSeries {
     }
 
     /**
+     * TimeSeries.map() helper function to rename columns in the underlying events.
+     * Takes a object of columns to rename:
+     * ```
+     * new_ts = ts.rename_columns({'in': 'new_in', 'out': 'new_out'})
+     * ```
+     *
+     * Returns a new TimeSeries containing new events. Columns not
+     * in the dict will be retained and not renamed.
+     *
+     * NOTE: as the name implies, this will only rename the main
+     * "top level" (ie: non-deep) columns. If you need more
+     * extravagant renaming, roll your own using map().
+     *
+     * @param {object} renameMap           Columns to rename.
+     * @return {TimeSeries}                A new TimeSeries, with new column names
+     */
+    renameColumns(renameMap) {
+        const rename = (event) => {
+            const renamedMap = (event) => {
+                const b = {};
+                _.each(event.data().toJS(), (value, key) => {
+                    const k = renameMap[key] || key;
+                    b[k] = value;
+                });
+                return b;
+            };
+
+            const renamedData = renamedMap(event);
+
+            if (event instanceof Event) {
+                return new Event(event.timestamp(), renamedData);
+            } else if (event instanceof TimeRangeEvent) {
+                return new TimeRangeEvent([event.begin(), event.end()], renamedData);
+            } else if (event instanceof IndexedEvent) {
+                return new IndexedEvent(event.index(), renamedData);
+            }
+        };
+
+        return this.map(rename);
+    }
+
+    /**
+     * Take the data in this TimeSeries and "fill" any missing
+     * or invalid values. This could be setting `null` values to zero
+     * so mathematical operations will succeed, interpolate a new
+     * value, or pad with the previously given value.
+     *
+     * @param  {string|array}   fieldSpec   Column or columns to look up. If you
+     *                                      need to retrieve multiple deep
+     *                                      nested values that ['can.be', 'done.with',
+     *                                      'this.notation']. A single deep value with a
+     *                                      string.like.this.
+     * @param  {String} method              Filling method: "zero" | "linear" | "pad"
+     * @param  {number} fillLimit           Set a limit on the number of events that will
+     *                                      be cached awaiting processing when fill method
+     *                                      is linear. If that number of invalid values
+     *                                      for the given field_spec are seen w/out hitting
+     *                                      a valid value (which is required for a linear
+     *                                      fill), then the unfilled events will be emitted
+     *                                      and will continue to be emitted until a valid
+     *                                      value is seen again. This is to keep events from
+     *                                      getting "stuck" in the queue during long runs
+     *                                      of invalid data. Setting this when using an
+     *                                      unbounded source is highly suggested. If not set,
+     *                                      then events will continue to cache until a good
+     *                                      value is seen or `flush()` is called.
+     *
+     * @return {TimeSeries}                 The new TimeSeries
+     */
+    fill(fieldSpec, method = "zero", fillLimit = null) {
+        const collections = this.pipeline()
+            .fill(fieldSpec, method, fillLimit)
+            .toKeyedCollections();
+
+        return this.setCollection(collections["all"]);
+    }
+
+    /**
      * Builds a new TimeSeries by dividing events within the TimeSeries
      * across multiple fixed windows of size `windowSize`.
      *
@@ -1024,14 +1102,14 @@ class TimeSeries {
      * using the reducer function to produce a new Event. Those Events are then
      * collected together to form a new TimeSeries.
      *
-     * @param  {object}   data        Meta data for the resulting TimeSeries
-     * @param  {array}    seriesList  A list of TimeSeries objects
-     * @param  {func}     reducer     The reducer function
-     * @param  {string}   fieldSpec   Column or columns to look up. If you
-     *                                need to retrieve multiple deep
-     *                                nested values that ['can.be', 'done.with',
-     *                                'this.notation']. A single deep value with a
-     *                                string.like.this.
+     * @param  {object}         data        Meta data for the resulting TimeSeries
+     * @param  {array}          seriesList  A list of TimeSeries objects
+     * @param  {func}           reducer     The reducer function
+     * @param  {string|array}   fieldSpec   Column or columns to look up. If you
+     *                                      need to retrieve multiple deep
+     *                                      nested values that ['can.be', 'done.with',
+     *                                      'this.notation']. A single deep value with a
+     *                                      string.like.this.
      *
      * @return {TimeSeries}           The new TimeSeries
      */
