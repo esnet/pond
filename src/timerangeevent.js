@@ -207,6 +207,19 @@ export class TimeRangeEvent {
     value(fieldSpec) {
         return this.get(fieldSpec);
     }
+
+    /**
+     * Collapses this event's columns, represented by the fieldSpecList
+     * into a single column. The collapsing itself is done with the reducer
+     * function. Optionally the collapsed column could be appended to the
+     * existing columns, or replace them (the default).
+     */
+    collapse(fieldSpecList, name, reducer, append = false) {
+        const data = append ? this.data().toJS() : {};
+        const d = fieldSpecList.map(fs => this.get(fs));
+        data[name] = reducer(d);
+        return this.setData(data);
+    }
 }
 
 export default TimeRangeEvent;
