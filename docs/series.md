@@ -143,6 +143,10 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.map(operator)](#TimeSeries+map) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.select(fieldSpec)](#TimeSeries+select) ⇒ <code>Collection</code>
         * [.collapse(fieldSpecList, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.renameColumns(renameMap)](#TimeSeries+renameColumns) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.fill(fieldSpec, method, limit)](#TimeSeries+fill) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.align()](#TimeSeries+align)
+        * [.rate()](#TimeSeries+rate)
         * [.fixedWindowRollup(windowSize, aggregation)](#TimeSeries+fixedWindowRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.hourlyRollup(toEvents, aggregation)](#TimeSeries+hourlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.dailyRollup(toEvents, aggregation)](#TimeSeries+dailyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
@@ -652,6 +656,83 @@ The result, a new TimeSeries, will be passed to the supplied callback.
 - reducer <code>function</code> - Reducer function e.g. sum
 - append <code>boolean</code> - Append the summed column, rather than replace
 
+<a name="TimeSeries+renameColumns"></a>
+
+### timeSeries.renameColumns(renameMap) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+TimeSeries.map() helper function to rename columns in the underlying events.
+Takes a object of columns to rename:
+```
+new_ts = ts.rename_columns({'in': 'new_in', 'out': 'new_out'})
+```
+
+Returns a new TimeSeries containing new events. Columns not
+in the dict will be retained and not renamed.
+
+NOTE: as the name implies, this will only rename the main
+"top level" (ie: non-deep) columns. If you need more
+extravagant renaming, roll your own using map().
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - A new TimeSeries, with new column names  
+**Params**
+
+- renameMap <code>object</code> - Columns to rename.
+
+<a name="TimeSeries+fill"></a>
+
+### timeSeries.fill(fieldSpec, method, limit) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+Take the data in this TimeSeries and "fill" any missing
+or invalid values. This could be setting `null` values to zero
+so mathematical operations will succeed, interpolate a new
+value, or pad with the previously given value.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The new TimeSeries  
+**Params**
+
+- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you
+                                     need to retrieve multiple deep
+                                     nested values that ['can.be', 'done.with',
+                                     'this.notation']. A single deep value with a
+                                     string.like.this.
+- method <code>String</code> <code> = zero</code> - Filling method: "zero" | "linear" | "pad"
+- limit <code>number</code> <code> = </code> - Set a limit on the number of consecutive events
+                                     will be filled before it starts returning invalid
+                                     values. For linear fill, no filling will happen
+                                     if the limit is reached before a valid value
+                                     is found.
+
+<a name="TimeSeries+align"></a>
+
+### timeSeries.align()
+Align of values to regular time boundaries. The value at
+the boundary is interpolated. Only the new interpolated
+points are returned. If limit is reached nulls will be
+returned at each boundary position.
+
+One use case for this is to modify irregular data (i.e. data
+that falls at irregular times) so that it falls into a
+sequence of evenly spaced values. We use this to take data we
+get from the network which is approximately every 30 second
+(:32, 1:02, 1:34, ...) and output data on exact 30 second
+boundaries (:30, 1:00, 1:30, ...).
+
+Another use case is data that might be already aligned to
+some regular interval, but that contains missing points.
+While `fill()` can be used to replace null values, align
+can be used to add in missing points completely. Those points
+can have an interpolated value, or by setting limit to 0,
+can be filled with nulls. This is really useful when downstream
+processing depends on complete sequences.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+rate"></a>
+
+### timeSeries.rate()
+Returns the derivative of the TimeSeries for the given
+TimeSeries.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+fixedWindowRollup"></a>
 
 ### timeSeries.fixedWindowRollup(windowSize, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
@@ -826,11 +907,11 @@ collected together to form a new TimeSeries.
 - data <code>object</code> - Meta data for the resulting TimeSeries
 - seriesList <code>array</code> - A list of TimeSeries objects
 - reducer <code>func</code> - The reducer function
-- fieldSpec <code>string</code> - Column or columns to look up. If you
-                               need to retrieve multiple deep
-                               nested values that ['can.be', 'done.with',
-                               'this.notation']. A single deep value with a
-                               string.like.this.
+- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you
+                                     need to retrieve multiple deep
+                                     nested values that ['can.be', 'done.with',
+                                     'this.notation']. A single deep value with a
+                                     string.like.this.
 
 <a name="TimeSeries.timeSeriesListMerge"></a>
 

@@ -16,8 +16,10 @@ import util from "./util";
 /**
  * A processor that fills missing/invalid values in the event with
  * new values (zero, interpolated or padded).
- * Number of filled events in new series can be controlled by
- * putting .take() in the pipeline chain.
+ *
+ * When doing a linear fill, Filler instances should be chained.
+ *
+ * If no fieldSpec is supplied, the default field "value" will be used.
  */
 export default class Filler extends Processor {
 
@@ -51,9 +53,8 @@ export default class Filler extends Processor {
         // state for pad to refer to previous event
         this._previousEvent = null;
 
-        // record of filled list values for linear to
-        // alternately skip or fill depending on context.
-        this._filledLists = [];
+        // key count for zero and pad fill
+        this._keyCount = {};
 
         // special state for linear fill
         this._lastGoodLinear = null;
@@ -61,8 +62,6 @@ export default class Filler extends Processor {
         // cache of events pending linear fill
         this._linearFillCache = [];
 
-        // key count for zero and pad fill
-        this._keyCount = {};
 
         if (!_.contains(["zero", "pad", "linear"], this._method)) {
             throw new Error(`Unknown method ${this._method} passed to Filler`);
@@ -71,6 +70,14 @@ export default class Filler extends Processor {
         if (_.isString(this._fieldSpec)) {
             this._fieldSpec = [this._fieldSpec];
         }
+
+        // When using linear mode, only a single column will be
+        // processed per instance
+
+        if (this._method === "linear" && this.fieldSpec.length > 1) {
+            throw new Error("Linear fill takes a path to a single column");
+        }
+
     }
 
     clone() {
@@ -99,12 +106,14 @@ export default class Filler extends Processor {
                 continue;
             }
 
+            // Get the next value using the fieldPath
             const val = newData.getIn(fieldPath);
 
             if (util.isMissing(val)) {
 
                 // Have we hit the limit?
-                if (this._fillLimit && this._keyCount[pathKey] >= this._fillLimit) {
+                if (this._fillLimit &&
+                    this._keyCount[pathKey] >= this._fillLimit) {
                     continue;
                 }
 
@@ -113,7 +122,8 @@ export default class Filler extends Processor {
                     this._keyCount[pathKey]++;
                 } else if (this._method === "pad") { // set to previous value
                     if (!_.isNull(this._previousEvent)) {
-                        const prevVal = this._previousEvent.data().getIn(fieldPath);
+                        const prevVal =
+                            this._previousEvent.data().getIn(fieldPath);
 
                         if (!util.isMissing(prevVal)) {
                             newData = newData.setIn(fieldPath, prevVal);

@@ -12,20 +12,16 @@
 /* eslint no-unused-expressions: 0 */
 /* eslint-disable max-len */
 
-import moment from "moment";
 import { expect } from "chai";
 
 import Event from "../../src/event";
-import TimeRangeEvent from "../../src/timerangeevent";
 import TimeSeries from "../../src/series.js";
-import TimeRange from "../../src/range.js";
 import Collection from "../../src/collection.js";
-import { sum, max, avg } from "../../src/functions";
 
 const EVENT_LIST = [
-    new Event(1429673400000, {'in': 1, 'out': 2}),
-    new Event(1429673460000, {'in': 3, 'out': 4}),
-    new Event(1429673520000, {'in': 5, 'out': 6}),
+    new Event(1429673400000, {in: 1, out: 2}),
+    new Event(1429673460000, {in: 3, out: 4}),
+    new Event(1429673520000, {in: 5, out: 6})
 ];
 
 const TICKET_RANGE = {
@@ -67,7 +63,7 @@ describe("Renaming columns of a TimeSeries", () => {
         const name = "collection";
         const collection = new Collection(EVENT_LIST);
         const ts = new TimeSeries({name, collection});
-        const renamed = ts.renameColumns({"in": "new_in", "out": "new_out"})
+        const renamed = ts.renameColumns({in: "new_in", out: "new_out"});
 
         expect(renamed.at(0).get("new_in")).to.equal(ts.at(0).get("in"));
         expect(renamed.at(0).get("new_out")).to.equal(ts.at(0).get("out"));
@@ -82,36 +78,56 @@ describe("Renaming columns of a TimeSeries", () => {
     });
    
     it("can rename a columns on a TimeRangeEvent series", done => {
+
+        const ts = new TimeSeries(TICKET_RANGE);
+        const renamed = ts.renameColumns({title: "event", esnet_ticket: "ticket"});
+
+        expect(renamed.at(0).get("event")).to.equal(ts.at(0).get("title"));
+        expect(renamed.at(0).get("ticket")).to.equal(ts.at(0).get("esnet_ticket"));
+
+        expect(renamed.at(1).get("event")).to.equal(ts.at(1).get("title"));
+        expect(renamed.at(1).get("ticket")).to.equal(ts.at(1).get("esnet_ticket"));
+
+        expect(renamed.at(0).timestamp().getTime()).to.equal(ts.at(0).timestamp().getTime());
+        expect(renamed.at(1).timestamp().getTime()).to.equal(ts.at(1).timestamp().getTime());
+
+        done();
+    });
+
+    it("can rename a columns on a IndexedEvent series", done => {
+
         const ts = new TimeSeries(AVAILABILITY_DATA);
-        const renamed = ts.renameColumns({"uptime": "available"})
+        const renamed = ts.renameColumns({uptime: "available"});
 
         expect(renamed.at(0).get("available")).to.equal(ts.at(0).get("uptime"));
         expect(renamed.at(2).get("available")).to.equal(ts.at(2).get("uptime"));
         expect(renamed.at(4).get("available")).to.equal(ts.at(4).get("uptime"));
         expect(renamed.at(6).get("available")).to.equal(ts.at(6).get("uptime"));
 
-        expect(renamed.at(0).timestamp().getTime()).to.equal(ts.at(0).timestamp().getTime());
-        expect(renamed.at(1).timestamp().getTime()).to.equal(ts.at(1).timestamp().getTime());
-        expect(renamed.at(2).timestamp().getTime()).to.equal(ts.at(2).timestamp().getTime());
+        expect(renamed.at(0).timestamp()).to.equal(ts.at(0).timestamp());
+        expect(renamed.at(1).timestamp()).to.equal(ts.at(1).timestamp());
+        expect(renamed.at(2).timestamp()).to.equal(ts.at(2).timestamp());
 
         done();
     });
 
 });
 
+/*
 describe("Filling missing values in a TimeSeries", () => {
 
     it("can use the filler to fill missing values with zero", done => {
+
         const ts = new TimeSeries({
             name: "traffic",
             columns: ["time", "direction"],
             points: [
-                [1400425947000, {"in": 1, "out": null}],
-                [1400425948000, {"in": null, "out": 4}],
-                [1400425949000, {"in": 5, "out": null}],
-                [1400425950000, {"in": null, "out": 8}],
-                [1400425960000, {"in": 9, "out": null}],
-                [1400425970000, {"in": null, "out": 12}]
+                [1400425947000, {in: 1, out: null}],
+                [1400425948000, {in: null, out: 4}],
+                [1400425949000, {in: 5, out: null}],
+                [1400425950000, {in: null, out: 8}],
+                [1400425960000, {in: 9, out: null}],
+                [1400425970000, {in: null, out: 12}]
             ]
         });
 
@@ -299,3 +315,4 @@ describe("Filling missing values in a TimeSeries", () => {
         done();
     });
 });
+*/

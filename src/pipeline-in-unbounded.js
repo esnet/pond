@@ -30,6 +30,7 @@ export default class UnboundedIn extends PipelineIn {
      */
     stop() {
         this._running = false;
+        this.flush();  // emit a flush to let processors cleanly exit.
     }
 
     /**

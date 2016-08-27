@@ -353,7 +353,11 @@ class TimeSeries {
             throw new Error("Collection supplied is not chronological");
         }
         const result = new TimeSeries(this);
-        result._collection = collection;
+        if (collection) {
+            result._collection = collection;
+        } else {
+            result._collection = new Collection();
+        }
         return result;
     }
 
@@ -878,28 +882,72 @@ class TimeSeries {
      *                                      'this.notation']. A single deep value with a
      *                                      string.like.this.
      * @param  {String} method              Filling method: "zero" | "linear" | "pad"
-     * @param  {number} fillLimit           Set a limit on the number of events that will
-     *                                      be cached awaiting processing when fill method
-     *                                      is linear. If that number of invalid values
-     *                                      for the given field_spec are seen w/out hitting
-     *                                      a valid value (which is required for a linear
-     *                                      fill), then the unfilled events will be emitted
-     *                                      and will continue to be emitted until a valid
-     *                                      value is seen again. This is to keep events from
-     *                                      getting "stuck" in the queue during long runs
-     *                                      of invalid data. Setting this when using an
-     *                                      unbounded source is highly suggested. If not set,
-     *                                      then events will continue to cache until a good
-     *                                      value is seen or `flush()` is called.
+     * @param  {number} limit               Set a limit on the number of consecutive events
+     *                                      will be filled before it starts returning invalid
+     *                                      values. For linear fill, no filling will happen
+     *                                      if the limit is reached before a valid value
+     *                                      is found.
      *
      * @return {TimeSeries}                 The new TimeSeries
      */
-    fill(fieldSpec, method = "zero", fillLimit = null) {
+    fill(fieldSpec, method = "zero", limit = null) {
+        let pipeline = this.pipeline();
+
+        if (method === "zero" || method === "pad") {
+            pipeline = pipeline.fill(fieldSpec, method, limit);
+        } else if (method === "linear" && _.isArray(fieldSpec)) {
+            fieldSpec.forEach(fieldPath => {
+                pipeline = pipeline.fill(fieldPath, method, limit);
+            });
+        } else {
+            throw new Error("Invalid fill method", method);
+        }
+
         const collections = this.pipeline()
-            .fill(fieldSpec, method, fillLimit)
             .toKeyedCollections();
 
         return this.setCollection(collections["all"]);
+    }
+
+    /**
+     * Align of values to regular time boundaries. The value at
+     * the boundary is interpolated. Only the new interpolated
+     * points are returned. If limit is reached nulls will be
+     * returned at each boundary position.
+     *
+     * One use case for this is to modify irregular data (i.e. data
+     * that falls at irregular times) so that it falls into a
+     * sequence of evenly spaced values. We use this to take data we
+     * get from the network which is approximately every 30 second
+     * (:32, 1:02, 1:34, ...) and output data on exact 30 second
+     * boundaries (:30, 1:00, 1:30, ...).
+     *
+     * Another use case is data that might be already aligned to
+     * some regular interval, but that contains missing points.
+     * While `fill()` can be used to replace null values, align
+     * can be used to add in missing points completely. Those points
+     * can have an interpolated value, or by setting limit to 0,
+     * can be filled with nulls. This is really useful when downstream
+     * processing depends on complete sequences.
+     */
+    align(fieldSpec = "value", window = "5m", method="linear", limit = null) {
+        const collection = this.pipeline()
+            .align(fieldSpec, window, method, limit)
+            .toKeyedCollections();
+
+        return this.setCollection(collection["all"]);
+    }
+
+    /**
+     * Returns the derivative of the TimeSeries for the given
+     * TimeSeries.
+     */
+    rate(fieldSpec = "value") {
+        const collection = this.pipeline()
+            .rate(fieldSpec)
+            .toKeyedCollections();
+
+        return this.setCollection(collection["all"]);
     }
 
     /**
