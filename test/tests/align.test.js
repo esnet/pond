@@ -137,15 +137,15 @@ describe("Testing the align() processor", () => {
 
     it("can do align with with invalid points", done => {
         const ts = new TimeSeries(SIMPLE_GAP_DATA_BAD);
-        const aligned = ts.align("value", "1m", "linear", 2);
+        const aligned = ts.align("value", "1m", "linear");
 
         expect(aligned.size()).to.equal(8);
         expect(aligned.at(0).get()).to.equal(1.25);
         expect(aligned.at(1).get()).to.equal(1.8571428571428572);
         expect(aligned.at(2).get()).to.equal(1.2857142857142856);
-        //expect(aligned.at(3).get()).to.equal(1.0);
-        //expect(aligned.at(4).get()).to.equal(1.0); // ???
-        //expect(aligned.at(5).get()).to.equal(1.0);
+        expect(aligned.at(3).get()).to.equal(1.0);
+        expect(aligned.at(4).get()).to.equal(1.0);
+        expect(aligned.at(5).get()).to.equal(1.0);
         expect(aligned.at(6).get()).to.be.null;  // bad value
         expect(aligned.at(7).get()).to.be.null;  // bad value
         done();
