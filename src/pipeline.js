@@ -852,9 +852,10 @@ class Pipeline {
         return this._append(p);
     }
 
-    rate(fieldSpec) {
+    rate(fieldSpec, allowNegative = true) {
         const p = new Derivator(this, {
             fieldSpec,
+            allowNegative,
             prev: this._chainLast()
         });
 

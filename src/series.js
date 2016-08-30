@@ -942,9 +942,9 @@ class TimeSeries {
      * Returns the derivative of the TimeSeries for the given
      * TimeSeries.
      */
-    rate(fieldSpec = "value") {
+    rate(fieldSpec = "value", allowNegative = true) {
         const collection = this.pipeline()
-            .rate(fieldSpec)
+            .rate(fieldSpec, allowNegative)
             .toKeyedCollections();
 
         return this.setCollection(collection["all"]);

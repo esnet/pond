@@ -200,4 +200,38 @@ describe("Testing align() and rate() together", () => {
     });
 
     it("can handle bad args");
+
+    it("can output nulls for negative values", done => {
+
+        const ts = new TimeSeries({
+            name: "traffic",
+            columns: ["time", "value"],
+            points: [
+                [89000, 100],
+                [181000, 50]
+            ]
+        });
+
+        const rates1 = ts.align("value", "30s").rate();
+
+        //lower counter will produce negative derivatives
+        expect(rates1.size()).to.equal(3);
+        expect(rates1.at(0).get("value_rate")).to.equal(-0.5434782608695656);
+        expect(rates1.at(1).get("value_rate")).to.equal(-0.5434782608695646);
+        expect(rates1.at(2).get("value_rate")).to.equal(-0.5434782608695653);
+
+        const rates2 = ts.align("value", "30s").rate(null, false);
+
+        expect(rates2.size()).to.equal(3)
+        expect(rates2.at(0).get("value_rate")).to.be.null;
+        expect(rates2.at(1).get("value_rate")).to.be.null;
+        expect(rates2.at(2).get("value_rate")).to.be.null;
+        
+        done();
+    });
 });
+
+
+
+
+

@@ -8,6 +8,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+/*eslint no-console: 0 */
+
 import _ from "underscore";
 import Immutable from "immutable";
 import IndexedEvent from "./indexedevent";
@@ -29,11 +31,14 @@ export default class Derivator extends Processor {
         if (arg1 instanceof Derivator) {
             const other = arg1;
             this._fieldSpec = other._fieldSpec;
+            this._allowNegative = other._allowNegative;
         } else if (isPipeline(arg1)) {
             const {
-                fieldSpec
+                fieldSpec,
+                allowNegative
             } = options;
             this._fieldSpec = fieldSpec;
+            this._allowNegative = allowNegative;
         } else {
             throw new Error("Unknown arg to Derivator constructor", arg1);
         }
@@ -47,6 +52,8 @@ export default class Derivator extends Processor {
         // work out field specs
         if (_.isString(this._fieldSpec)) {
             this._fieldSpec = [this._fieldSpec];
+        } else if (!this._fieldSpec) {
+            this._fieldSpec = ["value"];
         }
     }
 
@@ -79,7 +86,13 @@ export default class Derivator extends Processor {
             } else {
                 rate = (currentVal - previousVal) / deltaTime;
             }
-            d = d.setIn(ratePath, rate);
+
+            if (this._allowNegative === false && rate < 0) {
+                // don't allow negative differentials in certain cases
+                d = d.setIn(ratePath, null);
+            } else {
+                d = d.setIn(ratePath, rate);
+            }
         });
 
         return new TimeRangeEvent([previousTime, currentTime], d);

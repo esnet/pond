@@ -8,6 +8,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+/*eslint no-console: 0 */
+
 import _ from "underscore";
 import Event from "./event";
 import Index from "./index";
@@ -154,7 +156,7 @@ export default class Aligner extends Processor {
 
             let interpolatedVal = null;
             if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
-                //console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
+                console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
             } else {
                 interpolatedVal = previousVal + f * (currentVal - previousVal);
             }
