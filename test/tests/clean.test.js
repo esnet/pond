@@ -113,7 +113,7 @@ describe("Renaming columns of a TimeSeries", () => {
 
 });
 
-/*
+
 describe("Filling missing values in a TimeSeries", () => {
 
     it("can use the filler to fill missing values with zero", done => {
@@ -135,7 +135,11 @@ describe("Filling missing values in a TimeSeries", () => {
         // fill all columns, limit to 3
         //
 
-        const newTS = ts.fill(null, "zero", 3); // limit = 3
+        const newTS = ts.fill({
+            fieldSpec: ["direction.in", "direction.out"],
+            method: "zero",
+            limit: 3
+        });
 
         expect(newTS.size()).to.equal(6);
 
@@ -147,10 +151,10 @@ describe("Filling missing values in a TimeSeries", () => {
         // fill one column, limit to 4 in result set
         //
         
-        const newTS2 = ts.fill("direction.in", "zero", 4); // limit = 4
+        const newTS2 = ts.fill({fieldSpec: "direction.in", method: "zero", limit: 4});
 
-        expect(newTS2.at(1).get("direction.in"), 0)
-        expect(newTS2.at(3).get("direction.in"), 0)
+        expect(newTS2.at(1).get("direction.in"), 0);
+        expect(newTS2.at(3).get("direction.in"), 0);
 
         expect(newTS2.at(0).get("direction.out")).to.be.null;
         expect(newTS2.at(2).get("direction.out")).to.be.null;
@@ -165,21 +169,21 @@ describe("Filling missing values in a TimeSeries", () => {
             columns: ["time", "direction"],
             points: [
                 [1400425947000,
-                    {"in": {"tcp": 1, "udp": 3}, "out": {"tcp": 2, "udp": 3}}],
+                    {in: {tcp: 1, udp: 3}, out: {tcp: 2, udp: 3}}],
                 [1400425948000,
-                    {"in": {"tcp": 3, "udp": null}, "out": {"tcp": 4, "udp": 3}}],
+                    {in: {tcp: 3, udp: null}, out: {tcp: 4, udp: 3}}],
                 [1400425949000,
-                    {"in": {"tcp": 5, "udp": null}, "out": {"tcp": null, "udp": 3}}],
+                    {in: {tcp: 5, udp: null}, out: {tcp: null, udp: 3}}],
                 [1400425950000,
-                    {"in": {"tcp": 7, "udp": null}, "out": {"tcp": null, "udp": 3}}],
+                    {in: {tcp: 7, udp: null}, out: {tcp: null, udp: 3}}],
                 [1400425960000,
-                    {"in": {"tcp": 9, "udp": 4}, "out": {"tcp": 6, "udp": 3}}],
+                    {in: {tcp: 9, udp: 4}, out: {tcp: 6, udp: 3}}],
                 [1400425970000,
-                    {"in": {"tcp": 11, "udp": 5}, "out": {"tcp": 8, "udp": 3}}]
+                    {in: {tcp: 11, udp: 5}, out: {tcp: 8, udp: 3}}]
             ]
         });
 
-        const newTS = ts.fill();
+        const newTS = ts.fill({fieldSpec: ["direction.out.tcp", "direction.in.udp"]});
 
         expect(newTS.at(0).get("direction.in.udp")).to.equal(3);
         expect(newTS.at(1).get("direction.in.udp")).to.equal(0);  // fill
@@ -199,7 +203,7 @@ describe("Filling missing values in a TimeSeries", () => {
         // do it again, but only fill the out.tcp
         //
 
-        const newTS2 = ts.fill(["direction.out.tcp"]);
+        const newTS2 = ts.fill({fieldSpec: ["direction.out.tcp"]});
 
         expect(newTS2.at(0).get("direction.out.tcp")).to.equal(2);
         expect(newTS2.at(1).get("direction.out.tcp")).to.equal(4);
@@ -219,26 +223,31 @@ describe("Filling missing values in a TimeSeries", () => {
     });
    
     it("can limit pad and zero filling", done => {
+
         const ts = new TimeSeries({
             name: "traffic",
             columns: ["time", "direction"],
             points: [
-                [1400425947000, {'in': 1, 'out': null}],
-                [1400425948000, {'in': null, 'out': null}],
-                [1400425949000, {'in': null, 'out': null}],
-                [1400425950000, {'in': 3, 'out': 8}],
-                [1400425960000, {'in': null, 'out': null}],
-                [1400425970000, {'in': null, 'out': 12}],
-                [1400425980000, {'in': null, 'out': 13}],
-                [1400425990000, {'in': 7, 'out': null}],
-                [1400426000000, {'in': 8, 'out': null}],
-                [1400426010000, {'in': 9, 'out': null}],
-                [1400426020000, {'in': 10, 'out': null}]
+                [1400425947000, {in: 1, out: null}],
+                [1400425948000, {in: null, out: null}],
+                [1400425949000, {in: null, out: null}],
+                [1400425950000, {in: 3, out: 8}],
+                [1400425960000, {in: null, out: null}],
+                [1400425970000, {in: null, out: 12}],
+                [1400425980000, {in: null, out: 13}],
+                [1400425990000, {in: 7, out: null}],
+                [1400426000000, {in: 8, out: null}],
+                [1400426010000, {in: 9, out: null}],
+                [1400426020000, {in: 10, out: null}]
             ]
         });
 
         //verify fill limit for zero fill
-        const zeroTS = ts.fill(null, "zero", 2);
+        const zeroTS = ts.fill({
+            fieldSpec: ["direction.in", "direction.out"],
+            method: "zero",
+            limit: 2
+        });
 
         expect(zeroTS.at(0).get("direction.in")).to.equal(1);
         expect(zeroTS.at(1).get("direction.in")).to.equal(0);    // fill
@@ -252,7 +261,6 @@ describe("Filling missing values in a TimeSeries", () => {
         expect(zeroTS.at(9).get("direction.in")).to.equal(9);
         expect(zeroTS.at(10).get("direction.in")).to.equal(10);
 
-        
         expect(zeroTS.at(0).get("direction.out")).to.equal(0);   // fill
         expect(zeroTS.at(1).get("direction.out")).to.equal(0);   // fill
         expect(zeroTS.at(2).get("direction.out")).to.be.null;    // over limit skip
@@ -266,7 +274,11 @@ describe("Filling missing values in a TimeSeries", () => {
         expect(zeroTS.at(10).get("direction.out")).to.be.null;   // over limit skip
 
         // verify fill limit for pad fill
-        const padTS = ts.fill(null, "pad", 2);
+        const padTS = ts.fill({
+            fieldSpec: ["direction.in", "direction.out"],
+            method: "pad",
+            limit: 2
+        });
 
         expect(padTS.at(0).get("direction.in")).to.equal(1);
         expect(padTS.at(1).get("direction.in")).to.equal(1);     // fill
@@ -315,4 +327,4 @@ describe("Filling missing values in a TimeSeries", () => {
         done();
     });
 });
-*/
+

@@ -30,18 +30,12 @@ export default class Filler extends Processor {
             const other = arg1;
             this._fieldSpec = other._fieldSpec;
             this._method = other._method;
-            this._fillLimit = other._fillLimit;
+            this._limit = other._limit;
         } else if (isPipeline(arg1)) {
-            const {
-                fieldSpec,
-                method = "zero",
-                fillLimit = null
-            } = options;
-
+            const {fieldSpec, method = "zero", limit = null} = options;
             this._fieldSpec = fieldSpec;
             this._method = method;
-            this._fillLimit = fillLimit;
-
+            this._limit = limit;
         } else {
             throw new Error("Unknown arg to Filler constructor", arg1);
         }
@@ -69,6 +63,8 @@ export default class Filler extends Processor {
 
         if (_.isString(this._fieldSpec)) {
             this._fieldSpec = [this._fieldSpec];
+        } else if (_.isNull(this._fieldSpec)) {
+            this._fieldSpec = ["value"];
         }
 
         // When using linear mode, only a single column will be
@@ -112,8 +108,8 @@ export default class Filler extends Processor {
             if (util.isMissing(val)) {
 
                 // Have we hit the limit?
-                if (this._fillLimit &&
-                    this._keyCount[pathKey] >= this._fillLimit) {
+                if (this._limit &&
+                    this._keyCount[pathKey] >= this._limit) {
                     continue;
                 }
 
@@ -144,7 +140,6 @@ export default class Filler extends Processor {
      * Perform the fill operation on the event and emit.
      */
     addEvent(event) {
-
         if (this.hasObservers()) {
 
             const toEmit = [];

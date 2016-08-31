@@ -329,7 +329,7 @@ class Pipeline {
         return new Pipeline(d);
     }
 
-    _chainLast() {
+    _chainPrev() {
         return this.last() || this;
     }
 
@@ -648,7 +648,7 @@ class Pipeline {
         const p = new Offset(this, {
             by,
             fieldSpec,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -692,7 +692,7 @@ class Pipeline {
     aggregate(fields) {
         const p = new Aggregator(this, {
             fields,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
         return this._append(p);
     }
@@ -716,7 +716,7 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
         
         return this._append(p);
@@ -732,7 +732,7 @@ class Pipeline {
     map(op) {
         const p = new Mapper(this, {
             op,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -748,7 +748,7 @@ class Pipeline {
     filter(op) {
         const p = new Filter(this, {
             op,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -768,7 +768,7 @@ class Pipeline {
     select(fieldSpec) {
         const p = new Selector(this, {
             fieldSpec,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -806,7 +806,7 @@ class Pipeline {
             name,
             reducer,
             append,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -822,41 +822,30 @@ class Pipeline {
      * set, use Pipeline.keep() in the chain. See: TimeSeries.fill()
      * for an example.
      *
-     * @param {string|array} fieldSpec  Column or columns to look up. If you need
-     *                                  to retrieve multiple deep nested values that
-     *                                  ['can.be', 'done.with', 'this.notation'].
-     *                                  A single deep value with a string.like.this.
-     * @param  {[type]}      method     Filling method: zero | linear | pad
+     * Fill takes a single arg `options` which should be composed of:
+     *  * fieldSpec - Column or columns to look up. If you need
+     *                to retrieve multiple deep nested values that
+     *                ['can.be', 'done.with', 'this.notation'].
+     *                A single deep value with a string.like.this.
+     *  * method -    Filling method: zero | linear | pad
+     *
      * @return {Pipeline}               The Pipeline
      */
-    fill(fieldSpec, method, fillLimit) {
-        const p = new Filler(this, {
-            fieldSpec,
-            method,
-            fillLimit,
-            prev: this._chainLast()
-        });
-
-        return this._append(p);
+    fill({fieldSpec = null, method = "linear", limit = null}) {
+        const prev = this._chainPrev();
+        return this._append(new Filler(this, {fieldSpec, method, limit, prev}));
     }
 
     align(fieldSpec, window, method, limit) {
-        const p = new Aligner(this, {
-            fieldSpec,
-            window,
-            method,
-            limit,
-            prev: this._chainLast()
-        });
-
-        return this._append(p);
+        const prev = this._chainPrev();
+        return this._append(new Aligner(this, {fieldSpec, window, method, limit, prev}));
     }
 
     rate(fieldSpec, allowNegative = true) {
         const p = new Derivator(this, {
             fieldSpec,
             allowNegative,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -872,7 +861,7 @@ class Pipeline {
     take(limit) {
         const p = new Taker(this, {
             limit,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -901,7 +890,7 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
         
         return this._append(p);
@@ -924,7 +913,7 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this._chainLast()
+            prev: this._chainPrev()
         });
         return this._append(p);
     }

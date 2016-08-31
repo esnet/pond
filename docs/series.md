@@ -681,10 +681,12 @@ extravagant renaming, roll your own using map().
 <a name="TimeSeries+fill"></a>
 
 ### timeSeries.fill(fieldSpec, method, limit) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-Take the data in this TimeSeries and "fill" any missing
-or invalid values. This could be setting `null` values to zero
-so mathematical operations will succeed, interpolate a new
-value, or pad with the previously given value.
+Take the data in this TimeSeries and "fill" any missing or invalid
+values. This could be setting `null` values to zero so mathematical
+operations will succeed, interpolate a new value, or pad with the
+previously given value.
+
+The `fill()` method takes a single `options` arg, containing the following:
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The new TimeSeries  
@@ -695,8 +697,8 @@ value, or pad with the previously given value.
                                      nested values that ['can.be', 'done.with',
                                      'this.notation']. A single deep value with a
                                      string.like.this.
-- method <code>String</code> <code> = zero</code> - Filling method: "zero" | "linear" | "pad"
-- limit <code>number</code> <code> = </code> - Set a limit on the number of consecutive events
+- method <code>String</code> - Filling method: "zero" | "linear" | "pad"
+- limit <code>number</code> - Set a limit on the number of consecutive events
                                      will be filled before it starts returning invalid
                                      values. For linear fill, no filling will happen
                                      if the limit is reached before a valid value

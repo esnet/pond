@@ -871,10 +871,12 @@ class TimeSeries {
     }
 
     /**
-     * Take the data in this TimeSeries and "fill" any missing
-     * or invalid values. This could be setting `null` values to zero
-     * so mathematical operations will succeed, interpolate a new
-     * value, or pad with the previously given value.
+     * Take the data in this TimeSeries and "fill" any missing or invalid
+     * values. This could be setting `null` values to zero so mathematical
+     * operations will succeed, interpolate a new value, or pad with the
+     * previously given value.
+     *
+     * The `fill()` method takes a single `options` arg, containing the following:
      *
      * @param  {string|array}   fieldSpec   Column or columns to look up. If you
      *                                      need to retrieve multiple deep
@@ -890,20 +892,20 @@ class TimeSeries {
      *
      * @return {TimeSeries}                 The new TimeSeries
      */
-    fill(fieldSpec, method = "zero", limit = null) {
+    fill({fieldSpec, method = "zero", limit = null}) {
         let pipeline = this.pipeline();
 
         if (method === "zero" || method === "pad") {
-            pipeline = pipeline.fill(fieldSpec, method, limit);
+            pipeline = pipeline.fill({fieldSpec, method, limit});
         } else if (method === "linear" && _.isArray(fieldSpec)) {
             fieldSpec.forEach(fieldPath => {
-                pipeline = pipeline.fill(fieldPath, method, limit);
+                pipeline = pipeline.fill({fieldPath, method, limit});
             });
         } else {
-            throw new Error("Invalid fill method", method);
+            throw new Error("Invalid fill method:", method);
         }
 
-        const collections = this.pipeline()
+        const collections = pipeline
             .toKeyedCollections();
 
         return this.setCollection(collections["all"]);
