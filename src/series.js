@@ -892,14 +892,14 @@ class TimeSeries {
      *
      * @return {TimeSeries}                 The new TimeSeries
      */
-    fill({fieldSpec, method = "zero", limit = null}) {
+    fill({fieldSpec = null, method = "zero", limit = null}) {
         let pipeline = this.pipeline();
 
         if (method === "zero" || method === "pad") {
             pipeline = pipeline.fill({fieldSpec, method, limit});
         } else if (method === "linear" && _.isArray(fieldSpec)) {
             fieldSpec.forEach(fieldPath => {
-                pipeline = pipeline.fill({fieldPath, method, limit});
+                pipeline = pipeline.fill({fieldSpec: fieldPath, method, limit});
             });
         } else {
             throw new Error("Invalid fill method:", method);

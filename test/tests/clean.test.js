@@ -17,6 +17,9 @@ import { expect } from "chai";
 import Event from "../../src/event";
 import TimeSeries from "../../src/series.js";
 import Collection from "../../src/collection.js";
+import { Pipeline } from "../../src/pipeline.js";
+import UnboundedIn from "../../src/pipeline-in-unbounded.js";
+import CollectionOut from "../../src/pipeline-out-collection.js";
 
 const EVENT_LIST = [
     new Event(1429673400000, {in: 1, out: 2}),
@@ -306,8 +309,231 @@ describe("Filling missing values in a TimeSeries", () => {
 
         done();
     });
+   
+    it("can do linear interpolation fill (test_linear)", done => {
+
+        const ts = new TimeSeries({
+            name: "traffic",
+            columns: ["time", "direction"],
+            points: [
+                [1400425947000, {in: 1, out: 2}],
+                [1400425948000, {in: null, out: null}],
+                [1400425949000, {in: null, out: null}],
+                [1400425950000, {in: 3, out: null}],
+                [1400425960000, {in: null, out: null}],
+                [1400425970000, {in: 5, out: 12}],
+                [1400425980000, {in: 6, out: 13}]
+            ]
+        });
+
+        const result = ts.fill({
+            fieldSpec: ["direction.in", "direction.out"],
+            method: "linear"
+        });
+
+        expect(result.size()).to.equal(7);
+
+        expect(result.at(0).get("direction.in")).to.equal(1);
+        expect(result.at(1).get("direction.in")).to.equal(1.6666666666666665);     // filled
+        expect(result.at(2).get("direction.in")).to.equal(2.333333333333333);     // filled
+        expect(result.at(3).get("direction.in")).to.equal(3);
+        expect(result.at(4).get("direction.in")).to.equal(4.0);     // filled
+        expect(result.at(5).get("direction.in")).to.equal(5);
+
+        expect(result.at(0).get("direction.out")).to.equal(2);
+        expect(result.at(1).get("direction.out")).to.equal(2.4347826086956523);    // filled
+        expect(result.at(2).get("direction.out")).to.equal(2.869565217391304);    // filled
+        expect(result.at(3).get("direction.out")).to.equal(3.3043478260869565);  // filled
+        expect(result.at(4).get("direction.out")).to.equal(7.652173913043478); // filled
+        expect(result.at(5).get("direction.out")).to.equal(12);
+
+        done();
+    });
+   
+    it("can do linear interpolation fill with a pipeline (test_linear_list)", done => {
+
+        const ts = new TimeSeries({
+            name: "traffic",
+            columns: ["time", "direction"],
+            points: [
+                [1400425947000, {in: 1, out: 2}],
+                [1400425948000, {in: null, out: null}],
+                [1400425949000, {in: null, out: null}],
+                [1400425950000, {in: 3, out: null}],
+                [1400425960000, {in: null, out: null}],
+                [1400425970000, {in: 5, out: 12}],
+                [1400425980000, {in: 6, out: 13}]
+            ]
+        });
+
+        const result = Pipeline()
+            .from(ts)
+            .fill({fieldSpec: "direction.in", method: "linear"})
+            .fill({fieldSpec: "direction.out", method: "linear"})
+            .toEventList();
+
+        expect(result.length).to.equal(7);
+
+        expect(result[0].get("direction.in")).to.equal(1);
+        expect(result[1].get("direction.in")).to.equal(1.6666666666666665);     // filled
+        expect(result[2].get("direction.in")).to.equal(2.333333333333333);     // filled
+        expect(result[3].get("direction.in")).to.equal(3);
+        expect(result[4].get("direction.in")).to.equal(4.0);     // filled
+        expect(result[5].get("direction.in")).to.equal(5);
+
+        expect(result[0].get("direction.out")).to.equal(2);
+        expect(result[1].get("direction.out")).to.equal(2.4347826086956523);    // filled
+        expect(result[2].get("direction.out")).to.equal(2.869565217391304);    // filled
+        expect(result[3].get("direction.out")).to.equal(3.3043478260869565);  // filled
+        expect(result[4].get("direction.out")).to.equal(7.652173913043478); // filled
+        expect(result[5].get("direction.out")).to.equal(12);
+
+        done();
+    });
+
+    it("can do assymetric linear interpolation (test_assymetric_linear_fill)", done => {
+
+        const ts = new TimeSeries({
+            name: "traffic",
+            columns: ["time", "direction"],
+            points: [
+                [1400425947000, {in: 1, out: null}],
+                [1400425948000, {in: null, out: null}],
+                [1400425949000, {in: null, out: null}],
+                [1400425950000, {in: 3, out: 8}],
+                [1400425960000, {in: null, out: null}],
+                [1400425970000, {in: 5, out: 12}],
+                [1400425980000, {in: 6, out: 13}]
+            ]
+        });
+
+        const result = ts.fill({
+            fieldSpec: ["direction.in", "direction.out"],
+            method: "linear"
+        });
+
+        expect(result.at(0).get("direction.in")).to.equal(1);
+        expect(result.at(1).get("direction.in")).to.equal(1.6666666666666665); // filled
+        expect(result.at(2).get("direction.in")).to.equal(2.333333333333333);  // filled
+        expect(result.at(3).get("direction.in")).to.equal(3);
+        expect(result.at(4).get("direction.in")).to.equal(4.0);                // filled
+        expect(result.at(5).get("direction.in")).to.equal(5);
+
+        expect(result.at(0).get("direction.out")).to.be.null;
+        expect(result.at(1).get("direction.out")).to.be.null;
+        expect(result.at(2).get("direction.out")).to.be.null;
+        expect(result.at(3).get("direction.out")).to.equal(8);
+        expect(result.at(4).get("direction.out")).to.equal(10);               // filled
+        expect(result.at(5).get("direction.out")).to.equal(12);
+
+        done();
+    });
+
+    it("can do streaming fill (test_linear_stream)", done => {
+
+        const events = [
+            new Event(1400425947000, 1),
+            new Event(1400425948000, 2),
+            new Event(1400425949000, {value: null}),
+            new Event(1400425950000, {value: null}),
+            new Event(1400425951000, {value: null}),
+            new Event(1400425952000, 5),
+            new Event(1400425953000, 6),
+            new Event(1400425954000, 7)
+        ];
+
+        const stream = new UnboundedIn();
+
+        Pipeline()
+            .from(stream)
+            .emitOn("flush")
+            .fill({method: "linear", fieldSpec: "value"})
+            .to(CollectionOut, c => {
+                expect(c.at(0).value()).to.equal(1);
+                expect(c.at(1).value()).to.equal(2);
+                expect(c.at(2).value()).to.equal(2.75); // fill
+                expect(c.at(3).value()).to.equal(3.5);  // fill
+                expect(c.at(4).value()).to.equal(4.25); // fill
+                expect(c.at(5).value()).to.equal(5);
+                expect(c.at(6).value()).to.equal(6);
+                expect(c.at(7).value()).to.equal(7);
+                done();
+            });
+
+        events.forEach(e => stream.addEvent(e));
+        stream.stop();
+    });
+
+    it("can do streaming fill with limit (test_linear_stream_limit/1)", done => {
+
+        let results;
+
+        const events = [
+            new Event(1400425947000, 1),
+            new Event(1400425948000, 2),
+            new Event(1400425949000, {value: null}),
+            new Event(1400425950000, 3),
+            new Event(1400425951000, {value: null}),
+            new Event(1400425952000, {value: null}),
+            new Event(1400425953000, {value: null}),
+            new Event(1400425954000, {value: null})
+        ];
+
+        const stream = new UnboundedIn();
+
+        Pipeline()
+            .from(stream)
+            .fill({method: "linear", fieldSpec: "value"})
+            .to(CollectionOut, collection => {
+                results = collection;
+            });
+
+        events.forEach(e => stream.addEvent(e));
+        // should be blocked after 4 events waiting for a good next value
+        expect(results.size()).to.equal(4);
+        // stop the stream
+        stream.stop();
+        // should flush the last events anyway
+        expect(results.size()).to.equal(8);
+
+        done();
+    });
+
+    it("can do streaming fill with limit (test_linear_stream_limit/2)", done => {
+
+        let results;
+
+        const events = [
+            new Event(1400425947000, 1),
+            new Event(1400425948000, 2),
+            new Event(1400425949000, {value: null}),
+            new Event(1400425950000, 3),
+            new Event(1400425951000, {value: null}),
+            new Event(1400425952000, {value: null}),
+            new Event(1400425953000, {value: null}),
+            new Event(1400425954000, {value: null})
+        ];
+
+        const stream = new UnboundedIn();
+
+        Pipeline()
+            .from(stream)
+            .fill({method: "linear", fieldSpec: "value", limit: 3})
+            .to(CollectionOut, collection => {
+                results = collection;
+            });
+
+        events.forEach(e => stream.addEvent(e));
+
+        // Because of the limit, all events should be captured
+        // in the collection
+        expect(results.size()).to.equal(8);
+
+        done();
+    });
 
     //TODO
+    /*
     it("can throw on bad args", done => {
         const ts = new TimeSeries({
             name: "traffic",
@@ -326,5 +552,6 @@ describe("Filling missing values in a TimeSeries", () => {
 
         done();
     });
+    */
 });
 
