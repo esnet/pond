@@ -189,6 +189,7 @@ of collection data.
     * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.select(fieldSpec)](#Pipeline+select) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.collapse(fieldSpecList, name, reducer, append)](#Pipeline+collapse) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.fill()](#Pipeline+fill) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.take(limit)](#Pipeline+take) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asTimeRangeEvents(options)](#Pipeline+asTimeRangeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.asIndexedEvents(options)](#Pipeline+asIndexedEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -544,6 +545,27 @@ Collapse a subset of columns using a reducer function
           ...
      }, true);
 ```
+<a name="Pipeline+fill"></a>
+
+### pipeline.fill() ⇒ <code>[Pipeline](#Pipeline)</code>
+Take the data in this event steam and "fill" any missing
+or invalid values. This could be setting `null` values to `0`
+so mathematical operations will succeed, interpolate a new
+value, or pad with the previously given value.
+
+If one wishes to limit the number of filled events in the result
+set, use Pipeline.keep() in the chain. See: TimeSeries.fill()
+for an example.
+
+Fill takes a single arg `options` which should be composed of:
+ * fieldSpec - Column or columns to look up. If you need
+               to retrieve multiple deep nested values that
+               ['can.be', 'done.with', 'this.notation'].
+               A single deep value with a string.like.this.
+ * method -    Filling method: zero | linear | pad
+
+**Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
+**Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 <a name="Pipeline+take"></a>
 
 ### pipeline.take(limit) ⇒ <code>[Pipeline](#Pipeline)</code>

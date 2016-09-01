@@ -194,6 +194,10 @@ export default {
         return index;
     },
 
+    isMissing(val) {
+        return (_.isNull(val) || _.isUndefined(val) || _.isNaN(val));
+    },
+
     /**
      * Split the field spec if it is not already a list.
      *
@@ -205,7 +209,7 @@ export default {
      * to it, but this should also be deployed "upstream" to avoid
      * having that split() done over and over in a loop.
      */
-    fieldSpecToArray(fieldSpec) {
+    fieldPathToArray(fieldSpec) {
         if (_.isArray(fieldSpec) || _.isFunction(fieldSpec)) {
             return fieldSpec;
         } else if (_.isString(fieldSpec)) {
@@ -213,5 +217,31 @@ export default {
         } else if (_.isUndefined(fieldSpec)) {
             return ["value"];
         }
+    },
+
+    /**
+     * Generate a list of all possible field paths in an object. This is
+     * for to determine all deep paths when none is given.
+     */
+    generatePaths(newData) {
+        const paths = [];
+
+        function* recurse(data, keys = []) {
+            if (_.isObject(data)) {
+                for (const key of Object.keys(data)) {
+                    for (const path of recurse(data[key], [...keys, key])) {
+                        yield path;
+                    }
+                }
+            } else {
+                yield keys;
+            }
+        }
+
+        for (const key of recurse(newData)) {
+            paths.push(key);
+        }
+
+        return paths;
     }
 };

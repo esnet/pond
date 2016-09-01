@@ -246,7 +246,7 @@ class Event {
      */
     get(fieldPath) {
         let v;
-        const fspec = util.fieldSpecToArray(fieldPath);
+        const fspec = util.fieldPathToArray(fieldPath);
         v = this.data().getIn(fspec);
         if (v instanceof Immutable.Map || v instanceof Immutable.List) {
             return v.toJS();
@@ -286,27 +286,6 @@ class Event {
         data[name] = reducer(d);
         return this.setData(data);
     }
-
-    /*
-    fill(type, arg1, arg2) {
-        if (type === "NaN") {
-            const fixedValue = arg1;
-            const fixedKey = arg2;
-            const data = this._data.withMutations(d => {
-                this._data.forEach((value, key) => {
-                    if (_.isNaN(value) && (!fixedKey || fixedKey === key)) {
-                        d.set(key, fixedValue);
-                    }
-                });
-            });
-            this._data = data;
-            return this;
-        } else {
-            const msg = "Invalid fill type";
-            throw new Error(msg);
-        }
-    }
-    */
 
     static is(event1, event2) {
         return Immutable.is(event1._d, event2._d);

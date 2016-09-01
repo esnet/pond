@@ -11,23 +11,26 @@
 import Immutable from "immutable";
 import _ from "underscore";
 
-import UnboundedIn from "./pipeline-in-unbounded";
-import BoundedIn from "./pipeline-in-bounded";
-import Processor from "./processor";
-import Offset from "./offset";
-import Filter from "./filter";
-import Taker from "./taker";
 import Aggregator from "./aggregator";
-import Converter from "./converter";
-import Event from "./event";
-import TimeSeries from "./series";
-import TimeRangeEvent from "./timerangeevent";
-import IndexedEvent from "./indexedevent";
-import Selector from "./selector";
+import Aligner from "./aligner";
+import BoundedIn from "./pipeline-in-bounded";
 import Collapser from "./collapser";
-import Mapper from "./mapper";
-import EventOut from "./pipeline-out-event.js";
 import CollectionOut from "./pipeline-out-collection.js";
+import Converter from "./converter";
+import Derivator from "./derivator";
+import Event from "./event";
+import EventOut from "./pipeline-out-event.js";
+import Filler from "./filler";
+import Filter from "./filter";
+import IndexedEvent from "./indexedevent";
+import Mapper from "./mapper";
+import Offset from "./offset";
+import Processor from "./processor";
+import Selector from "./selector";
+import Taker from "./taker";
+import TimeRangeEvent from "./timerangeevent";
+import TimeSeries from "./series";
+import UnboundedIn from "./pipeline-in-unbounded";
 
 /**
  * A runner is used to extract the chain of processing operations
@@ -326,6 +329,10 @@ class Pipeline {
         return new Pipeline(d);
     }
 
+    _chainPrev() {
+        return this.last() || this;
+    }
+
     //
     // Pipeline state chained methods
     //
@@ -538,7 +545,12 @@ class Pipeline {
      *                         objects.
      */
     toKeyedCollections() {
-        return this.to(CollectionOut);
+        const result = this.to(CollectionOut);
+        if (result) {
+            return result;
+        } else {
+            return {};
+        }
     }
 
     /**
@@ -636,7 +648,7 @@ class Pipeline {
         const p = new Offset(this, {
             by,
             fieldSpec,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -680,7 +692,7 @@ class Pipeline {
     aggregate(fields) {
         const p = new Aggregator(this, {
             fields,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
         return this._append(p);
     }
@@ -704,7 +716,7 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
         
         return this._append(p);
@@ -720,7 +732,7 @@ class Pipeline {
     map(op) {
         const p = new Mapper(this, {
             op,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -736,7 +748,7 @@ class Pipeline {
     filter(op) {
         const p = new Filter(this, {
             op,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -756,7 +768,7 @@ class Pipeline {
     select(fieldSpec) {
         const p = new Selector(this, {
             fieldSpec,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -794,7 +806,46 @@ class Pipeline {
             name,
             reducer,
             append,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
+        });
+
+        return this._append(p);
+    }
+
+    /**
+     * Take the data in this event steam and "fill" any missing
+     * or invalid values. This could be setting `null` values to `0`
+     * so mathematical operations will succeed, interpolate a new
+     * value, or pad with the previously given value.
+     *
+     * If one wishes to limit the number of filled events in the result
+     * set, use Pipeline.keep() in the chain. See: TimeSeries.fill()
+     * for an example.
+     *
+     * Fill takes a single arg `options` which should be composed of:
+     *  * fieldSpec - Column or columns to look up. If you need
+     *                to retrieve multiple deep nested values that
+     *                ['can.be', 'done.with', 'this.notation'].
+     *                A single deep value with a string.like.this.
+     *  * method -    Filling method: zero | linear | pad
+     *
+     * @return {Pipeline}               The Pipeline
+     */
+    fill({fieldSpec = null, method = "linear", limit = null}) {
+        const prev = this._chainPrev();
+        return this._append(new Filler(this, {fieldSpec, method, limit, prev}));
+    }
+
+    align(fieldSpec, window, method, limit) {
+        const prev = this._chainPrev();
+        return this._append(new Aligner(this, {fieldSpec, window, method, limit, prev}));
+    }
+
+    rate(fieldSpec, allowNegative = true) {
+        const p = new Derivator(this, {
+            fieldSpec,
+            allowNegative,
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -810,7 +861,7 @@ class Pipeline {
     take(limit) {
         const p = new Taker(this, {
             limit,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
 
         return this._append(p);
@@ -839,7 +890,7 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
         
         return this._append(p);
@@ -862,7 +913,7 @@ class Pipeline {
         const p = new Converter(this, {
             type,
             ...options,
-            prev: this.last() ? this.last() : this
+            prev: this._chainPrev()
         });
         return this._append(p);
     }

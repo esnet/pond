@@ -353,7 +353,11 @@ class TimeSeries {
             throw new Error("Collection supplied is not chronological");
         }
         const result = new TimeSeries(this);
-        result._collection = collection;
+        if (collection) {
+            result._collection = collection;
+        } else {
+            result._collection = new Collection();
+        }
         return result;
     }
 
@@ -446,6 +450,13 @@ class TimeSeries {
     }
 
     /**
+     * Rename the timeseries
+     */
+    setName(name) {
+        return this.setMeta("name", name);
+    }
+
+    /**
      * Fetch the timeseries Index, if it has one.
      *
      * @return {Index} The Index given to this TimeSeries
@@ -526,6 +537,17 @@ class TimeSeries {
         } else {
             return this._data.get(key);
         }
+    }
+
+    /**
+     * Rename the timeseries
+     */
+    setMeta(key, value) {
+        const newTimeSeries = new TimeSeries(this);
+        const d = newTimeSeries._data;
+        const dd = d.set(key, value);
+        newTimeSeries._data = dd;
+        return newTimeSeries;
     }
 
     //
@@ -782,16 +804,20 @@ class TimeSeries {
      * Takes a fieldSpec (list of column names) and outputs to the callback just those
      * columns in a new TimeSeries.
      *
-     * @param {string}   fieldSpec Column or columns to find the stdev. If you
-     *                             need to retrieve multiple deep
-     *                             nested values that ['can.be', 'done.with',
-     *                             'this.notation']. A single deep value with a
-     *                             string.like.this.  If not supplied, all columns
-     *                             will be aggregated.
+     * @example
      *
-     * @return {Collection}        A collection containing only the selected fields
+     * ```
+     *     const ts = timeseries.select({fieldSpec: ["uptime", "notes"]});
+     * ```
+     *
+     * @param {object} options  An object containing options for the command:
+     *                           * fieldSpec - Column or columns to select into
+     *                                         a new TimeSeries.
+     *
+     * @return {TimeSeries}     The resulting TimeSeries with renamed columns
      */
-    select(fieldSpec) {
+    select(options) {
+        const { fieldSpec } = options;
         const collections = this.pipeline()
             .select(fieldSpec)
             .toKeyedCollections();
@@ -806,22 +832,202 @@ class TimeSeries {
      * The column may be appended to the existing columns, or replace them,
      * using the `append` boolean.
      *
+     * @example
+     *
+     * ```
+     *     const sums = ts.collapse({
+     *          name: "sum_series",
+     *          fieldSpecList: ["in", "out"],
+     *          reducer: sum(),
+     *          append: false
+     *     });
+     * ```
+     *
      * The result, a new TimeSeries, will be passed to the supplied callback.
      *
-     * @param  {array}      fieldSpecList  The list of columns to collase. If you
-     *                                     need to retrieve deep nested values that
-     *                                     ['can.be', 'done.with', 'this.notation']
-     * @param  {string}     name           The resulting summed column name
-     * @param  {function}   reducer        Reducer function e.g. sum
-     * @param  {boolean}    append         Append the summed column, rather than replace
+     * @param {object} options  An object containing options for the command:
+     *                           * fieldSpecList - The list of columns to collapse. (required)
+     *                           * name - The resulting collapsed column name (required)
+     *                           * reducer - The reducer function (required)
+     *                           * append -  Append the collapsed column, rather
+     *                                       than replace (bool)
      *
-     * @return {TimeSeries}                A collapsed TimeSeries
+     * @return {TimeSeries}     The resulting collapsed TimeSeries
      */
-    collapse(fieldSpecList, name, reducer, append) {
+    collapse(options) {
+        const { fieldSpecList, name, reducer, append } = options;
         const collections = this.pipeline()
             .collapse(fieldSpecList, name, reducer, append)
             .toKeyedCollections();
         return this.setCollection(collections["all"]);
+    }
+
+    /**
+     * TimeSeries.map() helper function to rename columns in the underlying events.
+     * Takes a object of columns to rename:
+     * ```
+     * new_ts = ts.renameColumns({
+     *     renameMap: {in: "new_in", out: "new_out"}
+     * });
+     * ```
+     *
+     * Returns a new `TimeSeries` containing new events. Columns not
+     * in the dict will be retained and not renamed.
+     *
+     * NOTE: as the name implies, this will only rename the main
+     * "top level" (ie: non-deep) columns. If you need more
+     * extravagant renaming, roll your own using `TimeSeries.map()`.
+     *
+     * @param {object} options  An object containing options for the command:
+     *                           * renameMap - Columns to rename.
+     *
+     * @return {TimeSeries}     The resulting TimeSeries with renamed columns
+     */
+    renameColumns(options) {
+        const { renameMap } = options;
+        const rename = (event) => {
+            const renamedMap = (event) => {
+                const b = {};
+                _.each(event.data().toJS(), (value, key) => {
+                    const k = renameMap[key] || key;
+                    b[k] = value;
+                });
+                return b;
+            };
+
+            const renamedData = renamedMap(event);
+
+            if (event instanceof Event) {
+                return new Event(event.timestamp(), renamedData);
+            } else if (event instanceof TimeRangeEvent) {
+                return new TimeRangeEvent([event.begin(), event.end()], renamedData);
+            } else if (event instanceof IndexedEvent) {
+                return new IndexedEvent(event.index(), renamedData);
+            }
+        };
+
+        return this.map(rename);
+    }
+
+    /**
+     * Take the data in this TimeSeries and "fill" any missing or invalid
+     * values. This could be setting `null` values to zero so mathematical
+     * operations will succeed, interpolate a new value, or pad with the
+     * previously given value.
+     *
+     * The `fill()` method takes a single `options` arg, containing the following:
+     *
+     * @param {object} options  An object containing options for the command:
+     *                           * fieldSpec - Column or columns to fill. If you need to
+     *                                         retrieve multiple deep nested values
+     *                                         that ['can.be', 'done.with', 'this.notation'].
+     *                                         A single deep value with a string.like.this.
+     *                           * method - "linear" or "pad" or "zero" style interpolation
+     *                           * limit - The maximum number of points which should be
+     *                                     interpolated onto missing points. You might set this to
+     *                                     2 if you are willing to fill 2 new points,
+     *                                     and then beyond that leave data with missing values.
+     *
+     * @return {TimeSeries}     The resulting filled TimeSeries
+     */
+    fill(options) {
+        const {
+            fieldSpec = null,
+            method = "zero",
+            limit = null
+        } = options;
+
+        let pipeline = this.pipeline();
+
+        if (method === "zero" || method === "pad") {
+            pipeline = pipeline.fill({fieldSpec, method, limit});
+        } else if (method === "linear" && _.isArray(fieldSpec)) {
+            fieldSpec.forEach(fieldPath => {
+                pipeline = pipeline.fill({fieldSpec: fieldPath, method, limit});
+            });
+        } else {
+            throw new Error("Invalid fill method:", method);
+        }
+
+        const collections = pipeline
+            .toKeyedCollections();
+
+        return this.setCollection(collections["all"]);
+    }
+
+    /**
+     * Align of values to regular time boundaries. The value at
+     * the boundary is interpolated. Only the new interpolated
+     * points are returned. If limit is reached nulls will be
+     * returned at each boundary position.
+     *
+     * One use case for this is to modify irregular data (i.e. data
+     * that falls at irregular times) so that it falls into a
+     * sequence of evenly spaced values. We use this to take data we
+     * get from the network which is approximately every 30 second
+     * (:32, 1:02, 1:34, ...) and output data on exact 30 second
+     * boundaries (:30, 1:00, 1:30, ...).
+     *
+     * Another use case is data that might be already aligned to
+     * some regular interval, but that contains missing points.
+     * While `fill()` can be used to replace null values, align
+     * can be used to add in missing points completely. Those points
+     * can have an interpolated value, or by setting limit to 0,
+     * can be filled with nulls. This is really useful when downstream
+     * processing depends on complete sequences.
+     *
+     * @param {object} options  An object containing options for the command:
+     *                           * fieldSpec - Column or columns to align. If you need to
+     *                                         retrieve multiple deep nested values
+     *                                         that ['can.be', 'done.with', 'this.notation'].
+     *                                         A single deep value with a string.like.this.
+     *                           * window - The size of the window. e.g. "6h" or "5m"
+     *                           * method - "linear" or "pad" style interpolation to the
+     *                                      boundaries
+     *                           * limit - The maximum number of points which should be
+     *                                     interpolated onto boundaries. You might set this to
+     *                                     2 if you are willing to interpolate 2 new points,
+     *                                     and then beyond that just emit nulls on the boundaries.
+     *
+     * @return {TimeSeries}     The resulting aligned TimeSeries
+     */
+    align(options) {
+        const {
+            fieldSpec = "value",
+            window = "5m",
+            method="linear",
+            limit = null
+        } = options; 
+        const collection = this.pipeline()
+            .align(fieldSpec, window, method, limit)
+            .toKeyedCollections();
+
+        return this.setCollection(collection["all"]);
+    }
+
+    /**
+     * Returns the derivative of the TimeSeries for the given
+     * TimeSeries.
+     *
+     * @param {object} options  An object containing options for the command:
+     *                           * fieldSpec - Column or columns to get the rate of. If you
+     *                                         need to retrieve multiple deep nested values
+     *                                         that ['can.be', 'done.with', 'this.notation'].
+     *                                         A single deep value with a string.like.this.
+     *                           * allowNegative - Will output null values for negative rates.
+     *                                             This is useful if you are getting the rate
+     *                                             of a counter that always goes up, except
+     *                                             when perhaps it rolls around or resets.
+     *
+     * @return {TimeSeries}     The resulting TimeSeries containing calculated rates
+     */
+    rate(options = {}) {
+        const {fieldSpec = "value", allowNegative = true} = options;
+        const collection = this.pipeline()
+            .rate(fieldSpec, allowNegative)
+            .toKeyedCollections();
+
+        return this.setCollection(collection["all"]);
     }
 
     /**
@@ -844,15 +1050,29 @@ class TimeSeries {
      *
      * @example
      * ```
-     * const timeseries = new TimeSeries(data);
-     * const dailyAvg = timeseries.fixedWindowRollup("1d", {value: {value: avg}});
+     *     const timeseries = new TimeSeries(data);
+     *     const dailyAvg = timeseries.fixedWindowRollup({
+     *         windowSize: "1d",
+     *         aggregation: {value: {value: avg}}
+     *     });
      * ```
      *
-     * @param  {string} windowSize  The size of the window. e.g. "6h" or "5m"
-     * @param  {object} aggregation The aggregation specification
-     * @return {TimeSeries}         The resulting rolled up TimeSeries
+     * @param {object} options  An object containing options for the command:
+     *                           * windowSize - The size of the window. e.g. "6h" or "5m"
+     *                           * aggregation - The aggregation specification
+     *
+     * @return {TimeSeries}     The resulting rolled up TimeSeries
      */
-    fixedWindowRollup(windowSize, aggregation, toEvents = false) {
+    fixedWindowRollup(options) {
+        const {windowSize, aggregation, toEvents = false} = options;
+        if (!windowSize) {
+            throw new Error("windowSize must be supplied, for example '5m' for five minute rollups");
+        }
+
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation function must be supplied, for example avg()");
+        }
+
         const aggregatorPipeline = this.pipeline()
             .windowBy(windowSize)
             .emitOn("discard")
@@ -877,13 +1097,21 @@ class TimeSeries {
      * ```
      * {in_avg: {in: avg()}, out_avg: {out: avg()}}
      * ```
-     * @param  {bool}   toEvents    Convert the rollup to Events, otherwise it
-     *                              will be returned as IndexedEvents.
-     * @param  {object} aggregation The aggregation specification
      *
-     * @return {TimeSeries}         The resulting rolled up TimeSeries
+     * @param {object} options  An object containing options for the command:
+     *                           * toEvents - (bool) Convert the rollup to Events, otherwise it
+     *                                        will be returned as IndexedEvents.
+     *                           * aggregation - The aggregation specification
+     *
+     * @return {TimeSeries}     The resulting rolled up TimeSeries
      */
-    hourlyRollup(aggregation, toEvent = false) {
+    hourlyRollup(options) {
+        const {aggregation, toEvent = false} = options;
+
+        if (!aggregation || !_.isFunction(aggregation)) {
+            throw new Error("aggregation function must be supplied, for example avg()");
+        }
+
         return this.fixedWindowRollup("1h", aggregation, toEvent);
     }
 
@@ -896,13 +1124,21 @@ class TimeSeries {
      * ```
      * {in_avg: {in: avg()}, out_avg: {out: avg()}}
      * ```
-     * @param  {bool}   toEvents    Convert the rollup to Events, otherwise it
-     *                              will be returned as IndexedEvents.
-     * @param  {object} aggregation The aggregation specification
      *
-     * @return {TimeSeries}         The resulting rolled up TimeSeries
+     * @param {object} options  An object containing options for the command:
+     *                           * toEvents - (bool) Convert the rollup to Events, otherwise it
+     *                                        will be returned as IndexedEvents.
+     *                           * aggregation - The aggregation specification
+     *
+     * @return {TimeSeries}     The resulting rolled up TimeSeries
      */
-    dailyRollup(aggregation, toEvents = false) {
+    dailyRollup(options) {
+        const {aggregation, toEvents = false} = options;
+
+        if (!aggregation || !_.isFunction(aggregation)) {
+            throw new Error("aggregation function must be supplied, for example avg()");
+        }
+
         return this._rollup("daily", aggregation, toEvents);
     }
 
@@ -915,13 +1151,20 @@ class TimeSeries {
      * ```
      * {in_avg: {in: avg()}, out_avg: {out: avg()}}
      * ```
-     * @param  {bool}   toEvents    Convert the rollup to Events, otherwise it
-     *                              will be returned as IndexedEvents.
-     * @param  {object} aggregation The aggregation specification
+     * @param {object} options  An object containing options for the command:
+     *                           * toEvents - (bool) Convert the rollup to Events, otherwise it
+     *                                        will be returned as IndexedEvents.
+     *                           * aggregation - The aggregation specification
      *
-     * @return {TimeSeries}         The resulting rolled up TimeSeries
+     * @return {TimeSeries}     The resulting rolled up TimeSeries
      */
-    monthlyRollup(aggregation, toEvents = false) {
+    monthlyRollup(options) {
+        const {aggregation, toEvents = false} = options;
+
+        if (!aggregation || !_.isFunction(aggregation)) {
+            throw new Error("aggregation function must be supplied, for example avg()");
+        }
+
         return this._rollup("monthly", aggregation, toEvents);
     }
 
@@ -931,16 +1174,25 @@ class TimeSeries {
      * Each window then has an aggregation specification `aggregation`
      * applied. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
+     *
      * ```
      * {in_avg: {in: avg()}, out_avg: {out: avg()}}
      * ```
-     * @param  {bool}   toEvents    Convert the rollup to Events, otherwise it
-     *                              will be returned as IndexedEvents.
-     * @param  {object} aggregation The aggregation specification
      *
-     * @return {TimeSeries}         The resulting rolled up TimeSeries
+     * @param {object} options  An object containing options for the command:
+     *                           * toEvents - (bool) Convert the rollup to Events, otherwise it
+     *                                        will be returned as IndexedEvents.
+     *                           * aggregation - The aggregation specification
+     *
+     * @return {TimeSeries}     The resulting rolled up TimeSeries
      */
-    yearlyRollup(aggregation, toEvents = false) {
+    yearlyRollup(options) {
+        const {aggregation, toEvents = false} = options;
+
+        if (!aggregation || !_.isFunction(aggregation)) {
+            throw new Error("aggregation function must be supplied, for example avg()");
+        }
+
         return this._rollup("yearly", aggregation, toEvents);
     }
 
@@ -974,15 +1226,17 @@ class TimeSeries {
      * @example
      * ```
      * const timeseries = new TimeSeries(data);
-     * const collections = timeseries.collectByFixedWindow("1d");
+     * const collections = timeseries.collectByFixedWindow({windowSize: "1d"});
      * console.log(collections); // {1d-16314: Collection, 1d-16315: Collection, ...}
      * ```
      *
-     * @param  {string} windowSize The size of the window. e.g. "6h" or "5m"
+     * @param {object} options  An object containing options for the command:
+     *                           * windowSize - The size of the window. e.g. "6h" or "5m"
+     *
      * @return {map}    The result is a mapping from window index to a
      *                  Collection. e.g. "1d-16317" -> Collection
      */
-    collectByFixedWindow(windowSize) {
+    collectByFixedWindow({windowSize}) {
         return this.pipeline()
             .windowBy(windowSize)
             .emitOn("discard")
@@ -1024,18 +1278,28 @@ class TimeSeries {
      * using the reducer function to produce a new Event. Those Events are then
      * collected together to form a new TimeSeries.
      *
-     * @param  {object}   data        Meta data for the resulting TimeSeries
-     * @param  {array}    seriesList  A list of TimeSeries objects
-     * @param  {func}     reducer     The reducer function
-     * @param  {string}   fieldSpec   Column or columns to look up. If you
-     *                                need to retrieve multiple deep
-     *                                nested values that ['can.be', 'done.with',
-     *                                'this.notation']. A single deep value with a
-     *                                string.like.this.
-     *
-     * @return {TimeSeries}           The new TimeSeries
+     * @param {object} options  An object containing options for the command:
+     *                           * seriesList - A list of TimeSeries (required)
+     *                           * reducer - The reducer function (required)
+     *                           * fieldSpec - Column or columns to sum. If you
+     *                                         need to retrieve multiple deep
+     *                                         nested values that ['can.be', 'done.with',
+     *                                         'this.notation']. A single deep value with a
+     *                                         string.like.this. If not supplied all columns
+     *                                         will be operated on.
+     *                           * ... - additional meta data for the resulting TimeSeries
      */
-    static timeseriesListReduce(data, seriesList, reducer, fieldSpec) {
+    static timeseriesListReduce(options) {
+        const {seriesList, fieldSpec, reducer, ...data} = options;
+
+        if (!seriesList || !_.isArray(seriesList)) {
+            throw new Error("A list of TimeSeries must be supplied to reduce");
+        }
+
+        if (!reducer || !_.isFunction(reducer)) {
+            throw new Error("reducer function must be supplied, for example avg()");
+        }
+
         // for each series, map events to the same timestamp/index
         const eventMap = {};
         _.each(seriesList, (series) => {
@@ -1076,15 +1340,15 @@ class TimeSeries {
      * it is useful to combine multiple TimeSeries which have different time ranges
      * as well as combine TimeSeries which have different columns.
      *
-     * @param  {object}              data       Meta data for the new TimeSeries
-     * @param  {array}               seriesList A list of TimeSeries
+     * @param {object} options  An object containing options for the command:
+     *                           * seriesList - A list of TimeSeries (required)
+     *                           * ... - additional meta data for the resulting TimeSeries
      *
-     * @return {TimeSeries}                     The resulting TimeSeries
+     * @return {TimeSeries}     The merged TimeSeries
      */
-    static timeSeriesListMerge(data, seriesList) {
-        return TimeSeries.timeseriesListReduce(data,
-                                               seriesList,
-                                               Event.merge);
+    static timeSeriesListMerge(options) {
+        const reducer = Event.merge;
+        return TimeSeries.timeseriesListReduce({...options, reducer});
     }
 
     /**
@@ -1099,21 +1363,19 @@ class TimeSeries {
      * const sum = TimeSeries.timeSeriesListSum({name: "sum"}, [ts1, ts2], ["temp"]);
      * ```
      *
-     * @param  {object}   data          Meta data for the new TimeSeries
-     * @param  {array}    seriesList    A list of TimeSeries
-     * @param  {string}   fieldSpec     Column or columns to sum. If you
-     *                                  need to retrieve multiple deep
-     *                                  nested values that ['can.be', 'done.with',
-     *                                  'this.notation']. A single deep value with a
-     *                                  string.like.this. If not supplied all columns
-     *                                  will be operated on.
-     * @return {TimeSeries}             The resulting TimeSeries
+     * @param {object} options  An object containing options for the command:
+     *                           * seriesList - A list of TimeSeries (required)
+     *                           * fieldSpec - Column or columns to sum. If you
+     *                                         need to retrieve multiple deep
+     *                                         nested values that ['can.be', 'done.with',
+     *                                         'this.notation']. A single deep value with a
+     *                                         string.like.this. If not supplied all columns
+     *                                         will be operated on.
+     *                           * ... - additional meta data for the resulting TimeSeries
      */
-    static timeSeriesListSum(data, seriesList, fieldSpec) {
-        return TimeSeries.timeseriesListReduce(data,
-                                               seriesList,
-                                               Event.sum,
-                                               fieldSpec);
+    static timeSeriesListSum(options) {
+        const reducer = Event.sum;
+        return TimeSeries.timeseriesListReduce({...options, reducer});
     }
 }
 
