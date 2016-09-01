@@ -69,7 +69,10 @@ describe("Testing the align() processor", () => {
    
     it("can do basic alignment", done => {
         const ts = new TimeSeries(SIMPLE_GAP_DATA);
-        const aligned = ts.align("value", "1m");
+        const aligned = ts.align({
+            fieldSpec: "value",
+            window: "1m"
+        });
 
         expect(aligned.size()).to.equal(8);
         expect(aligned.at(0).get()).to.equal(1.25);
@@ -86,7 +89,11 @@ describe("Testing the align() processor", () => {
 
     it("can do basic hold alignment", done => {
         const ts = new TimeSeries(SIMPLE_GAP_DATA);
-        const aligned = ts.align("value", "1m", "hold");
+        const aligned = ts.align({
+            fieldSpec: "value",
+            window: "1m",
+            method: "hold"
+        });
 
         expect(aligned.size()).to.equal(8);
         expect(aligned.at(0).get()).to.equal(.75);
@@ -103,7 +110,12 @@ describe("Testing the align() processor", () => {
 
     it("can do align with a limit (hold)", done => {
         const ts = new TimeSeries(SIMPLE_GAP_DATA);
-        const aligned = ts.align("value", "1m", "hold", 2);
+        const aligned = ts.align({
+            fieldSpec: "value",
+            window: "1m",
+            method: "hold",
+            limit: 2
+        });
 
         expect(aligned.size()).to.equal(8);
         expect(aligned.at(0).get()).to.equal(.75);
@@ -120,7 +132,12 @@ describe("Testing the align() processor", () => {
 
     it("can do align with a limit (linear)", done => {
         const ts = new TimeSeries(SIMPLE_GAP_DATA);
-        const aligned = ts.align("value", "1m", "linear", 2);
+        const aligned = ts.align({
+            fieldSpec: "value",
+            window: "1m",
+            method: "linear",
+            limit: 2
+        });
 
         expect(aligned.size()).to.equal(8);
         expect(aligned.at(0).get()).to.equal(1.25);
@@ -137,7 +154,11 @@ describe("Testing the align() processor", () => {
 
     it("can do align with with invalid points", done => {
         const ts = new TimeSeries(SIMPLE_GAP_DATA_BAD);
-        const aligned = ts.align("value", "1m", "linear");
+        const aligned = ts.align({
+            fieldSpec: "value",
+            window: "1m",
+            method: "linear"
+        });
 
         expect(aligned.size()).to.equal(8);
         expect(aligned.at(0).get()).to.equal(1.25);
@@ -158,7 +179,7 @@ describe("Testing align() and rate() together", () => {
 
     it("can do rates", done => {
         const ts = new TimeSeries(RATE);
-        const rate = ts.rate("in");
+        const rate = ts.rate({fieldSpec: "in"});
 
         // one less than source
         expect(rate.size()).to.equal(RATE["points"].length - 1);
@@ -189,7 +210,7 @@ describe("Testing align() and rate() together", () => {
             ]
         };
         const ts = new TimeSeries(RAW_RATES);
-        const rates = ts.align("value", "30s").rate();
+        const rates = ts.align({fieldSpec: "value", window: "30s"}).rate();
 
         expect(rates.size()).to.equal(3);
         expect(rates.at(0).get("value_rate")).to.equal(1.0869565217391313);
@@ -198,8 +219,6 @@ describe("Testing align() and rate() together", () => {
 
         done();
     });
-
-    it("can handle bad args");
 
     it("can output nulls for negative values", done => {
 
@@ -212,7 +231,7 @@ describe("Testing align() and rate() together", () => {
             ]
         });
 
-        const rates1 = ts.align("value", "30s").rate();
+        const rates1 = ts.align({fieldSpec: "value", window: "30s"}).rate();
 
         //lower counter will produce negative derivatives
         expect(rates1.size()).to.equal(3);
@@ -220,7 +239,9 @@ describe("Testing align() and rate() together", () => {
         expect(rates1.at(1).get("value_rate")).to.equal(-0.5434782608695646);
         expect(rates1.at(2).get("value_rate")).to.equal(-0.5434782608695653);
 
-        const rates2 = ts.align("value", "30s").rate(null, false);
+        const rates2 = ts
+            .align({fieldSpec: "value", window: "30s"})
+            .rate({allowNegative: false});
 
         expect(rates2.size()).to.equal(3)
         expect(rates2.at(0).get("value_rate")).to.be.null;
@@ -230,8 +251,3 @@ describe("Testing align() and rate() together", () => {
         done();
     });
 });
-
-
-
-
-

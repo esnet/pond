@@ -525,7 +525,7 @@ describe("TimeSeries", () => {
 
     describe("Timeseries name", () => {
 
-        it("can create a series with meta data and get that data back", done => {
+        it("can create a series and set a new name", done => {
             const series = new TimeSeries(interfaceData);
             expect(series.name()).to.equal("star-cr5:to_anl_ip-a_v4");
             const newSeries = series.setName("bob");
@@ -1041,8 +1041,10 @@ describe("TimeSeries", () => {
         it("can merge two timeseries columns together using merge", (done) => {
             const inTraffic = new TimeSeries(trafficDataIn);
             const outTraffic = new TimeSeries(trafficDataOut);
-            const trafficSeries = TimeSeries.timeSeriesListMerge(
-                {name: "traffic"}, [inTraffic, outTraffic]);
+            const trafficSeries = TimeSeries.timeSeriesListMerge({
+                name: "traffic",
+                seriesList: [inTraffic, outTraffic]
+            });
             expect(trafficSeries.at(2).get("in")).to.equal(26);
             expect(trafficSeries.at(2).get("out")).to.equal(67);
             done();
@@ -1051,9 +1053,11 @@ describe("TimeSeries", () => {
         it("can append two timeseries together using merge", (done) => {
             const tile1 = new TimeSeries(partialTraffic1);
             const tile2 = new TimeSeries(partialTraffic2);
-            const trafficSeries = TimeSeries.timeSeriesListMerge(
-                {name: "traffic", source: "router"}, [tile1, tile2]
-            );
+            const trafficSeries = TimeSeries.timeSeriesListMerge({
+                name: "traffic",
+                source: "router",
+                seriesList: [tile1, tile2]
+            });
             expect(trafficSeries.size()).to.equal(8);
             expect(trafficSeries.at(0).get()).to.equal(34);
             expect(trafficSeries.at(1).get()).to.equal(13);
@@ -1071,9 +1075,10 @@ describe("TimeSeries", () => {
         it("can merge two series and preserve the correct time format", (done) => {
             const inTraffic = new TimeSeries(trafficBNLtoNEWY);
             const outTraffic = new TimeSeries(trafficNEWYtoBNL);
-            const trafficSeries = TimeSeries.timeSeriesListMerge(
-                {name: "traffic"}, [inTraffic, outTraffic]
-            );
+            const trafficSeries = TimeSeries.timeSeriesListMerge({
+                name: "traffic",
+                seriesList: [inTraffic, outTraffic]
+            });
             expect(trafficSeries.at(0).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:12:30 GMT");
             expect(trafficSeries.at(1).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:13:00 GMT");
             expect(trafficSeries.at(2).timestampAsUTCString()).to.equal("Mon, 31 Aug 2015 20:13:30 GMT");
@@ -1086,11 +1091,11 @@ describe("TimeSeries", () => {
         it("can merge two timeseries into a new timeseries that is the sum", (done) => {
             const part1 = new TimeSeries(sumPart1);
             const part2 = new TimeSeries(sumPart2);
-            const sum = TimeSeries.timeSeriesListSum(
-                {name: "sum"},
-                [part1, part2],
-                ["in", "out"]
-            );
+            const sum = TimeSeries.timeSeriesListSum({
+                name: "sum",
+                seriesList: [part1, part2],
+                fieldSpec: ["in", "out"]
+            });
 
             //10, 9, 8, 7
             expect(sum.at(0).get("in")).to.equal(10);
@@ -1112,8 +1117,14 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the sum of two columns", (done) => {
             const ts = new TimeSeries(sumPart1);
-            const sums = ts.collapse(["in", "out"], "sum", sum(), false);
-            
+
+            const sums = ts.collapse({
+                name: "sum",
+                fieldSpecList: ["in", "out"],
+                reducer: sum(),
+                append: false
+            });
+
             expect(sums.at(0).get("sum")).to.equal(7);
             expect(sums.at(1).get("sum")).to.equal(9);
             expect(sums.at(2).get("sum")).to.equal(11);
@@ -1123,7 +1134,12 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the max of two columns", (done) => {
             const timeseries = new TimeSeries(sumPart2);
-            const c = timeseries.collapse(["in", "out"], "max_in_out", max(), true);
+            const c = timeseries.collapse({
+                name: "max_in_out",
+                fieldSpecList: ["in", "out"],
+                reducer: max(),
+                append: true
+            });
 
             expect(c.at(0).get("max_in_out")).to.equal(9);
             expect(c.at(1).get("max_in_out")).to.equal(7);
@@ -1134,9 +1150,14 @@ describe("TimeSeries", () => {
 
         it("can collapse a timeseries into a new timeseries that is the sum of two columns, then find the max", (done) => {
             const ts = new TimeSeries(sumPart1);
-            const sums = ts.collapse(["in", "out"], "value", sum(), false);
-
+            const sums = ts.collapse({
+                name: "value",
+                fieldSpecList: ["in", "out"],
+                reducer: sum(),
+                append: false
+            });
             expect(sums.max()).to.equal(13);
+
             done();
         });
 
@@ -1148,7 +1169,7 @@ describe("TimeSeries", () => {
             const timeseries = new TimeSeries(interfaceData);
             expect(timeseries.columns()).to.eql(["in", "out"]);
 
-            const ts = timeseries.select("in");
+            const ts = timeseries.select({fieldSpec: "in"});
             expect(ts.columns()).to.eql(["in"]);
             expect(ts.name()).to.equal("star-cr5:to_anl_ip-a_v4");
 
@@ -1159,7 +1180,7 @@ describe("TimeSeries", () => {
             const timeseries = new TimeSeries(availabilitySeries);
             expect(timeseries.columns()).to.eql(["uptime", "notes", "outages"]);
 
-            const ts = timeseries.select(["uptime", "notes"]);
+            const ts = timeseries.select({fieldSpec: ["uptime", "notes"]});
             expect(ts.columns()).to.eql(["uptime", "notes"]);
             expect(ts.name()).to.equal("availability");
 
@@ -1190,7 +1211,10 @@ describe("TimeSeries", () => {
     describe("TimeSeries rollup to a fixed window", () => {
         it("can take 1 day avgs over a timeseries", (done) => {
             const timeseries = new TimeSeries(sept2014Data);
-            const dailyAvg = timeseries.fixedWindowRollup("1d", {value: {value: avg()}});
+            const dailyAvg = timeseries.fixedWindowRollup({
+                windowSize: "1d",
+                aggregation: {value: {value: avg()}}
+            });
 
             expect(dailyAvg.size()).to.equal(5);
             expect(dailyAvg.at(0).value()).to.equal(46.875);
@@ -1201,29 +1225,12 @@ describe("TimeSeries", () => {
         });
     });
 
-    /*
-    Since this is all in local time, testing this is kind of problematic
-    Removing for now :(
-        
-    describe("TimeSeries daily rollup", () => {
-        it("can take daily avgs over a timeseries", (done) => {
-            const timeseries = new TimeSeries(sept2014Data);
-            const dailyAvg = timeseries.dailyRollup({value: avg});
-
-            expect(dailyAvg.size()).to.equal(6);
-            expect(dailyAvg.at(0).indexAsString()).to.equal("2014-08-31");
-            //expect(dailyAvg.at(2).value()).to.equal(54.083333333333336);
-            //expect(dailyAvg.at(4).value()).to.equal(51.85);
-
-            done();
-        });
-    });
-    */
-   
     describe("TimeSeries collect by a fixed window", () => {
         it("can make collections for each day in the timeseries", (done) => {
             const timeseries = new TimeSeries(sept2014Data);
-            const collections = timeseries.collectByFixedWindow("1d");
+            const collections = timeseries.collectByFixedWindow({
+                windowSize: "1d"
+            });
 
             expect(collections["1d-16314"].size()).to.equal(24);
             expect(collections["1d-16318"].size()).to.equal(20);

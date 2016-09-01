@@ -66,7 +66,9 @@ describe("Renaming columns of a TimeSeries", () => {
         const name = "collection";
         const collection = new Collection(EVENT_LIST);
         const ts = new TimeSeries({name, collection});
-        const renamed = ts.renameColumns({in: "new_in", out: "new_out"});
+        const renamed = ts.renameColumns({
+            renameMap: {in: "new_in", out: "new_out"}
+        });
 
         expect(renamed.at(0).get("new_in")).to.equal(ts.at(0).get("in"));
         expect(renamed.at(0).get("new_out")).to.equal(ts.at(0).get("out"));
@@ -83,7 +85,9 @@ describe("Renaming columns of a TimeSeries", () => {
     it("can rename a columns on a TimeRangeEvent series", done => {
 
         const ts = new TimeSeries(TICKET_RANGE);
-        const renamed = ts.renameColumns({title: "event", esnet_ticket: "ticket"});
+        const renamed = ts.renameColumns({
+            renameMap: {title: "event", esnet_ticket: "ticket"}
+        });
 
         expect(renamed.at(0).get("event")).to.equal(ts.at(0).get("title"));
         expect(renamed.at(0).get("ticket")).to.equal(ts.at(0).get("esnet_ticket"));
@@ -100,7 +104,9 @@ describe("Renaming columns of a TimeSeries", () => {
     it("can rename a columns on a IndexedEvent series", done => {
 
         const ts = new TimeSeries(AVAILABILITY_DATA);
-        const renamed = ts.renameColumns({uptime: "available"});
+        const renamed = ts.renameColumns({
+            renameMap: {uptime: "available"}
+        });
 
         expect(renamed.at(0).get("available")).to.equal(ts.at(0).get("uptime"));
         expect(renamed.at(2).get("available")).to.equal(ts.at(2).get("uptime"));

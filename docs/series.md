@@ -143,24 +143,24 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.quantile(n, column, interp)](#TimeSeries+quantile) ⇒ <code>array</code>
         * [.pipeline()](#TimeSeries+pipeline) ⇒ <code>Pipeline</code>
         * [.map(operator)](#TimeSeries+map) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.select(fieldSpec)](#TimeSeries+select) ⇒ <code>Collection</code>
-        * [.collapse(fieldSpecList, name, reducer, append)](#TimeSeries+collapse) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.renameColumns(renameMap)](#TimeSeries+renameColumns) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.fill(fieldSpec, method, limit)](#TimeSeries+fill) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.align()](#TimeSeries+align)
-        * [.rate()](#TimeSeries+rate)
-        * [.fixedWindowRollup(windowSize, aggregation)](#TimeSeries+fixedWindowRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.hourlyRollup(toEvents, aggregation)](#TimeSeries+hourlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.dailyRollup(toEvents, aggregation)](#TimeSeries+dailyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.monthlyRollup(toEvents, aggregation)](#TimeSeries+monthlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.yearlyRollup(toEvents, aggregation)](#TimeSeries+yearlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.collectByFixedWindow(windowSize)](#TimeSeries+collectByFixedWindow) ⇒ <code>map</code>
+        * [.select(options)](#TimeSeries+select) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.collapse(options)](#TimeSeries+collapse) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.renameColumns(options)](#TimeSeries+renameColumns) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.fill(options)](#TimeSeries+fill) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.align(options)](#TimeSeries+align) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.rate(options)](#TimeSeries+rate) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.fixedWindowRollup(options)](#TimeSeries+fixedWindowRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.hourlyRollup(options)](#TimeSeries+hourlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.dailyRollup(options)](#TimeSeries+dailyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.monthlyRollup(options)](#TimeSeries+monthlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.yearlyRollup(options)](#TimeSeries+yearlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.collectByFixedWindow(options)](#TimeSeries+collectByFixedWindow) ⇒ <code>map</code>
     * _static_
         * [.equal(series1, series2)](#TimeSeries.equal) ⇒ <code>bool</code>
         * [.is(series1, series2)](#TimeSeries.is) ⇒ <code>bool</code>
-        * [.timeseriesListReduce(data, seriesList, reducer, fieldSpec)](#TimeSeries.timeseriesListReduce) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.timeSeriesListMerge(data, seriesList)](#TimeSeries.timeSeriesListMerge) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.timeSeriesListSum(data, seriesList, fieldSpec)](#TimeSeries.timeSeriesListSum) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.timeseriesListReduce(options)](#TimeSeries.timeseriesListReduce)
+        * [.timeSeriesListMerge(options)](#TimeSeries.timeSeriesListMerge) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.timeSeriesListSum(options)](#TimeSeries.timeSeriesListSum)
 
 <a name="TimeSeries+toJSON"></a>
 
@@ -632,24 +632,25 @@ a new set of Events.
 
 <a name="TimeSeries+select"></a>
 
-### timeSeries.select(fieldSpec) ⇒ <code>Collection</code>
+### timeSeries.select(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Takes a fieldSpec (list of column names) and outputs to the callback just those
 columns in a new TimeSeries.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>Collection</code> - A collection containing only the selected fields  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting TimeSeries with renamed columns  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to find the stdev. If you
-                            need to retrieve multiple deep
-                            nested values that ['can.be', 'done.with',
-                            'this.notation']. A single deep value with a
-                            string.like.this.  If not supplied, all columns
-                            will be aggregated.
+- options <code>object</code> - An object containing options for the command:
+                          * fieldSpec - Column or columns to select into
+                                        a new TimeSeries.
 
+**Example**  
+```
+    const ts = timeseries.select({fieldSpec: ["uptime", "notes"]});
+```
 <a name="TimeSeries+collapse"></a>
 
-### timeSeries.collapse(fieldSpecList, name, reducer, append) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.collapse(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Takes a fieldSpec (list of column names) and collapses
 them to a new column named `name` which is the reduction (using
 the `reducer` function) of the matched columns in the fieldSpecList.
@@ -657,44 +658,56 @@ the `reducer` function) of the matched columns in the fieldSpecList.
 The column may be appended to the existing columns, or replace them,
 using the `append` boolean.
 
-The result, a new TimeSeries, will be passed to the supplied callback.
-
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - A collapsed TimeSeries  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting collapsed TimeSeries  
 **Params**
 
-- fieldSpecList <code>array</code> - The list of columns to collase. If you
-                                    need to retrieve deep nested values that
-                                    ['can.be', 'done.with', 'this.notation']
-- name <code>string</code> - The resulting summed column name
-- reducer <code>function</code> - Reducer function e.g. sum
-- append <code>boolean</code> - Append the summed column, rather than replace
+- options <code>object</code> - An object containing options for the command:
+                          * fieldSpecList - The list of columns to collapse. (required)
+                          * name - The resulting collapsed column name (required)
+                          * reducer - The reducer function (required)
+                          * append -  Append the collapsed column, rather
+                                      than replace (bool)
 
+**Example**  
+```
+    const sums = ts.collapse({
+         name: "sum_series",
+         fieldSpecList: ["in", "out"],
+         reducer: sum(),
+         append: false
+    });
+```
+
+The result, a new TimeSeries, will be passed to the supplied callback.
 <a name="TimeSeries+renameColumns"></a>
 
-### timeSeries.renameColumns(renameMap) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.renameColumns(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 TimeSeries.map() helper function to rename columns in the underlying events.
 Takes a object of columns to rename:
 ```
-new_ts = ts.rename_columns({'in': 'new_in', 'out': 'new_out'})
+new_ts = ts.renameColumns({
+    renameMap: {in: "new_in", out: "new_out"}
+});
 ```
 
-Returns a new TimeSeries containing new events. Columns not
+Returns a new `TimeSeries` containing new events. Columns not
 in the dict will be retained and not renamed.
 
 NOTE: as the name implies, this will only rename the main
 "top level" (ie: non-deep) columns. If you need more
-extravagant renaming, roll your own using map().
+extravagant renaming, roll your own using `TimeSeries.map()`.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - A new TimeSeries, with new column names  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting TimeSeries with renamed columns  
 **Params**
 
-- renameMap <code>object</code> - Columns to rename.
+- options <code>object</code> - An object containing options for the command:
+                          * renameMap - Columns to rename.
 
 <a name="TimeSeries+fill"></a>
 
-### timeSeries.fill(fieldSpec, method, limit) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.fill(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Take the data in this TimeSeries and "fill" any missing or invalid
 values. This could be setting `null` values to zero so mathematical
 operations will succeed, interpolate a new value, or pad with the
@@ -703,24 +716,23 @@ previously given value.
 The `fill()` method takes a single `options` arg, containing the following:
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The new TimeSeries  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting filled TimeSeries  
 **Params**
 
-- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you
-                                     need to retrieve multiple deep
-                                     nested values that ['can.be', 'done.with',
-                                     'this.notation']. A single deep value with a
-                                     string.like.this.
-- method <code>String</code> - Filling method: "zero" | "linear" | "pad"
-- limit <code>number</code> - Set a limit on the number of consecutive events
-                                     will be filled before it starts returning invalid
-                                     values. For linear fill, no filling will happen
-                                     if the limit is reached before a valid value
-                                     is found.
+- options <code>object</code> - An object containing options for the command:
+                          * fieldSpec - Column or columns to fill. If you need to
+                                        retrieve multiple deep nested values
+                                        that ['can.be', 'done.with', 'this.notation'].
+                                        A single deep value with a string.like.this.
+                          * method - "linear" or "pad" or "zero" style interpolation
+                          * limit - The maximum number of points which should be
+                                    interpolated onto missing points. You might set this to
+                                    2 if you are willing to fill 2 new points,
+                                    and then beyond that leave data with missing values.
 
 <a name="TimeSeries+align"></a>
 
-### timeSeries.align()
+### timeSeries.align(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Align of values to regular time boundaries. The value at
 the boundary is interpolated. Only the new interpolated
 points are returned. If limit is reached nulls will be
@@ -742,16 +754,45 @@ can be filled with nulls. This is really useful when downstream
 processing depends on complete sequences.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting aligned TimeSeries  
+**Params**
+
+- options <code>object</code> - An object containing options for the command:
+                          * fieldSpec - Column or columns to align. If you need to
+                                        retrieve multiple deep nested values
+                                        that ['can.be', 'done.with', 'this.notation'].
+                                        A single deep value with a string.like.this.
+                          * window - The size of the window. e.g. "6h" or "5m"
+                          * method - "linear" or "pad" style interpolation to the
+                                     boundaries
+                          * limit - The maximum number of points which should be
+                                    interpolated onto boundaries. You might set this to
+                                    2 if you are willing to interpolate 2 new points,
+                                    and then beyond that just emit nulls on the boundaries.
+
 <a name="TimeSeries+rate"></a>
 
-### timeSeries.rate()
+### timeSeries.rate(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Returns the derivative of the TimeSeries for the given
 TimeSeries.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting TimeSeries containing calculated rates  
+**Params**
+
+- options <code>object</code> - An object containing options for the command:
+                          * fieldSpec - Column or columns to get the rate of. If you
+                                        need to retrieve multiple deep nested values
+                                        that ['can.be', 'done.with', 'this.notation'].
+                                        A single deep value with a string.like.this.
+                          * allowNegative - Will output null values for negative rates.
+                                            This is useful if you are getting the rate
+                                            of a counter that always goes up, except
+                                            when perhaps it rolls around or resets.
+
 <a name="TimeSeries+fixedWindowRollup"></a>
 
-### timeSeries.fixedWindowRollup(windowSize, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.fixedWindowRollup(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Builds a new TimeSeries by dividing events within the TimeSeries
 across multiple fixed windows of size `windowSize`.
 
@@ -773,17 +814,21 @@ function and return the result as in_avg and out_avg.
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
 **Params**
 
-- windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
-- aggregation <code>object</code> - The aggregation specification
+- options <code>object</code> - An object containing options for the command:
+                          * windowSize - The size of the window. e.g. "6h" or "5m"
+                          * aggregation - The aggregation specification
 
 **Example**  
 ```
-const timeseries = new TimeSeries(data);
-const dailyAvg = timeseries.fixedWindowRollup("1d", {value: {value: avg}});
+    const timeseries = new TimeSeries(data);
+    const dailyAvg = timeseries.fixedWindowRollup({
+        windowSize: "1d",
+        aggregation: {value: {value: avg}}
+    });
 ```
 <a name="TimeSeries+hourlyRollup"></a>
 
-### timeSeries.hourlyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.hourlyRollup(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Builds a new TimeSeries by dividing events into hours.
 
 Each window then has an aggregation specification `aggregation`
@@ -797,13 +842,14 @@ fieldNames to aggregation functions and their fieldPath. For example:
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
 **Params**
 
-- toEvents <code>bool</code> - Convert the rollup to Events, otherwise it
-                             will be returned as IndexedEvents.
-- aggregation <code>object</code> - The aggregation specification
+- options <code>object</code> - An object containing options for the command:
+                          * toEvents - (bool) Convert the rollup to Events, otherwise it
+                                       will be returned as IndexedEvents.
+                          * aggregation - The aggregation specification
 
 <a name="TimeSeries+dailyRollup"></a>
 
-### timeSeries.dailyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.dailyRollup(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Builds a new TimeSeries by dividing events into days.
 
 Each window then has an aggregation specification `aggregation`
@@ -817,13 +863,14 @@ fieldNames to aggregation functions and their fieldPath. For example:
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
 **Params**
 
-- toEvents <code>bool</code> <code> = false</code> - Convert the rollup to Events, otherwise it
-                             will be returned as IndexedEvents.
-- aggregation <code>object</code> - The aggregation specification
+- options <code>object</code> - An object containing options for the command:
+                          * toEvents - (bool) Convert the rollup to Events, otherwise it
+                                       will be returned as IndexedEvents.
+                          * aggregation - The aggregation specification
 
 <a name="TimeSeries+monthlyRollup"></a>
 
-### timeSeries.monthlyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.monthlyRollup(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Builds a new TimeSeries by dividing events into months.
 
 Each window then has an aggregation specification `aggregation`
@@ -837,18 +884,20 @@ fieldNames to aggregation functions and their fieldPath. For example:
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
 **Params**
 
-- toEvents <code>bool</code> <code> = false</code> - Convert the rollup to Events, otherwise it
-                             will be returned as IndexedEvents.
-- aggregation <code>object</code> - The aggregation specification
+- options <code>object</code> - An object containing options for the command:
+                          * toEvents - (bool) Convert the rollup to Events, otherwise it
+                                       will be returned as IndexedEvents.
+                          * aggregation - The aggregation specification
 
 <a name="TimeSeries+yearlyRollup"></a>
 
-### timeSeries.yearlyRollup(toEvents, aggregation) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.yearlyRollup(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Builds a new TimeSeries by dividing events into years.
 
 Each window then has an aggregation specification `aggregation`
 applied. This specification describes a mapping of output
 fieldNames to aggregation functions and their fieldPath. For example:
+
 ```
 {in_avg: {in: avg()}, out_avg: {out: avg()}}
 ```
@@ -857,13 +906,14 @@ fieldNames to aggregation functions and their fieldPath. For example:
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
 **Params**
 
-- toEvents <code>bool</code> <code> = false</code> - Convert the rollup to Events, otherwise it
-                             will be returned as IndexedEvents.
-- aggregation <code>object</code> - The aggregation specification
+- options <code>object</code> - An object containing options for the command:
+                          * toEvents - (bool) Convert the rollup to Events, otherwise it
+                                       will be returned as IndexedEvents.
+                          * aggregation - The aggregation specification
 
 <a name="TimeSeries+collectByFixedWindow"></a>
 
-### timeSeries.collectByFixedWindow(windowSize) ⇒ <code>map</code>
+### timeSeries.collectByFixedWindow(options) ⇒ <code>map</code>
 Builds multiple Collections, each collects together
 events within a window of size `windowSize`. Note that these
 are windows defined relative to Jan 1st, 1970, and are UTC.
@@ -873,12 +923,13 @@ are windows defined relative to Jan 1st, 1970, and are UTC.
                  Collection. e.g. "1d-16317" -> Collection  
 **Params**
 
-- windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
+- options <code>object</code> - An object containing options for the command:
+                          * windowSize - The size of the window. e.g. "6h" or "5m"
 
 **Example**  
 ```
 const timeseries = new TimeSeries(data);
-const collections = timeseries.collectByFixedWindow("1d");
+const collections = timeseries.collectByFixedWindow({windowSize: "1d"});
 console.log(collections); // {1d-16314: Collection, 1d-16315: Collection, ...}
 ```
 <a name="TimeSeries.equal"></a>
@@ -909,7 +960,7 @@ are of the same value as each other then equals will return true.
 
 <a name="TimeSeries.timeseriesListReduce"></a>
 
-### TimeSeries.timeseriesListReduce(data, seriesList, reducer, fieldSpec) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### TimeSeries.timeseriesListReduce(options)
 Reduces a list of TimeSeries objects using a reducer function. This works
 by taking each event in each TimeSeries and collecting them together
 based on timestamp. All events for a given time are then merged together
@@ -917,21 +968,22 @@ using the reducer function to produce a new Event. Those Events are then
 collected together to form a new TimeSeries.
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The new TimeSeries  
 **Params**
 
-- data <code>object</code> - Meta data for the resulting TimeSeries
-- seriesList <code>array</code> - A list of TimeSeries objects
-- reducer <code>func</code> - The reducer function
-- fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you
-                                     need to retrieve multiple deep
-                                     nested values that ['can.be', 'done.with',
-                                     'this.notation']. A single deep value with a
-                                     string.like.this.
+- options <code>object</code> - An object containing options for the command:
+                          * seriesList - A list of TimeSeries (required)
+                          * reducer - The reducer function (required)
+                          * fieldSpec - Column or columns to sum. If you
+                                        need to retrieve multiple deep
+                                        nested values that ['can.be', 'done.with',
+                                        'this.notation']. A single deep value with a
+                                        string.like.this. If not supplied all columns
+                                        will be operated on.
+                          * ... - additional meta data for the resulting TimeSeries
 
 <a name="TimeSeries.timeSeriesListMerge"></a>
 
-### TimeSeries.timeSeriesListMerge(data, seriesList) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### TimeSeries.timeSeriesListMerge(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Takes a list of TimeSeries and merges them together to form a new
 Timeseries.
 
@@ -940,30 +992,31 @@ it is useful to combine multiple TimeSeries which have different time ranges
 as well as combine TimeSeries which have different columns.
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting TimeSeries  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The merged TimeSeries  
 **Params**
 
-- data <code>object</code> - Meta data for the new TimeSeries
-- seriesList <code>array</code> - A list of TimeSeries
+- options <code>object</code> - An object containing options for the command:
+                          * seriesList - A list of TimeSeries (required)
+                          * ... - additional meta data for the resulting TimeSeries
 
 <a name="TimeSeries.timeSeriesListSum"></a>
 
-### TimeSeries.timeSeriesListSum(data, seriesList, fieldSpec) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### TimeSeries.timeSeriesListSum(options)
 Takes a list of TimeSeries and sums them together to form a new
 Timeseries.
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting TimeSeries  
 **Params**
 
-- data <code>object</code> - Meta data for the new TimeSeries
-- seriesList <code>array</code> - A list of TimeSeries
-- fieldSpec <code>string</code> - Column or columns to sum. If you
-                                 need to retrieve multiple deep
-                                 nested values that ['can.be', 'done.with',
-                                 'this.notation']. A single deep value with a
-                                 string.like.this. If not supplied all columns
-                                 will be operated on.
+- options <code>object</code> - An object containing options for the command:
+                          * seriesList - A list of TimeSeries (required)
+                          * fieldSpec - Column or columns to sum. If you
+                                        need to retrieve multiple deep
+                                        nested values that ['can.be', 'done.with',
+                                        'this.notation']. A single deep value with a
+                                        string.like.this. If not supplied all columns
+                                        will be operated on.
+                          * ... - additional meta data for the resulting TimeSeries
 
 **Example**  
 ```
