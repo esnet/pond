@@ -450,6 +450,13 @@ class TimeSeries {
     }
 
     /**
+     * Rename the timeseries
+     */
+    setName(name) {
+        return this.setMeta("name", name);
+    }
+
+    /**
      * Fetch the timeseries Index, if it has one.
      *
      * @return {Index} The Index given to this TimeSeries
@@ -530,6 +537,17 @@ class TimeSeries {
         } else {
             return this._data.get(key);
         }
+    }
+
+    /**
+     * Rename the timeseries
+     */
+    setMeta(key, value) {
+        const newTimeSeries = new TimeSeries(this);
+        const d = newTimeSeries._data;
+        const dd = d.set(key, value);
+        newTimeSeries._data = dd;
+        return newTimeSeries;
     }
 
     //

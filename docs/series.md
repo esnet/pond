@@ -119,6 +119,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.clean(fieldPath)](#TimeSeries+clean) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.events()](#TimeSeries+events)
         * [.name()](#TimeSeries+name) ⇒ <code>string</code>
+        * [.setName()](#TimeSeries+setName)
         * [.index()](#TimeSeries+index) ⇒ <code>Index</code>
         * [.indexAsString()](#TimeSeries+indexAsString) ⇒ <code>string</code>
         * [.indexAsRange()](#TimeSeries+indexAsRange) ⇒ <code>TimeRange</code>
@@ -126,6 +127,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.columns()](#TimeSeries+columns) ⇒ <code>array</code>
         * [.collection()](#TimeSeries+collection) ⇒ <code>Collection</code>
         * [.meta(key)](#TimeSeries+meta) ⇒ <code>object</code>
+        * [.setMeta()](#TimeSeries+setMeta)
         * [.size()](#TimeSeries+size) ⇒ <code>number</code>
         * [.sizeValid()](#TimeSeries+sizeValid) ⇒ <code>number</code>
         * [.count()](#TimeSeries+count) ⇒ <code>number</code>
@@ -321,6 +323,12 @@ Fetch the timeseries name
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>string</code> - The name given to this TimeSeries  
+<a name="TimeSeries+setName"></a>
+
+### timeSeries.setName()
+Rename the timeseries
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+index"></a>
 
 ### timeSeries.index() ⇒ <code>Index</code>
@@ -384,6 +392,12 @@ data as a JSON object, or a specific key if `key` is supplied.
 
 - key <code>string</code> - Optional specific part of the meta data
 
+<a name="TimeSeries+setMeta"></a>
+
+### timeSeries.setMeta()
+Rename the timeseries
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+size"></a>
 
 ### timeSeries.size() ⇒ <code>number</code>

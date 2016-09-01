@@ -523,6 +523,32 @@ describe("TimeSeries", () => {
 
     });
 
+    describe("Timeseries name", () => {
+
+        it("can create a series with meta data and get that data back", done => {
+            const series = new TimeSeries(interfaceData);
+            expect(series.name()).to.equal("star-cr5:to_anl_ip-a_v4");
+            const newSeries = series.setName("bob");
+            expect(newSeries.name()).to.equal("bob");
+            done();
+        });
+
+    });
+
+    describe("Timeseries set meta data", () => {
+
+        it("can create a series with meta data and get that data back", done => {
+            const series = new TimeSeries(interfaceData);
+            expect(series.meta("site_interface")).to.equal("et-1/0/0");
+            const newSeries = series.setMeta("site_interface", "bob");
+            expect(newSeries.meta("site_interface")).to.equal("bob");
+            expect(newSeries.at(0).get("in")).to.equal(52);
+            expect(newSeries.meta("site")).to.equal("anl");
+            done();
+        });
+
+    });
+
     describe("Timeseries support for deeply nested structures", () => {
 
         it("can create a series with a nested object", done => {
