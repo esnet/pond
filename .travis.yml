@@ -7,4 +7,6 @@ notifications:
 before_install:
     - export TZ=America/Los_Angeles
 script:
-    - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+    npm test -- --coverage
+after_script:
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
