@@ -1,11 +1,46 @@
 ## v0.7
+> September 2016
 
-This update is concerned with adding quantile and percentile calculations.
+This update had three main goals:
+ - Better handling of imperfect data.
+ - Add quantile and percentile calculations
+ - Improve API consistency
 
-The main breaking change here is `Pipeline.aggregate()` format has changed to allow better composition of emitted events.
+In addition, PyPond is now available with feature parity to the pond.js.
 
-**Pipeline**
+Breaking changes to look out for: `Pipeline.aggregate()` has changed to allow better composition of emitted events, aggregation functions are now supplied as `avg()` rather than simple `avg`. And `UnboundedIns` are now simply `Stream`.
 
+**General:**
+
+ -  Consistent use of fieldSpec, fieldPath etc across the API.
+ -  Aggregation functions now all need to be specified as `avg()` rather than `avg`. i.e. they are now a function that returns a function. This is to allow them to take parameters. e.g `percentile(95)`.
+ -  * All aggregation functions now accept a strategy for dealing with missing values. Missing values in pond.js are `NaN`s, `null`, or `undefined`. Strategies added are:
+    - `keepMissing` - pass through all values to the aggregator
+    - `ignoreMissing` - pass though only non-missing values
+    - `zeroMissing` - turn missing values into 0
+    - `propagateMissing` - cause the aggregator to return null if there is a missing value
+
+**Collection:**
+
+ - Adds `quantile()` and `percentile()` aggregation functions
+
+**TimeSeries:**
+
+ - Adds quantile and percentile aggregation functions
+ - Fixed: better handling of UTC times when generating IndexedEvent results
+ - More mutation support:
+    - Added `renameColumns()` to deep rename Events within a TimeSeries
+    - Added `setName()` to change the name of a TimeSeries
+    - Added `setMeta(key, value)` to change the meta data in a TimeSeries
+  In each case you will get a new TimeSeries back.
+ - Added `fill()` method to fill in missing values within a TimeSeries, using 0s, padding (last good value) or linear interpolation. In each case you can also specify a limit to the fill
+ - Added `align()` method to interpolate data to specific time boundaries (e.g. every 5 minutes). The interpolation can be with last value or linear interpolation. Like fill, a limit can also be supplied.
+ - Added `rate()` method to return the derivative of the TimeSeries. Optionally you can ignore negative values.
+
+**Pipelines:**
+
+ - Support for`fill()`, `align()` and `rate()` within a Pipeline.
+ - `UnboundedIn` is now `Stream`.
  - Changes `aggregation` to more explicitly define the output fields. This allows you to perform multiple aggregations on the same input field, such as aggregating temperature over a collection window to average_temp and max_temp.
 
 Before:
@@ -21,26 +56,21 @@ After:
 const p = Pipeline()
   ...
   .aggregate({
-      in: {in: keep},
-      in_avg: {in: avg},
+      in: {in: keep()},
+      in_avg: {in: avg()},
       in_95th: {in: percentile(95)}}
   })
   ...
 ```
 
  - As shown in the above example, you can use the `percentile()` function. Note that this is a little different from the others in that you need to call the function with the percentile value you want. A second parameter controls the way the function behaves when a percentile does not land on a specific sample. The default is to linearly interpolate.
+ - Fixes a bug where Pipeline.taker() would ignore the first event.
 
- - BUGFIX: Fixes a bug where Pipeline.taker() would ignore the first event.
+**Internal**
 
-**TimeSeries**
-
- - Adds a `quantile()` function to return n evenly spaced quantiles within the TimeSeries.
- - Adds a `percentile()` function to find a specific percentile within the TimeSeries
-
-**Collection**
-
- - Adds a `quantile()` function to return n evenly spaced quantiles within the Collection.
- - Adds a `percentile()` function to find a specific percentile within the Collection.
+ - Website now built with create-react-app
+ - Tests use Jest now and run in the terminal (for create-react-app workflow)
+ - General project restructuring
 
 ---
 
