@@ -1,15 +1,33 @@
-## TimeRangeEvent
+<a name="TimeRangeEvent"></a>
 
----
+## TimeRangeEvent
+A TimeRangeEvent uses a TimeRange to specify the range over
+which the event occurs and maps that to a data object representing
+some measurements or metrics during that time range.
+
+You supply the timerange as a TimeRange object.
+
+The data is also specified during construction and me be either:
+ 1) a Javascript object or simple type
+ 2) an Immutable.Map.
+ 3) Simple measurement
+
+If an Javascript object is provided it will be stored internally as an
+Immutable Map. If the data provided is some other simple type (such as an
+integer) then it will be equivalent to supplying an object of {value: data}.
+Data may also be undefined.
+
+To get the data out of an TimeRangeEvent instance use `data()`.
+It will return an Immutable.Map. Alternatively you can call `toJSON()`
+to return a Javascript object representation of the data, while
+`toString()` will serialize the entire event to a string.
 
 **Kind**: global class  
-## API Reference
-
 
 * [TimeRangeEvent](#TimeRangeEvent)
     * [new TimeRangeEvent()](#new_TimeRangeEvent_new)
     * [.toPoint()](#TimeRangeEvent+toPoint)
-    * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>TimeRange</code>
+    * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
     * [.data()](#TimeRangeEvent+data) ⇒ <code>Immutable.Map</code>
     * [.setData()](#TimeRangeEvent+setData)
     * [.timerangeAsUTCString()](#TimeRangeEvent+timerangeAsUTCString) ⇒ <code>string</code>
@@ -18,6 +36,7 @@
     * [.end()](#TimeRangeEvent+end) ⇒ <code>Data</code>
     * [.timestamp()](#TimeRangeEvent+timestamp) ⇒ <code>Data</code>
     * [.get()](#TimeRangeEvent+get)
+    * [.collapse()](#TimeRangeEvent+collapse)
 
 <a name="new_TimeRangeEvent_new"></a>
 
@@ -41,11 +60,11 @@ Returns a flat array starting with the timestamp, followed by the values.
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 <a name="TimeRangeEvent+timerange"></a>
 
-### timeRangeEvent.timerange() ⇒ <code>TimeRange</code>
+### timeRangeEvent.timerange() ⇒ <code>[TimeRange](#TimeRange)</code>
 The TimeRange of this data
 
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>TimeRange</code> - TimeRange of this data.  
+**Returns**: <code>[TimeRange](#TimeRange)</code> - TimeRange of this data.  
 <a name="TimeRangeEvent+data"></a>
 
 ### timeRangeEvent.data() ⇒ <code>Immutable.Map</code>
@@ -101,5 +120,14 @@ Alias for the begin() time.
 Get specific data out of the Event. The data will be converted
 to a js object. You can use a fieldSpec to address deep data.
 A fieldSpec could be "a.b"
+
+**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
+<a name="TimeRangeEvent+collapse"></a>
+
+### timeRangeEvent.collapse()
+Collapses this event's columns, represented by the fieldSpecList
+into a single column. The collapsing itself is done with the reducer
+function. Optionally the collapsed column could be appended to the
+existing columns, or replace them (the default).
 
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  

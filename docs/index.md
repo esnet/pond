@@ -1,7 +1,6 @@
+<a name="Index"></a>
+
 ## Index
-
----
-
 An index is simply a string that represents a fixed range of time. There are two basic types:
 *Multiplier index* - the number of some unit of time (hours, days etc) since the UNIX epoch.
 *Calendar index* - The second represents a calendar range, such as Oct 2014.
@@ -27,8 +26,6 @@ An Index is a nice representation of certain types of time intervals because it 
 An Index is also useful when collecting into specific time ranges, for example generating all the 5 min ("5m") maximum rollups within a specific day ("1d"). See the processing section within these docs.
 
 **Kind**: global class  
-## API Reference
-
 
 * [Index](#Index)
     * [.toJSON()](#Index+toJSON)

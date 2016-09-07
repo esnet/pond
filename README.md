@@ -2,7 +2,7 @@
 
 ----
 
-Pond.js is a library build on top of [immutable.js](https://facebook.github.io/immutable-js/) to provide time-based data structures, serialization and processing within our tools.
+Pond.js is a library built on top of [immutable.js](https://facebook.github.io/immutable-js/) to provide time-based data structures, serialization and processing within our tools.
 
 For data structures it unifies the use of time ranges, events and collections and time series. For processing it provides a chained pipeline interface to aggregate, collect and process batches or streams of events.
 
@@ -71,7 +71,7 @@ And forming together collections of events:
 
 And then high level processing via Event pipelines:
 
-* **Pipeline** - Stream or batch processing of Events. Supports windowing, grouping and aggregation. Still under development.
+* **Pipeline** - Stream or batch processing of Events. Supports windowing, grouping and aggregation.
 
 # Getting started
 
@@ -92,17 +92,11 @@ For further information see the [Getting started](http://software.es.net/pond/#/
 
 Read the [contribution guidelines](./CONTRIBUTING.md).
 
-The library has Mocha tests. To run the tests interactively, use:
-
-    npm run start-tester
-
-Then point your browser to:
-
-    http://localhost:9500/webpack-dev-server/tests
-
-Or to run the tests (and linting) on the command line:
+The library has a large and growing Jest test suite. To run the tests interactively, use:
 
     npm test
+
+This will start 
 
 # License
 

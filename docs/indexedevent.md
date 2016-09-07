@@ -1,7 +1,6 @@
+<a name="IndexedEvent"></a>
+
 ## IndexedEvent
-
----
-
 An IndexedEvent uses an Index to specify a timerange over which the event
 occurs and maps that to a data object representing some measurement or metric
 during that time range.
@@ -27,23 +26,22 @@ The get the data out of an IndexedEvent instance use `data()`. It will return
 an Immutable.Map.
 
 **Kind**: global class  
-## API Reference
-
 
 * [IndexedEvent](#IndexedEvent)
     * [new IndexedEvent()](#new_IndexedEvent_new)
     * [.toPoint()](#IndexedEvent+toPoint)
-    * [.index()](#IndexedEvent+index) ⇒ <code>Index</code>
+    * [.index()](#IndexedEvent+index) ⇒ <code>[Index](#Index)</code>
     * [.setData()](#IndexedEvent+setData)
     * [.data()](#IndexedEvent+data) ⇒ <code>Immutable.Map</code>
     * [.indexAsString()](#IndexedEvent+indexAsString) ⇒ <code>string</code>
     * [.timerangeAsUTCString()](#IndexedEvent+timerangeAsUTCString) ⇒ <code>string</code>
     * [.timerangeAsLocalString()](#IndexedEvent+timerangeAsLocalString) ⇒ <code>string</code>
-    * [.timerange()](#IndexedEvent+timerange) ⇒ <code>TimeRange</code>
+    * [.timerange()](#IndexedEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
     * [.begin()](#IndexedEvent+begin) ⇒ <code>Data</code>
     * [.end()](#IndexedEvent+end) ⇒ <code>Data</code>
     * [.timestamp()](#IndexedEvent+timestamp) ⇒ <code>Data</code>
     * [.get()](#IndexedEvent+get)
+    * [.collapse()](#IndexedEvent+collapse)
 
 <a name="new_IndexedEvent_new"></a>
 
@@ -69,11 +67,11 @@ Returns a flat array starting with the timestamp, followed by the values.
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
 <a name="IndexedEvent+index"></a>
 
-### indexedEvent.index() ⇒ <code>Index</code>
+### indexedEvent.index() ⇒ <code>[Index](#Index)</code>
 Returns the Index associated with the data in this Event
 
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>Index</code> - The Index  
+**Returns**: <code>[Index](#Index)</code> - The Index  
 <a name="IndexedEvent+setData"></a>
 
 ### indexedEvent.setData()
@@ -110,11 +108,11 @@ The TimeRange of this data, in Local time, as a string.
 **Returns**: <code>string</code> - TimeRange of this data.  
 <a name="IndexedEvent+timerange"></a>
 
-### indexedEvent.timerange() ⇒ <code>TimeRange</code>
+### indexedEvent.timerange() ⇒ <code>[TimeRange](#TimeRange)</code>
 The TimeRange of this data
 
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>TimeRange</code> - TimeRange of this data.  
+**Returns**: <code>[TimeRange](#TimeRange)</code> - TimeRange of this data.  
 <a name="IndexedEvent+begin"></a>
 
 ### indexedEvent.begin() ⇒ <code>Data</code>
@@ -142,5 +140,14 @@ Alias for the begin() time.
 Get specific data out of the Event. The data will be converted
 to a js object. You can use a fieldSpec to address deep data.
 A fieldSpec could be "a.b"
+
+**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
+<a name="IndexedEvent+collapse"></a>
+
+### indexedEvent.collapse()
+Collapses this event's columns, represented by the fieldSpecList
+into a single column. The collapsing itself is done with the reducer
+function. Optionally the collapsed column could be appended to the
+existing columns, or replace them (the default).
 
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  

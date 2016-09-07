@@ -1,7 +1,6 @@
+<a name="Event"></a>
+
 ## Event
-
----
-
 There are three types of Events in Pond:
 
 1. *Event* - a generic event which associates a timestamp with some data
@@ -74,8 +73,6 @@ outageEvent.data()
 to fetch the whole data object, which will be an Immutable Map.
 
 **Kind**: global class  
-## API Reference
-
 
 * [Event](#Event)
     * [new Event()](#new_Event_new)

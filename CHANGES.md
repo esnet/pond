@@ -1,4 +1,4 @@
-## 0.7
+## v0.7
 
 This update is concerned with adding quantile and percentile calculations.
 
@@ -44,7 +44,7 @@ const p = Pipeline()
 
 ---
 
-## 0.6
+## v0.6
 
 This update concentrates on providing a better API for processing a TimeSeries object. It updates the Pipeline code to be able to return the results as an alternative to evoking a callback function. Using this API several methods on the TimeSeries have been reworked to directly return their results as a new TimeSeries. In addition, TimeSeries now has several new methods to do roll-ups aggregations and collections directly.
 
@@ -114,11 +114,11 @@ Static functions to build an Index strings for daily, monthly and yearly rollups
 
 ---
 
-## 0.5
+## v0.5
 
 Large update causing many API changes, especially within what was previously the Processor pipeline (now Pipeline). The core structures such as Events and TimeSeries remain largely the same, at least from an API perspective, with mostly feature additions and bug fixes. We are still evolving the pipeline code but feel this is a significant step forward and one which we can build on going forward.
 
-### 0.5.0
+### v0.5.0
 
  * Pipeline is a complete rewrite of the Processing code. It now unifies operations on sets of Events into a Collection class that also backs the TimeSeries itself. This enables the pipelines to operate on either streams of Events or on TimeSeries or Collections.
  * Pipelines therefore support a limited notion of either streaming or batch processing.
@@ -147,18 +147,18 @@ Large update causing many API changes, especially within what was previously the
 
 ---
 
-## 0.4
+## v0.4
 
-### 0.4.2
+### v0.4.2
 
  * Fixed creation of a `TimeSeries` from `TimeRangeEvents`.
  * Fixed `timerange()` calculation of a `TimeSeries` made of `TimeRangeEvents`.
 
-### 0.4.1
+### v0.4.1
 
  * Fixed TimeSeries import
 
-### 0.4.0
+### v0.4.0
 
  * Support for processing chains. e.g.
  
@@ -179,9 +179,9 @@ Large update causing many API changes, especially within what was previously the
 
 ---
 
-## 0.3
+## v0.3
 
-### 0.3.0
+### v0.3.0
 
  * Better support for nested objects:
     * Converts deeper structures to Immutable objects internally
@@ -194,13 +194,13 @@ Large update causing many API changes, especially within what was previously the
 
 ---
 
-## 0.2
+## v0.2
 
-### 0.2.1
+### v0.2.1
 
  * Fixed an issue with merge.
 
-### 0.2.0
+### v0.2.0
 
  * You can either merge two series with different columns together, or same columns and different times.
 

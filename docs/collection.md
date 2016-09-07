@@ -1,7 +1,6 @@
+<a name="Collection"></a>
+
 ## Collection
-
----
-
 A collection is an abstraction for a bag of Events.
 
 You typically construct a Collection from a list of Events, which
@@ -23,43 +22,41 @@ in Pipeline event processing. They are an instance of a BoundedIn, so
 they can be used as a pipeline source.
 
 **Kind**: global class  
-## API Reference
-
 
 * [Collection](#Collection)
     * [new Collection(arg1, [arg2])](#new_Collection_new)
     * _instance_
         * [.toJSON()](#Collection+toJSON) ⇒ <code>Object</code>
         * [.toString()](#Collection+toString) ⇒ <code>string</code>
-        * [.type()](#Collection+type) ⇒ <code>Event</code> &#124; <code>IndexedEvent</code> &#124; <code>TimeRangeEvent</code>
+        * [.type()](#Collection+type) ⇒ <code>[Event](#Event)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
         * [.size()](#Collection+size) ⇒ <code>number</code>
         * [.sizeValid()](#Collection+sizeValid) ⇒ <code>number</code>
-        * [.at(pos)](#Collection+at) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-        * [.atTime(time)](#Collection+atTime) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-        * [.atFirst()](#Collection+atFirst) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
-        * [.atLast()](#Collection+atLast) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+        * [.at(pos)](#Collection+at) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+        * [.atTime(time)](#Collection+atTime) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+        * [.atFirst()](#Collection+atFirst) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+        * [.atLast()](#Collection+atLast) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
         * [.bisect(t, b)](#Collection+bisect) ⇒ <code>number</code>
         * [.events()](#Collection+events)
         * [.eventList()](#Collection+eventList) ⇒ <code>Immutable.List</code>
         * [.eventListAsArray()](#Collection+eventListAsArray) ⇒ <code>Array</code>
-        * [.sort()](#Collection+sort) ⇒ <code>TimeRange</code>
-        * [.range()](#Collection+range) ⇒ <code>TimeRange</code>
+        * [.sort()](#Collection+sort) ⇒ <code>[TimeRange](#TimeRange)</code>
+        * [.range()](#Collection+range) ⇒ <code>[TimeRange](#TimeRange)</code>
         * [.addEvent(event)](#Collection+addEvent) ⇒ <code>[Collection](#Collection)</code>
         * [.slice(begin, end)](#Collection+slice) ⇒ <code>[Collection](#Collection)</code>
         * [.filter(func)](#Collection+filter) ⇒ <code>[Collection](#Collection)</code>
         * [.map(func)](#Collection+map) ⇒ <code>[Collection](#Collection)</code>
         * [.clean(fieldPath)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
         * [.count()](#Collection+count) ⇒ <code>number</code>
-        * [.first(fieldSpec)](#Collection+first) ⇒ <code>number</code>
-        * [.last(fieldSpec)](#Collection+last) ⇒ <code>number</code>
-        * [.sum(fieldSpec)](#Collection+sum) ⇒ <code>number</code>
-        * [.avg(fieldSpec)](#Collection+avg) ⇒ <code>number</code>
-        * [.max(fieldSpec)](#Collection+max) ⇒ <code>number</code>
-        * [.min(fieldSpec)](#Collection+min) ⇒ <code>number</code>
-        * [.mean(fieldSpec)](#Collection+mean) ⇒ <code>number</code>
-        * [.median(fieldSpec)](#Collection+median) ⇒ <code>number</code>
-        * [.stdev(fieldSpec)](#Collection+stdev) ⇒ <code>number</code>
-        * [.percentile(q, fieldSpec, interp)](#Collection+percentile) ⇒ <code>number</code>
+        * [.first(fieldPath)](#Collection+first) ⇒ <code>number</code>
+        * [.last(fieldPath)](#Collection+last) ⇒ <code>number</code>
+        * [.sum(fieldPath)](#Collection+sum) ⇒ <code>number</code>
+        * [.avg(fieldPath)](#Collection+avg) ⇒ <code>number</code>
+        * [.max(fieldPath)](#Collection+max) ⇒ <code>number</code>
+        * [.min(fieldPath)](#Collection+min) ⇒ <code>number</code>
+        * [.mean(fieldPath)](#Collection+mean) ⇒ <code>number</code>
+        * [.median(fieldPath)](#Collection+median) ⇒ <code>number</code>
+        * [.stdev(fieldPath)](#Collection+stdev) ⇒ <code>number</code>
+        * [.percentile(q, fieldPath, interp)](#Collection+percentile) ⇒ <code>number</code>
         * [.quantile(n, column, interp)](#Collection+quantile) ⇒ <code>array</code>
         * [.aggregate(func, fieldSpec)](#Collection+aggregate) ⇒ <code>number</code>
         * [.isChronological()](#Collection+isChronological) ⇒ <code>Boolean</code>
@@ -101,7 +98,7 @@ string representation of `toJSON()`.
 **Returns**: <code>string</code> - The Collection serialized as a string.  
 <a name="Collection+type"></a>
 
-### collection.type() ⇒ <code>Event</code> &#124; <code>IndexedEvent</code> &#124; <code>TimeRangeEvent</code>
+### collection.type() ⇒ <code>[Event](#Event)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
 Returns the Event object type in this Collection.
 
 Since Collections may only have one type of event (`Event`, `IndexedEvent`
@@ -109,7 +106,7 @@ or `TimeRangeEvent`) this will return that type. If no events
 have been added to the Collection it will return `undefined`.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>Event</code> &#124; <code>IndexedEvent</code> &#124; <code>TimeRangeEvent</code> - - The class of the type
+**Returns**: <code>[Event](#Event)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> - - The class of the type
                                               of events contained in
                                               this Collection.  
 <a name="Collection+size"></a>
@@ -132,11 +129,11 @@ specifically are not NaN, undefined or null.
 **Returns**: <code>number</code> - Count of valid events  
 <a name="Collection+at"></a>
 
-### collection.at(pos) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+### collection.at(pos) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
 Returns an event in the Collection by its position.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code> - Returns the
+**Returns**: <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> - Returns the
 event at the pos specified.  
 **Params**
 
@@ -151,7 +148,7 @@ for (let row=0; row < series.size(); row++) {
 ```
 <a name="Collection+atTime"></a>
 
-### collection.atTime(time) ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+### collection.atTime(time) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
 Returns an event in the Collection by its time. This is the same
 as calling `bisect` first and then using `at` with the index.
 
@@ -162,13 +159,13 @@ as calling `bisect` first and then using `at` with the index.
 
 <a name="Collection+atFirst"></a>
 
-### collection.atFirst() ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+### collection.atFirst() ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
 Returns the first event in the Collection.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 <a name="Collection+atLast"></a>
 
-### collection.atLast() ⇒ <code>Event</code> &#124; <code>TimeRangeEvent</code> &#124; <code>IndexedEvent</code>
+### collection.atLast() ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
 Returns the last event in the Collection.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -212,21 +209,21 @@ Returns a Javascript array representation of the event list
 **Returns**: <code>Array</code> - All events as a Javascript Array.  
 <a name="Collection+sort"></a>
 
-### collection.sort() ⇒ <code>TimeRange</code>
+### collection.sort() ⇒ <code>[TimeRange](#TimeRange)</code>
 Sorts the Collection using the value referenced by
 the fieldSpec.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>TimeRange</code> - The extents of the TimeSeries  
+**Returns**: <code>[TimeRange](#TimeRange)</code> - The extents of the TimeSeries  
 <a name="Collection+range"></a>
 
-### collection.range() ⇒ <code>TimeRange</code>
+### collection.range() ⇒ <code>[TimeRange](#TimeRange)</code>
 From the range of times, or Indexes within the TimeSeries, return
 the extents of the TimeSeries as a TimeRange. This is currently implemented
 by walking the events.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>TimeRange</code> - The extents of the TimeSeries  
+**Returns**: <code>[TimeRange](#TimeRange)</code> - The extents of the TimeSeries  
 <a name="Collection+addEvent"></a>
 
 ### collection.addEvent(event) ⇒ <code>[Collection](#Collection)</code>
@@ -238,7 +235,7 @@ same type as other events within the Collection.
 **Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection containing the new event.  
 **Params**
 
-- event <code>Event</code> | <code>TimeRangeEvent</code> | <code>IndexedEvent</code> - The event being added.
+- event <code>[Event](#Event)</code> | <code>[TimeRangeEvent](#TimeRangeEvent)</code> | <code>[IndexedEvent](#IndexedEvent)</code> - The event being added.
 
 <a name="Collection+slice"></a>
 
@@ -304,151 +301,124 @@ Returns the number of events in this collection
 **Returns**: <code>number</code> - The number of events  
 <a name="Collection+first"></a>
 
-### collection.first(fieldSpec) ⇒ <code>number</code>
+### collection.first(fieldPath) ⇒ <code>number</code>
 Returns the first value in the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The first value  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to look up. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the first value of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+last"></a>
 
-### collection.last(fieldSpec) ⇒ <code>number</code>
+### collection.last(fieldPath) ⇒ <code>number</code>
 Returns the last value in the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The last value  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to look up. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the last value of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+sum"></a>
 
-### collection.sum(fieldSpec) ⇒ <code>number</code>
+### collection.sum(fieldPath) ⇒ <code>number</code>
 Returns the sum of the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The sum  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to sum. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the sum of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+avg"></a>
 
-### collection.avg(fieldSpec) ⇒ <code>number</code>
+### collection.avg(fieldPath) ⇒ <code>number</code>
 Aggregates the events down to their average(s)
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The average  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to average. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the avg of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+max"></a>
 
-### collection.max(fieldSpec) ⇒ <code>number</code>
+### collection.max(fieldPath) ⇒ <code>number</code>
 Aggregates the events down to their maximum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The max value for the field  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to find the max. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the max of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+min"></a>
 
-### collection.min(fieldSpec) ⇒ <code>number</code>
+### collection.min(fieldPath) ⇒ <code>number</code>
 Aggregates the events down to their minimum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The min value for the field  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to find the min. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the min of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+mean"></a>
 
-### collection.mean(fieldSpec) ⇒ <code>number</code>
+### collection.mean(fieldPath) ⇒ <code>number</code>
 Aggregates the events down to their mean (same as avg)
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The mean  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to find the mean. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the mean of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+median"></a>
 
-### collection.median(fieldSpec) ⇒ <code>number</code>
+### collection.median(fieldPath) ⇒ <code>number</code>
 Aggregates the events down to their minimum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The median value for the field  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to find the median. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the median of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+stdev"></a>
 
-### collection.stdev(fieldSpec) ⇒ <code>number</code>
+### collection.stdev(fieldPath) ⇒ <code>number</code>
 Aggregates the events down to their stdev
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>number</code> - The resulting stdev value  
 **Params**
 
-- fieldSpec <code>string</code> - Column or columns to find the stdev. If you
-                             need to retrieve multiple deep
-                             nested values that ['can.be', 'done.with',
-                             'this.notation']. A single deep value with a
-                             string.like.this.  If not supplied, all columns
-                             will be aggregated.
+- fieldPath <code>string</code> - Column to find the stdev of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 
 <a name="Collection+percentile"></a>
 
-### collection.percentile(q, fieldSpec, interp) ⇒ <code>number</code>
+### collection.percentile(q, fieldPath, interp) ⇒ <code>number</code>
 Gets percentile q within the Collection. This works the same way as numpy.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -456,12 +426,9 @@ Gets percentile q within the Collection. This works the same way as numpy.
 **Params**
 
 - q <code>integer</code> - The percentile (should be between 0 and 100)
-- fieldSpec <code>string</code> - Column or columns to find the stdev. If you
-                           need to retrieve multiple deep
-                           nested values that ['can.be', 'done.with',
-                           'this.notation']. A single deep value with a
-                           string.like.this.  If not supplied, all columns
-                           will be aggregated.
+- fieldPath <code>string</code> - Column to find the percentile of. A deep value can be referenced with a
+                           string.like.this.  If not supplied the `value` column will be
+                           aggregated.
 - interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
                            to use when the desired quantile lies between
                            two data points. Options are:
