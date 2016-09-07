@@ -6,3 +6,5 @@ notifications:
   email: false
 before_install:
     - export TZ=America/Los_Angeles
+script:
+    npm test -- --coverage | ./node_modules/coveralls/bin/coveralls.js
