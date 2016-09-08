@@ -11,6 +11,7 @@
 import React from "react";
 import Markdown from "react-markdown";
 import text from "raw!./rollup.md";
+import logo from "../img/pond.png";
 
 export default React.createClass({
 
@@ -18,7 +19,10 @@ export default React.createClass({
         return (
             <div>
                 <div className="row">
-                    <div className="col-md-12">
+                    <div className="col-md-2">
+                        <img src={logo} alt="ESnet" width={120} height={120}/>
+                    </div>
+                    <div className="col-md-9">
                         <Markdown source={text}/>
                     </div>
                 </div>

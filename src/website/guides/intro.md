@@ -13,7 +13,7 @@ For data structures it unifies the use of time ranges, events and collections an
 
 We are still developing Pond.js as it integrates further into our code, so it may change or be incomplete in parts. That said, it has a growing collection of tests and we will strive not to break those without careful consideration.
 
-See the CHANGES.md document for version updates.
+See the [CHANGES.md](/#changelog).
 
 ## Rational
 

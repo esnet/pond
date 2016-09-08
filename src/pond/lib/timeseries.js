@@ -592,11 +592,12 @@ class TimeSeries {
      * @param {string} fieldPath  Column to find the stdev of. A deep value can
      *                            be referenced with a string.like.this.  If not supplied
      *                            the `value` column will be aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The sum
      */
-    sum(fieldPath) {
-        return this._collection.sum(fieldPath);
+    sum(fieldPath, filter) {
+        return this._collection.sum(fieldPath, filter);
     }
 
     /**
@@ -608,8 +609,8 @@ class TimeSeries {
      *
      * @return {number}           The max value for the field
      */
-    max(fieldSpec) {
-        return this._collection.max(fieldSpec);
+    max(fieldPath, filter) {
+        return this._collection.max(fieldPath, filter);
     }
 
     /**
@@ -618,11 +619,12 @@ class TimeSeries {
      * @param {string} fieldPath  Column to find the min of. A deep value can
      *                            be referenced with a string.like.this.  If not supplied
      *                            the `value` column will be aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The min value for the field
      */
-    min(fieldPath) {
-        return this._collection.min(fieldPath);
+    min(fieldPath, filter) {
+        return this._collection.min(fieldPath, filter);
     }
 
     /**
@@ -631,11 +633,12 @@ class TimeSeries {
      * @param {string} fieldPath  Column to find the avg of. A deep value can
      *                            be referenced with a string.like.this.  If not supplied
      *                            the `value` column will be aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The average
      */
-    avg(fieldSpec) {
-        return this._collection.avg(fieldSpec);
+    avg(fieldPath, filter) {
+        return this._collection.avg(fieldPath, filter);
     }
 
     /**
@@ -644,11 +647,12 @@ class TimeSeries {
      * @param {string} fieldPath  Column to find the mean of. A deep value can
      *                            be referenced with a string.like.this.  If not supplied
      *                            the `value` column will be aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The mean
      */
-    mean(fieldSpec) {
-        return this._collection.mean(fieldSpec);
+    mean(fieldPath, filter) {
+        return this._collection.mean(fieldPath, filter);
     }
 
     /**
@@ -657,11 +661,12 @@ class TimeSeries {
      * @param {string} fieldPath  Column to find the median of. A deep value can
      *                            be referenced with a string.like.this.  If not supplied
      *                            the `value` column will be aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The resulting median value
      */
-    median(fieldSpec) {
-        return this._collection.median(fieldSpec);
+    median(fieldPath, filter) {
+        return this._collection.median(fieldPath, filter);
     }
 
     /**
@@ -670,11 +675,12 @@ class TimeSeries {
      * @param {string} fieldPath  Column to find the stdev of. A deep value can
      *                            be referenced with a string.like.this.  If not supplied
      *                            the `value` column will be aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The resulting stdev value
      */
-    stdev(fieldSpec) {
-        return this._collection.stdev(fieldSpec);
+    stdev(fieldPath, filter) {
+        return this._collection.stdev(fieldPath, filter);
     }
 
     /**
@@ -690,11 +696,12 @@ class TimeSeries {
      *                             to use when the desired quantile lies between
      *                             two data points. Options are: "linear", "lower", "higher",
      *                             "nearest", "midpoint"
+     * @param {function} filter    Optional filter function used to clean data before aggregating
      *
      * @return {number}            The percentile
      */
-    percentile(q, fieldSpec, interp = "linear") {
-        return this._collection.percentile(q, fieldSpec, interp);
+    percentile(q, fieldPath, interp = "linear", filter) {
+        return this._collection.percentile(q, fieldPath, interp, filter);
     }
 
     /**
@@ -710,8 +717,8 @@ class TimeSeries {
      *
      * @return {number}           The resulting value
      */
-    aggregate(func, fieldSpec) {
-        return this._collection.aggregate(func, fieldSpec);
+    aggregate(func, fieldPath) {
+        return this._collection.aggregate(func, fieldPath);
     }
 
     /**

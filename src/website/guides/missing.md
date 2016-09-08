@@ -1,14 +1,14 @@
-# Handling missing data
-
+## Handling missing data
+---
 Real world data can have gaps, bad names, or occur at irregular intervals. Pond.js contains several methods to adjust or sanitize a series of less than optimal data. As with all other mutation operations in pond.js, these methods will return new `Event` objects, new `Collections` and new `TimeSeries` as apropos.
 
-## Filling
+### Filling
 
 Data might contain missing or otherwise invalid values. `TimeSeries.fill()` can perform a variety of fill operations to smooth or make sure that the data can be processed in math operations without blowing up.
 
 In pond.js, a value is considered "invalid" if it `undefined`, `null` or `NaN`. In PyPond `None`, a `NaN` value, or an empty string are considered missing.
 
-### Usage
+#### Usage
 
 The `fill()` method on a TimeSeries takes a single `options` argument. Options are:
 * `fieldSpec` - is the same as it is in the rest of the code - a string or list of strings denoting "columns" in the data. It can point `to.deep.values` using the usual dot notation.
@@ -27,7 +27,7 @@ A complete sample usage could look like this:
     });
 ```
 
-#### The method option
+##### The method option
 
 There are three fill methods:
 
@@ -37,7 +37,7 @@ There are three fill methods:
 
 Note: neither `pad` or `linear` can fill the first value in a series if it is invalid, and they can't start filling until good value has been seen: `[null, null, null, 1, 2, 3]` would remain unchanged. Similarly, `linear` can not fill the last value in a series.
 
-#### The `limit` option
+##### The `limit` option
 
 The optional `limit` controls how many values will be filled before it gives up and starts returning the invalid data until a valid value is seen again.
 
@@ -64,7 +64,7 @@ Using methods `zero` and `pad` the first two missing values are filled and the t
 When filling multiple columns, the count is maintained on a per-column basis.  So given the following data:
 
 ```
-    const date = {
+    const data = {
         name: "traffic",
         columns: ["time", "direction"],
         points: [
@@ -87,7 +87,7 @@ The `in` and `out` sub-columns will be counted and filled independently of each 
 
 If `limit` is not set, no limits will be placed on the fill and all values will be filled as apropos to the selected method.
 
-#### Constructing `linear` fill `Pipeline` chains
+##### Constructing `linear` fill `Pipeline` chains
 
 `TimeSeries.fill()` will be the common entry point for the `Filler`, but a `Pipeline` can be constructed as well. Even though the default behavior of `TimeSeries.fill()` applies to all fill methods, the `linear` fill logic is somewhat different than the `zero` and `pad` methods. Note the following points when creating your own `method: 'linear'` processing chain.
 
@@ -103,7 +103,7 @@ If `limit` is not set, no limits will be placed on the fill and all values will 
 * When using an unbounded input (like `Stream`), it is a best practice to set a limit using the optional `limit`. This will ensure events will continue being emitted if the data hits a long run of missing values.
 * When using an streaming source, make sure to shut it down "cleanly" using `.stop()`. This will ensure `.flush()` is called so any unfilled cached events are emitted.
 
-## Alignment of data
+### Alignment of data
 
 The align processor takes a `TimeSeries` of events that might come in with timestamps at uneven intervals and produces a new series of those points are aligned on precise time window boundaries.  A series containing four events with following timestamps:
 
@@ -125,7 +125,7 @@ Only a series of `Event` objects can be aligned. `IndexedEvent` objects are basi
 
 It should also be noted that the emitted/aligned event will only contain the fields that alignment was requested on. Which is to say if you have two columns, `in` and `out`, and only request to align the `in` column, the `out` value will not be contained in the emitted event.
 
-### Usage
+#### Usage
 
 The full argument usage of the align method:
 
@@ -151,13 +151,13 @@ The full argument usage of the align method:
 
 That would normally produce events on three alignment boundaries `1:00, 2:00 and 3:00` and that exceeds the `limit` so those events will have `null` as a value instead of an interpolated value.
 
-### Interpolation methods
+#### Interpolation methods
 
-#### Linear
+##### Linear
 
 This is the default method. It uses simple linear interpolation between values in `Event` objects to derive new values on to the alignment boundaries. Interpolation occurs between the last event before the boundary and the first point after. Interpolation can occur across multiple boundaries at once.
 
-#### Hold
+##### Hold
 
 This is a much simpler method. It just fills the selected field(s) with the corresponding value from the previous event.
 

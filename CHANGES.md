@@ -1,3 +1,5 @@
+## Changelog
+---
 ## v0.7
 > September 2016
 

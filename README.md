@@ -1,18 +1,18 @@
-[![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond) [![npm version](https://badge.fury.io/js/pondjs.svg)](https://badge.fury.io/js/pondjs)
+[![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond) [![npm version](https://badge.fury.io/js/pondjs.svg)](https://badge.fury.io/js/pondjs) [![Coverage Status](https://coveralls.io/repos/github/esnet/pond/badge.svg?branch=v0.7)](https://coveralls.io/github/esnet/pond?branch=v0.7)
 
 ----
 
-Pond.js is a library built on top of [immutable.js](https://facebook.github.io/immutable-js/) to provide time-based data structures, serialization and processing within our tools.
+Pond.js is a library built on top of [immutable.js](https://facebook.github.io/immutable-js/) to provide time-based data structures, serialization and processing within our tools. There is also a Python version of the library: [PyPond](https://github.com/esnet/pypond) that has the same features.
 
 For data structures it unifies the use of time ranges, events and collections and time series. For processing it provides a chained pipeline interface to aggregate, collect and process batches or streams of events.
 
-We are still developing Pond.js as it integrates further into our code, so it may change or be incomplete in parts. That said, it has a growing collection of tests and we will strive not to break those without careful consideration.
+We are still developing Pond as it integrates further into our code, so it may change or be incomplete in parts. That said, it has a growing collection of tests and we will strive not to break those without careful consideration.
 
-See the CHANGES.md document for version updates.
+See the [CHANGES.md](https://github.com/esnet/pond/blob/master/CHANGES.md) document for version updates.
 
 ## Rational
 
-ESnet runs a large research network for the US Department of Energy. Our tools consume events and time series data throughout our network visualization applications and data processing chains. As our tool set grew, so did our need to build a Javascript library to work with this type of data that was consistent and dependable. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated. Not only do we need to deal with different formats at all layers of the system, we also repeat our processing code over and over. Pond.js was built to address these pain points.
+ESnet runs a large research network for the US Department of Energy. Our tools consume events and time series data throughout our network visualization applications and data processing chains. As our tool set grew, so did our need to build a library to work with this type of data that was consistent and dependable. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated. Not only do we need to deal with different formats at all layers of the system, we also repeat our processing code over and over. Pond.js and its Python equivalent PyPond, were built to address these pain points.
 
 The result might be as simple as comparing two time ranges:
 
@@ -31,7 +31,19 @@ Or quickly performing aggregations on a timeseries:
 
 ```js
     const timeseries = new TimeSeries(weatherData);
-    const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
+    const dailyAvg = timeseries.fixedWindowRollup("1d", {
+        avg_temp: {temperature: avg()}
+    });
+```
+
+Or filling missing values:
+
+```js
+    const timeseries = new TimeSeries(trafficData);
+    const result = ts.fill({
+        fieldSpec: ["direction.in", "direction.out"],
+        method: "linear"   // linearly interpolate missing values
+    });
 ```
 
 Or much higher level batch or stream processing using the Pipeline API:
@@ -43,7 +55,7 @@ Or much higher level batch or stream processing using the Pipeline API:
         .groupBy(e => e.value() > 65 ? "high" : "low")
         .emitOn("flush")
         .to(CollectionOut, (collection, windowKey, groupByKey) => {
-            result[groupByKey] = collection;
+            // do something with result
         }, true);
 
 ```

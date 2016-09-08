@@ -128,14 +128,14 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.size()](#TimeSeries+size) ⇒ <code>number</code>
         * [.sizeValid()](#TimeSeries+sizeValid) ⇒ <code>number</code>
         * [.count()](#TimeSeries+count) ⇒ <code>number</code>
-        * [.sum(fieldPath)](#TimeSeries+sum) ⇒ <code>number</code>
+        * [.sum(fieldPath, filter)](#TimeSeries+sum) ⇒ <code>number</code>
         * [.max(fieldPath)](#TimeSeries+max) ⇒ <code>number</code>
-        * [.min(fieldPath)](#TimeSeries+min) ⇒ <code>number</code>
-        * [.avg(fieldPath)](#TimeSeries+avg) ⇒ <code>number</code>
-        * [.mean(fieldPath)](#TimeSeries+mean) ⇒ <code>number</code>
-        * [.median(fieldPath)](#TimeSeries+median) ⇒ <code>number</code>
-        * [.stdev(fieldPath)](#TimeSeries+stdev) ⇒ <code>number</code>
-        * [.percentile(q, fieldPath, interp)](#TimeSeries+percentile) ⇒ <code>number</code>
+        * [.min(fieldPath, filter)](#TimeSeries+min) ⇒ <code>number</code>
+        * [.avg(fieldPath, filter)](#TimeSeries+avg) ⇒ <code>number</code>
+        * [.mean(fieldPath, filter)](#TimeSeries+mean) ⇒ <code>number</code>
+        * [.median(fieldPath, filter)](#TimeSeries+median) ⇒ <code>number</code>
+        * [.stdev(fieldPath, filter)](#TimeSeries+stdev) ⇒ <code>number</code>
+        * [.percentile(q, fieldPath, interp, filter)](#TimeSeries+percentile) ⇒ <code>number</code>
         * [.aggregate(func, fieldPath)](#TimeSeries+aggregate) ⇒ <code>number</code>
         * [.quantile(n, fieldPath, interp)](#TimeSeries+quantile) ⇒ <code>array</code>
         * [.pipeline()](#TimeSeries+pipeline) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -423,7 +423,7 @@ for size().
 **Returns**: <code>number</code> - Count of events  
 <a name="TimeSeries+sum"></a>
 
-### timeSeries.sum(fieldPath) ⇒ <code>number</code>
+### timeSeries.sum(fieldPath, filter) ⇒ <code>number</code>
 Returns the sum for the fieldspec
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -433,6 +433,7 @@ Returns the sum for the fieldspec
 - fieldPath <code>string</code> - Column to find the stdev of. A deep value can
                            be referenced with a string.like.this.  If not supplied
                            the `value` column will be aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+max"></a>
 
@@ -449,7 +450,7 @@ Aggregates the events down to their maximum value
 
 <a name="TimeSeries+min"></a>
 
-### timeSeries.min(fieldPath) ⇒ <code>number</code>
+### timeSeries.min(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their minimum value
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -459,10 +460,11 @@ Aggregates the events down to their minimum value
 - fieldPath <code>string</code> - Column to find the min of. A deep value can
                            be referenced with a string.like.this.  If not supplied
                            the `value` column will be aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+avg"></a>
 
-### timeSeries.avg(fieldPath) ⇒ <code>number</code>
+### timeSeries.avg(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events in the TimeSeries down to their average
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -472,10 +474,11 @@ Aggregates the events in the TimeSeries down to their average
 - fieldPath <code>string</code> - Column to find the avg of. A deep value can
                            be referenced with a string.like.this.  If not supplied
                            the `value` column will be aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+mean"></a>
 
-### timeSeries.mean(fieldPath) ⇒ <code>number</code>
+### timeSeries.mean(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events in the TimeSeries down to their mean (same as avg)
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -485,10 +488,11 @@ Aggregates the events in the TimeSeries down to their mean (same as avg)
 - fieldPath <code>string</code> - Column to find the mean of. A deep value can
                            be referenced with a string.like.this.  If not supplied
                            the `value` column will be aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+median"></a>
 
-### timeSeries.median(fieldPath) ⇒ <code>number</code>
+### timeSeries.median(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their medium value
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -498,10 +502,11 @@ Aggregates the events down to their medium value
 - fieldPath <code>string</code> - Column to find the median of. A deep value can
                            be referenced with a string.like.this.  If not supplied
                            the `value` column will be aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+stdev"></a>
 
-### timeSeries.stdev(fieldPath) ⇒ <code>number</code>
+### timeSeries.stdev(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their stdev
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -511,10 +516,11 @@ Aggregates the events down to their stdev
 - fieldPath <code>string</code> - Column to find the stdev of. A deep value can
                            be referenced with a string.like.this.  If not supplied
                            the `value` column will be aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+percentile"></a>
 
-### timeSeries.percentile(q, fieldPath, interp) ⇒ <code>number</code>
+### timeSeries.percentile(q, fieldPath, interp, filter) ⇒ <code>number</code>
 Gets percentile q within the TimeSeries. This works the same way as numpy.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -525,10 +531,11 @@ Gets percentile q within the TimeSeries. This works the same way as numpy.
 - fieldPath <code>string</code> - Column to find the qth percentile of. A deep value can
                             be referenced with a string.like.this.  If not supplied
                             the `value` column will be aggregated.
-- interp <code>string</code> - Specifies the interpolation method
+- interp <code>string</code> <code> = &quot;linear&quot;</code> - Specifies the interpolation method
                             to use when the desired quantile lies between
                             two data points. Options are: "linear", "lower", "higher",
                             "nearest", "midpoint"
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+aggregate"></a>
 

@@ -47,18 +47,18 @@ they can be used as a pipeline source.
         * [.map(func)](#Collection+map) ⇒ <code>[Collection](#Collection)</code>
         * [.clean(fieldPath)](#Collection+clean) ⇒ <code>[Collection](#Collection)</code>
         * [.count()](#Collection+count) ⇒ <code>number</code>
-        * [.first(fieldPath)](#Collection+first) ⇒ <code>number</code>
-        * [.last(fieldPath)](#Collection+last) ⇒ <code>number</code>
-        * [.sum(fieldPath)](#Collection+sum) ⇒ <code>number</code>
-        * [.avg(fieldPath)](#Collection+avg) ⇒ <code>number</code>
-        * [.max(fieldPath)](#Collection+max) ⇒ <code>number</code>
-        * [.min(fieldPath)](#Collection+min) ⇒ <code>number</code>
-        * [.mean(fieldPath)](#Collection+mean) ⇒ <code>number</code>
-        * [.median(fieldPath)](#Collection+median) ⇒ <code>number</code>
-        * [.stdev(fieldPath)](#Collection+stdev) ⇒ <code>number</code>
-        * [.percentile(q, fieldPath, interp)](#Collection+percentile) ⇒ <code>number</code>
+        * [.first(fieldPath, filter)](#Collection+first) ⇒ <code>number</code>
+        * [.last(fieldPath, filter)](#Collection+last) ⇒ <code>number</code>
+        * [.sum(fieldPath, filter)](#Collection+sum) ⇒ <code>number</code>
+        * [.avg(fieldPath, filter)](#Collection+avg) ⇒ <code>number</code>
+        * [.max(fieldPath, filter)](#Collection+max) ⇒ <code>number</code>
+        * [.min(fieldPath, filter)](#Collection+min) ⇒ <code>number</code>
+        * [.mean(fieldPath, filter)](#Collection+mean) ⇒ <code>number</code>
+        * [.median(fieldPath, filter)](#Collection+median) ⇒ <code>number</code>
+        * [.stdev(fieldPath, filter)](#Collection+stdev) ⇒ <code>number</code>
+        * [.percentile(q, fieldPath, interp, filter)](#Collection+percentile) ⇒ <code>number</code>
+        * [.aggregate(func, fieldPath)](#Collection+aggregate) ⇒ <code>number</code>
         * [.quantile(n, column, interp)](#Collection+quantile) ⇒ <code>array</code>
-        * [.aggregate(func, fieldSpec)](#Collection+aggregate) ⇒ <code>number</code>
         * [.isChronological()](#Collection+isChronological) ⇒ <code>Boolean</code>
     * _static_
         * [.equal(collection1, collection2)](#Collection.equal) ⇒ <code>bool</code>
@@ -211,7 +211,7 @@ Returns a Javascript array representation of the event list
 
 ### collection.sort() ⇒ <code>[TimeRange](#TimeRange)</code>
 Sorts the Collection using the value referenced by
-the fieldSpec.
+the fieldPath.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>[TimeRange](#TimeRange)</code> - The extents of the TimeSeries  
@@ -301,7 +301,7 @@ Returns the number of events in this collection
 **Returns**: <code>number</code> - The number of events  
 <a name="Collection+first"></a>
 
-### collection.first(fieldPath) ⇒ <code>number</code>
+### collection.first(fieldPath, filter) ⇒ <code>number</code>
 Returns the first value in the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -311,10 +311,11 @@ Returns the first value in the Collection for the fieldspec
 - fieldPath <code>string</code> - Column to find the first value of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+last"></a>
 
-### collection.last(fieldPath) ⇒ <code>number</code>
+### collection.last(fieldPath, filter) ⇒ <code>number</code>
 Returns the last value in the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -324,10 +325,11 @@ Returns the last value in the Collection for the fieldspec
 - fieldPath <code>string</code> - Column to find the last value of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+sum"></a>
 
-### collection.sum(fieldPath) ⇒ <code>number</code>
+### collection.sum(fieldPath, filter) ⇒ <code>number</code>
 Returns the sum of the Collection for the fieldspec
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -337,10 +339,11 @@ Returns the sum of the Collection for the fieldspec
 - fieldPath <code>string</code> - Column to find the sum of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+avg"></a>
 
-### collection.avg(fieldPath) ⇒ <code>number</code>
+### collection.avg(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their average(s)
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -350,10 +353,11 @@ Aggregates the events down to their average(s)
 - fieldPath <code>string</code> - Column to find the avg of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+max"></a>
 
-### collection.max(fieldPath) ⇒ <code>number</code>
+### collection.max(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their maximum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -363,10 +367,11 @@ Aggregates the events down to their maximum value
 - fieldPath <code>string</code> - Column to find the max of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+min"></a>
 
-### collection.min(fieldPath) ⇒ <code>number</code>
+### collection.min(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their minimum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -376,10 +381,11 @@ Aggregates the events down to their minimum value
 - fieldPath <code>string</code> - Column to find the min of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+mean"></a>
 
-### collection.mean(fieldPath) ⇒ <code>number</code>
+### collection.mean(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their mean (same as avg)
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -389,23 +395,25 @@ Aggregates the events down to their mean (same as avg)
 - fieldPath <code>string</code> - Column to find the mean of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+median"></a>
 
-### collection.median(fieldPath) ⇒ <code>number</code>
+### collection.median(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their minimum value
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The median value for the field  
+**Returns**: <code>number</code> - The median value  
 **Params**
 
 - fieldPath <code>string</code> - Column to find the median of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+stdev"></a>
 
-### collection.stdev(fieldPath) ⇒ <code>number</code>
+### collection.stdev(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their stdev
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -415,10 +423,11 @@ Aggregates the events down to their stdev
 - fieldPath <code>string</code> - Column to find the stdev of. A deep value can be referenced with a
                            string.like.this.  If not supplied the `value` column will be
                            aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="Collection+percentile"></a>
 
-### collection.percentile(q, fieldPath, interp) ⇒ <code>number</code>
+### collection.percentile(q, fieldPath, interp, filter) ⇒ <code>number</code>
 Gets percentile q within the Collection. This works the same way as numpy.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -438,6 +447,22 @@ Gets percentile q within the Collection. This works the same way as numpy.
                             * higher: j.
                             * nearest: i or j whichever is nearest.
                             * midpoint: (i + j) / 2.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
+
+<a name="Collection+aggregate"></a>
+
+### collection.aggregate(func, fieldPath) ⇒ <code>number</code>
+Aggregates the events down using a user defined function to
+do the reduction.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>number</code> - The resulting value  
+**Params**
+
+- func <code>function</code> - User defined reduction function. Will be
+                           passed a list of values. Should return a
+                           singe value.
+- fieldPath <code>String</code> - The field to aggregate over
 
 <a name="Collection+quantile"></a>
 
@@ -460,21 +485,6 @@ Gets n quantiles within the Collection. This works the same way as numpy.
                             * higher: j.
                             * nearest: i or j whichever is nearest.
                             * midpoint: (i + j) / 2.
-
-<a name="Collection+aggregate"></a>
-
-### collection.aggregate(func, fieldSpec) ⇒ <code>number</code>
-Aggregates the events down using a user defined function to
-do the reduction.
-
-**Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The resulting value  
-**Params**
-
-- func <code>function</code> - User defined reduction function. Will be
-                           passed a list of values. Should return a
-                           singe value.
-- fieldSpec <code>String</code> - The field to aggregate over
 
 <a name="Collection+isChronological"></a>
 

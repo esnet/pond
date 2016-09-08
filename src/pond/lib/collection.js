@@ -301,12 +301,12 @@ class Collection extends Bounded {
 
     /**
      * Sorts the Collection using the value referenced by
-     * the fieldSpec.
+     * the fieldPath.
      *
      * @return {TimeRange} The extents of the TimeSeries
      */
-    sort(fieldSpec) {
-        const fs = util.fieldPathToArray(fieldSpec);
+    sort(fieldPath) {
+        const fs = util.fieldPathToArray(fieldPath);
         return this.setEvents(this._eventList.sortBy(event => {
             const e = new this._type(event);
             return e.get(fs);
@@ -443,11 +443,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the first value of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
-     * @return {number} The first value
+     * @return {number}           The first value
      */
-    first(fieldPath) {
-        return this.aggregate(first, fieldPath);
+    first(fieldPath, filter) {
+        return this.aggregate(first(filter), fieldPath);
     }
 
     /**
@@ -456,11 +457,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the last value of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The last value
      */
-    last(fieldPath) {
-        return this.aggregate(last, fieldPath);
+    last(fieldPath, filter) {
+        return this.aggregate(last(filter), fieldPath);
     }
 
     /**
@@ -469,6 +471,7 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the sum of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The sum
      */
@@ -482,11 +485,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the avg of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The average
      */
-    avg(fieldPath) {
-        return this.aggregate(avg(), fieldPath);
+    avg(fieldPath, filter) {
+        return this.aggregate(avg(filter), fieldPath);
     }
 
     /**
@@ -495,11 +499,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the max of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The max value for the field
      */
-    max(fieldPath) {
-        return this.aggregate(max(), fieldPath);
+    max(fieldPath, filter) {
+        return this.aggregate(max(filter), fieldPath);
     }
 
     /**
@@ -508,11 +513,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the min of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The min value for the field
      */
-    min(fieldPath) {
-        return this.aggregate(min(), fieldPath);
+    min(fieldPath, filter) {
+        return this.aggregate(min(filter), fieldPath);
     }
 
     /**
@@ -521,11 +527,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the mean of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
-     * @return {number}             The mean
+     * @return {number}           The mean
      */
-    mean(fieldPath) {
-        return this.avg(fieldPath);
+    mean(fieldPath, filter) {
+        return this.avg(fieldPath, filter);
     }
 
     /**
@@ -534,11 +541,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the median of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
-     * @return {number}             The median value for the field
+     * @return {number}           The median value
      */
-    median(fieldPath) {
-        return this.aggregate(median(), fieldPath);
+    median(fieldPath, filter) {
+        return this.aggregate(median(filter), fieldPath);
     }
 
     /**
@@ -547,11 +555,12 @@ class Collection extends Bounded {
      * @param {string} fieldPath  Column to find the stdev of. A deep value can be referenced with a
      *                            string.like.this.  If not supplied the `value` column will be
      *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The resulting stdev value
      */
-    stdev(fieldPath) {
-        return this.aggregate(stdev(), fieldPath);
+    stdev(fieldPath, filter) {
+        return this.aggregate(stdev(filter), fieldPath);
     }
 
     /**
@@ -572,11 +581,52 @@ class Collection extends Bounded {
      *                             * higher: j.
      *                             * nearest: i or j whichever is nearest.
      *                             * midpoint: (i + j) / 2.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
      *
      * @return {number}           The percentile
      */
-    percentile(q, fieldPath, interp = "linear") {
-        return this.aggregate(percentile(q, interp), fieldPath);
+    percentile(q, fieldPath, interp = "linear", filter) {
+        return this.aggregate(percentile(q, interp, filter), fieldPath);
+    }
+
+    /**
+     * Aggregates the events down using a user defined function to
+     * do the reduction.
+     *
+     * @param  {function} func    User defined reduction function. Will be
+     *                            passed a list of values. Should return a
+     *                            singe value.
+     *
+     * @param  {String} fieldPath The field to aggregate over
+     *
+     * @return {number}           The resulting value
+     */
+    aggregate(func, fieldPath, options = {}) {
+        let fpath;
+        if (!_.isFunction(func)) {
+            throw new Error("First arg to aggregate() must be a function");
+        }
+
+        if (_.isString(fieldPath)) {
+            fpath = fieldPath;
+        } else if (_.isArray(fieldPath)) {
+            // if the ['array', 'style', 'fieldpath'] is being used,
+            // we need to turn it back into a string since we are
+            // using a subset of the the map() functionality on
+            // a single column
+            fpath = fieldPath.split(".");
+        } else if (_.isUndefined(fieldPath)) {
+            // map() needs a field name to use as a key. Normally
+            // this case is normally handled by _field_spec_to_array()
+            // inside get(). Also, if map(func, field_spec=None) then
+            // it will map all the columns.
+            fpath = "value";
+        } else {
+            throw new Error("Collection.aggregate() takes a string/array fieldPath");
+        }
+
+        const result = Event.mapReduce(this.eventListAsArray(), fpath, func, options);
+        return result[fpath];
     }
 
     /**
@@ -632,46 +682,6 @@ class Collection extends Bounded {
             }
         }
         return results;
-    }
-
-    /**
-     * Aggregates the events down using a user defined function to
-     * do the reduction.
-     *
-     * @param  {function} func    User defined reduction function. Will be
-     *                            passed a list of values. Should return a
-     *                            singe value.
-     *
-     * @param  {String} fieldSpec The field to aggregate over
-     *
-     * @return {number}           The resulting value
-     */
-    aggregate(func, fieldPath, options = {}) {
-        let fpath;
-        if (!_.isFunction(func)) {
-            throw new Error("First arg to aggregate() must be a function");
-        }
-
-        if (_.isString(fieldPath)) {
-            fpath = fieldPath;
-        } else if (_.isArray(fieldPath)) {
-            // if the ['array', 'style', 'field_path'] is being used,
-            // we need to turn it back into a string since we are
-            // using a subset of the the map() functionality on
-            // a single column
-            fpath = fieldPath.split(".");
-        } else if (_.isUndefined(fieldPath)) {
-            // map() needs a field name to use as a key. Normally
-            // this case is normally handled by _field_spec_to_array()
-            // inside get(). Also, if map(func, field_spec=None) then
-            // it will map all the columns.
-            fpath = "value";
-        } else {
-            throw new Error("Collection.aggregate() takes a string/array fieldPath");
-        }
-
-        const result = Event.mapReduce(this.eventListAsArray(), fpath, func, options);
-        return result[fpath];
     }
 
     /**
