@@ -1,4 +1,4 @@
-[![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond) [![npm version](https://badge.fury.io/js/pondjs.svg)](https://badge.fury.io/js/pondjs) [![Coverage Status](https://coveralls.io/repos/github/esnet/pond/badge.svg?branch=v0.7)](https://coveralls.io/github/esnet/pond?branch=v0.7)
+[![Build status](https://api.travis-ci.org/esnet/pond.png)](https://travis-ci.org/esnet/pond) [![npm version](https://badge.fury.io/js/pondjs.svg)](https://badge.fury.io/js/pondjs) [![Coverage Status](https://coveralls.io/repos/github/esnet/pond/badge.svg?branch=master)](https://coveralls.io/github/esnet/pond?branch=master)
 
 ----
 
