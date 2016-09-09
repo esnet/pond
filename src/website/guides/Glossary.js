@@ -10,20 +10,20 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import Highlighter from "./Highlighter";
-
-import markdown from "raw!../../../docs/Pipeline.md";
+import logo from "../img/pond.png";
+import text from "raw!./glossary.md";
 
 export default React.createClass({
-
-    mixins: [Highlighter],
 
     render() {
         return (
             <div>
                 <div className="row">
-                    <div className="col-md-12">
-                        <Markdown source={markdown}/>
+                    <div className="col-md-2">
+                        <img src={logo} alt="ESnet" width={120} height={120}/>
+                    </div>
+                    <div className="col-md-9">
+                        <Markdown source={text}/>
                     </div>
                 </div>
             </div>

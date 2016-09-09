@@ -11,7 +11,7 @@ var collectJson = require('collect-json')
 /* paths used by this script */
 var p = {
   src: path.resolve(__dirname, '../src/pond/lib/*.js'),
-  output: path.resolve(__dirname, '../docs/%s.md')
+  output: path.resolve(__dirname, '../src/website/docs/%s.md')
 }
 
 console.log(p);

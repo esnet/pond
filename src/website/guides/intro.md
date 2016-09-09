@@ -1,5 +1,5 @@
 
-## Pond.js
+# Pond.js
 
 ---
 
@@ -22,35 +22,34 @@ ESnet runs a large research network for the US Department of Energy. Our tools c
 The result might be as simple as comparing two time ranges:
 
 ```js
-    const timerange = timerange1.intersection(timerange2);
-    timerange.asRelativeString();  // "a few seconds ago to a month ago"
+const timerange = timerange1.intersection(timerange2);
+timerange.asRelativeString();  // "a few seconds ago to a month ago"
 ```
 
 Or simply getting the average value in a timeseries:
 
 ```js
-    timeseries.avg("sensor");
+timeseries.avg("sensor");
 ```
 
 Or quickly performing aggregations on a timeseries:
 
 ```js
-    const timeseries = new TimeSeries(weatherData);
-    const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
+const timeseries = new TimeSeries(weatherData);
+const dailyAvg = timeseries.fixedWindowRollup("1d", {value: avg});
 ```
 
 Or much higher level batch or stream processing using the Pipeline API:
 
 ```js
-    const p = Pipeline()
-        .from(timeseries)
-        .take(10)
-        .groupBy(e => e.value() > 65 ? "high" : "low")
-        .emitOn("flush")
-        .to(CollectionOut, (collection, windowKey, groupByKey) => {
-            result[groupByKey] = collection;
-        }, true);
-
+const p = Pipeline()
+    .from(timeseries)
+    .take(10)
+    .groupBy(e => e.value() > 65 ? "high" : "low")
+    .emitOn("flush")
+    .to(CollectionOut, (collection, windowKey, groupByKey) => {
+        result[groupByKey] = collection;
+    }, true);
 ```
 
 ## What does it do?

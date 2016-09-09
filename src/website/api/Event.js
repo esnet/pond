@@ -10,9 +10,9 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import Highlighter from "./Highlighter";
+import Highlighter from "../components/Highlighter";
 
-import text from "raw!../../../docs/Event.md";
+import text from "raw!../docs/Event.md";
 
 export default React.createClass({
 

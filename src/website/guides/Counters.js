@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2016, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -11,12 +11,9 @@
 import React from "react";
 import Markdown from "react-markdown";
 import logo from "../img/pond.png";
-import text from "raw!./intro.md";
-import Highlighter from "../components/Highlighter";
+import text from "raw!./counters.md";
 
 export default React.createClass({
-
-    mixins: [Highlighter],
 
     render() {
         return (

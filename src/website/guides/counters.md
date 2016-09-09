@@ -1,4 +1,5 @@
-# SNMP counter example
+## SNMP counter example
+---
 
 Measurement data we receive from our network routers comes in the form of counters. These counters generally increases monotonically. In this example we combine the alignment with the rate function to get a TimeSeries of network traffic (e.g. bits per second).
 

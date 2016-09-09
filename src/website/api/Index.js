@@ -10,19 +10,25 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import Highlighter from "./Highlighter";
-import text from "raw!../../../docs/IndexedEvent.md";
+import Highlighter from "../components/Highlighter";
+import text from "raw!../docs/Index.md";
 
 export default React.createClass({
 
     mixins: [Highlighter],
+
+    getInitialState() {
+        return {
+            markdown: text
+        };
+    },
 
     render() {
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
-                        <Markdown source={text}/>
+                        <Markdown source={this.state.markdown}/>
                     </div>
                 </div>
             </div>

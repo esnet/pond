@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2015, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -10,8 +10,9 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import Highlighter from "./Highlighter";
-import text from "raw!../../../docs/Collection.md";
+import Highlighter from "../components/Highlighter";
+
+import markdown from "raw!../docs/Pipeline.md";
 
 export default React.createClass({
 
@@ -22,7 +23,7 @@ export default React.createClass({
             <div>
                 <div className="row">
                     <div className="col-md-12">
-                        <Markdown source={text}/>
+                        <Markdown source={markdown}/>
                     </div>
                 </div>
             </div>

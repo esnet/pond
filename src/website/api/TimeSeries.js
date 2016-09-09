@@ -10,9 +10,8 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import logo from "../img/pond.png";
-import text from "raw!./intro.md";
-import Highlighter from "../components/Highlighter";
+import Highlighter from "./Highlighter";
+import text from "raw!../docs/TimeSeries.md";
 
 export default React.createClass({
 
@@ -22,10 +21,7 @@ export default React.createClass({
         return (
             <div>
                 <div className="row">
-                    <div className="col-md-2">
-                        <img src={logo} alt="ESnet" width={120} height={120}/>
-                    </div>
-                    <div className="col-md-9">
+                    <div className="col-md-12">
                         <Markdown source={text}/>
                     </div>
                 </div>

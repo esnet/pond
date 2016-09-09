@@ -58,8 +58,11 @@ class App extends Component {
                         <ul className="nav nav-sidebar">
                             <li><Link to="/">Introduction</Link></li>
                             <li><Link to="start">Getting started</Link></li>
+                            <li><Link to="processing">Processing pipelines</Link></li>
                             <li><Link to="missing">Handling missing data</Link></li>
-                            <li><Link to="rollup">Generating Rollups</Link></li>
+                            <li><Link to="rollup">Rollup example</Link></li>
+                            <li><Link to="counter">SNMP Counter example</Link></li>
+                            <li><Link to="glossary">Glossary</Link></li>
                             <li><Link to="changelog">Changelog</Link></li>
                         </ul>
 
@@ -73,28 +76,25 @@ class App extends Component {
                             <li><Link to="indexedevent">IndexedEvent</Link></li>
                             <li><Link to="collection">Collection</Link></li>
                             <li><Link to="timeseries">TimeSeries</Link></li>
+                            <li><Link to="pipeline">Pipeline</Link></li>
                         </ul>
+                        
+                        <div className="sidebar-heading">Related Projects</div>
 
-                        <div className="sidebar-heading">Processing</div>
-
-                            <ul className="nav nav-sidebar">
-                                <li><Link to="pipeline">Pipeline</Link></li>
-                            </ul>
+                        <ul className="nav nav-sidebar">
+                            <li><a href="http://software.es.net/pypond/">PyPond</a></li>
+                            <li><a href="http://software.es.net/react-timeseries-charts/">React Timeseries Charts</a></li>
+                            <li><a href="http://software.es.net/react-network-diagrams/">React Network Diagrams</a></li>
+                        </ul>
 
                         <div className="sidebar-heading">Links</div>
 
                         <ul className="nav nav-sidebar">
-                            <li><a href="https://github.com/esnet/pond/">GitHub</a></li>
+                            <li><a href="https://github.com/esnet/pond/">Pond.js on GitHub</a></li>
+                            <li><a href="http://software.es.net/">ESnet Open Source</a></li>
                             <li><a href="https://www.es.net/">ESnet</a></li>
-                            <li><a href="http://software.es.net/">Open Source</a></li>
                         </ul>
 
-                        <div className="sidebar-heading">Related Projects</div>
-
-                        <ul className="nav nav-sidebar">
-                            <li><a href="http://software.es.net/react-timeseries-charts/">Timeseries Charts</a></li>
-                            <li><a href="http://software.es.net/react-network-diagrams/">Network Diagrams</a></li>
-                        </ul>
                     </div>
 
                     <div className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
