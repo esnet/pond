@@ -1,4 +1,82 @@
-## 0.6
+## Changelog
+---
+## v0.7
+> September 2016
+
+This update had three main goals:
+ - Better handling of imperfect data.
+ - Add quantile and percentile calculations
+ - Improve API consistency
+
+In addition, PyPond is now available with feature parity to the pond.js.
+
+Breaking changes to look out for: `Pipeline.aggregate()` has changed to allow better composition of emitted events, aggregation functions are now supplied as `avg()` rather than simple `avg`. And `UnboundedIns` are now simply `Stream`.
+
+**General:**
+
+ -  Consistent use of fieldSpec, fieldPath etc across the API.
+ -  Aggregation functions now all need to be specified as `avg()` rather than `avg`. i.e. they are now a function that returns a function. This is to allow them to take parameters. e.g `percentile(95)`.
+ -  * All aggregation functions now accept a strategy for dealing with missing values. Missing values in pond.js are `NaN`s, `null`, or `undefined`. Strategies added are:
+    - `keepMissing` - pass through all values to the aggregator
+    - `ignoreMissing` - pass though only non-missing values
+    - `zeroMissing` - turn missing values into 0
+    - `propagateMissing` - cause the aggregator to return null if there is a missing value
+
+**Collection:**
+
+ - Adds `quantile()` and `percentile()` aggregation functions
+
+**TimeSeries:**
+
+ - Adds quantile and percentile aggregation functions
+ - Fixed: better handling of UTC times when generating IndexedEvent results
+ - More mutation support:
+    - Added `renameColumns()` to deep rename Events within a TimeSeries
+    - Added `setName()` to change the name of a TimeSeries
+    - Added `setMeta(key, value)` to change the meta data in a TimeSeries
+  In each case you will get a new TimeSeries back.
+ - Added `fill()` method to fill in missing values within a TimeSeries, using 0s, padding (last good value) or linear interpolation. In each case you can also specify a limit to the fill
+ - Added `align()` method to interpolate data to specific time boundaries (e.g. every 5 minutes). The interpolation can be with last value or linear interpolation. Like fill, a limit can also be supplied.
+ - Added `rate()` method to return the derivative of the TimeSeries. Optionally you can ignore negative values.
+
+**Pipelines:**
+
+ - Support for`fill()`, `align()` and `rate()` within a Pipeline.
+ - `UnboundedIn` is now `Stream`.
+ - Changes `aggregation` to more explicitly define the output fields. This allows you to perform multiple aggregations on the same input field, such as aggregating temperature over a collection window to average_temp and max_temp.
+
+Before:
+```
+const p = Pipeline()
+  ...
+  .aggregate({in: avg, out: avg})
+  ...
+```
+
+After:
+```
+const p = Pipeline()
+  ...
+  .aggregate({
+      in: {in: keep()},
+      in_avg: {in: avg()},
+      in_95th: {in: percentile(95)}}
+  })
+  ...
+```
+
+ - As shown in the above example, you can use the `percentile()` function. Note that this is a little different from the others in that you need to call the function with the percentile value you want. A second parameter controls the way the function behaves when a percentile does not land on a specific sample. The default is to linearly interpolate.
+ - Fixes a bug where Pipeline.taker() would ignore the first event.
+
+**Internal**
+
+ - Website now built with create-react-app
+ - Tests use Jest now and run in the terminal (for create-react-app workflow)
+ - General project restructuring
+
+---
+
+## v0.6
 
 This update concentrates on providing a better API for processing a TimeSeries object. It updates the Pipeline code to be able to return the results as an alternative to evoking a callback function. Using this API several methods on the TimeSeries have been reworked to directly return their results as a new TimeSeries. In addition, TimeSeries now has several new methods to do roll-ups aggregations and collections directly.
 
@@ -66,12 +144,13 @@ Static functions to build an Index strings for daily, monthly and yearly rollups
 **Collector:**
  - Ability to collect based on daily, monthly or yearly buckets.
 
+---
 
-## 0.5
+## v0.5
 
 Large update causing many API changes, especially within what was previously the Processor pipeline (now Pipeline). The core structures such as Events and TimeSeries remain largely the same, at least from an API perspective, with mostly feature additions and bug fixes. We are still evolving the pipeline code but feel this is a significant step forward and one which we can build on going forward.
 
-### 0.5.0
+### v0.5.0
 
  * Pipeline is a complete rewrite of the Processing code. It now unifies operations on sets of Events into a Collection class that also backs the TimeSeries itself. This enables the pipelines to operate on either streams of Events or on TimeSeries or Collections.
  * Pipelines therefore support a limited notion of either streaming or batch processing.
@@ -98,18 +177,20 @@ Large update causing many API changes, especially within what was previously the
     - Added code coverage
     - Auto-build of docs for website
 
-## 0.4
+---
 
-### 0.4.2
+## v0.4
+
+### v0.4.2
 
  * Fixed creation of a `TimeSeries` from `TimeRangeEvents`.
  * Fixed `timerange()` calculation of a `TimeSeries` made of `TimeRangeEvents`.
 
-### 0.4.1
+### v0.4.1
 
  * Fixed TimeSeries import
 
-### 0.4.0
+### v0.4.0
 
  * Support for processing chains. e.g.
  
@@ -128,9 +209,11 @@ Large update causing many API changes, especially within what was previously the
  * Events support keys to enable the ability to do groupBy operations. You can add a key to an `Event` with `setKey()`, and you'll get a new `Event` back which is the same as the old one, but with a key. You can query the key with, unsurprisingly, `key()`.
  * `Groupers` are a new `Event` processor which takes an incoming event stream and emits the same event but with a key on it. This enables downstream processing, such as aggregation, to group based on the key.
 
-## 0.3
+---
 
-### 0.3.0
+## v0.3
+
+### v0.3.0
 
  * Better support for nested objects:
     * Converts deeper structures to Immutable objects internally
@@ -141,13 +224,15 @@ Large update causing many API changes, especially within what was previously the
  * Began work on ability to do things like sum a series or isolate columns of a series.
  * Website update as well as uniform linting
 
-## 0.2
+---
 
-### 0.2.1
+## v0.2
+
+### v0.2.1
 
  * Fixed an issue with merge.
 
-### 0.2.0
+### v0.2.0
 
  * You can either merge two series with different columns together, or same columns and different times.
 
