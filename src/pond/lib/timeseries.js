@@ -217,7 +217,8 @@ class TimeSeries {
             }
 
             if (!this._collection.isChronological()) {
-                throw new Error("Events supplied to TimeSeries constructor must be chronological");
+                console.warn("TimeSeries constructed with non-chronological events and will be sorted");
+                this._collection = this._collection.sortByTime();
             }
         }
     }
