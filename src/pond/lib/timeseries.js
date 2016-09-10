@@ -863,28 +863,16 @@ class TimeSeries {
      */
     renameColumns(options) {
         const { renameMap } = options;
-        const rename = (event) => {
-            const renamedMap = (event) => {
-                const b = {};
-                _.each(event.data().toJS(), (value, key) => {
-                    const k = renameMap[key] || key;
-                    b[k] = value;
-                });
-                return b;
-            };
-
-            const renamedData = renamedMap(event);
-
+        return this.map((event) => {
+            const d = event.data().mapKeys(key => renameMap[key] || key);
             if (event instanceof Event) {
-                return new Event(event.timestamp(), renamedData);
+                return new Event(event.timestamp(), d);
             } else if (event instanceof TimeRangeEvent) {
-                return new TimeRangeEvent([event.begin(), event.end()], renamedData);
+                return new TimeRangeEvent([event.begin(), event.end()], d);
             } else if (event instanceof IndexedEvent) {
-                return new IndexedEvent(event.index(), renamedData);
+                return new IndexedEvent(event.index(), d);
             }
-        };
-
-        return this.map(rename);
+        });
     }
 
     /**
