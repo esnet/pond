@@ -1309,13 +1309,17 @@ class TimeSeries {
 
         // For each key, reduce the events associated with that key
         // to a single new event
-        const events = [];
-        _.each(eventMap, (eventsList) => {
-            const event = reducer(eventsList, fieldSpec);
-            events.push(event);
-        });
+        const events = _.map(eventMap, (eventsList) =>
+            reducer(eventsList, fieldSpec)
+        );
 
-        return new TimeSeries({...data, events});
+        // Make a collection. If the events are out of order, sort them
+        let collection = new Collection(events);
+        if (!collection.isChronological()) {
+            collection = collection.sortByTime();
+        }
+
+        return new TimeSeries({...data, collection});
     }
 
     /**
