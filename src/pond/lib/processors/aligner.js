@@ -42,7 +42,7 @@ export default class Aligner extends Processor {
             const {
                 fieldSpec,
                 window,
-                method = "zero",
+                method = "hold",
                 limit = null
             } = options;
 
@@ -68,7 +68,7 @@ export default class Aligner extends Processor {
 
         // check input of method
         if (!_.contains(["linear", "hold"], this._method)) {
-            throw new Error(`Unknown method ${this._method} passed to Aligner`);
+            throw new Error(`Unknown method '${this._method}' passed to Aligner`);
         }
 
         // check limit

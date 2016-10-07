@@ -19,16 +19,18 @@ function isValid(v) {
 //
 
 
-const keepMissing = (values) => values;
+const keepMissing = values => values;
 const ignoreMissing = values => values.filter(isValid);
 const zeroMissing = values => values.map(v => isValid(v) ? v : 0);
 const propagateMissing = values => ignoreMissing(values).length === values.length ? values : null;
+const noneIfEmpty = values => values.length === 0 ? null : values;
 
 export const filter = {
     keepMissing,
     ignoreMissing,
     zeroMissing,
-    propagateMissing
+    propagateMissing,
+    noneIfEmpty
 };
 
 /**

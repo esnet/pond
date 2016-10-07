@@ -1037,15 +1037,15 @@ class TimeSeries {
      *     const timeseries = new TimeSeries(data);
      *     const dailyAvg = timeseries.fixedWindowRollup({
      *         windowSize: "1d",
-     *         aggregation: {value: {value: avg}}
+     *         aggregation: {value: {value: avg()}}
      *     });
      * ```
      *
      * @param                options                An object containing options:
      * @param {string}       options.windowSize     The size of the window. e.g. "6h" or "5m"
      * @param {object}       options.aggregation    The aggregation specification (see description above)
-     *
-     * @return {TimeSeries}     The resulting rolled up TimeSeries
+     * @param {bool}         options.toEvents       Output as Events, rather than IndexedEvents
+     * @return {TimeSeries}                         The resulting rolled up TimeSeries
      */
     fixedWindowRollup(options) {
         const {windowSize, aggregation, toEvents = false} = options;
@@ -1054,7 +1054,7 @@ class TimeSeries {
         }
 
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         const aggregatorPipeline = this.pipeline()
@@ -1092,8 +1092,8 @@ class TimeSeries {
     hourlyRollup(options) {
         const {aggregation, toEvent = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this.fixedWindowRollup("1h", aggregation, toEvent);
@@ -1119,8 +1119,8 @@ class TimeSeries {
     dailyRollup(options) {
         const {aggregation, toEvents = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this._rollup("daily", aggregation, toEvents);
@@ -1146,8 +1146,8 @@ class TimeSeries {
     monthlyRollup(options) {
         const {aggregation, toEvents = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this._rollup("monthly", aggregation, toEvents);
@@ -1174,8 +1174,8 @@ class TimeSeries {
     yearlyRollup(options) {
         const {aggregation, toEvents = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this._rollup("yearly", aggregation, toEvents);

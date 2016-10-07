@@ -11,6 +11,7 @@
 /* eslint-disable */
 
 import TimeSeries from "../timeseries";
+import { Pipeline } from "../pipeline";
 
 const SIMPLE_GAP_DATA = {
     name: "traffic",
@@ -147,4 +148,25 @@ it("can do alignment with TimeSeries.align() on a TimeSeries with invalid points
     expect(aligned.at(6).get()).toBeNull();  // bad value
     expect(aligned.at(7).get()).toBeNull();  // bad value
     done();
+});
+
+it("can do alignment on an already aligned timeseries", () => {
+    const ts = new TimeSeries({
+         name: "traffic",
+         columns: ["time", "value"],
+         points: [
+             [1473490770000, 10],
+             [1473490800000, 20],
+             [1473490830000, 30],
+             [1473490860000, 40]
+         ]
+    });
+
+    const result = Pipeline()
+        .from(ts)
+        .align("value", "30s", "linear", 10)
+        .toKeyedCollections()
+
+    console.log(result["all"].toString());
+
 });
