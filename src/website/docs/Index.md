@@ -28,13 +28,20 @@ An Index is also useful when collecting into specific time ranges, for example g
 **Kind**: global class  
 
 * [Index](#Index)
-    * [.toJSON()](#Index+toJSON)
-    * [.toString()](#Index+toString)
-    * [.toNiceString()](#Index+toNiceString)
-    * [.asString()](#Index+asString)
-    * [.asTimerange()](#Index+asTimerange)
-    * [.begin()](#Index+begin)
-    * [.end()](#Index+end)
+    * _instance_
+        * [.toJSON()](#Index+toJSON)
+        * [.toString()](#Index+toString)
+        * [.toNiceString()](#Index+toNiceString)
+        * [.asString()](#Index+asString)
+        * [.asTimerange()](#Index+asTimerange)
+        * [.begin()](#Index+begin)
+        * [.end()](#Index+end)
+    * _static_
+        * [.getIndexString()](#Index.getIndexString)
+        * [.getIndexStringList()](#Index.getIndexStringList)
+        * [.getDailyIndexString()](#Index.getDailyIndexString)
+        * [.getMonthlyIndexString()](#Index.getMonthlyIndexString)
+        * [.getYearlyIndexString()](#Index.getYearlyIndexString)
 
 <a name="Index+toJSON"></a>
 
@@ -81,3 +88,33 @@ Returns the start date of the Index
 Returns the end date of the Index
 
 **Kind**: instance method of <code>[Index](#Index)</code>  
+<a name="Index.getIndexString"></a>
+
+### Index.getIndexString()
+Return the index string given an index prefix and a datetime object.
+
+**Kind**: static method of <code>[Index](#Index)</code>  
+<a name="Index.getIndexStringList"></a>
+
+### Index.getIndexStringList()
+Given the time range, return a list of strings of index values every <prefix> tick.
+
+**Kind**: static method of <code>[Index](#Index)</code>  
+<a name="Index.getDailyIndexString"></a>
+
+### Index.getDailyIndexString()
+Generate an index string with day granularity.
+
+**Kind**: static method of <code>[Index](#Index)</code>  
+<a name="Index.getMonthlyIndexString"></a>
+
+### Index.getMonthlyIndexString()
+Generate an index string with month granularity.
+
+**Kind**: static method of <code>[Index](#Index)</code>  
+<a name="Index.getYearlyIndexString"></a>
+
+### Index.getYearlyIndexString()
+Generate an index string with month granularity.
+
+**Kind**: static method of <code>[Index](#Index)</code>  
