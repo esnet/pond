@@ -96,10 +96,18 @@ class Index {
         return this._timerange.end();
     }
 
+    /**
+     * Return the index string given an index prefix and a datetime object.
+     */
+
     static getIndexString(win, date) {
         const pos = util.windowPositionFromDate(win, date);
         return `${win}-${pos}`;
     }
+
+    /**
+     * Given the time range, return a list of strings of index values every <prefix> tick.
+     */
 
     static getIndexStringList(win, timerange) {
         const pos1 = util.windowPositionFromDate(win, timerange.begin());
@@ -113,6 +121,10 @@ class Index {
         return indexList;
     }
 
+    /**
+     * Generate an index string with day granularity.
+     */
+
     static getDailyIndexString(date, utc = false) {
         let day = util.leftPad(utc ? date.getUTCDate() : date.getDate());
         let month = util.leftPad(utc ? date.getUTCMonth() + 1 : date.getMonth() + 1);
@@ -120,11 +132,19 @@ class Index {
         return `${year}-${month}-${day}`;
     }
 
+    /**
+     * Generate an index string with month granularity.
+     */
+
     static getMonthlyIndexString(date, utc = false) {
         let month = util.leftPad(utc ? date.getUTCMonth() + 1 : date.getMonth() + 1);
         const year = utc ? date.getUTCFullYear() : date.getFullYear();
         return `${year}-${month}`;
     }
+
+    /**
+     * Generate an index string with month granularity.
+     */
 
     static getYearlyIndexString(date, utc = false) {
         const year = utc ? date.getUTCFullYear() : date.getFullYear();
