@@ -42,7 +42,7 @@ export default class Aligner extends Processor {
             const {
                 fieldSpec,
                 window,
-                method = "zero",
+                method = "hold",
                 limit = null
             } = options;
 
@@ -68,7 +68,7 @@ export default class Aligner extends Processor {
 
         // check input of method
         if (!_.contains(["linear", "hold"], this._method)) {
-            throw new Error(`Unknown method ${this._method} passed to Aligner`);
+            throw new Error(`Unknown method '${this._method}' passed to Aligner`);
         }
 
         // check limit
@@ -80,6 +80,14 @@ export default class Aligner extends Processor {
 
     clone() {
         return new Aligner(this);
+    }
+
+    /**
+     * Test to see if an event is perfectly aligned. Used on first event.
+     */
+    isAligned(event) {
+        const bound = Index.getIndexString(this._window, event.timestamp())
+        return this.getBoundaryTime(bound) === event.timestamp().getTime();
     }
 
     /**
@@ -181,6 +189,9 @@ export default class Aligner extends Processor {
         if (this.hasObservers()) {
             if (!this._previous) {
                 this._previous = event;
+                if (this.isAligned(event)) {
+                    this.emit(event);
+                }
                 return;
             }
 

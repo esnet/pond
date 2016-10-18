@@ -176,8 +176,10 @@ class Collection extends Bounded {
      * event at the pos specified.
      */
     at(pos) {
-        const event = new this._type(this._eventList.get(pos));
-        return event;
+        if (this._eventList.size > 0) {
+            const event = new this._type(this._eventList.get(pos));
+            return event;
+        }
     }
 
     /**
@@ -189,7 +191,7 @@ class Collection extends Bounded {
      */
     atTime(time) {
         const pos = this.bisect(time);
-        if (pos && pos < this.size()) {
+        if (pos >= 0 && pos < this.size()) {
             return this.at(pos);
         }
     }

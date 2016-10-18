@@ -111,3 +111,28 @@ it("can determine if a collection is chronological", () => {
     const sortedCollection = collection.sortByTime();
     expect(sortedCollection.isChronological()).toBeTruthy();
 });
+
+it("can correctly use atTime()", () =>{
+    const t = new Date(1476803711641);
+    let collection = new Collection();
+
+    expect(collection.size()).toEqual(0);
+    collection = collection.addEvent(new Event(t, 2));
+
+    expect(collection.size()).toEqual(1);
+    expect(collection.at(0).value()).toEqual(2);
+
+    const bisect = collection.bisect(t);
+    expect(bisect).toEqual(0);
+    expect(collection.at(bisect).value()).toEqual(2);
+
+    expect(collection.atTime(t).value()).toEqual(2);
+
+    // => {"name":"test","utc":true,"columns":["time","value"],"points":[[1465084800000,2]]}
+    //console.log("time1 index " + timeseries.bisect(time1));
+    // => 0
+    //console.log("index 0 " + timeseries.at(0));
+    // => {"time":1465084800000,"data":{"value":2}}
+    //console.log("using timeAt " + timeseries.atTime(time1));
+    // => undefined :(
+})

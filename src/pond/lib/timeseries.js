@@ -217,7 +217,7 @@ class TimeSeries {
             }
 
             if (!this._collection.isChronological()) {
-                throw new Error("Events supplied to TimeSeries constructor must be chronological");
+                throw new Error("TimeSeries was passed non-chronological events");
             }
         }
     }
@@ -344,12 +344,15 @@ class TimeSeries {
     /**
      * Sets a new underlying collection for this TimeSeries.
      *
-     * @param {Collection}  collection The new collection
+     * @param {Collection}  collection       The new collection
+     * @param {boolean}     isChronological  Causes the chronological
+     *                                       order of the events to
+     *                                       not be checked
      *
-     * @return {TimeSeries}            A new TimeSeries
+     * @return {TimeSeries}                  A new TimeSeries
      */
-    setCollection(collection) {
-        if (!collection.isChronological()) {
+    setCollection(collection, isChronological = false) {
+        if (!isChronological && !collection.isChronological()) {
             throw new Error("Collection supplied is not chronological");
         }
         const result = new TimeSeries(this);
@@ -385,7 +388,7 @@ class TimeSeries {
      */
     slice(begin, end) {
         const sliced = this._collection.slice(begin, end);
-        return this.setCollection(sliced);
+        return this.setCollection(sliced, true);
     }
 
     /**
@@ -416,7 +419,7 @@ class TimeSeries {
      */
     clean(fieldSpec) {
         const cleaned = this._collection.clean(fieldSpec);
-        return this.setCollection(cleaned);
+        return this.setCollection(cleaned, true);
     }
 
     /**
@@ -774,7 +777,7 @@ class TimeSeries {
         const collections = this.pipeline()
             .map(op)
             .toKeyedCollections();
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -800,7 +803,7 @@ class TimeSeries {
         const collections = this.pipeline()
             .select(fieldSpec)
             .toKeyedCollections();
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -836,7 +839,7 @@ class TimeSeries {
         const collections = this.pipeline()
             .collapse(fieldSpecList, name, reducer, append)
             .toKeyedCollections();
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -863,28 +866,16 @@ class TimeSeries {
      */
     renameColumns(options) {
         const { renameMap } = options;
-        const rename = (event) => {
-            const renamedMap = (event) => {
-                const b = {};
-                _.each(event.data().toJS(), (value, key) => {
-                    const k = renameMap[key] || key;
-                    b[k] = value;
-                });
-                return b;
-            };
-
-            const renamedData = renamedMap(event);
-
+        return this.map((event) => {
+            const d = event.data().mapKeys(key => renameMap[key] || key);
             if (event instanceof Event) {
-                return new Event(event.timestamp(), renamedData);
+                return new Event(event.timestamp(), d);
             } else if (event instanceof TimeRangeEvent) {
-                return new TimeRangeEvent([event.begin(), event.end()], renamedData);
+                return new TimeRangeEvent([event.begin(), event.end()], d);
             } else if (event instanceof IndexedEvent) {
-                return new IndexedEvent(event.index(), renamedData);
+                return new IndexedEvent(event.index(), d);
             }
-        };
-
-        return this.map(rename);
+        });
     }
 
     /**
@@ -939,7 +930,7 @@ class TimeSeries {
         const collections = pipeline
             .toKeyedCollections();
 
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -997,7 +988,7 @@ class TimeSeries {
             .align(fieldSpec, period, method, limit)
             .toKeyedCollections();
 
-        return this.setCollection(collection["all"]);
+        return this.setCollection(collection["all"], true);
     }
 
     /**
@@ -1022,7 +1013,7 @@ class TimeSeries {
             .rate(fieldSpec, allowNegative)
             .toKeyedCollections();
 
-        return this.setCollection(collection["all"]);
+        return this.setCollection(collection["all"], true);
     }
 
     /**
@@ -1048,15 +1039,15 @@ class TimeSeries {
      *     const timeseries = new TimeSeries(data);
      *     const dailyAvg = timeseries.fixedWindowRollup({
      *         windowSize: "1d",
-     *         aggregation: {value: {value: avg}}
+     *         aggregation: {value: {value: avg()}}
      *     });
      * ```
      *
      * @param                options                An object containing options:
      * @param {string}       options.windowSize     The size of the window. e.g. "6h" or "5m"
      * @param {object}       options.aggregation    The aggregation specification (see description above)
-     *
-     * @return {TimeSeries}     The resulting rolled up TimeSeries
+     * @param {bool}         options.toEvents       Output as Events, rather than IndexedEvents
+     * @return {TimeSeries}                         The resulting rolled up TimeSeries
      */
     fixedWindowRollup(options) {
         const {windowSize, aggregation, toEvents = false} = options;
@@ -1065,7 +1056,7 @@ class TimeSeries {
         }
 
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         const aggregatorPipeline = this.pipeline()
@@ -1080,7 +1071,7 @@ class TimeSeries {
             .clearWindow()
             .toKeyedCollections();
 
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -1103,8 +1094,8 @@ class TimeSeries {
     hourlyRollup(options) {
         const {aggregation, toEvent = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this.fixedWindowRollup("1h", aggregation, toEvent);
@@ -1130,8 +1121,8 @@ class TimeSeries {
     dailyRollup(options) {
         const {aggregation, toEvents = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this._rollup("daily", aggregation, toEvents);
@@ -1157,8 +1148,8 @@ class TimeSeries {
     monthlyRollup(options) {
         const {aggregation, toEvents = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this._rollup("monthly", aggregation, toEvents);
@@ -1185,8 +1176,8 @@ class TimeSeries {
     yearlyRollup(options) {
         const {aggregation, toEvents = false} = options;
 
-        if (!aggregation || !_.isFunction(aggregation)) {
-            throw new Error("aggregation function must be supplied, for example avg()");
+        if (!aggregation || !_.isObject(aggregation)) {
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
 
         return this._rollup("yearly", aggregation, toEvents);
@@ -1211,7 +1202,7 @@ class TimeSeries {
             .clearWindow()
             .toKeyedCollections();
 
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -1299,7 +1290,7 @@ class TimeSeries {
 
         // for each series, map events to the same timestamp/index
         const eventMap = {};
-        _.each(seriesList, (series) => {
+        seriesList.forEach(series => {
             for (const event of series.events()) {
                 let key;
                 if (event instanceof Event) {
@@ -1320,13 +1311,20 @@ class TimeSeries {
 
         // For each key, reduce the events associated with that key
         // to a single new event
-        const events = [];
-        _.each(eventMap, (eventsList) => {
-            const event = reducer(eventsList, fieldSpec);
-            events.push(event);
-        });
+        const events = _.map(eventMap, eventsList =>
+            reducer(eventsList, fieldSpec)
+        );
 
-        return new TimeSeries({...data, events});
+        // Make a collection. If the events are out of order, sort them.
+        // It's always possible that events are out of order here, depending
+        // on the start times of the series, along with it the series
+        // have missing data, so I think we don't have a choice here.
+        let collection = new Collection(events);
+        if (!collection.isChronological()) {
+            collection = collection.sortByTime();
+        }
+
+        return new TimeSeries({...data, collection});
     }
 
     /**
