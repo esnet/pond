@@ -1,5 +1,16 @@
 ## Changelog
 ---
+
+## v0.7.1
+> October 2016
+
+Patch release to fix several bugs and improve performance:
+- renaming columns now does so with mapKeys, rather than breaking the whole thing apart
+- fixes merging of TimeSeries so that if the result isn't chronological then it will sort them before trying to make a new TimeSeries
+- fixes atTime() boundary condition (#45)
+- fixed align processors to handle initial events that are already aligned
+- internal calls to setCollection can skip the isChronological test with a flag since they know they are maintaining order.
+
 ## v0.7
 > September 2016
 
