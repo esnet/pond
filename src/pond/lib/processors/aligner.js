@@ -83,6 +83,14 @@ export default class Aligner extends Processor {
     }
 
     /**
+     * Test to see if an event is perfectly aligned. Used on first event.
+     */
+    isAligned(event) {
+        const bound = Index.getIndexString(this._window, event.timestamp())
+        return this.getBoundaryTime(bound) === event.timestamp().getTime();
+    }
+
+    /**
      * Returns a list of indexes of window boundaries if the current
      * event and the previous event do not lie in the same window. If
      * they are in the same window, return an empty list.
@@ -181,6 +189,9 @@ export default class Aligner extends Processor {
         if (this.hasObservers()) {
             if (!this._previous) {
                 this._previous = event;
+                if (this.isAligned(event)) {
+                    this.emit(event);
+                }
                 return;
             }
 

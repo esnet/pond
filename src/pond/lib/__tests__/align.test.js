@@ -167,6 +167,17 @@ it("can do alignment on an already aligned timeseries", () => {
         .align("value", "30s", "linear", 10)
         .toKeyedCollections()
 
-    expect(result["all"].toString())
-        .toEqual(`[{"time":"2016-09-10T07:00:00.000Z","data":{"value":20}},{"time":"2016-09-10T07:00:30.000Z","data":{"value":30}},{"time":"2016-09-10T07:01:00.000Z","data":{"value":40}}]`);
+    const timeseries = result["all"];
+
+    expect(timeseries.at(0).timestamp().getTime()).toEqual(1473490770000);
+    expect(timeseries.at(0).value()).toEqual(10);
+
+    expect(timeseries.at(1).timestamp().getTime()).toEqual(1473490800000);
+    expect(timeseries.at(1).value()).toEqual(20);
+
+    expect(timeseries.at(2).timestamp().getTime()).toEqual(1473490830000);
+    expect(timeseries.at(2).value()).toEqual(30);
+
+    expect(timeseries.at(3).timestamp().getTime()).toEqual(1473490860000);
+    expect(timeseries.at(3).value()).toEqual(40);
 });
