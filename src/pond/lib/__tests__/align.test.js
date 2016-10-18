@@ -167,6 +167,6 @@ it("can do alignment on an already aligned timeseries", () => {
         .align("value", "30s", "linear", 10)
         .toKeyedCollections()
 
-    console.log(result["all"].toString());
-
+    expect(result["all"].toString())
+        .toEqual(`[{"time":"2016-09-10T07:00:00.000Z","data":{"value":20}},{"time":"2016-09-10T07:00:30.000Z","data":{"value":30}},{"time":"2016-09-10T07:01:00.000Z","data":{"value":40}}]`);
 });

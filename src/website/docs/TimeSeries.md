@@ -109,7 +109,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.atFirst()](#TimeSeries+atFirst) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
         * [.atLast()](#TimeSeries+atLast) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
         * [.events()](#TimeSeries+events)
-        * [.setCollection(collection)](#TimeSeries+setCollection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.setCollection(collection, isChronological)](#TimeSeries+setCollection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.bisect(t, b)](#TimeSeries+bisect) ⇒ <code>number</code>
         * [.slice(begin, end)](#TimeSeries+slice) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.crop(timerange)](#TimeSeries+crop) ⇒ <code>[TimeSeries](#TimeSeries)</code>
@@ -238,7 +238,7 @@ for (let event of series.events()) {
 ```
 <a name="TimeSeries+setCollection"></a>
 
-### timeSeries.setCollection(collection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### timeSeries.setCollection(collection, isChronological) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Sets a new underlying collection for this TimeSeries.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -246,6 +246,9 @@ Sets a new underlying collection for this TimeSeries.
 **Params**
 
 - collection <code>[Collection](#Collection)</code> - The new collection
+- isChronological <code>boolean</code> <code> = false</code> - Causes the chronological
+                                      order of the events to
+                                      not be checked
 
 <a name="TimeSeries+bisect"></a>
 
@@ -805,13 +808,14 @@ function and return the result as in_avg and out_avg.
 - options - An object containing options:
     - .windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
     - .aggregation <code>object</code> - The aggregation specification (see description above)
+    - .toEvents <code>bool</code> - Output as Events, rather than IndexedEvents
 
 **Example**  
 ```
     const timeseries = new TimeSeries(data);
     const dailyAvg = timeseries.fixedWindowRollup({
         windowSize: "1d",
-        aggregation: {value: {value: avg}}
+        aggregation: {value: {value: avg()}}
     });
 ```
 <a name="TimeSeries+hourlyRollup"></a>

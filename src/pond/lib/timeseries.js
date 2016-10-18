@@ -217,8 +217,7 @@ class TimeSeries {
             }
 
             if (!this._collection.isChronological()) {
-                console.warn("TimeSeries constructed with non-chronological events and will be sorted");
-                this._collection = this._collection.sortByTime();
+                throw new Error("TimeSeries was passed non-chronological events");
             }
         }
     }
@@ -345,12 +344,15 @@ class TimeSeries {
     /**
      * Sets a new underlying collection for this TimeSeries.
      *
-     * @param {Collection}  collection The new collection
+     * @param {Collection}  collection       The new collection
+     * @param {boolean}     isChronological  Causes the chronological
+     *                                       order of the events to
+     *                                       not be checked
      *
-     * @return {TimeSeries}            A new TimeSeries
+     * @return {TimeSeries}                  A new TimeSeries
      */
-    setCollection(collection) {
-        if (!collection.isChronological()) {
+    setCollection(collection, isChronological = false) {
+        if (!isChronological && !collection.isChronological()) {
             throw new Error("Collection supplied is not chronological");
         }
         const result = new TimeSeries(this);
@@ -386,7 +388,7 @@ class TimeSeries {
      */
     slice(begin, end) {
         const sliced = this._collection.slice(begin, end);
-        return this.setCollection(sliced);
+        return this.setCollection(sliced, true);
     }
 
     /**
@@ -417,7 +419,7 @@ class TimeSeries {
      */
     clean(fieldSpec) {
         const cleaned = this._collection.clean(fieldSpec);
-        return this.setCollection(cleaned);
+        return this.setCollection(cleaned, true);
     }
 
     /**
@@ -775,7 +777,7 @@ class TimeSeries {
         const collections = this.pipeline()
             .map(op)
             .toKeyedCollections();
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -801,7 +803,7 @@ class TimeSeries {
         const collections = this.pipeline()
             .select(fieldSpec)
             .toKeyedCollections();
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -837,7 +839,7 @@ class TimeSeries {
         const collections = this.pipeline()
             .collapse(fieldSpecList, name, reducer, append)
             .toKeyedCollections();
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -928,7 +930,7 @@ class TimeSeries {
         const collections = pipeline
             .toKeyedCollections();
 
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -986,7 +988,7 @@ class TimeSeries {
             .align(fieldSpec, period, method, limit)
             .toKeyedCollections();
 
-        return this.setCollection(collection["all"]);
+        return this.setCollection(collection["all"], true);
     }
 
     /**
@@ -1011,7 +1013,7 @@ class TimeSeries {
             .rate(fieldSpec, allowNegative)
             .toKeyedCollections();
 
-        return this.setCollection(collection["all"]);
+        return this.setCollection(collection["all"], true);
     }
 
     /**
@@ -1069,7 +1071,7 @@ class TimeSeries {
             .clearWindow()
             .toKeyedCollections();
 
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -1200,7 +1202,7 @@ class TimeSeries {
             .clearWindow()
             .toKeyedCollections();
 
-        return this.setCollection(collections["all"]);
+        return this.setCollection(collections["all"], true);
     }
 
     /**
@@ -1288,7 +1290,7 @@ class TimeSeries {
 
         // for each series, map events to the same timestamp/index
         const eventMap = {};
-        _.each(seriesList, (series) => {
+        seriesList.forEach(series => {
             for (const event of series.events()) {
                 let key;
                 if (event instanceof Event) {
@@ -1309,11 +1311,14 @@ class TimeSeries {
 
         // For each key, reduce the events associated with that key
         // to a single new event
-        const events = _.map(eventMap, (eventsList) =>
+        const events = _.map(eventMap, eventsList =>
             reducer(eventsList, fieldSpec)
         );
 
-        // Make a collection. If the events are out of order, sort them
+        // Make a collection. If the events are out of order, sort them.
+        // It's always possible that events are out of order here, depending
+        // on the start times of the series, along with it the series
+        // have missing data, so I think we don't have a choice here.
         let collection = new Collection(events);
         if (!collection.isChronological()) {
             collection = collection.sortByTime();

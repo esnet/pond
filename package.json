@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint src website/modules/*.jsx",
     "test": "react-scripts test",
-    "docs": "rm -f docs/* && node ./scripts/renderdocs.js",
+    "docs": "rm -f /src/website/docs/* && node ./scripts/renderdocs.js",
     "build": ". ./scripts/build.sh",
     "start-website": "react-scripts start",
     "build-website": "echo \"*** Building website\n\" && rm -rf docs && react-scripts build && mv build docs"
