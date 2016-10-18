@@ -910,7 +910,16 @@ class TimeSeries {
             events.push(event);
         });
 
-        return new TimeSeries({...data, events});
+        // Make a collection. If the events are out of order, sort them.
+        // It's always possible that events are out of order here, depending
+        // on the start times of the series, along with it the series
+        // have missing data, so I think we don't have a choice here.
+        let collection = new Collection(events);
+        if (!collection.isChronological()) {
+            collection = collection.sortByTime();
+        }
+
+        return new TimeSeries({...data, collection});
     }
 
     /**
