@@ -94,6 +94,7 @@ to fetch the whole data object, which will be an Immutable Map.
     * _static_
         * [.isValidValue(event, The)](#Event.isValidValue)
         * [.selector()](#Event.selector)
+        * [.merge(events)](#Event.merge)
         * [.combine(events, fieldSpec, reducer)](#Event.combine)
         * [.sum(events, fieldSpec)](#Event.sum)
         * [.avg(events, fieldSpec)](#Event.avg)
@@ -249,12 +250,34 @@ The fieldPath currently can be:
 The function returns a new event.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
+<a name="Event.merge"></a>
+
+### Event.merge(events)
+Merges multiple `events` together into a new array of events, one
+for each time/index/timerange of the source events. Merging is done on
+the data of each event. Values from later events in the list overwrite
+early values if fields conflict, but generally you can use this in two
+common use cases:
+  - append events of different timestamps
+  - merge in events with one field to events with another
+
+See also: TimeSeries.timeSeriesListMerge()
+
+**Kind**: static method of <code>[Event](#Event)</code>  
+**Params**
+
+- events <code>array</code> - Array of event objects
+
 <a name="Event.combine"></a>
 
 ### Event.combine(events, fieldSpec, reducer)
-Combines multiple events with the same time together
-to form a new event. Doesn't currently work on IndexedEvents
-or TimeRangeEvents.
+Combines multiple `events` together into a new array of events, one
+for each time/index/timerange of the source events. Combining acts
+on the fields specified in the `fieldSpec` and uses the reducer to
+take the multiple values and reducer them down to one. A reducer is
+any of the standard Pond functions: avg(), sum() etc.
+
+See also: TimeSeries.timeSeriesListSum()
 
 **Kind**: static method of <code>[Event](#Event)</code>  
 **Params**
@@ -270,9 +293,8 @@ or TimeRangeEvents.
 <a name="Event.sum"></a>
 
 ### Event.sum(events, fieldSpec)
-Sum takes multiple events, groups them by timestamp, and uses combine()
-to add them together. If the events do not have the same timestamp an
-exception will be thrown.
+Sum takes multiple events and sums them together. The result is a
+single event for each timestamp. Events should be homogeneous.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
 **Params**

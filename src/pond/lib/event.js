@@ -14,6 +14,7 @@ import Immutable from "immutable";
 
 import IndexedEvent from "./indexedevent";
 import TimeRangeEvent from "./timerangeevent";
+import TimeRange from "./timerange";
 import { sum, avg } from "./base/functions";
 import util from "./base/util";
 
@@ -302,108 +303,101 @@ class Event {
         return event.setData(data);
     }
 
-    static mergeEvents(events) {
-        const t = events[0].timestamp();
-        const data = {};
-        _.each(events, event => {
-            if (!event instanceof Event) {
-                const msg = "Events being merged must have the same type";
-                throw new Error(msg);
-            }
-
-            if (t.getTime() !== event.timestamp().getTime()) {
-                const msg = "Events being merged must have the same timestamp";
-                throw new Error(msg);
-            }
-
-            const d = event.toJSON().data;
-            _.each(d, (val, key) => {
-                if (_.has(data, key)) {
-                    const msg =
-                    `Events being merged may not have the same key '${key}'`;
-                    throw new Error(msg);
-                }
-                data[key] = val;
-            });
-        });
-
-        const e = new Event(t.getTime(), data);
-        return e;
-    }
-
-    static mergeTimeRangeEvents(events) {
-        const timerange = events[0].timerange();
-        const data = {};
-        _.each(events, event => {
-            if (!event instanceof TimeRangeEvent) {
-                const msg = "Events being merged must have the same type";
-                throw new Error(msg);
-            }
-
-            if (timerange.toUTCString() !== event.timerange().toUTCString()) {
-                const msg = "Events being merged must have the same timerange";
-                throw new Error(msg);
-            }
-
-            const d = event.toJSON().data;
-            _.each(d, (val, key) => {
-                if (_.has(data, key)) {
-                    const msg =
-                    `Events being merged may not have the same key '${key}'`;
-                    throw new Error(msg);
-                }
-                data[key] = val;
-            });
-        });
-
-        return new TimeRangeEvent(timerange, data);
-    }
-
-    static mergeIndexedEvents(events) {
-        const index = events[0].indexAsString();
-        const data = {};
-        _.each(events, event => {
-            if (!event instanceof IndexedEvent) {
-                throw new Error("Events being merged must have the same type");
-            }
-
-            if (index !== event.indexAsString()) {
-                throw new Error("Events being merged must have the same index");
-            }
-
-            const d = event.toJSON().data;
-            _.each(d, (val, key) => {
-                if (_.has(data, key)) {
-                    const msg =
-                    `Events being merged may not have the same key '${key}'`;
-                    throw new Error(msg);
-                }
-                data[key] = val;
-            });
-        });
-        return new IndexedEvent(index, data);
-    }
-
+    /**
+     * Merges multiple `events` together into a new array of events, one
+     * for each time/index/timerange of the source events. Merging is done on
+     * the data of each event. Values from later events in the list overwrite
+     * early values if fields conflict, but generally you can use this in two
+     * common use cases:
+     *   - append events of different timestamps
+     *   - merge in events with one field to events with another
+     *
+     * See also: TimeSeries.timeSeriesListMerge()
+     *
+     * @param {array}        events     Array of event objects
+     */
     static merge(events) {
-        if (events.length < 1) {
-            return;
-        } else if (events.length === 1) {
-            return events[0];
+        if (events.length === 0) {
+            return [];
         }
 
-        if (events[0] instanceof Event) {
-            return Event.mergeEvents(events);
-        } else if (events[0] instanceof TimeRangeEvent) {
-            return Event.mergeTimeRangeEvents(events);
-        } else if (events[0] instanceof IndexedEvent) {
-            return Event.mergeIndexedEvents(events);
-        }
+        const eventMap = {};
+        const typeMap = {};
+
+        //
+        // Group by the time (the key), as well as keeping track
+        // of the event types so we can check that for a given key
+        // they are homogeneous and also so we can build an output
+        // event for this key
+        //
+
+        events.forEach(e => {
+
+            let type;
+            let key;
+            if (e instanceof Event) {
+                type = Event;
+                key = e.timestamp().getTime();
+            } else if (e instanceof IndexedEvent) {
+                type = IndexedEvent;
+                key = e.index();
+            } else if (e instanceof TimeRangeEvent) {
+                type = TimeRangeEvent;
+                key = `${e.timerange().begin()},${e.timerange().end()}`;
+            }
+
+            if (!_.has(eventMap, key)) {
+                eventMap[key] = [];
+            }
+            eventMap[key].push(e);
+
+            if (!_.has(typeMap, key)) {
+                typeMap[key] = type;
+            } else {
+                if (typeMap[key] !== type) {
+                    throw new Error(`Events for time ${key} are not homogeneous`)
+                }
+            }
+        });
+
+        //
+        // For each key we'll build a new event of the same type as the source
+        // events. Here we loop through all the events for that key, then for each field
+        // we are considering, we get all the values and reduce them (sum, avg, etc).
+        //
+
+        const outEvents = [];
+        _.each(eventMap, (events, key) => {
+            let data = Immutable.Map();
+            events.forEach(event => {
+                data = data.merge(event.data());
+            });
+
+            const type = typeMap[key];
+            if (type === Event) {
+                const timestamp = +key;
+                outEvents.push(new Event(timestamp, data));
+            } else if (type === IndexedEvent) {
+                const index = key;
+                outEvents.push(new IndexedEvent(index, data));
+            } else if (type === TimeRangeEvent) {
+                const [ begin, end ] = key.split(",");
+                const timerange = new TimeRange(+begin, +end);
+                outEvents.push(new TimeRangeEvent(timerange, data));
+            }
+        });
+
+        return outEvents;
     }
 
     /**
-     * Combines multiple events with the same time together
-     * to form a new event. Doesn't currently work on IndexedEvents
-     * or TimeRangeEvents.
+     * Combines multiple `events` together into a new array of events, one
+     * for each time/index/timerange of the source events. Combining acts
+     * on the fields specified in the `fieldSpec` and uses the reducer to
+     * take the multiple values and reducer them down to one. A reducer is
+     * any of the standard Pond functions: avg(), sum() etc.
+     *
+     * See also: TimeSeries.timeSeriesListSum()
      *
      * @param {array}        events     Array of event objects
      * @param {string|array} fieldSpec  Column or columns to look up. If you need
@@ -414,47 +408,104 @@ class Event {
      * @param {function}     reducer    Reducer function to apply to column data.
      */
     static combine(events, fieldSpec, reducer) {
-        if (events.length < 1) {
-            return;
+        if (events.length === 0) {
+            return [];
         }
-        const mapped = Event.map(events, event => {
-            const mapEvent = {};
-            // Which field do we want to work with
-            let fieldNames = [];
-            if (!fieldSpec) {
-                fieldNames = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
-            } else if (_.isString(fieldSpec)) {
-                fieldNames = [fieldSpec];
-            } else if (_.isArray(fieldSpec)) {
-                fieldNames = fieldSpec;
+
+        let fieldNames;
+        if (_.isString(fieldSpec)) {
+            fieldNames = [fieldSpec];
+        } else if (_.isArray(fieldSpec)) {
+            fieldNames = fieldSpec;
+        }
+
+        const eventMap = {};
+        const typeMap = {};
+
+        //
+        // Group by the time (the key), as well as keeping track
+        // of the event types so we can check that for a given key
+        // they are homogeneous and also so we can build an output
+        // event for this key
+        //
+
+        events.forEach(e => {
+
+            let type;
+            let key;
+            if (e instanceof Event) {
+                type = Event;
+                key = e.timestamp().getTime();
+            } else if (e instanceof IndexedEvent) {
+                type = IndexedEvent;
+                key = e.index();
+            } else if (e instanceof TimeRangeEvent) {
+                type = TimeRangeEvent;
+                key = `${e.timerange().begin()},${e.timerange().end()}`;
             }
-            // Map the fields, along with the timestamp, to the value
-            _.each(fieldNames, fieldName => {
-                mapEvent[`${event.timestamp().getTime()}::${fieldName}`] =
-                    event.data().get(fieldName);
+
+            if (!_.has(eventMap, key)) {
+                eventMap[key] = [];
+            }
+            eventMap[key].push(e);
+
+            if (!_.has(typeMap, key)) {
+                typeMap[key] = type;
+            } else {
+                if (typeMap[key] !== type) {
+                    throw new Error(`Events for time ${key} are not homogeneous`)
+                }
+            }
+        });
+
+        //
+        // For each key we'll build a new event of the same type as the source
+        // events. Here we loop through all the events for that key, then for each field
+        // we are considering, we get all the values and reduce them (sum, avg, etc).
+        //
+
+        const outEvents = []
+        _.each(eventMap, (events, key) => {
+            const mapEvent = {};
+            events.forEach(event => {
+                let fields = fieldNames;
+                if (!fieldNames) {
+                     fields = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
+                }
+                fields.forEach(fieldName => {
+                    if (!mapEvent[fieldName]) {
+                        mapEvent[fieldName] = [];
+                    }
+                    mapEvent[fieldName].push(event.data().get(fieldName));
+                });
             });
 
-            return mapEvent;
-        });
+            const d = {};
+            _.map(mapEvent, (values, fieldName) => {
+                d[fieldName] = reducer(values);
+            });
 
-        const eventData = {};
-        _.each(Event.reduce(mapped, reducer), (value, key) => {
-            const [ timestamp, fieldName ] = key.split("::");
-            if (!_.has(eventData, timestamp)) {
-                eventData[timestamp] = {};
+            const type = typeMap[key];
+            if (type === Event) {
+                const timestamp = +key;
+                outEvents.push(new Event(timestamp, d));
+            } else if (type === IndexedEvent) {
+                const index = key;
+                outEvents.push(new IndexedEvent(index, d));
+            } else if (type === TimeRangeEvent) {
+                const [ begin, end ] = key.split(",");
+                const timerange = new TimeRange(+begin, +end);
+                outEvents.push(new TimeRangeEvent(timerange, d));
             }
-            eventData[timestamp][fieldName] = value;
+
         });
 
-        return _.map(eventData, (data, timestamp) => {
-            return new Event(+timestamp, data);
-        });
+        return outEvents;
     }
 
     /**
-     * Sum takes multiple events, groups them by timestamp, and uses combine()
-     * to add them together. If the events do not have the same timestamp an
-     * exception will be thrown.
+     * Sum takes multiple events and sums them together. The result is a
+     * single event for each timestamp. Events should be homogeneous.
      *
      * @param {array}        events     Array of event objects
      * @param {string|array} fieldSpec  Column or columns to look up. If you need
@@ -464,17 +515,7 @@ class Event {
      *                                  If not supplied, all columns will be operated on.
      */
     static sum(events, fieldSpec) {
-        // Since all the events should be of the same time
-        // we can just take the first result from combine
-        let t;
-        events.forEach(e => {
-            if (!t) t = e.timestamp().getTime();
-            if (t !== e.timestamp().getTime()) {
-                throw new Error("sum() expects all events to have the same timestamp");
-            }
-        });
-
-        return Event.combine(events, fieldSpec, sum())[0];
+        return Event.combine(events, fieldSpec, sum());
     }
 
     /**
@@ -490,7 +531,7 @@ class Event {
      *                                  If not supplied, all columns will be operated on.
      */
     static avg(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, avg())[0];
+        return Event.combine(events, fieldSpec, avg());
     }
 
     /**

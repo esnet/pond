@@ -1288,32 +1288,16 @@ class TimeSeries {
             throw new Error("reducer function must be supplied, for example avg()");
         }
 
-        // for each series, map events to the same timestamp/index
-        const eventMap = {};
+        // for each series, make a map from timestamp to the
+        // list of events with that timestamp
+        const eventList = [];
         seriesList.forEach(series => {
             for (const event of series.events()) {
-                let key;
-                if (event instanceof Event) {
-                    key = event.timestamp();
-                } else if (event instanceof IndexedEvent) {
-                    key = event.index();
-                } else if (event instanceof TimeRangeEvent) {
-                    key = event.timerange().toUTCString();
-                }
-
-                if (!_.has(eventMap, key)) {
-                    eventMap[key] = [];
-                }
-
-                eventMap[key].push(event);
+                eventList.push(event);
             }
         });
 
-        // For each key, reduce the events associated with that key
-        // to a single new event
-        const events = _.map(eventMap, eventsList =>
-            reducer(eventsList, fieldSpec)
-        );
+        const events = reducer(eventList, fieldSpec);
 
         // Make a collection. If the events are out of order, sort them.
         // It's always possible that events are out of order here, depending
@@ -1324,7 +1308,9 @@ class TimeSeries {
             collection = collection.sortByTime();
         }
 
-        return new TimeSeries({...data, collection});
+        const timeseries = new TimeSeries({...data, collection});
+
+        return timeseries;
     }
 
     /**

@@ -619,6 +619,7 @@ it("can merge two timeseries columns together using merge", () => {
         name: "traffic",
         seriesList: [inTraffic, outTraffic]
     });
+
     expect(trafficSeries.at(2).get("in")).toBe(26);
     expect(trafficSeries.at(2).get("out")).toBe(67);
 });
@@ -663,6 +664,7 @@ it("can merge two series and preserve the correct time format", () => {
 it("can merge two timeseries into a new timeseries that is the sum", () => {
     const part1 = new TimeSeries(sumPart1);
     const part2 = new TimeSeries(sumPart2);
+
     const sum = TimeSeries.timeSeriesListSum({
         name: "sum",
         seriesList: [part1, part2],
