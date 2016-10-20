@@ -10,6 +10,8 @@
 
 /* eslint-disable */
 
+import Immutable from "immutable";
+
 import Event from "../event";
 import Index from "../index";
 import IndexedEvent from "../indexedevent";
@@ -135,6 +137,17 @@ it("can merge multiple events together", () => {
     expect(merged[0].get("c")).toBe(2);
 });
 
+it("can merge multiple events together using an Immutable.List", () => {
+    const t = new Date("2015-04-22T03:30:00Z");
+    const event1 = new Event(t, {a: 5, b: 6});
+    const event2 = new Event(t, {c: 2});
+    const merged = Event.merge(new Immutable.List([event1, event2]));
+
+    expect(merged.get(0).get("a")).toBe(5);
+    expect(merged.get(0).get("b")).toBe(6);
+    expect(merged.get(0).get("c")).toBe(2);
+});
+
 it("can merge multiple indexed events together", () => {
     const index = "1h-396206";
     const event1 = new IndexedEvent(index, {a: 5, b: 6});
@@ -159,6 +172,20 @@ it("can merge multiple timerange events together", () => {
     expect(merged[0].get("c")).toBe(2);
 });
 
+it("can deeply merge multiple events together", () => {
+    const t = new Date("2015-04-22T03:30:00Z");
+    const event1 = new Event(t, {a: 5, b: {c: 6}});
+    const event2 = new Event(t, {d: 2, b: {e: 4}});
+    const merged = Event.merge([event1, event2], true);
+
+    console.log(merged);
+
+    expect(merged[0].get("a")).toBe(5);
+    expect(merged[0].get("b.c")).toBe(6);
+    expect(merged[0].get("d")).toBe(2);
+    expect(merged[0].get("b.e")).toBe(4);
+});
+
 //
 // Event sums
 //
@@ -175,6 +202,30 @@ it("can sum multiple events together", () => {
     expect(result[0].get("a")).toBe(8);
     expect(result[0].get("b")).toBe(11);
     expect(result[0].get("c")).toBe(14);
+});
+
+it("can sum multiple events together using an Immutable.List", () => {
+    const t = new Date("2015-04-22T03:30:00Z");
+    const events = [
+        new Event(t, {a: 5, b: 6, c: 7}),
+        new Event(t, {a: 2, b: 3, c: 4}),
+        new Event(t, {a: 1, b: 2, c: 3})
+    ];
+    const result = Event.sum(new Immutable.List(events));
+
+    expect(result.getIn([0, "a"])).toBe(8);
+    expect(result.getIn([0, "b"])).toBe(11);
+    expect(result.getIn([0, "c"])).toBe(14);
+});
+
+it("can pass no events to sum and get back an empty list", () => {
+    const t = new Date("2015-04-22T03:30:00Z");
+    const events = [];
+    const result1 = Event.sum(events);
+    expect(result1.length).toBe(0);
+
+    const result2 = Event.sum(new Immutable.List(events));
+    expect(result2.length).toBe(0);
 });
 
 it("can sum multiple indexed events together", () => {

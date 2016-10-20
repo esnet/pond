@@ -307,17 +307,22 @@ class Event {
      * Merges multiple `events` together into a new array of events, one
      * for each time/index/timerange of the source events. Merging is done on
      * the data of each event. Values from later events in the list overwrite
-     * early values if fields conflict, but generally you can use this in two
-     * common use cases:
+     * early values if fields conflict.
+     *
+     * Common use cases:
      *   - append events of different timestamps
      *   - merge in events with one field to events with another
+     *   - merge in events that supersede the previous events
      *
      * See also: TimeSeries.timeSeriesListMerge()
      *
-     * @param {array}        events     Array of event objects
+     * @param {Immutable.List|array} events  Array or Immutable.List of events
+     *
+     * @return {Immutable.List|array}        Array or Immutable.List of events
      */
-    static merge(events) {
-        if (events.length === 0) {
+    static merge(events, deep) {
+        if (events instanceof Immutable.List && events.size === 0 ||
+            _.isArray(events) && events.length === 0) {
             return [];
         }
 
@@ -370,7 +375,7 @@ class Event {
         _.each(eventMap, (events, key) => {
             let data = Immutable.Map();
             events.forEach(event => {
-                data = data.merge(event.data());
+                data = deep ? data.mergeDeep(event.data()) : data.merge(event.data());
             });
 
             const type = typeMap[key];
@@ -387,28 +392,47 @@ class Event {
             }
         });
 
+        // This function outputs the same as its input. If we are
+        // passed an Immutable.List of events, the user will get
+        // an Immutable.List back. If an array, a simple JS array will
+        // be returned.
+        if (events instanceof Immutable.List) {
+            return Immutable.List(outEvents);
+        }
         return outEvents;
     }
 
     /**
      * Combines multiple `events` together into a new array of events, one
-     * for each time/index/timerange of the source events. Combining acts
-     * on the fields specified in the `fieldSpec` and uses the reducer to
-     * take the multiple values and reducer them down to one. A reducer is
-     * any of the standard Pond functions: avg(), sum() etc.
+     * for each time/index/timerange of the source events. The list of
+     * events may be specified as an array or `Immutable.List`. Combining acts
+     * on the fields specified in the `fieldSpec` and uses the reducer
+     * function to take the multiple values and reducer them down to one.
      *
-     * See also: TimeSeries.timeSeriesListSum()
+     * The return result will be an of the same form as the input. If you
+     * pass in an array of events, you will get an array of events back. If
+     * you pass an `Immutable.List` of events then you will get an
+     * `Immutable.List` of events back.
      *
-     * @param {array}        events     Array of event objects
-     * @param {string|array} fieldSpec  Column or columns to look up. If you need
-     *                                  to retrieve multiple deep nested values that
-     *                                  ['can.be', 'done.with', 'this.notation'].
-     *                                  A single deep value with a string.like.this.
-     *                                  If not supplied, all columns will be operated on.
-     * @param {function}     reducer    Reducer function to apply to column data.
+     * This is the general version of `Event.sum()` and `Event.avg()`. If those
+     * common use cases are what you want, just use those functions. If you
+     * want to specify your own reducer you can use this function.
+     *
+     * See also: `TimeSeries.timeSeriesListSum()`
+     *
+     * @param {Immutable.List|array} events     Array of event objects
+     * @param {string|array}         fieldSpec  Column or columns to look up. If you need
+     *                                          to retrieve multiple deep nested values that
+     *                                          ['can.be', 'done.with', 'this.notation'].
+     *                                          A single deep value with a string.like.this.
+     *                                          If not supplied, all columns will be operated on.
+     * @param {function}             reducer    Reducer function to apply to column data.
+     *
+     * @return {Immutable.List|array}   An Immutable.List or array of events
      */
     static combine(events, fieldSpec, reducer) {
-        if (events.length === 0) {
+        if (events instanceof Immutable.List && events.size === 0 ||
+            _.isArray(events) && events.length === 0) {
             return [];
         }
 
@@ -464,7 +488,7 @@ class Event {
         // we are considering, we get all the values and reduce them (sum, avg, etc).
         //
 
-        const outEvents = []
+        const outEvents = [];
         _.each(eventMap, (events, key) => {
             const mapEvent = {};
             events.forEach(event => {
@@ -500,6 +524,13 @@ class Event {
 
         });
 
+        // This function outputs the same as its input. If we are
+        // passed an Immutable.List of events, the user will get
+        // an Immutable.List back. If an array, a simple JS array will
+        // be returned.
+        if (events instanceof Immutable.List) {
+            return Immutable.List(outEvents);
+        }
         return outEvents;
     }
 
