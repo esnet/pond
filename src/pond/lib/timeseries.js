@@ -304,7 +304,10 @@ class TimeSeries {
      * @return {Event|TimeRangeEvent|IndexedEvent}
      */
     atTime(time) {
-        return this._collection.atTime(time);
+        const pos = this.bisect(time);
+        if (pos >= 0 && pos < this.size()) {
+            return this.at(pos);
+        }
     }
 
     /**
@@ -373,7 +376,23 @@ class TimeSeries {
      * @return {number}      The row number that is the greatest, but still below t.
      */
     bisect(t, b) {
-        return this._collection.bisect(t, b);
+        const tms = t.getTime();
+        const size = this.size();
+        let i = b || 0;
+
+        if (!size) {
+            return undefined;
+        }
+
+        for (; i < size; i++) {
+            const ts = this.at(i).timestamp().getTime();
+            if (ts > tms) {
+                return i - 1 >= 0 ? i - 1 : 0;
+            } else if (ts === tms) {
+                return i;
+            }
+        }
+        return i - 1;
     }
 
     /**
@@ -563,7 +582,7 @@ class TimeSeries {
      * @return {number} Count of events
      */
     size() {
-        return this._collection.size();
+        return this._collection ? this._collection.size() : 0;
     }
 
     /**

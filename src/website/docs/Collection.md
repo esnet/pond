@@ -32,14 +32,16 @@ they can be used as a pipeline source.
         * [.size()](#Collection+size) ⇒ <code>number</code>
         * [.sizeValid()](#Collection+sizeValid) ⇒ <code>number</code>
         * [.at(pos)](#Collection+at) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
-        * [.atTime(time)](#Collection+atTime) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+        * [.atKey(key)](#Collection+atKey) ⇒ <code>Array</code>
         * [.atFirst()](#Collection+atFirst) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
         * [.atLast()](#Collection+atLast) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
-        * [.bisect(t, b)](#Collection+bisect) ⇒ <code>number</code>
         * [.events()](#Collection+events)
         * [.eventList()](#Collection+eventList) ⇒ <code>Immutable.List</code>
         * [.eventListAsArray()](#Collection+eventListAsArray) ⇒ <code>Array</code>
-        * [.sort()](#Collection+sort) ⇒ <code>[TimeRange](#TimeRange)</code>
+        * [.eventListAsMap()](#Collection+eventListAsMap) ⇒ <code>map</code>
+        * [.dedup()](#Collection+dedup) ⇒ <code>[Collection](#Collection)</code>
+        * [.sortByTime()](#Collection+sortByTime) ⇒ <code>[Collection](#Collection)</code>
+        * [.sort()](#Collection+sort) ⇒ <code>[Collection](#Collection)</code>
         * [.range()](#Collection+range) ⇒ <code>[TimeRange](#TimeRange)</code>
         * [.addEvent(event)](#Collection+addEvent) ⇒ <code>[Collection](#Collection)</code>
         * [.slice(begin, end)](#Collection+slice) ⇒ <code>[Collection](#Collection)</code>
@@ -146,16 +148,19 @@ for (let row=0; row < series.size(); row++) {
   console.log(event.toString());
 }
 ```
-<a name="Collection+atTime"></a>
+<a name="Collection+atKey"></a>
 
-### collection.atTime(time) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
-Returns an event in the Collection by its time. This is the same
-as calling `bisect` first and then using `at` with the index.
+### collection.atKey(key) ⇒ <code>Array</code>
+Returns a list of events in the Collection which have
+the exact key (time, timerange or index) as the key specified
+by 'at'. Note that this is an O(n) search for the time specified,
+since collections are an unordered bag of events.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>Array</code> - All events at that key  
 **Params**
 
-- time <code>Date</code> - The time of the event.
+- key <code>Date</code> | <code>string</code> | <code>[TimeRange](#TimeRange)</code> - The key of the event.
 
 <a name="Collection+atFirst"></a>
 
@@ -169,18 +174,6 @@ Returns the first event in the Collection.
 Returns the last event in the Collection.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-<a name="Collection+bisect"></a>
-
-### collection.bisect(t, b) ⇒ <code>number</code>
-Returns the index that bisects the Collection at the time specified.
-
-**Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>number</code> - The row number that is the greatest, but still below t.  
-**Params**
-
-- t <code>Date</code> - The time to bisect the Collection with
-- b <code>number</code> - The position to begin searching at
-
 <a name="Collection+events"></a>
 
 ### collection.events()
@@ -207,14 +200,44 @@ Returns a Javascript array representation of the event list
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 **Returns**: <code>Array</code> - All events as a Javascript Array.  
+<a name="Collection+eventListAsMap"></a>
+
+### collection.eventListAsMap() ⇒ <code>map</code>
+Returns the events in the collection as a Javascript Map, where
+the key is the timestamp, index or timerange and the
+value is an array of events with that key.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>map</code> - The map of events  
+<a name="Collection+dedup"></a>
+
+### collection.dedup() ⇒ <code>[Collection](#Collection)</code>
+Removes duplicates from the Collection. If duplicates
+exist in the collection with the same key but with different
+values, then later event values will be used.
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>[Collection](#Collection)</code> - The sorted Collection.  
+<a name="Collection+sortByTime"></a>
+
+### collection.sortByTime() ⇒ <code>[Collection](#Collection)</code>
+Sorts the Collection by the timestamp. In the case
+of TimeRangeEvents and IndexedEvents, it will be sorted
+by the begin time. This is useful when the collection
+will be passed into a TimeSeries.
+
+See also isChronological().
+
+**Kind**: instance method of <code>[Collection](#Collection)</code>  
+**Returns**: <code>[Collection](#Collection)</code> - The sorted Collection  
 <a name="Collection+sort"></a>
 
-### collection.sort() ⇒ <code>[TimeRange](#TimeRange)</code>
+### collection.sort() ⇒ <code>[Collection](#Collection)</code>
 Sorts the Collection using the value referenced by
 the fieldPath.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>[TimeRange](#TimeRange)</code> - The extents of the TimeSeries  
+**Returns**: <code>[Collection](#Collection)</code> - The extents of the Collection  
 <a name="Collection+range"></a>
 
 ### collection.range() ⇒ <code>[TimeRange](#TimeRange)</code>

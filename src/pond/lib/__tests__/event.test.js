@@ -178,8 +178,6 @@ it("can deeply merge multiple events together", () => {
     const event2 = new Event(t, {d: 2, b: {e: 4}});
     const merged = Event.merge([event1, event2], true);
 
-    console.log(merged);
-
     expect(merged[0].get("a")).toBe(5);
     expect(merged[0].get("b.c")).toBe(6);
     expect(merged[0].get("d")).toBe(2);
@@ -261,6 +259,24 @@ it("can sum multiple events together if they have different timestamps", () => {
     const result = Event.sum(events);
 
     expect(result[0].get("a")).toBe(7);
+});
+
+//
+// Test duplication
+//
+
+it("can detect duplicated event", () => {
+    const e1 = new Event(1477058455872, {a: 5, b: 6, c: 7});
+    const e2 = new Event(1477058455872, {a: 5, b: 6, c: 7});
+    const e3 = new Event(1477058455872, {a: 6, b: 6, c: 7});
+
+    // Just check times and type
+    expect(Event.isDuplicate(e1, e2)).toBeTruthy();
+    expect(Event.isDuplicate(e1, e3)).toBeTruthy();
+
+    // Check times, type and values
+    expect(Event.isDuplicate(e1, e3, false)).toBeFalsy();
+    expect(Event.isDuplicate(e1, e2, false)).toBeTruthy();
 });
 
 //

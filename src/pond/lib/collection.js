@@ -183,17 +183,32 @@ class Collection extends Bounded {
     }
 
     /**
-     * Returns an event in the Collection by its time. This is the same
-     * as calling `bisect` first and then using `at` with the index.
+     * Returns a list of events in the Collection which have
+     * the exact key (time, timerange or index) as the key specified
+     * by 'at'. Note that this is an O(n) search for the time specified,
+     * since collections are an unordered bag of events.
      *
-     * @param  {Date} time The time of the event.
-     * @return {Event|TimeRangeEvent|IndexedEvent}
+     * @param  {Date|string|TimeRange} key The key of the event.
+     * @return {Array} All events at that key
      */
-    atTime(time) {
-        const pos = this.bisect(time);
-        if (pos >= 0 && pos < this.size()) {
-            return this.at(pos);
+    atKey(k) {
+        const result = [];
+        let key;
+        if (k instanceof Date) {
+            key = k.getTime();
+        } else if (_.isString(k)) {
+            key = k;
+        } else if (k instanceof TimeRange) {
+            key = `${this.timerange().begin()},${this.timerange().end()}`;
         }
+
+        for (const e of this.events()) {
+            if (e.key() === key) {
+                result.push(e);
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -216,34 +231,6 @@ class Collection extends Bounded {
         if (this.size()) {
             return this.at(this.size() - 1);
         }
-    }
-
-    /**
-     * Returns the index that bisects the Collection at the time specified.
-     *
-     * @param  {Date}    t   The time to bisect the Collection with
-     * @param  {number}  b   The position to begin searching at
-     *
-     * @return {number}      The row number that is the greatest, but still below t.
-     */
-    bisect(t, b) {
-        const tms = t.getTime();
-        const size = this.size();
-        let i = b || 0;
-
-        if (!size) {
-            return undefined;
-        }
-
-        for (; i < size; i++) {
-            const ts = this.at(i).timestamp().getTime();
-            if (ts > tms) {
-                return i - 1 >= 0 ? i - 1 : 0;
-            } else if (ts === tms) {
-                return i;
-            }
-        }
-        return i - 1;
     }
 
     /**
@@ -290,10 +277,55 @@ class Collection extends Bounded {
         return events;
     }
 
+    /**
+     * Returns the events in the collection as a Javascript Map, where
+     * the key is the timestamp, index or timerange and the
+     * value is an array of events with that key.
+     *
+     * @return {map} The map of events
+     */
+    eventListAsMap() {
+        const events = {};
+        for (const e of this.events()) {
+            const key = e.key();
+            if (!_.has(events, key)) {
+                events[key] = [];
+            }
+            events[key].push(e);
+        }
+        return events;
+    }
+
+    //
+    // De-duplicate
+    //
+
+    /**
+     * Removes duplicates from the Collection. If duplicates
+     * exist in the collection with the same key but with different
+     * values, then later event values will be used.
+     *
+     * @return {Collection} The sorted Collection.
+     */
+    dedup() {
+        const events = Event.merge(this.eventListAsArray());
+        return new Collection(events);
+    }
+
     //
     // Sorting
     //
 
+    /**
+     * Sorts the Collection by the timestamp. In the case
+     * of TimeRangeEvents and IndexedEvents, it will be sorted
+     * by the begin time. This is useful when the collection
+     * will be passed into a TimeSeries.
+     *
+     * See also isChronological().
+     *
+     * @return {Collection} The sorted Collection
+     */
     sortByTime() {
         return this.setEvents(this._eventList.sortBy(event => {
             const e = new this._type(event);
@@ -305,7 +337,7 @@ class Collection extends Bounded {
      * Sorts the Collection using the value referenced by
      * the fieldPath.
      *
-     * @return {TimeRange} The extents of the TimeSeries
+     * @return {Collection} The extents of the Collection
      */
     sort(fieldPath) {
         const fs = util.fieldPathToArray(fieldPath);
@@ -393,6 +425,7 @@ class Collection extends Bounded {
      * the supplied function.
      * @param {function} func The mapping function, that should return
      * a new event when passed in the old event.
+     *
      * @return {Collection} A new, modified, Collection.
      */
     map(mapFunc) {

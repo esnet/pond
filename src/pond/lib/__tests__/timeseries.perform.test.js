@@ -35,7 +35,7 @@ it("can take 80 interfaces and sum them together in less than 2 sec", () => {
         fieldSpec: ["in", "out"]
     });
     const end = (new Date()).getTime();
-    //console.log(list.length, ":", (end - begin)/1000, "sec", sum.avg("in"), sum.avg("out"));
+    //console.log("Time", (end - begin)/1000, "sec");
     expect(sum.avg("in")).toEqual(115466129590.72786);
     expect(sum.avg("out")).toEqual(120824846698.03258);
     expect((end - begin)/1000).toBeLessThan(2.0);
@@ -60,5 +60,6 @@ it("can take 80 interfaces and sum them together in less than 2 sec", () => {
         seriesList: tileList
     });
     const end = (new Date()).getTime();
-    expect(end - begin).toBeLessThan(250);
+    //console.log("Time", (end - begin), "msec", trafficSeries.size());
+    expect(end - begin).toBeLessThan(100);
 });

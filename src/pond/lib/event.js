@@ -259,8 +259,56 @@ class Event {
         return this.setData(data);
     }
 
+    /**
+     * Returns the timestamp (as ms since the epoch)
+     */
+    key() {
+        return this.timestamp().getTime();
+    }
+
+    /**
+     * Returns the timestamp (as ms since the epoch) for an Event,
+     * the index string for an IndexedEvent or the TimeRange
+     * expressed as beginTime,endTime for a TimeRangeEvent.
+     */
+    type() {
+        return Event;
+    }
+
+    /**
+     * Do the two supplied events contain the same data,
+     * even if they are not the same instance.
+     * @param  {Event}  event1 First event to compare
+     * @param  {Event}  event2 Second event to compare
+     * @return {Boolean}       Result
+     */
     static is(event1, event2) {
         return Immutable.is(event1._d, event2._d);
+    }
+
+    /**
+     * Returns if the two supplied events are duplicates
+     * of each other. By default, duplicated means that the
+     * timestamps are the same. This is the case with incoming events
+     * where the second event is either known to be the same (but
+     * duplicate) of the first, or supersedes the first. You can
+     * also pass in false for ignoreValues and get a full
+     * compare.
+     *
+     * @return {Boolean}              The result of the compare
+     */
+    static isDuplicate(event1, event2, ignoreValues = true) {
+        if (ignoreValues) {
+            return (
+                event1.type() === event2.type() &&
+                event1.key() === event2.key()
+            );
+        } else {
+            return (
+                event1.type() === event2.type() &&
+                Event.is(event1, event2)
+            );
+        }
     }
 
     /**
@@ -326,9 +374,6 @@ class Event {
             return [];
         }
 
-        const eventMap = {};
-        const typeMap = {};
-
         //
         // Group by the time (the key), as well as keeping track
         // of the event types so we can check that for a given key
@@ -336,21 +381,12 @@ class Event {
         // event for this key
         //
 
+        const eventMap = {};
+        const typeMap = {};
+
         events.forEach(e => {
-
-            let type;
-            let key;
-            if (e instanceof Event) {
-                type = Event;
-                key = e.timestamp().getTime();
-            } else if (e instanceof IndexedEvent) {
-                type = IndexedEvent;
-                key = e.index();
-            } else if (e instanceof TimeRangeEvent) {
-                type = TimeRangeEvent;
-                key = `${e.timerange().begin()},${e.timerange().end()}`;
-            }
-
+            const type = e.type();
+            const key = e.key()
             if (!_.has(eventMap, key)) {
                 eventMap[key] = [];
             }
@@ -454,25 +490,12 @@ class Event {
         //
 
         events.forEach(e => {
-
-            let type;
-            let key;
-            if (e instanceof Event) {
-                type = Event;
-                key = e.timestamp().getTime();
-            } else if (e instanceof IndexedEvent) {
-                type = IndexedEvent;
-                key = e.index();
-            } else if (e instanceof TimeRangeEvent) {
-                type = TimeRangeEvent;
-                key = `${e.timerange().begin()},${e.timerange().end()}`;
-            }
-
+            const type = e.type();
+            const key = e.key()
             if (!_.has(eventMap, key)) {
                 eventMap[key] = [];
             }
             eventMap[key].push(e);
-
             if (!_.has(typeMap, key)) {
                 typeMap[key] = type;
             } else {

@@ -73,6 +73,20 @@ class TimeRangeEvent {
         return JSON.stringify(this.toJSON());
     }
 
+    /**
+     * Returns the timestamp (as ms since the epoch)
+     */
+    key() {
+        return `${this.timerange().begin()},${this.timerange().end()}`;
+    }
+
+    /**
+     * Returns the type of this class instance
+     */
+    type() {
+        return TimeRangeEvent;
+    }
+
     //
     // Access the timerange represented by the index
     //

@@ -26,6 +26,8 @@ to return a Javascript object representation of the data, while
 
 * [TimeRangeEvent](#TimeRangeEvent)
     * [new TimeRangeEvent()](#new_TimeRangeEvent_new)
+    * [.key()](#TimeRangeEvent+key)
+    * [.type()](#TimeRangeEvent+type)
     * [.toPoint()](#TimeRangeEvent+toPoint)
     * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
     * [.data()](#TimeRangeEvent+data) ⇒ <code>Immutable.Map</code>
@@ -52,6 +54,18 @@ To specify the data you can supply either:
     - a simple type such as an integer. In the case of the simple type
       this is a shorthand for supplying {"value": v}.
 
+<a name="TimeRangeEvent+key"></a>
+
+### timeRangeEvent.key()
+Returns the timestamp (as ms since the epoch)
+
+**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
+<a name="TimeRangeEvent+type"></a>
+
+### timeRangeEvent.type()
+Returns the type of this class instance
+
+**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 <a name="TimeRangeEvent+toPoint"></a>
 
 ### timeRangeEvent.toPoint()

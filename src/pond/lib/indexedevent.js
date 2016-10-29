@@ -107,6 +107,20 @@ class IndexedEvent {
     }
 
     /**
+     * Returns the type of this class instance
+     */
+    type() {
+        return IndexedEvent;
+    }
+
+    /**
+     * Returns the timestamp (as ms since the epoch)
+     */
+    key() {
+        return this.index();
+    }
+
+    /**
      * Returns a flat array starting with the timestamp, followed by the values.
      */
     toPoint() {

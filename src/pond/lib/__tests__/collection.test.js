@@ -25,6 +25,13 @@ const UNORDERED_EVENT_LIST = [
     new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
 ];
 
+const EVENT_LIST_DUP = [
+    new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
+    new Event(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
+    new Event(new Date("2015-04-22T03:31:00Z"), {in: 4, out: 5}),
+    new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
+];
+
 /**
  * Note the Collections are currently moslty tested through either
  * the pipeline code or the TimeSeries code.
@@ -112,27 +119,42 @@ it("can determine if a collection is chronological", () => {
     expect(sortedCollection.isChronological()).toBeTruthy();
 });
 
-it("can correctly use atTime()", () =>{
-    const t = new Date(1476803711641);
-    let collection = new Collection();
+//
+// Getting events out of the Collection
+//
 
-    expect(collection.size()).toEqual(0);
-    collection = collection.addEvent(new Event(t, 2));
+// Duplicates with atKey
+it("can find duplicates with atKey", () => {
+    const collection = new Collection(EVENT_LIST_DUP);
+    const find = collection.atKey(new Date("2015-04-22T03:31:00Z"));
+    expect(find.length).toBe(2);
+    expect(find[0].get("in")).toEqual(3);
+    expect(find[1].get("in")).toEqual(4);
+});
 
-    expect(collection.size()).toEqual(1);
-    expect(collection.at(0).value()).toEqual(2);
+it("can find duplicates with atKey", () => {
+    const collection = new Collection(EVENT_LIST_DUP);
+    const find = collection.atKey(new Date("2015-05-22T03:32:00Z"));
+    expect(find.length).toBe(0);
+});
 
-    const bisect = collection.bisect(t);
-    expect(bisect).toEqual(0);
-    expect(collection.at(bisect).value()).toEqual(2);
+// Event list as...
+it("can express the collection events as a map", () => {
+    const collection = new Collection(EVENT_LIST_DUP);
+    const eventMap = collection.eventListAsMap();
+    expect(eventMap["1429673400000"].length).toBe(1);
+    expect(eventMap["1429673460000"].length).toBe(2);
+    expect(eventMap["1429673520000"].length).toBe(1);
+    expect(eventMap["1429673460000"][0].get("in")).toBe(3);
+    expect(eventMap["1429673460000"][1].get("in")).toBe(4);
+});
 
-    expect(collection.atTime(t).value()).toEqual(2);
-
-    // => {"name":"test","utc":true,"columns":["time","value"],"points":[[1465084800000,2]]}
-    //console.log("time1 index " + timeseries.bisect(time1));
-    // => 0
-    //console.log("index 0 " + timeseries.at(0));
-    // => {"time":1465084800000,"data":{"value":2}}
-    //console.log("using timeAt " + timeseries.atTime(time1));
-    // => undefined :(
-})
+// Event list as...
+it("can express the collection events as a map", () => {
+    const collection = new Collection(EVENT_LIST_DUP);
+    const dedup = collection.dedup();
+    expect(dedup.size()).toBe(3);
+    expect(dedup.at(0).get("in")).toBe(1);
+    expect(dedup.at(1).get("in")).toBe(4);
+    expect(dedup.at(2).get("in")).toBe(5);
+});

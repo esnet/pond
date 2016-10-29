@@ -11,6 +11,8 @@
 /* eslint-disable */
 
 import moment from "moment";
+
+import Collection from "../collection";
 import Event from "../event";
 import TimeRange from "../timerange";
 import TimeRangeEvent from "../timerangeevent";
@@ -797,4 +799,21 @@ it("can make Collections for each day in the TimeSeries", () => {
 
     expect(collections["1d-16314"].size()).toBe(24);
     expect(collections["1d-16318"].size()).toBe(20);
+});
+
+
+it("can correctly use atTime()", () =>{
+    const t = new Date(1476803711641);
+
+    let collection = new Collection();
+    collection = collection.addEvent(new Event(t, 2));
+
+    // Test bisect to get element 0
+    const ts = new TimeSeries({collection});
+    const bisect = ts.bisect(t);
+    expect(bisect).toEqual(0);
+    expect(ts.at(bisect).value()).toEqual(2);
+
+    // Test atTime to get element 0
+    expect(ts.atTime(t).value()).toEqual(2);
 });

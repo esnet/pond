@@ -29,6 +29,8 @@ an Immutable.Map.
 
 * [IndexedEvent](#IndexedEvent)
     * [new IndexedEvent()](#new_IndexedEvent_new)
+    * [.type()](#IndexedEvent+type)
+    * [.key()](#IndexedEvent+key)
     * [.toPoint()](#IndexedEvent+toPoint)
     * [.index()](#IndexedEvent+index) ⇒ <code>[Index](#Index)</code>
     * [.setData()](#IndexedEvent+setData)
@@ -59,6 +61,18 @@ To specify the data you can supply either:
     - a simple type such as an integer. In the case of the simple type
       this is a shorthand for supplying {"value": v}.
 
+<a name="IndexedEvent+type"></a>
+
+### indexedEvent.type()
+Returns the type of this class instance
+
+**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
+<a name="IndexedEvent+key"></a>
+
+### indexedEvent.key()
+Returns the timestamp (as ms since the epoch)
+
+**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
 <a name="IndexedEvent+toPoint"></a>
 
 ### indexedEvent.toPoint()
