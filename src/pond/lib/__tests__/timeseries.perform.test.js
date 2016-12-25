@@ -11,7 +11,6 @@
 /* eslint-disable */
 
 import _ from "underscore";
-import Event from "../event";
 import TimeSeries from "../timeseries";
 
 import data from "./interfaces.json"
@@ -61,5 +60,5 @@ it("can take 80 interfaces and sum them together in less than 2 sec", () => {
     });
     const end = (new Date()).getTime();
     //console.log("Time", (end - begin), "msec", trafficSeries.size());
-    expect(end - begin).toBeLessThan(100);
+    expect(end - begin).toBeLessThan(120);
 });

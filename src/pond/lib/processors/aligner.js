@@ -13,11 +13,11 @@
 import _ from "underscore";
 import Immutable from "immutable";
 
-import Processor from "./processor";
-
 import Event from "../event";
 import Index from "../index";
 import IndexedEvent from "../indexedevent";
+import Processor from "./processor";
+import TimeEvent from "../timeevent";
 import TimeRange from "../timerange";
 import TimeRangeEvent from "../timerangeevent";
 import { isPipeline } from "../pipeline";
@@ -137,7 +137,7 @@ export default class Aligner extends Processor {
                 d = d.setIn(fieldPath, null);
             }
         });
-        return new Event(t, d);
+        return new TimeEvent(t, d);
     }
 
      /**
@@ -174,7 +174,7 @@ export default class Aligner extends Processor {
             d = d.setIn(fieldPath, interpolatedVal);
         });
 
-        return new Event(boundaryTime, d);
+        return new TimeEvent(boundaryTime, d);
     }
 
     /**

@@ -12,24 +12,25 @@
 
 import Collection from "../collection";
 import Event from "../event";
+import TimeEvent from "../timeevent";
 
 const EVENT_LIST = [
-    new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
-    new Event(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
-    new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
+    new TimeEvent(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
+    new TimeEvent(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
+    new TimeEvent(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
 ];
 
 const UNORDERED_EVENT_LIST = [
-    new Event(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
-    new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
-    new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
+    new TimeEvent(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
+    new TimeEvent(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
+    new TimeEvent(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
 ];
 
 const EVENT_LIST_DUP = [
-    new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
-    new Event(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
-    new Event(new Date("2015-04-22T03:31:00Z"), {in: 4, out: 5}),
-    new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
+    new TimeEvent(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
+    new TimeEvent(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
+    new TimeEvent(new Date("2015-04-22T03:31:00Z"), {in: 4, out: 5}),
+    new TimeEvent(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
 ];
 
 /**
@@ -96,7 +97,7 @@ it("can loop (for .. of) over a Collection's events", () => {
 
 it("can add an event and get a new Collection back", () => {
     const collection = new Collection(EVENT_LIST);
-    const event = new Event(new Date("2015-04-22T03:32:00Z"), {in: 1, out: 2});
+    const event = new TimeEvent(new Date("2015-04-22T03:32:00Z"), {in: 1, out: 2});
     const newCollection = collection.addEvent(event);
     expect(newCollection.size()).toBe(4);
 });

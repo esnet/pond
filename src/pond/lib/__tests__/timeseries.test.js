@@ -13,7 +13,7 @@
 import moment from "moment";
 
 import Collection from "../collection";
-import Event from "../event";
+import TimeEvent from "../timeevent";
 import TimeRange from "../timerange";
 import TimeRangeEvent from "../timerangeevent";
 import TimeSeries from "../timeseries";
@@ -383,8 +383,8 @@ it("can create an series with our wire format", () => {
 
 it("can create an series with a list of Events", () => {
     const events = [];
-    events.push(new Event(new Date(2015, 7, 1), {value: 27}));
-    events.push(new Event(new Date(2015, 8, 1), {value: 14}));
+    events.push(new TimeEvent(new Date(2015, 7, 1), {value: 27}));
+    events.push(new TimeEvent(new Date(2015, 8, 1), {value: 14}));
     const series = new TimeSeries({
         name: "events",
         events
@@ -413,7 +413,7 @@ it("can return the size of the series", () => {
 it("can return an item in the series as an event", () => {
     const series = new TimeSeries(TIMESERIES_TEST_DATA);
     const event = series.at(1);
-    expect(event instanceof Event).toBeTruthy();
+    expect(event instanceof TimeEvent).toBeTruthy();
 });
 
 it("can return an item in the series with the correct data", () => {
@@ -483,10 +483,10 @@ it("can create a series with a nested object", () => {
 
 it("can create a series with nested events", () => {
     const events = [];
-    events.push(new Event(new Date(2015, 6, 1), {NASA_north: {in: 100, out: 200}, NASA_south: {in: 145, out: 135}}));
-    events.push(new Event(new Date(2015, 7, 1), {NASA_north: {in: 200, out: 400}, NASA_south: {in: 146, out: 142}}));
-    events.push(new Event(new Date(2015, 8, 1), {NASA_north: {in: 300, out: 600}, NASA_south: {in: 147, out: 158}}));
-    events.push(new Event(new Date(2015, 9, 1), {NASA_north: {in: 400, out: 800}, NASA_south: {in: 155, out: 175}}));
+    events.push(new TimeEvent(new Date(2015, 6, 1), {NASA_north: {in: 100, out: 200}, NASA_south: {in: 145, out: 135}}));
+    events.push(new TimeEvent(new Date(2015, 7, 1), {NASA_north: {in: 200, out: 400}, NASA_south: {in: 146, out: 142}}));
+    events.push(new TimeEvent(new Date(2015, 8, 1), {NASA_north: {in: 300, out: 600}, NASA_south: {in: 147, out: 158}}));
+    events.push(new TimeEvent(new Date(2015, 9, 1), {NASA_north: {in: 400, out: 800}, NASA_south: {in: 155, out: 175}}));
     const series = new TimeSeries({
         name: "Map traffic",
         events
@@ -806,7 +806,7 @@ it("can correctly use atTime()", () =>{
     const t = new Date(1476803711641);
 
     let collection = new Collection();
-    collection = collection.addEvent(new Event(t, 2));
+    collection = collection.addEvent(new TimeEvent(t, 2));
 
     // Test bisect to get element 0
     const ts = new TimeSeries({collection});
@@ -817,3 +817,81 @@ it("can correctly use atTime()", () =>{
     // Test atTime to get element 0
     expect(ts.atTime(t).value()).toEqual(2);
 });
+
+/*
+class TrafficEvent extends IndexedEvent {
+    constructor(arg1, arg2) {
+        super(arg1, arg2);
+    }
+
+    static dataSchema() {
+        return {
+            type: "record",
+            fields: [
+                {name: "name", type: "string"},
+                {name: "in", type: "long"},
+                {name: "out", type: "long"}
+            ]
+        };
+    }
+}
+*/
+class StatusSeries extends TimeSeries {
+    constructor(arg) {
+        super(arg);
+    }
+
+    /**
+     * Should return any meta data in the series
+     */
+    metaSchema() {
+        return [
+            {name: "name", type: "string"}
+        ];
+    }
+
+    /**
+     * Should return the schema of the event key
+     */
+    keySchema() {
+        return {
+            name: "time",
+            type: {"type": "long", "logicalType": "timestamp-millis"}
+        };
+    }
+
+    /**
+     * Should return a record, defining the schema for
+     * each event's data. This does not include the event key
+     * (time, timerange or index).
+     */
+    dataSchema() {
+        return {
+            type: "record",
+            fields: [
+                {name: "value", type: "long"},
+                {name: "status", type: "string"}
+            ]
+        };
+    }
+}
+
+
+fit("can convert a timeseries to avro", () => {
+    const timeseries = new StatusSeries({
+        name: "traffic",
+        columns: ["time", "value", "status"],
+        points: [
+            [1400425947000, 52, "ok"],
+            [1400425948000, 18, "ok"],
+            [1400425949000, 26, "fail"],
+            [1400425950000, 93, "offline"]
+        ]
+    });
+
+    const buffer = timeseries.toAvro();
+    console.log("Buffer", buffer);
+    const timeseries2 = new StatusSeries(buffer);
+
+});
+
