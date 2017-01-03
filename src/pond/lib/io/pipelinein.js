@@ -9,9 +9,6 @@
  */
 
 import _ from "underscore";
-import Event from "../event";
-import TimeRangeEvent from "../timerangeevent";
-import IndexedEvent from "../indexedevent";
 import Observable from "../base/observable";
 
 class PipelineIn extends Observable {

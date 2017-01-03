@@ -333,7 +333,7 @@ class TrafficEvent extends TimeEvent {
         super(arg1, arg2);
     }
 
-    dataSchema() {
+    static dataSchema() {
         return {
             type: "record",
             fields: [
@@ -356,7 +356,7 @@ class IndexedTrafficEvent extends IndexedEvent {
         super(arg1, arg2);
     }
 
-    dataSchema() {
+    static dataSchema() {
         return {
             type: "record",
             fields: [
@@ -368,8 +368,37 @@ class IndexedTrafficEvent extends IndexedEvent {
     }
 }
 
-it("can convert an event to avro", () => {
+it("can convert an IndexedEvent subclass to avro", () => {
     const event1 = new IndexedTrafficEvent("1d-1234", {name: "source1", in: 2, out: 11});
     const event2 = new IndexedTrafficEvent(event1.toAvro());
+    expect(Event.is(event1, event2)).toBeTruthy();
+});
+
+
+class StatusEvent extends TimeRangeEvent {
+    constructor(arg1, arg2) {
+        super(arg1, arg2);
+    }
+
+    static dataSchema() {
+        return {
+            type: "record",
+            fields: [
+                {name: "title", type: "string"},
+                {name: "description", type: "string"}
+            ]
+        };
+    }
+}
+
+it("can convert an TimeRangeEvent subclass to avro", () => {
+    const sampleEvent = OUTAGE_EVENT_LIST["outage_events"][0];
+
+    // Extract the begin and end times
+    const beginTime = new Date(1445449170000);
+    const endTime = new Date(1445449260000);
+    const timerange = new TimeRange(beginTime, endTime);
+    const event1 = new StatusEvent(timerange, {title: "Unscheduled Maintenance", description: "The router failed"});
+    const event2 = new StatusEvent(event1.toAvro());
     expect(Event.is(event1, event2)).toBeTruthy();
 });

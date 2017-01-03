@@ -818,54 +818,13 @@ it("can correctly use atTime()", () =>{
     expect(ts.atTime(t).value()).toEqual(2);
 });
 
-/*
-class TrafficEvent extends IndexedEvent {
+
+class StatusEvent extends TimeEvent {
     constructor(arg1, arg2) {
         super(arg1, arg2);
     }
 
     static dataSchema() {
-        return {
-            type: "record",
-            fields: [
-                {name: "name", type: "string"},
-                {name: "in", type: "long"},
-                {name: "out", type: "long"}
-            ]
-        };
-    }
-}
-*/
-class StatusSeries extends TimeSeries {
-    constructor(arg) {
-        super(arg);
-    }
-
-    /**
-     * Should return any meta data in the series
-     */
-    metaSchema() {
-        return [
-            {name: "name", type: "string"}
-        ];
-    }
-
-    /**
-     * Should return the schema of the event key
-     */
-    keySchema() {
-        return {
-            name: "time",
-            type: {"type": "long", "logicalType": "timestamp-millis"}
-        };
-    }
-
-    /**
-     * Should return a record, defining the schema for
-     * each event's data. This does not include the event key
-     * (time, timerange or index).
-     */
-    dataSchema() {
         return {
             type: "record",
             fields: [
@@ -876,9 +835,22 @@ class StatusSeries extends TimeSeries {
     }
 }
 
+class StatusSeries extends TimeSeries {
+    constructor(arg) {
+        super(arg);
+    }
 
-fit("can convert a timeseries to avro", () => {
-    const timeseries = new StatusSeries({
+    metaSchema() {
+        return [{name: "name", type: "string"}];
+    }
+
+    static event(key) {
+        return StatusEvent;
+    }
+}
+
+it("can convert a timeseries to avro", () => {
+    const timeseries1 = new StatusSeries({
         name: "traffic",
         columns: ["time", "value", "status"],
         points: [
@@ -889,9 +861,8 @@ fit("can convert a timeseries to avro", () => {
         ]
     });
 
-    const buffer = timeseries.toAvro();
-    console.log("Buffer", buffer);
+    const buffer = timeseries1.toAvro();
     const timeseries2 = new StatusSeries(buffer);
-
+    TimeSeries.is(timeseries1, timeseries2);
 });
 

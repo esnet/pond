@@ -13,7 +13,7 @@ import _ from "underscore";
 import Processor from "./processor";
 
 import Index from "../index";
-import TimeEvent from "../timeevent"
+import TimeEvent from "../timeevent";
 import IndexedEvent from "../indexedevent";
 import TimeRange from "../timerange";
 import TimeRangeEvent from "../timerangeevent";

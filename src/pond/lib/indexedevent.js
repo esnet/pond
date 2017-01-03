@@ -9,7 +9,6 @@
  */
 
 import _ from "underscore";
-import avro from "avsc";
 import Immutable from "immutable";
 import Index from "./index";
 import Event from "./event";
@@ -96,7 +95,7 @@ class IndexedEvent extends Event {
      * For Avro serialization, this defines the event's key (the Index)
      * as a simple string
      */
-    keySchema() {
+    static keySchema() {
         return {
             name: "index",
             type: "string"

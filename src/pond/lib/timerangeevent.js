@@ -57,6 +57,17 @@ class TimeRangeEvent extends Event {
             const other = arg1;
             this._d = other._d;
             return;
+        } else if (arg1 instanceof Buffer) {
+            let avroData;
+            try {
+                avroData = this.schema().fromBuffer(arg1);
+            } catch (err) {
+                console.error("Unable to convert supplied avro buffer to event");
+            }
+            const range = new TimeRange(avroData.timerange);
+            const data = new Immutable.Map(avroData.data);
+            this._d = new Immutable.Map({range, data});
+            return;
         } else if (arg1 instanceof Immutable.Map) {
             this._d = arg1;
             return;
@@ -67,17 +78,30 @@ class TimeRangeEvent extends Event {
     }
 
     /**
-     * Returns the timestamp (as ms since the epoch)
+     * Returns the timerange as a string
      */
     key() {
         return `${+this.timerange().begin()},${+this.timerange().end()}`;
     }
 
-
     toJSON() {
         return {
             timerange: this.timerange().toJSON(),
             data: this.data().toJSON()
+        };
+    }
+
+    /**
+     * For Avro serialization, this defines the event's key
+     * (the TimeRange as an array)
+     */
+    static keySchema() {
+        return {
+            name: "timerange",
+            type: {
+                type: "array",
+                items: "long"
+            }
         };
     }
 

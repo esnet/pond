@@ -155,7 +155,11 @@ class TimeSeries {
             this._collection = other._collection;
 
         } else if (arg instanceof Buffer) {
-            console.log("Buffer");
+
+            //
+            // Turns the buffer into a JSON object using the AVRO schema
+            //
+
             let obj;
             try {
                 obj = this.schema().fromBuffer(arg);
@@ -164,28 +168,20 @@ class TimeSeries {
             }
 
             const { columns, points, utc = true, ...meta2 } = obj; //eslint-disable-line
-            const [eventType, ...eventFields] = columns;
-            const events = points.map(point => {
+            const [ eventKey ] = columns;
+            const events = points.map((point) => {
                 const t = point[columns[0]];
                 const d = point.data;
-                switch (columns[0]) {
-                    case "time":
-                        return new TimeEvent(t, d);
-                    case "timerange":
-                        return new TimeRangeEvent(t, d);
-                    case "index":
-                        return new IndexedEvent(t, d, utc);
-                    default:
-                        throw new Error(`Unknown event type: ${eventType}`);
-                }
+                const options = utc;
+                const Event = this.constructor.event(eventKey);
+                return new Event(t, d, options);
             });
-
-            console.log(events);
 
             this._collection = new Collection(events);
             this._data = buildMetaData(meta2);
 
             return;
+
         } else if (_.isObject(arg)) {
 
             //
@@ -229,20 +225,13 @@ class TimeSeries {
                 //
 
                 const { columns, points, utc = true, ...meta2 } = obj; //eslint-disable-line
-                const [eventType, ...eventFields] = columns;
+                const [ eventKey, ...eventFields ] = columns;
                 const events = points.map(point => {
                     const [t, ...eventValues] = point;
                     const d = _.object(eventFields, eventValues);
-                    switch (eventType) {
-                        case "time":
-                            return new TimeEvent(t, d);
-                        case "timerange":
-                            return new TimeRangeEvent(t, d);
-                        case "index":
-                            return new IndexedEvent(t, d, utc);
-                        default:
-                            throw new Error(`Unknown event type: ${eventType}`);
-                    }
+                    const options = utc;
+                    const Event = this.constructor.event(eventKey);
+                    return new Event(t, d, options);
                 });
 
                 this._collection = new Collection(events);
@@ -270,57 +259,42 @@ class TimeSeries {
         ];
     }
 
-    /*
-    keySchema(type) {
-        let keySchema;
-        if (type === "time") {
-            keySchema = {
-                name: "time",
-                type: {"type": "long", "logicalType": "timestamp-millis"}
-            };
-        } else if (type === "index") {
-            keySchema = {
-                name: "index",
-                type: "string"
-            };
-        } else if (type === "timerange") {
-            keySchema = {
-                name: "timerange", type: {
-                    "type": "array",
-                    "items": {
-                        name: "time",
-                        type: {"type": "long", "logicalType": "timestamp-millis"}
-                    }
-                }
-            };
-        }
-        console.log("type", type);
-        return keySchema;
+    keySchema(eventKey) {
+        const Event = this.constructor.event(eventKey);
+        return Event.keySchema();
     }
-    */
 
-    schema() {
+    dataSchema(eventKey) {
+        const Event = this.constructor.event(eventKey);
+        return Event.dataSchema();
+    }
+
+    schema(eventKey) {
         const s = {
-            "type": "record",
-            "name": "TimeSeries",
-            "fields" : [
+            type: "record",
+            name: "TimeSeries",
+            fields : [
                 ...this.metaSchema(),
-                { name: "columns", type: {"type": "array", "items": "string" }},
-                { name: "points", type: {
-                    "type": "array",
-                    "items": {
-                            "type": "record",
-                            "name": "Event",
-                            "fields" : [
-                                this.keySchema(),
-                                {name: "data", type: this.dataSchema()}
+                {
+                    name: "columns",
+                    type: {type: "array", items: "string" }
+                },
+                {
+                    name: "points",
+                    type: {
+                        type: "array",
+                        items: {
+                            type: "record",
+                            name: "Event",
+                            fields : [
+                                this.keySchema(eventKey),
+                                {name: "data", type: this.dataSchema(eventKey)}
                             ]
                         }
                     }
                 }
             ]
         };
-        console.log(JSON.stringify(s, null, 3));
         return avro.parse(s);
     }
 
@@ -329,15 +303,7 @@ class TimeSeries {
      */
     toAvro() {
         const d = this.toJSON();
-        const [ key, ...columns ] = d.columns;
-
-        if (this.keySchema === undefined) {
-          throw new TypeError("Subclass of TimeSeries must implement keySchema()");
-        }
-
-        if (this.dataSchema === undefined) {
-          throw new TypeError("Subclass of TimeSeries must implement dataSchema()");
-        }
+        const [ eventKey, ...columns ] = d.columns;
 
         const points = d.points.map(point => {
             const data = {};
@@ -345,14 +311,14 @@ class TimeSeries {
                 data[c] = point[i + 1];
             });
             return {
-                [key]: point[0],
+                [eventKey]: point[0],
                 data
             };
         });
         d.points = points;
 
         try {
-            return this.schema().toBuffer(d);
+            return this.schema(eventKey).toBuffer(d);
         } catch (err) {
             console.error("Unable to convert TimeSeries to avro based on schema", err);
         }
@@ -1392,6 +1358,28 @@ class TimeSeries {
     /*
      * STATIC
      */
+
+     /**
+      * Defines the event type contained in this TimeSeries. The default here
+      * is to use the supplied type (time, timerange or index) to build either
+      * a TimeEvent, TimeRangeEvent or IndexedEvent. However, you can also
+      * subclass the TimeSeries and reimplement this to return another event
+      * type. Typically you might want to do this to provide an Event subclass
+      * that carries its own schema, for better validated and compact Avro
+      * serialization.
+      */
+    static event(eventKey) {
+        switch (eventKey) {
+            case "time":
+                return TimeEvent;
+            case "timerange":
+                return TimeRangeEvent;
+            case "index":
+                return IndexedEvent;
+            default:
+                throw new Error(`Unknown event type: ${eventKey}`);
+        }
+    }
 
      /**
       * Static function to compare two TimeSeries to each other. If the TimeSeries

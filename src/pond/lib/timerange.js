@@ -52,7 +52,7 @@ class TimeRange {
             const other = arg1;
             this._range = other._range;
         } else if (arg1 instanceof Buffer) {
-            const rangeArray = this.schema().fromBuffer(arg1)
+            const rangeArray = this.schema().fromBuffer(arg1);
             this._range = new Immutable.List([new Date(rangeArray[0]),
                                               new Date(rangeArray[1])]);
         } else if (arg1 instanceof Immutable.List) {

@@ -9,9 +9,7 @@
  */
 
 import _ from "underscore";
-import avro from "avsc";
 import Immutable from "immutable";
-import moment from "moment";
 import Event from "./event";
 import util from "./base/util";
 
@@ -150,10 +148,13 @@ class TimeEvent extends Event {
      * For Avro serialization, this defines the event's key (the timestamp)
      * as a simple a long (logicalType of timestamp milliseconds)
      */
-    keySchema() {
+    static keySchema() {
         return {
             name: "time",
-            type: {"type": "long", "logicalType": "timestamp-millis"}
+            type: {
+                type: "long",
+                logicalType: "timestamp-millis"
+            }
         };
     }
 

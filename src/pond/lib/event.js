@@ -22,11 +22,25 @@ class Event {
         }
     }
 
+    keySchema() {
+        if (this.constructor.keySchema === undefined) {
+            throw new TypeError("Must implement the event's keySchema() static method");
+        }
+        return this.constructor.keySchema();
+    }
+
+    dataSchema() {
+        if (this.constructor.dataSchema === undefined) {
+            throw new TypeError("Must implement the event's dataSchema() static method");
+        }
+        return this.constructor.dataSchema();
+    }
+
     schema() {
         const schema = {
-            "type": "record",
-            "name": "Event",
-            "fields" : [
+            type: "record",
+            name: "Event",
+            fields : [
                 this.keySchema(),
                 {name: "data", type: this.dataSchema()}
             ]
@@ -38,12 +52,6 @@ class Event {
      * Express the event as an avro buffer
      */
     toAvro() {
-        if (this.keySchema === undefined) {
-          throw new TypeError("Must implement the event's keySchema()");
-        }
-        if (this.dataSchema === undefined) {
-          throw new TypeError("Must implement the event's dataSchema()");
-        }
         try {
             return this.schema().toBuffer(this.toJSON());
         } catch (err) {
@@ -56,7 +64,7 @@ class Event {
      */
     toString() {
         if (this.toJSON === undefined) {
-          throw new TypeError("Must implement toJSON()");
+            throw new TypeError("Must implement toJSON()");
         }
         return JSON.stringify(this.toJSON());
     }
@@ -249,7 +257,7 @@ class Event {
 
         events.forEach(e => {
             const type = e.type();
-            const key = e.key()
+            const key = e.key();
             if (!_.has(eventMap, key)) {
                 eventMap[key] = [];
             }
@@ -259,7 +267,7 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(`Events for time ${key} are not homogeneous`)
+                    throw new Error(`Events for time ${key} are not homogeneous`);
                 }
             }
         });
@@ -344,7 +352,7 @@ class Event {
 
         events.forEach(e => {
             const type = e.type();
-            const key = e.key()
+            const key = e.key();
             if (!_.has(eventMap, key)) {
                 eventMap[key] = [];
             }
@@ -353,7 +361,7 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(`Events for time ${key} are not homogeneous`)
+                    throw new Error(`Events for time ${key} are not homogeneous`);
                 }
             }
         });
@@ -370,7 +378,7 @@ class Event {
             events.forEach(event => {
                 let fields = fieldNames;
                 if (!fieldNames) {
-                     fields = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
+                    fields = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
                 }
                 fields.forEach(fieldName => {
                     if (!mapEvent[fieldName]) {
