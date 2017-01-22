@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -15,9 +15,7 @@ import Immutable from "immutable";
 import IndexedEvent from "./indexedevent";
 import TimeRangeEvent from "./timerangeevent";
 import TimeRange from "./timerange";
-import { sum, avg } from "./base/functions";
 import util from "./base/util";
-
 
 /**
 There are three types of Events in Pond:
@@ -99,7 +97,6 @@ outageEvent.data()
 to fetch the whole data object, which will be an Immutable Map.
 */
 class Event {
-
     /**
      * The creation of an Event is done by combining two parts:
      * the timestamp and the data.
@@ -121,14 +118,16 @@ class Event {
             this._d = other._d;
             return;
         }
-        if (arg1 instanceof Immutable.Map &&
-            arg1.has("time") && arg1.has("data")) {
+        if (
+            arg1 instanceof Immutable.Map && arg1.has("time") &&
+                arg1.has("data")
+        ) {
             this._d = arg1;
             return;
         }
         const time = timestampFromArg(arg1);
         const data = dataFromArg(arg2);
-        this._d = new Immutable.Map({time, data});
+        this._d = new Immutable.Map({ time, data });
     }
 
     /**
@@ -137,10 +136,7 @@ class Event {
      * @return {Object} The event as JSON.
      */
     toJSON() {
-        return {
-            time: this.timestamp().getTime(),
-            data: this.data().toJSON()
-        };
+        return { time: this.timestamp().getTime(), data: this.data().toJSON() };
     }
 
     /**
@@ -155,7 +151,10 @@ class Event {
      * Returns a flat array starting with the timestamp, followed by the values.
      */
     toPoint() {
-        return [this.timestamp().getTime(), ..._.values(this.data().toJSON())];
+        return [
+            this.timestamp().getTime(),
+            ..._.values(this.data().toJSON())
+        ];
     }
 
     /**
@@ -299,15 +298,10 @@ class Event {
      */
     static isDuplicate(event1, event2, ignoreValues = true) {
         if (ignoreValues) {
-            return (
-                event1.type() === event2.type() &&
-                event1.key() === event2.key()
-            );
+            return event1.type() === event2.type() &&
+                event1.key() === event2.key();
         } else {
-            return (
-                event1.type() === event2.type() &&
-                Event.is(event1, event2)
-            );
+            return event1.type() === event2.type() && Event.is(event1, event2);
         }
     }
 
@@ -320,7 +314,7 @@ class Event {
      */
     static isValidValue(event, fieldPath) {
         const v = event.value(fieldPath);
-        const invalid = (_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
+        const invalid = _.isUndefined(v) || _.isNaN(v) || _.isNull(v);
         return !invalid;
     }
 
@@ -369,8 +363,10 @@ class Event {
      * @return {Immutable.List|array}        Array or Immutable.List of events
      */
     static merge(events, deep) {
-        if (events instanceof Immutable.List && events.size === 0 ||
-            _.isArray(events) && events.length === 0) {
+        if (
+            events instanceof Immutable.List && events.size === 0 ||
+                _.isArray(events) && events.length === 0
+        ) {
             return [];
         }
 
@@ -380,13 +376,12 @@ class Event {
         // they are homogeneous and also so we can build an output
         // event for this key
         //
-
         const eventMap = {};
         const typeMap = {};
 
         events.forEach(e => {
             const type = e.type();
-            const key = e.key()
+            const key = e.key();
             if (!_.has(eventMap, key)) {
                 eventMap[key] = [];
             }
@@ -396,7 +391,9 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(`Events for time ${key} are not homogeneous`)
+                    throw new Error(
+                        `Events for time ${key} are not homogeneous`
+                    );
                 }
             }
         });
@@ -406,12 +403,13 @@ class Event {
         // events. Here we loop through all the events for that key, then for each field
         // we are considering, we get all the values and reduce them (sum, avg, etc).
         //
-
         const outEvents = [];
         _.each(eventMap, (events, key) => {
             let data = Immutable.Map();
             events.forEach(event => {
-                data = deep ? data.mergeDeep(event.data()) : data.merge(event.data());
+                data = deep
+                    ? data.mergeDeep(event.data())
+                    : data.merge(event.data());
             });
 
             const type = typeMap[key];
@@ -467,14 +465,16 @@ class Event {
      * @return {Immutable.List|array}   An Immutable.List or array of events
      */
     static combine(events, fieldSpec, reducer) {
-        if (events instanceof Immutable.List && events.size === 0 ||
-            _.isArray(events) && events.length === 0) {
+        if (
+            events instanceof Immutable.List && events.size === 0 ||
+                _.isArray(events) && events.length === 0
+        ) {
             return [];
         }
 
         let fieldNames;
         if (_.isString(fieldSpec)) {
-            fieldNames = [fieldSpec];
+            fieldNames = [ fieldSpec ];
         } else if (_.isArray(fieldSpec)) {
             fieldNames = fieldSpec;
         }
@@ -488,10 +488,9 @@ class Event {
         // they are homogeneous and also so we can build an output
         // event for this key
         //
-
         events.forEach(e => {
             const type = e.type();
-            const key = e.key()
+            const key = e.key();
             if (!_.has(eventMap, key)) {
                 eventMap[key] = [];
             }
@@ -500,7 +499,9 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(`Events for time ${key} are not homogeneous`)
+                    throw new Error(
+                        `Events for time ${key} are not homogeneous`
+                    );
                 }
             }
         });
@@ -510,14 +511,16 @@ class Event {
         // events. Here we loop through all the events for that key, then for each field
         // we are considering, we get all the values and reduce them (sum, avg, etc).
         //
-
         const outEvents = [];
         _.each(eventMap, (events, key) => {
             const mapEvent = {};
             events.forEach(event => {
                 let fields = fieldNames;
                 if (!fieldNames) {
-                     fields = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
+                    fields = _.map(
+                        event.data().toJSON(),
+                        (value, fieldName) => fieldName
+                    );
                 }
                 fields.forEach(fieldName => {
                     if (!mapEvent[fieldName]) {
@@ -544,7 +547,6 @@ class Event {
                 const timerange = new TimeRange(+begin, +end);
                 outEvents.push(new TimeRangeEvent(timerange, d));
             }
-
         });
 
         // This function outputs the same as its input. If we are
@@ -557,35 +559,12 @@ class Event {
         return outEvents;
     }
 
-    /**
-     * Sum takes multiple events and sums them together. The result is a
-     * single event for each timestamp. Events should be homogeneous.
-     *
-     * @param {array}        events     Array of event objects
-     * @param {string|array} fieldSpec  Column or columns to look up. If you need
-     *                                  to retrieve multiple deep nested values that
-     *                                  ['can.be', 'done.with', 'this.notation'].
-     *                                  A single deep value with a string.like.this.
-     *                                  If not supplied, all columns will be operated on.
-     */
-    static sum(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, sum());
+    static combiner(fieldSpec, reducer) {
+        return eventList => Event.combine(eventList, fieldSpec, reducer);
     }
 
-    /**
-     * Sum takes multiple events, groups them by timestamp, and uses combine()
-     * to average them. If the events do not have the same timestamp an
-     * exception will be thrown.
-     *
-     * @param {array}        events     Array of event objects
-     * @param {string|array} fieldSpec  Column or columns to look up. If you need
-     *                                  to retrieve multiple deep nested values that
-     *                                  ['can.be', 'done.with', 'this.notation'].
-     *                                  A single deep value with a string.like.this.
-     *                                  If not supplied, all columns will be operated on.
-     */
-    static avg(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, avg());
+    static merger(fieldSpec) {
+        return eventList => Event.merge(eventList, fieldSpec);
     }
 
     /**
@@ -621,7 +600,9 @@ class Event {
         } else if (_.isArray(evts)) {
             events = new Immutable.List(evts);
         } else {
-            throw new Error("Unknown event list type. Should be an array or Immutable List");
+            throw new Error(
+                "Unknown event list type. Should be an array or Immutable List"
+            );
         }
 
         if (_.isString(multiFieldSpec)) {
@@ -631,13 +612,12 @@ class Event {
                     result[fieldSpec] = [];
                 }
                 const value = event.get(fieldSpec);
-                
+
                 result[fieldSpec].push(value);
             });
         } else if (_.isArray(multiFieldSpec)) {
             _.each(multiFieldSpec, fieldSpec => {
                 events.forEach(event => {
-
                     if (!_.has(result, fieldSpec)) {
                         result[fieldSpec] = [];
                     }
@@ -708,7 +688,9 @@ function timestampFromArg(arg) {
     } else if (moment.isMoment(arg)) {
         return new Date(arg.valueOf());
     } else {
-        throw new Error(`Unable to get timestamp from ${arg}. Should be a number, date, or moment.`);
+        throw new Error(
+            `Unable to get timestamp from ${arg}. Should be a number, date, or moment.`
+        );
     }
 }
 
@@ -723,7 +705,7 @@ function dataFromArg(arg) {
     } else if (_.isNumber(arg) || _.isString(arg)) {
         // Just add it to the value key of a new Map
         // e.g. new Event(t, 25); -> t, {value: 25}
-        data = new Immutable.Map({value: arg});
+        data = new Immutable.Map({ value: arg });
     } else {
         throw new Error(`Unable to interpret event data from ${arg}.`);
     }
@@ -731,3 +713,4 @@ function dataFromArg(arg) {
 }
 
 export default Event;
+
