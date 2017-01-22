@@ -12,16 +12,13 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
-
-import Processor from "./processor";
-
-import Event from "../event";
 import Index from "../index";
 import IndexedEvent from "../indexedevent";
+import Processor from "./processor";
+import TimeEvent from "../timeevent";
 import TimeRange from "../timerange";
 import TimeRangeEvent from "../timerangeevent";
 import { isPipeline } from "../pipeline";
-
 import util from "../base/util";
 
 /**
@@ -86,7 +83,7 @@ export default class Aligner extends Processor {
      * Test to see if an event is perfectly aligned. Used on first event.
      */
     isAligned(event) {
-        const bound = Index.getIndexString(this._window, event.timestamp())
+        const bound = Index.getIndexString(this._window, event.timestamp());
         return this.getBoundaryTime(bound) === event.timestamp().getTime();
     }
 
@@ -137,7 +134,7 @@ export default class Aligner extends Processor {
                 d = d.setIn(fieldPath, null);
             }
         });
-        return new Event(t, d);
+        return new TimeEvent(t, d);
     }
 
      /**
@@ -174,7 +171,7 @@ export default class Aligner extends Processor {
             d = d.setIn(fieldPath, interpolatedVal);
         });
 
-        return new Event(boundaryTime, d);
+        return new TimeEvent(boundaryTime, d);
     }
 
     /**

@@ -10,6 +10,7 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
+import avro from "avsc";
 
 import moment from "moment";
 
@@ -50,6 +51,10 @@ class TimeRange {
         if (arg1 instanceof TimeRange) {
             const other = arg1;
             this._range = other._range;
+        } else if (arg1 instanceof Buffer) {
+            const rangeArray = this.schema().fromBuffer(arg1);
+            this._range = new Immutable.List([new Date(rangeArray[0]),
+                                              new Date(rangeArray[1])]);
         } else if (arg1 instanceof Immutable.List) {
             const rangeList = arg1;
             this._range = rangeList;
@@ -70,6 +75,18 @@ class TimeRange {
                 this._range = new Immutable.List([new Date(b), new Date(e)]);
             }
         }
+    }
+
+    schema() {
+        return avro.parse({
+            name: "TimeRange",
+            type: "array",
+            items: "long"
+        });
+    }
+
+    toAvro() {
+        return this.schema().toBuffer(this.toJSON());
     }
 
     /**

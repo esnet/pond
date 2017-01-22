@@ -12,15 +12,15 @@
 
 import Collection from "../collection";
 import CollectionOut from "../io/collectionout";
-import Event from "../event";
+import TimeEvent from "../timeevent";
 import TimeSeries from "../timeseries";
 import Stream from "../io/stream";
 import { Pipeline } from "../pipeline";
 
 const EVENT_LIST = [
-    new Event(1429673400000, {in: 1, out: 2}),
-    new Event(1429673460000, {in: 3, out: 4}),
-    new Event(1429673520000, {in: 5, out: 6})
+    new TimeEvent(1429673400000, {in: 1, out: 2}),
+    new TimeEvent(1429673460000, {in: 3, out: 4}),
+    new TimeEvent(1429673520000, {in: 5, out: 6})
 ];
 
 const TICKET_RANGE = {
@@ -351,14 +351,14 @@ it("can do assymetric linear interpolation (test_assymetric_linear_fill)", () =>
 it("can do streaming fill (test_linear_stream)", (done) => {
 
     const events = [
-        new Event(1400425947000, 1),
-        new Event(1400425948000, 2),
-        new Event(1400425949000, {value: null}),
-        new Event(1400425950000, {value: null}),
-        new Event(1400425951000, {value: null}),
-        new Event(1400425952000, 5),
-        new Event(1400425953000, 6),
-        new Event(1400425954000, 7)
+        new TimeEvent(1400425947000, 1),
+        new TimeEvent(1400425948000, 2),
+        new TimeEvent(1400425949000, {value: null}),
+        new TimeEvent(1400425950000, {value: null}),
+        new TimeEvent(1400425951000, {value: null}),
+        new TimeEvent(1400425952000, 5),
+        new TimeEvent(1400425953000, 6),
+        new TimeEvent(1400425954000, 7)
     ];
 
     const stream = new Stream();
@@ -388,14 +388,14 @@ it("can do streaming fill with limit (test_linear_stream_limit/1)", () => {
     let results;
 
     const events = [
-        new Event(1400425947000, 1),
-        new Event(1400425948000, 2),
-        new Event(1400425949000, {value: null}),
-        new Event(1400425950000, 3),
-        new Event(1400425951000, {value: null}),
-        new Event(1400425952000, {value: null}),
-        new Event(1400425953000, {value: null}),
-        new Event(1400425954000, {value: null})
+        new TimeEvent(1400425947000, 1),
+        new TimeEvent(1400425948000, 2),
+        new TimeEvent(1400425949000, {value: null}),
+        new TimeEvent(1400425950000, 3),
+        new TimeEvent(1400425951000, {value: null}),
+        new TimeEvent(1400425952000, {value: null}),
+        new TimeEvent(1400425953000, {value: null}),
+        new TimeEvent(1400425954000, {value: null})
     ];
 
     const stream = new Stream();
@@ -421,14 +421,14 @@ it("can do streaming fill with limit (test_linear_stream_limit/2)", () => {
     let results;
 
     const events = [
-        new Event(1400425947000, 1),
-        new Event(1400425948000, 2),
-        new Event(1400425949000, {value: null}),
-        new Event(1400425950000, 3),
-        new Event(1400425951000, {value: null}),
-        new Event(1400425952000, {value: null}),
-        new Event(1400425953000, {value: null}),
-        new Event(1400425954000, {value: null})
+        new TimeEvent(1400425947000, 1),
+        new TimeEvent(1400425948000, 2),
+        new TimeEvent(1400425949000, {value: null}),
+        new TimeEvent(1400425950000, 3),
+        new TimeEvent(1400425951000, {value: null}),
+        new TimeEvent(1400425952000, {value: null}),
+        new TimeEvent(1400425953000, {value: null}),
+        new TimeEvent(1400425954000, {value: null})
     ];
 
     const stream = new Stream();

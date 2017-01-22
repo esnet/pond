@@ -11,7 +11,7 @@
 import Immutable from "immutable";
 import _ from "underscore";
 
-import Event from "./event";
+import TimeEvent from "./timeevent";
 import IndexedEvent from "./indexedevent";
 import TimeRangeEvent from "./timerangeevent";
 import TimeSeries from "./timeseries";
@@ -683,7 +683,7 @@ class Pipeline {
      *      in_avg: {in: avg},
      *      out_avg: {in: avg}
      *   })
-     *   .asEvents()
+     *   .asTimeEvents()
      *   .to(EventOut, {}, event => {
      *      result[`${event.index()}`] = event; // Result
      *   });
@@ -703,11 +703,11 @@ class Pipeline {
 
     /**
      * Converts incoming TimeRangeEvents or IndexedEvents to
-     * Events. This is helpful since some processors will
-     * emit TimeRangeEvents or IndexedEvents, which may be
-     * unsuitable for some applications.
+     * TimeEvents. This is helpful since some processors,
+     * especially aggregators, will emit TimeRangeEvents or
+     * IndexedEvents, which may be unsuitable for some applications.
      *
-     * @param  {object} options To convert to an Event you need
+     * @param  {object} options To convert to an TimeEvent you need
      * to convert a time range to a single time. There are three options:
      *  1. use the beginning time (options = {alignment: "lag"})
      *  2. use the center time (options = {alignment: "center"})
@@ -715,8 +715,8 @@ class Pipeline {
      *
      * @return {Pipeline} The Pipeline
      */
-    asEvents(options) {
-        const type = Event;
+    asTimeEvents(options) {
+        const type = TimeEvent;
         const p = new Converter(this, {
             type,
             ...options,

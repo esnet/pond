@@ -255,3 +255,13 @@ it("can be a new range (the smaller range) if one range surrounds another", () =
     expect(range.intersection(rangeInside).toString()).toBe(rangeInside.toString());
     expect(rangeInside.intersection(range).toString()).toBe(rangeInside.toString());
 });
+
+it("can convert the timeseries to avro", () => {
+    const beginTime = moment("2010-01-01 12:00", fmt).toDate();
+    const endTime = moment("2010-06-01 12:00", fmt).toDate();
+    const range1 = new TimeRange(beginTime, endTime);
+    const serialized = range1.toAvro();
+    const range2 = new TimeRange(serialized);
+    expect(range1.equals(range2)).toBeTruthy();
+});
+

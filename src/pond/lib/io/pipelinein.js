@@ -9,9 +9,6 @@
  */
 
 import _ from "underscore";
-import Event from "../event";
-import TimeRangeEvent from "../timerangeevent";
-import IndexedEvent from "../indexedevent";
 import Observable from "../base/observable";
 
 class PipelineIn extends Observable {
@@ -24,13 +21,7 @@ class PipelineIn extends Observable {
 
     _check(e) {
         if (!this._type) {
-            if (e instanceof Event) {
-                this._type = Event;
-            } else if (e instanceof TimeRangeEvent) {
-                this._type = TimeRangeEvent;
-            } else if (e instanceof IndexedEvent) {
-                this._type = IndexedEvent;
-            }
+            this._type = e.type();
         } else {
             if (!(e instanceof this._type)) {
                 throw new Error("Homogeneous events expected.");
