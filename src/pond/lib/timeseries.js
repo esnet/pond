@@ -1406,17 +1406,34 @@ class TimeSeries {
     }
 
     /**
-     * Reduces a list of TimeSeries objects using a reducer function. This works
+     * Reduces a list of TimeSeries objects using an event reducer function. This works
      * by taking each event in each TimeSeries and collecting them together
      * based on timestamp. All events for a given time are then merged together
      * using the reducer function to produce a new Event. Those Events are then
      * collected together to form a new TimeSeries.
      *
+     * This is a fairly low level function in that you need to provide an
+     * Event reducer (rather than a regular value reducer like `avg()` or `sum()`).
+     * The two existing examples of event reducers are `Event.sum` and `Event.avg`, however
+     * you can use those directly by evoking `timeseriesListSum()` and
+     * `timeseriesListAvg()` directly. Therefore if you have need for this function
+     * you will need to create you own event reducer function. This is fairly simple,
+     * since the implementation of `Event.sum` looks like this:
+     *
+     * ```
+     *     static sum(events, fieldSpec) {
+     *         return Event.combine(events, fieldSpec, sum());
+     *     }
+     * ```
+     *
+     * Where `sum()` is one of the simple reducers. Swapping this out with you own
+     * function should be all this is needed.
+     *
      * @param                  options                An object containing options. Additional key
      *                                                values in the options will be added as meta data
      *                                                to the resulting TimeSeries.
      * @param {array}          options.seriesList     A list of `TimeSeries` (required)
-     * @param {function}       options.reducer        The reducer function (required)
+     * @param {function}       options.reducer        The event reducer function (required)
      * @param {array | string} options.fieldSpec      Column or columns to sum. If you
      *                                                need to retrieve multiple deep
      *                                                nested values that ['can.be', 'done.with',
@@ -1525,6 +1542,38 @@ class TimeSeries {
      */
     static timeSeriesListSum(options) {
         const reducer = Event.sum;
+        return TimeSeries.timeSeriesListReduce({...options, reducer});
+    }
+
+    /**
+     * Takes a list of TimeSeries and averages corrsponding fields
+     * together to form a new Timeseries.
+     *
+     * @example
+     *
+     * ```
+     * const ts1 = new TimeSeries(weather1);
+     * const ts2 = new TimeSeries(weather2);
+     * const sum = TimeSeries.timeSeriesListAvg({
+     *     name: "avg",
+     *     seriesList: [ts1, ts2],
+     *     fieldSpec: "temperature"
+     * });
+     * ```
+     *
+     * @param                  options                An object containing options. Additional key
+     *                                                values in the options will be added as meta data
+     *                                                to the resulting TimeSeries.
+     * @param {array}          options.seriesList     A list of `TimeSeries` (required)
+     * @param {array | string} options.fieldSpec      Column or columns to avg. If you
+     *                                                need to retrieve multiple deep
+     *                                                nested values that ['can.be', 'done.with',
+     *                                                'this.notation']. A single deep value with a
+     *                                                string.like.this.
+     * @return {TimeSeries}                           The averaged TimeSeries
+     */
+    static timeSeriesListAvg(options) {
+        const reducer = Event.avg;
         return TimeSeries.timeSeriesListReduce({...options, reducer});
     }
 }

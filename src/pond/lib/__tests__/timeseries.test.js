@@ -688,6 +688,63 @@ it("can merge two timeseries into a new timeseries that is the sum", () => {
 });
 
 //
+// Avergage two timeseries together
+//
+
+it("can merge two timeseries into a new timeseries that is the sum", () => {
+    const part1 = new TimeSeries({
+        name: "part1",
+        columns: ["time", "in", "out"],
+        points: [
+            [1400425951000, 1, 6],
+            [1400425952000, 2, 7],
+            [1400425953000, 3, 8],
+            [1400425954000, 4, 9]
+        ]
+    });
+    const part2 = new TimeSeries({
+        name: "part2",
+        columns: ["time", "in", "out"],
+        points: [
+            [1400425951000, 9, 1],
+            [1400425952000, 7, 2],
+            [1400425953000, 5, 3],
+            [1400425954000, 3, 4]
+        ]
+    });
+
+    const avgSeries = TimeSeries.timeSeriesListReduce({
+        name: "avg",
+        seriesList: [part1, part2],
+        fieldSpec: ["in", "out"],
+        reducer: Event.avg
+    });
+
+    expect(avgSeries.at(0).get("in")).toBe(5);
+    expect(avgSeries.at(1).get("in")).toBe(4.5);
+    expect(avgSeries.at(2).get("in")).toBe(4);
+    expect(avgSeries.at(3).get("in")).toBe(3.5);
+
+    expect(avgSeries.at(0).get("out")).toBe(3.5);
+    expect(avgSeries.at(1).get("out")).toBe(4.5);
+    expect(avgSeries.at(2).get("out")).toBe(5.5);
+    expect(avgSeries.at(3).get("out")).toBe(6.5);
+
+    const avgSeries2 = TimeSeries.timeSeriesListAvg({
+        name: "avg",
+        seriesList: [part1, part2],
+        fieldSpec: ["in", "out"]
+    });
+
+    expect(avgSeries2.at(0).get("in")).toBe(5);
+    expect(avgSeries2.at(1).get("in")).toBe(4.5);
+    expect(avgSeries2.at(2).get("in")).toBe(4);
+    expect(avgSeries2.at(3).get("in")).toBe(3.5);
+
+
+});
+
+//
 // Collapse down columns in a TimeSeries
 //
 
