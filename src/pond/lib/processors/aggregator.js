@@ -11,7 +11,6 @@
 import _ from "underscore";
 
 import Processor from "./processor";
-
 import Collector from "../collector";
 import IndexedEvent from "../indexedevent";
 import TimeRangeEvent from "../timerangeevent";

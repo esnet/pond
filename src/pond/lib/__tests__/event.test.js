@@ -15,6 +15,7 @@ import Immutable from "immutable";
 import Event from "../event";
 import Index from "../index";
 import IndexedEvent from "../indexedevent";
+import TimeEvent from "../timeevent";
 import TimeRange from "../timerange";
 import TimeRangeEvent from "../timerangeevent";
 import { avg } from "../base/functions";
@@ -69,19 +70,19 @@ const DEEP_EVENT_DATA = {
 };
 
 const EVENT_LIST = [];
-EVENT_LIST.push(new Event(1445449170000, {name: "source1", in: 2, out: 11}));
-EVENT_LIST.push(new Event(1445449200000, {name: "source1", in: 4, out: 13}));
-EVENT_LIST.push(new Event(1445449230000, {name: "source1", in: 6, out: 15}));
-EVENT_LIST.push(new Event(1445449260000, {name: "source1", in: 8, out: 18}));
+EVENT_LIST.push(new TimeEvent(1445449170000, {name: "source1", in: 2, out: 11}));
+EVENT_LIST.push(new TimeEvent(1445449200000, {name: "source1", in: 4, out: 13}));
+EVENT_LIST.push(new TimeEvent(1445449230000, {name: "source1", in: 6, out: 15}));
+EVENT_LIST.push(new TimeEvent(1445449260000, {name: "source1", in: 8, out: 18}));
 
 
 //
-// Event creation
+// TimeEvent creation
 //
 
-it("can create a regular Event, with deep data", () => {
+it("can create a regular TimeEvent, with deep data", () => {
     const timestamp = new Date("2015-04-22T03:30:00Z");
-    const event = new Event(timestamp, DEEP_EVENT_DATA);
+    const event = new TimeEvent(timestamp, DEEP_EVENT_DATA);
 
     expect(event.get("NorthRoute")).toEqual({in: 123, out: 456});
     expect(event.get("SouthRoute")).toEqual({in: 654, out: 223});
@@ -95,7 +96,7 @@ it("can create an IndexedEvent using a string index and data", () => {
     expect(event.get("value")).toBe(42);
 });
 
-it("can create an indexed event using an existing Index and data", () => {
+it("can create an IndexedEvent using an existing Index and data", () => {
     const index = new Index("1d-12355");
     const event = new IndexedEvent(index, {value: 42});
     const expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
@@ -128,8 +129,8 @@ it("can create a TimeRangeEvent using a object", () => {
 
 it("can merge multiple events together", () => {
     const t = new Date("2015-04-22T03:30:00Z");
-    const event1 = new Event(t, {a: 5, b: 6});
-    const event2 = new Event(t, {c: 2});
+    const event1 = new TimeEvent(t, {a: 5, b: 6});
+    const event2 = new TimeEvent(t, {c: 2});
     const merged = Event.merge([event1, event2]);
 
     expect(merged[0].get("a")).toBe(5);
@@ -139,8 +140,8 @@ it("can merge multiple events together", () => {
 
 it("can merge multiple events together using an Immutable.List", () => {
     const t = new Date("2015-04-22T03:30:00Z");
-    const event1 = new Event(t, {a: 5, b: 6});
-    const event2 = new Event(t, {c: 2});
+    const event1 = new TimeEvent(t, {a: 5, b: 6});
+    const event2 = new TimeEvent(t, {c: 2});
     const merged = Event.merge(new Immutable.List([event1, event2]));
 
     expect(merged.get(0).get("a")).toBe(5);
@@ -174,8 +175,8 @@ it("can merge multiple timerange events together", () => {
 
 it("can deeply merge multiple events together", () => {
     const t = new Date("2015-04-22T03:30:00Z");
-    const event1 = new Event(t, {a: 5, b: {c: 6}});
-    const event2 = new Event(t, {d: 2, b: {e: 4}});
+    const event1 = new TimeEvent(t, {a: 5, b: {c: 6}});
+    const event2 = new TimeEvent(t, {d: 2, b: {e: 4}});
     const merged = Event.merge([event1, event2], true);
 
     expect(merged[0].get("a")).toBe(5);
@@ -191,9 +192,9 @@ it("can deeply merge multiple events together", () => {
 it("can sum multiple events together", () => {
     const t = new Date("2015-04-22T03:30:00Z");
     const events = [
-        new Event(t, {a: 5, b: 6, c: 7}),
-        new Event(t, {a: 2, b: 3, c: 4}),
-        new Event(t, {a: 1, b: 2, c: 3})
+        new TimeEvent(t, {a: 5, b: 6, c: 7}),
+        new TimeEvent(t, {a: 2, b: 3, c: 4}),
+        new TimeEvent(t, {a: 1, b: 2, c: 3})
     ];
     const result = Event.sum(events);
 
@@ -205,9 +206,9 @@ it("can sum multiple events together", () => {
 it("can sum multiple events together using an Immutable.List", () => {
     const t = new Date("2015-04-22T03:30:00Z");
     const events = [
-        new Event(t, {a: 5, b: 6, c: 7}),
-        new Event(t, {a: 2, b: 3, c: 4}),
-        new Event(t, {a: 1, b: 2, c: 3})
+        new TimeEvent(t, {a: 5, b: 6, c: 7}),
+        new TimeEvent(t, {a: 2, b: 3, c: 4}),
+        new TimeEvent(t, {a: 1, b: 2, c: 3})
     ];
     const result = Event.sum(new Immutable.List(events));
 
@@ -252,9 +253,9 @@ it("can sum multiple events together if they have different timestamps", () => {
     const t2 = new Date("2015-04-22T04:00:00Z");
     const t3 = new Date("2015-04-22T04:30:00Z");
     const events = [
-        new Event(t1, {a: 5, b: 6, c: 7}),
-        new Event(t1, {a: 2, b: 3, c: 4}),
-        new Event(t3, {a: 1, b: 2, c: 3})
+        new TimeEvent(t1, {a: 5, b: 6, c: 7}),
+        new TimeEvent(t1, {a: 2, b: 3, c: 4}),
+        new TimeEvent(t3, {a: 1, b: 2, c: 3})
     ];
     const result = Event.sum(events);
 
@@ -266,9 +267,9 @@ it("can sum multiple events together if they have different timestamps", () => {
 //
 
 it("can detect duplicated event", () => {
-    const e1 = new Event(1477058455872, {a: 5, b: 6, c: 7});
-    const e2 = new Event(1477058455872, {a: 5, b: 6, c: 7});
-    const e3 = new Event(1477058455872, {a: 6, b: 6, c: 7});
+    const e1 = new TimeEvent(1477058455872, {a: 5, b: 6, c: 7});
+    const e2 = new TimeEvent(1477058455872, {a: 5, b: 6, c: 7});
+    const e3 = new TimeEvent(1477058455872, {a: 6, b: 6, c: 7});
 
     // Just check times and type
     expect(Event.isDuplicate(e1, e2)).toBeTruthy();
@@ -285,7 +286,7 @@ it("can detect duplicated event", () => {
 
 it("can create an event with deep data and then get values back with dot notation", () => {
     const timestamp = new Date("2015-04-22T03:30:00Z");
-    const event = new Event(timestamp, DEEP_EVENT_DATA);
+    const event = new TimeEvent(timestamp, DEEP_EVENT_DATA);
     let eventValue;
     for (let i = 0; i < 100000; i++) {
         eventValue = event.get(["NorthRoute", "in"]); //1550ms
@@ -325,4 +326,79 @@ it("should be able to run a simple mapReduce calculation", () => {
     const result = Event.mapReduce(EVENT_LIST, ["in", "out"], avg());
 
     expect(result).toEqual({ in: 5, out: 14.25 });
+});
+
+class TrafficEvent extends TimeEvent {
+    constructor(arg1, arg2) {
+        super(arg1, arg2);
+    }
+
+    static dataSchema() {
+        return {
+            type: "record",
+            fields: [
+                {name: "name", type: "string"},
+                {name: "in", type: "long"},
+                {name: "out", type: "long"}
+            ]
+        };
+    }
+}
+
+it("can convert an event to avro", () => {
+    const event1 = new TrafficEvent(1445449170000, {name: "source1", in: 2, out: 11});
+    const event2 = new TrafficEvent(event1.toAvro());
+    expect(Event.is(event1, event2)).toBeTruthy();
+});
+
+class IndexedTrafficEvent extends IndexedEvent {
+    constructor(arg1, arg2) {
+        super(arg1, arg2);
+    }
+
+    static dataSchema() {
+        return {
+            type: "record",
+            fields: [
+                {name: "name", type: "string"},
+                {name: "in", type: "long"},
+                {name: "out", type: "long"}
+            ]
+        };
+    }
+}
+
+it("can convert an IndexedEvent subclass to avro", () => {
+    const event1 = new IndexedTrafficEvent("1d-1234", {name: "source1", in: 2, out: 11});
+    const event2 = new IndexedTrafficEvent(event1.toAvro());
+    expect(Event.is(event1, event2)).toBeTruthy();
+});
+
+
+class StatusEvent extends TimeRangeEvent {
+    constructor(arg1, arg2) {
+        super(arg1, arg2);
+    }
+
+    static dataSchema() {
+        return {
+            type: "record",
+            fields: [
+                {name: "title", type: "string"},
+                {name: "description", type: "string"}
+            ]
+        };
+    }
+}
+
+it("can convert an TimeRangeEvent subclass to avro", () => {
+    const sampleEvent = OUTAGE_EVENT_LIST["outage_events"][0];
+
+    // Extract the begin and end times
+    const beginTime = new Date(1445449170000);
+    const endTime = new Date(1445449260000);
+    const timerange = new TimeRange(beginTime, endTime);
+    const event1 = new StatusEvent(timerange, {title: "Unscheduled Maintenance", description: "The router failed"});
+    const event2 = new StatusEvent(event1.toAvro());
+    expect(Event.is(event1, event2)).toBeTruthy();
 });

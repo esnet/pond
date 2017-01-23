@@ -12,15 +12,15 @@
 
 import Collection from "../collection";
 import CollectionOut from "../io/collectionout";
-import Event from "../event";
+import TimeEvent from "../timeevent";
 import TimeSeries from "../timeseries";
 import Stream from "../io/stream";
 import { Pipeline } from "../pipeline";
 
 const EVENT_LIST = [
-    new Event(1429673400000, {in: 1, out: 2}),
-    new Event(1429673460000, {in: 3, out: 4}),
-    new Event(1429673520000, {in: 5, out: 6})
+    new TimeEvent(1429673400000, {in: 1, out: 2}),
+    new TimeEvent(1429673460000, {in: 3, out: 4}),
+    new TimeEvent(1429673520000, {in: 5, out: 6})
 ];
 
 const TICKET_RANGE = {
@@ -60,33 +60,32 @@ it("can rename columns on an Event series", done => {
         renameMap: {in: "new_in", out: "new_out"}
     });
 
-    expect(renamed.at(0).get("new_in")).toBe(ts.at(0).get("in"));
-    expect(renamed.at(0).get("new_out")).toBe(ts.at(0).get("out"));
+    expect(renamed.at(0).get("new_in")).toEqual(ts.at(0).get("in"));
+    expect(renamed.at(0).get("new_out")).toEqual(ts.at(0).get("out"));
 
-    expect(renamed.at(1).get("new_in")).toBe(ts.at(1).get("in"));
-    expect(renamed.at(1).get("new_out")).toBe(ts.at(1).get("out"));
+    expect(renamed.at(1).get("new_in")).toEqual(ts.at(1).get("in"));
+    expect(renamed.at(1).get("new_out")).toEqual(ts.at(1).get("out"));
 
-    expect(renamed.at(0).timestamp().getTime()).toBe(ts.at(0).timestamp().getTime());
-    expect(renamed.at(1).timestamp().getTime()).toBe(ts.at(1).timestamp().getTime());
+    expect(renamed.at(0).timestamp().getTime()).toEqual(ts.at(0).timestamp().getTime());
+    expect(renamed.at(1).timestamp().getTime()).toEqual(ts.at(1).timestamp().getTime());
 
     done();
 });
 
 it("can rename a columns on a TimeRangeEvent series", done => {
-
     const ts = new TimeSeries(TICKET_RANGE);
     const renamed = ts.renameColumns({
         renameMap: {title: "event", esnet_ticket: "ticket"}
     });
 
-    expect(renamed.at(0).get("event")).toBe(ts.at(0).get("title"));
-    expect(renamed.at(0).get("ticket")).toBe(ts.at(0).get("esnet_ticket"));
+    expect(renamed.at(0).get("event")).toEqual(ts.at(0).get("title"));
+    expect(renamed.at(0).get("ticket")).toEqual(ts.at(0).get("esnet_ticket"));
 
-    expect(renamed.at(1).get("event")).toBe(ts.at(1).get("title"));
-    expect(renamed.at(1).get("ticket")).toBe(ts.at(1).get("esnet_ticket"));
+    expect(renamed.at(1).get("event")).toEqual(ts.at(1).get("title"));
+    expect(renamed.at(1).get("ticket")).toEqual(ts.at(1).get("esnet_ticket"));
 
-    expect(renamed.at(0).timestamp().getTime()).toBe(ts.at(0).timestamp().getTime());
-    expect(renamed.at(1).timestamp().getTime()).toBe(ts.at(1).timestamp().getTime());
+    expect(renamed.at(0).timestamp().getTime()).toEqual(ts.at(0).timestamp().getTime());
+    expect(renamed.at(1).timestamp().getTime()).toEqual(ts.at(1).timestamp().getTime());
 
     done();
 });
@@ -98,14 +97,14 @@ it("can rename a columns on a IndexedEvent series", done => {
         renameMap: {uptime: "available"}
     });
 
-    expect(renamed.at(0).get("available")).toBe(ts.at(0).get("uptime"));
-    expect(renamed.at(2).get("available")).toBe(ts.at(2).get("uptime"));
-    expect(renamed.at(4).get("available")).toBe(ts.at(4).get("uptime"));
-    expect(renamed.at(6).get("available")).toBe(ts.at(6).get("uptime"));
+    expect(renamed.at(0).get("available")).toEqual(ts.at(0).get("uptime"));
+    expect(renamed.at(2).get("available")).toEqual(ts.at(2).get("uptime"));
+    expect(renamed.at(4).get("available")).toEqual(ts.at(4).get("uptime"));
+    expect(renamed.at(6).get("available")).toEqual(ts.at(6).get("uptime"));
 
-    expect(renamed.at(0).timestamp()).toBe(ts.at(0).timestamp());
-    expect(renamed.at(1).timestamp()).toBe(ts.at(1).timestamp());
-    expect(renamed.at(2).timestamp()).toBe(ts.at(2).timestamp());
+    expect(renamed.at(0).timestamp()).toEqual(ts.at(0).timestamp());
+    expect(renamed.at(1).timestamp()).toEqual(ts.at(1).timestamp());
+    expect(renamed.at(2).timestamp()).toEqual(ts.at(2).timestamp());
 
     done();
 });

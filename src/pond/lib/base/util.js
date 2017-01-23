@@ -8,10 +8,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import moment from "moment";
 import _ from "underscore";
-
+import Immutable from "immutable";
+import moment from "moment";
 import TimeRange from "../timerange";
+import Index from "../index";
 
 const units = {
     s: {label: "seconds", length: 1},
@@ -244,5 +245,65 @@ export default {
         }
 
         return paths;
+    },
+
+    //
+    // Functions to turn constructor args
+    // into other stuff
+    //
+
+    timestampFromArg(arg) {
+        if (_.isNumber(arg)) {
+            return new Date(arg);
+        } else if (_.isString(arg)) {
+            return new Date(+arg);
+        } else if (_.isDate(arg)) {
+            return new Date(arg.getTime());
+        } else if (moment.isMoment(arg)) {
+            return new Date(arg.valueOf());
+        } else {
+            throw new Error(`Unable to get timestamp from ${arg}. Should be a number, date, or moment.`);
+        }
+    },
+
+    timeRangeFromArg(arg) {
+        if (arg instanceof TimeRange) {
+            return arg;
+        } else if (_.isString(arg)) {
+            const [ begin, end ] = arg.split(",");
+            return new TimeRange([ +begin, +end ]);
+        } else if (_.isArray(arg) && arg.length === 2) {
+            return new TimeRange(arg);
+        } else {
+            throw new Error(`Unable to parse timerange. Should be a TimeRange. Got ${arg}.`);
+        }
+    },
+
+    indexFromArgs(arg1, arg2 = true) {
+        if (_.isString(arg1)) {
+            return new Index(arg1, arg2);
+        } else if (arg1 instanceof Index) {
+            return arg1;
+        } else {
+            throw new Error(`Unable to get index from ${arg1}. Should be a string or Index.`);
+        }
+    },
+
+    dataFromArg(arg) {
+        let data;
+        if (_.isObject(arg)) {
+            // Deeply convert the data to Immutable Map
+            data = new Immutable.fromJS(arg);
+        } else if (data instanceof Immutable.Map) {
+            // Copy reference to the data
+            data = arg;
+        } else if (_.isNumber(arg) || _.isString(arg)) {
+            // Just add it to the value key of a new Map
+            // e.g. new Event(t, 25); -> t, {value: 25}
+            data = new Immutable.Map({value: arg});
+        } else {
+            throw new Error(`Unable to interpret event data from ${arg}.`);
+        }
+        return data;
     }
 };

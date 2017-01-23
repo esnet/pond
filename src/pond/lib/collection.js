@@ -128,9 +128,8 @@ class Collection extends Bounded {
      * or `TimeRangeEvent`) this will return that type. If no events
      * have been added to the Collection it will return `undefined`.
      *
-     * @return {Event|IndexedEvent|TimeRangeEvent} - The class of the type
-     *                                               of events contained in
-     *                                               this Collection.
+     * @return {Event} - The class of the type of events contained in
+     *                   this Collection.
      */
     type() {
         return this._type;
@@ -172,8 +171,7 @@ class Collection extends Bounded {
      * }
      * ```
      * @param  {number} pos The position of the event
-     * @return {Event|TimeRangeEvent|IndexedEvent}     Returns the
-     * event at the pos specified.
+     * @return {Event}      Returns the event at the pos specified.
      */
     at(pos) {
         if (this._eventList.size > 0) {
@@ -201,20 +199,18 @@ class Collection extends Bounded {
         } else if (k instanceof TimeRange) {
             key = `${this.timerange().begin()},${this.timerange().end()}`;
         }
-
         for (const e of this.events()) {
             if (e.key() === key) {
                 result.push(e);
             }
         }
-
         return result;
     }
 
     /**
      * Returns the first event in the Collection.
      *
-     * @return {Event|TimeRangeEvent|IndexedEvent}
+     * @return {Event}
      */
     atFirst() {
         if (this.size()) {
@@ -225,7 +221,7 @@ class Collection extends Bounded {
     /**
      * Returns the last event in the Collection.
      *
-     * @return {Event|TimeRangeEvent|IndexedEvent}
+     * @return {Event}
      */
     atLast() {
         if (this.size()) {
@@ -377,7 +373,7 @@ class Collection extends Bounded {
      * can be an Event, TimeRangeEvent or IndexedEvent, but it must be of the
      * same type as other events within the Collection.
      *
-     * @param {Event|TimeRangeEvent|IndexedEvent} event The event being added.
+     * @param {Event} event The event being added.
      *
      * @return {Collection} A new, modified, Collection containing the new event.
      */

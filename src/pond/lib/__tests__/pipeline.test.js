@@ -10,19 +10,16 @@
 
 /* eslint-disable */
 
-// I/O
+import Collection from "../collection";
 import CollectionOut from "../io/collectionout";
 import EventOut from "../io/eventout";
-import Stream from "../io/stream";
-import { Pipeline } from "../pipeline";
-
-import Collection from "../collection";
-import Event from "../event";
 import IndexedEvent from "../indexedevent";
+import Stream from "../io/stream";
+import TimeEvent from "../timeevent";
 import TimeRange from "../timerange";
 import TimeRangeEvent from "../timerangeevent";
 import TimeSeries from "../timeseries";
-
+import { Pipeline } from "../pipeline";
 import {
     keep,
     avg,
@@ -34,9 +31,9 @@ import {
 } from "../base/functions";
 
 const EVENT_LIST = [
-    new Event(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
-    new Event(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
-    new Event(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
+    new TimeEvent(new Date("2015-04-22T03:30:00Z"), {in: 1, out: 2}),
+    new TimeEvent(new Date("2015-04-22T03:31:00Z"), {in: 3, out: 4}),
+    new TimeEvent(new Date("2015-04-22T03:32:00Z"), {in: 5, out: 6})
 ];
 
 const TRAFFIC_DATA = {
@@ -339,11 +336,11 @@ describe("Pipeline", () => {
         it("can aggregate events into by windowed avg", () => {
 
             const eventsIn = [];
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {in: 3, out: 1}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {in: 9, out: 2}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {in: 6, out: 6}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {in: 4, out: 7}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {in: 5, out: 9}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 7, 57, 0), {in: 3, out: 1}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 7, 58, 0), {in: 9, out: 2}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 7, 59, 0), {in: 6, out: 6}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 8, 0, 0), {in: 4, out: 7}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 8, 1, 0), {in: 5, out: 9}));
 
             const stream = new Stream();
             const result = {};
@@ -371,11 +368,11 @@ describe("Pipeline", () => {
         it("an collect together events and aggregate", () => {
 
             const eventsIn = [];
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 57, 0), {type: "a", in: 3, out: 1}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 58, 0), {type: "a", in: 9, out: 2}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 7, 59, 0), {type: "b", in: 6, out: 6}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 0, 0), {type: "a", in: 4, out: 7}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 8, 1, 0), {type: "b", in: 5, out: 9}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 7, 57, 0), {type: "a", in: 3, out: 1}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 7, 58, 0), {type: "a", in: 9, out: 2}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 7, 59, 0), {type: "b", in: 6, out: 6}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 8, 0, 0), {type: "a", in: 4, out: 7}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 8, 1, 0), {type: "b", in: 5, out: 9}));
 
             const stream = new Stream();
             const result = {};
@@ -404,14 +401,14 @@ describe("Pipeline", () => {
             expect(result["1h-396200:b"].get("out_avg")).toBe(9);
         });
 
-        it("can aggregate events by windowed avg and convert them to Events", () => {
+        it("can aggregate events by windowed avg and convert them to TimeEvents", () => {
 
             const eventsIn = [];
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 57, 0), {in: 3, out: 1}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 58, 0), {in: 9, out: 2}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 59, 0), {in: 6, out: 6}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 0, 0), {in: 4, out: 7}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 1, 0), {in: 5, out: 9}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 1, 57, 0), {in: 3, out: 1}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 1, 58, 0), {in: 9, out: 2}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 1, 59, 0), {in: 6, out: 6}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 2, 0, 0), {in: 4, out: 7}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 2, 1, 0), {in: 5, out: 9}));
 
             const stream = new Stream();
             const result = {};
@@ -440,11 +437,11 @@ describe("Pipeline", () => {
         it("can aggregate events to get percentiles", () => {
 
             const eventsIn = [];
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 57, 0), {in: 3, out: 1}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 58, 0), {in: 9, out: 2}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 1, 59, 0), {in: 6, out: 6}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 0, 0), {in: 4, out: 7}));
-            eventsIn.push(new Event(Date.UTC(2015, 2, 14, 2, 1, 0), {in: 5, out: 9}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 1, 57, 0), {in: 3, out: 1}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 1, 58, 0), {in: 9, out: 2}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 1, 59, 0), {in: 6, out: 6}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 2, 0, 0), {in: 4, out: 7}));
+            eventsIn.push(new TimeEvent(Date.UTC(2015, 2, 14, 2, 1, 0), {in: 5, out: 9}));
 
             const stream = new Stream();
             const result = {};
@@ -460,7 +457,7 @@ describe("Pipeline", () => {
                     in_75th: {in: percentile(75)},
                     in_high: {in: max()}
                 })
-                .asEvents()
+                .asTimeEvents()
                 .to(EventOut, event => {
                     result[`${+event.timestamp()}`] = event;
                 });
@@ -479,9 +476,9 @@ describe("Pipeline", () => {
     describe("Pipeline event conversion", () => {
 
         const timestamp = new Date(1426316400000);
-        const e = new Event(timestamp, 3);
+        const e = new TimeEvent(timestamp, 3);
 
-        it("should be able to convert from an Event to an TimeRangeEvent, using a duration, in front of the event", (done) => {
+        it("should be able to convert from an TimeEvent to an TimeRangeEvent, using a duration, in front of the event", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
@@ -493,7 +490,7 @@ describe("Pipeline", () => {
             stream.addEvent(e);
         });
 
-        it("should be able to convert from an Event to an TimeRangeEvent, using a duration, surrounding the event", (done) => {
+        it("should be able to convert from an TimeEvent to an TimeRangeEvent, using a duration, surrounding the event", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
@@ -505,7 +502,7 @@ describe("Pipeline", () => {
             stream.addEvent(e);
         });
 
-        it("should be able to convert from an Event to an TimeRangeEvent, using a duration, in behind of the event", (done) => {
+        it("should be able to convert from an TimeEvent to an TimeRangeEvent, using a duration, in behind of the event", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
@@ -517,7 +514,7 @@ describe("Pipeline", () => {
             stream.addEvent(e);
         });
 
-        it("should be able to convert from an Event to an IndexedEvent", (done) => {
+        it("should be able to convert from an TimeEvent to an IndexedEvent", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
@@ -529,11 +526,11 @@ describe("Pipeline", () => {
             stream.addEvent(e);
         });
 
-        it("should be able to convert from an Event to an Event as a noop", (done) => {
+        it("should be able to convert from an TimeEvent to an TimeEvent as a noop", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
-                .asEvents()
+                .asTimeEvents()
                 .to(EventOut, event => {
                     expect(event).toBe(e);
                     done();
@@ -547,11 +544,11 @@ describe("Pipeline", () => {
         const timeRange = new TimeRange([1426316400000, 1426320000000]);
         const timeRangeEvent = new TimeRangeEvent(timeRange, 3);
 
-        it("should be able to convert from an TimeRangeEvent to an Event, using the center of the range", (done) => {
+        it("should be able to convert from an TimeRangeEvent to an TimeEvent, using the center of the range", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
-                .asEvents({alignment: "center"})
+                .asTimeEvents({alignment: "center"})
                 .to(EventOut, event => {
                     expect(`${event}`).toBe(`{"time":1426318200000,"data":{"value":3}}`);
                     done();
@@ -559,11 +556,11 @@ describe("Pipeline", () => {
             stream.addEvent(timeRangeEvent);
         });
 
-        it("should be able to convert from an TimeRangeEvent to an Event, using beginning of the range", (done) => {
+        it("should be able to convert from an TimeRangeEvent to an TimeEvent, using beginning of the range", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
-                .asEvents({alignment: "lag"})
+                .asTimeEvents({alignment: "lag"})
                 .to(EventOut, event => {
                     expect(`${event}`).toBe(`{"time":1426316400000,"data":{"value":3}}`);
                     done();
@@ -571,11 +568,11 @@ describe("Pipeline", () => {
             stream.addEvent(timeRangeEvent);
         });
 
-        it("should be able to convert from an TimeRangeEvent to an Event, using the end of the range", (done) => {
+        it("should be able to convert from an TimeRangeEvent to an TimeEvent, using the end of the range", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
-                .asEvents({alignment: "lead"})
+                .asTimeEvents({alignment: "lead"})
                 .to(EventOut, event => {
                     expect(`${event}`).toBe(`{"time":1426320000000,"data":{"value":3}}`);
                     done();
@@ -600,11 +597,11 @@ describe("Pipeline", () => {
 
         const indexedEvent = new IndexedEvent("1h-396199", 3);
 
-        it("should be able to convert from an IndexedEvent to an Event, using the center of the range", (done) => {
+        it("should be able to convert from an IndexedEvent to an TimeEvent, using the center of the range", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
-                .asEvents({alignment: "center"})
+                .asTimeEvents({alignment: "center"})
                 .to(EventOut, event => {
                     expect(`${event}`).toBe(`{"time":1426318200000,"data":{"value":3}}`);
                     done();
@@ -612,11 +609,11 @@ describe("Pipeline", () => {
             stream.addEvent(indexedEvent);
         });
 
-        it("should be able to convert from an IndexedEvent to an Event, using beginning of the range", (done) => {
+        it("should be able to convert from an IndexedEvent to an TimeEvent, using beginning of the range", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
-                .asEvents({alignment: "lag"})
+                .asTimeEvents({alignment: "lag"})
                 .to(EventOut, event => {
                     expect(`${event}`).toBe(`{"time":1426316400000,"data":{"value":3}}`);
                     done();
@@ -624,11 +621,11 @@ describe("Pipeline", () => {
             stream.addEvent(indexedEvent);
         });
 
-        it("should be able to convert from an IndexedEvent to an Event, using the end of the range", (done) => {
+        it("should be able to convert from an IndexedEvent to an TimeEvent, using the end of the range", (done) => {
             const stream = new Stream();
             Pipeline()
                 .from(stream)
-                .asEvents({alignment: "lead"})
+                .asTimeEvents({alignment: "lead"})
                 .to(EventOut, event => {
                     expect(`${event}`).toBe(`{"time":1426320000000,"data":{"value":3}}`);
                     done();
