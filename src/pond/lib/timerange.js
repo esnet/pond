@@ -38,7 +38,6 @@ var range = new TimeRange([1326309060000, 1329941520000]);
 
  */
 class TimeRange {
-
     /**
      * Builds a new TimeRange which may be of several different formats:
      *   - Another TimeRange (copy constructor)
@@ -53,36 +52,40 @@ class TimeRange {
             this._range = other._range;
         } else if (arg1 instanceof Buffer) {
             const rangeArray = this.schema().fromBuffer(arg1);
-            this._range = new Immutable.List([new Date(rangeArray[0]),
-                                              new Date(rangeArray[1])]);
+            this._range = new Immutable.List([
+                new Date(rangeArray[0]),
+                new Date(rangeArray[1])
+            ]);
         } else if (arg1 instanceof Immutable.List) {
             const rangeList = arg1;
             this._range = rangeList;
         } else if (_.isArray(arg1)) {
             const rangeArray = arg1;
-            this._range = new Immutable.List([new Date(rangeArray[0]),
-                                              new Date(rangeArray[1])]);
+            this._range = new Immutable.List([
+                new Date(rangeArray[0]),
+                new Date(rangeArray[1])
+            ]);
         } else {
             const b = arg1;
             const e = arg2;
             if (_.isDate(b) && _.isDate(e)) {
-                this._range = new Immutable.List([new Date(b.getTime()),
-                                                  new Date(e.getTime())]);
+                this._range = new Immutable.List([
+                    new Date(b.getTime()),
+                    new Date(e.getTime())
+                ]);
             } else if (moment.isMoment(b) && moment.isMoment(e)) {
-                this._range = new Immutable.List([new Date(b.valueOf()),
-                                                  new Date(e.valueOf())]);
+                this._range = new Immutable.List([
+                    new Date(b.valueOf()),
+                    new Date(e.valueOf())
+                ]);
             } else if (_.isNumber(b) && _.isNumber(e)) {
-                this._range = new Immutable.List([new Date(b), new Date(e)]);
+                this._range = new Immutable.List([ new Date(b), new Date(e) ]);
             }
         }
     }
 
     schema() {
-        return avro.parse({
-            name: "TimeRange",
-            type: "array",
-            items: "long"
-        });
+        return avro.parse({ name: "TimeRange", type: "array", items: "long" });
     }
 
     toAvro() {
@@ -102,7 +105,6 @@ class TimeRange {
     //
     // Serialize
     //
-
     /**
      * Returns the TimeRange as JSON, which will be a Javascript array
      * of two ms timestamps.
@@ -110,7 +112,7 @@ class TimeRange {
      * @return {number[]} JSON representation of the TimeRange
      */
     toJSON() {
-        return [this.begin().getTime(), this.end().getTime()];
+        return [ this.begin().getTime(), this.end().getTime() ];
     }
 
     /**
@@ -217,7 +219,7 @@ class TimeRange {
      */
     equals(other) {
         return this.begin().getTime() === other.begin().getTime() &&
-               this.end().getTime() === other.end().getTime();
+            this.end().getTime() === other.end().getTime();
     }
 
     /**
@@ -230,8 +232,7 @@ class TimeRange {
         if (_.isDate(other)) {
             return this.begin() <= other && this.end() >= other;
         } else {
-            return this.begin() <= other.begin() &&
-                   this.end() >= other.end();
+            return this.begin() <= other.begin() && this.end() >= other.end();
         }
         return false;
     }
@@ -244,8 +245,7 @@ class TimeRange {
      * @return {boolean} Result
      */
     within(other) {
-        return this.begin() >= other.begin() &&
-               this.end() <= other.end();
+        return this.begin() >= other.begin() && this.end() <= other.end();
     }
 
     /**
@@ -255,8 +255,10 @@ class TimeRange {
      * @return {boolean} Result
      */
     overlaps(other) {
-        if (this.contains(other.begin()) && !this.contains(other.end()) ||
-            this.contains(other.end()) && !this.contains(other.begin())) {
+        if (
+            this.contains(other.begin()) && !this.contains(other.end()) ||
+                this.contains(other.end()) && !this.contains(other.begin())
+        ) {
             return true;
         } else {
             return false;
@@ -271,7 +273,7 @@ class TimeRange {
      * @return {boolean} Result
      */
     disjoint(other) {
-        return (this.end() < other.begin() || this.begin() > other.end());
+        return this.end() < other.begin() || this.begin() > other.end();
     }
 
     /**
@@ -296,8 +298,7 @@ class TimeRange {
         }
         const b = this.begin() > other.begin() ? this.begin() : other.begin();
         const e = this.end() < other.end() ? this.end() : other.end();
-        return new TimeRange(new Date(b.getTime()),
-                             new Date(e.getTime()));
+        return new TimeRange(new Date(b.getTime()), new Date(e.getTime()));
     }
 
     /**
@@ -317,7 +318,6 @@ class TimeRange {
     //
     // Static TimeRange creators
     //
-
     /**
      * @return {TimeRange} The last day, as a TimeRange
      */
@@ -374,3 +374,4 @@ class TimeRange {
 }
 
 export default TimeRange;
+

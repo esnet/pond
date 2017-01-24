@@ -11,7 +11,6 @@
 import _ from "underscore";
 
 class PipelineOut {
-
     constructor(pipeline) {
         this._id = _.uniqueId("id-");
         this._pipeline = pipeline;
@@ -19,3 +18,4 @@ class PipelineOut {
 }
 
 export default PipelineOut;
+

@@ -40,7 +40,6 @@ import util from "./base/util";
  * an Immutable.Map.
  */
 class IndexedEvent extends Event {
-
     /**
      * The creation of an IndexedEvent is done by combining two parts:
      * the Index and the data.
@@ -67,21 +66,22 @@ class IndexedEvent extends Event {
             try {
                 avroData = this.schema().fromBuffer(arg1);
             } catch (err) {
-                console.error("Unable to convert supplied avro buffer to event");
+                console.error(
+                    "Unable to convert supplied avro buffer to event"
+                );
             }
-            
+
             this._d = new Immutable.Map();
             this._d = this._d.set("index", new Index(avroData.index));
             this._d = this._d.set("data", new Immutable.Map(avroData.data));
             return;
-
         } else if (arg1 instanceof Immutable.Map) {
             this._d = arg1;
             return;
         }
         const index = util.indexFromArgs(arg1, arg3);
         const data = util.dataFromArg(arg2);
-        this._d = new Immutable.Map({index, data});
+        this._d = new Immutable.Map({ index, data });
     }
 
     /**
@@ -96,30 +96,21 @@ class IndexedEvent extends Event {
      * as a simple string
      */
     static keySchema() {
-        return {
-            name: "index",
-            type: "string"
-        };
+        return { name: "index", type: "string" };
     }
 
     /**
      * Express the IndexedEvent as a JSON object
      */
     toJSON() {
-        return {
-            index: this.indexAsString(),
-            data: this.data().toJSON()
-        };
+        return { index: this.indexAsString(), data: this.data().toJSON() };
     }
 
     /**
      * Returns a flat array starting with the index, followed by the values.
      */
     toPoint() {
-        return [
-            this.indexAsString(),
-            ..._.values(this.data().toJSON())
-        ];
+        return [ this.indexAsString(), ..._.values(this.data().toJSON()) ];
     }
 
     /**
@@ -129,7 +120,6 @@ class IndexedEvent extends Event {
     index() {
         return this._d.get("index");
     }
-
 
     /**
      * Returns the Index as a string, same as event.index().toString()
@@ -189,3 +179,4 @@ class IndexedEvent extends Event {
 }
 
 export default IndexedEvent;
+

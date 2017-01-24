@@ -11,7 +11,6 @@
 import PipelineIn from "./pipelinein";
 
 export default class Stream extends PipelineIn {
-
     constructor() {
         super();
 
@@ -30,7 +29,7 @@ export default class Stream extends PipelineIn {
      */
     stop() {
         this._running = false;
-        this.flush();  // emit a flush to let processors cleanly exit.
+        this.flush(); // emit a flush to let processors cleanly exit.
     }
 
     /**
@@ -43,7 +42,8 @@ export default class Stream extends PipelineIn {
         }
     }
 
-    * events() {
+    *events() {
         throw new Error("Iteration across unbounded sources is not supported.");
     }
 }
+

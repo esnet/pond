@@ -17,12 +17,11 @@ function isValid(v) {
 //
 // Functions to process missing values out of a value list
 //
-
-
 const keepMissing = values => values;
 const ignoreMissing = values => values.filter(isValid);
 const zeroMissing = values => values.map(v => isValid(v) ? v : 0);
-const propagateMissing = values => ignoreMissing(values).length === values.length ? values : null;
+const propagateMissing = values =>
+    ignoreMissing(values).length === values.length ? values : null;
 const noneIfEmpty = values => values.length === 0 ? null : values;
 
 export const filter = {
@@ -41,7 +40,7 @@ export const filter = {
  * and 'avg' the value.
  */
 export function keep(clean = filter.ignoreMissing) {
-    return function (values) {
+    return values => {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         let result = first()(cleanValues);
@@ -65,7 +64,7 @@ export function keep(clean = filter.ignoreMissing) {
  *     `zeroMissing` - will replace missing values with a zero
  */
 export function sum(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         return _.reduce(cleanValues, (a, b) => a + b, 0);
@@ -83,10 +82,16 @@ export function sum(clean = filter.ignoreMissing) {
  *     `zeroMissing` - will replace missing values with a zero
  */
 export function avg(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
-        const sum = _.reduce(cleanValues, (a, b) => { return a + b; }, 0);
+        const sum = _.reduce(
+            cleanValues,
+            (a, b) => {
+                return a + b;
+            },
+            0
+        );
         return sum / cleanValues.length;
     };
 }
@@ -102,7 +107,7 @@ export function avg(clean = filter.ignoreMissing) {
  *     `zeroMissing` - will replace missing values with a zero
  */
 export function max(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         const max = _.max(cleanValues);
@@ -123,7 +128,7 @@ export function max(clean = filter.ignoreMissing) {
  *     `zeroMissing` - will replace missing values with a zero
  */
 export function min(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         const min = _.min(cleanValues);
@@ -143,7 +148,7 @@ export function min(clean = filter.ignoreMissing) {
  *     be null if the values contain a missing value
  */
 export function count(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         return cleanValues.length;
@@ -162,7 +167,7 @@ export function count(clean = filter.ignoreMissing) {
  *     it is a missing value or not.
  */
 export function first(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         return cleanValues.length ? cleanValues[0] : undefined;
@@ -181,11 +186,12 @@ export function first(clean = filter.ignoreMissing) {
  *     it is a missing value or not.
  */
 export function last(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
-        return cleanValues.length ?
-            cleanValues[cleanValues.length - 1] : undefined;
+        return cleanValues.length
+            ? cleanValues[cleanValues.length - 1]
+            : undefined;
     };
 }
 
@@ -202,7 +208,7 @@ export function last(clean = filter.ignoreMissing) {
  *     `zeroMissing` - will replace missing values with a zero
  */
 export function difference(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         return _.max(cleanValues) - _.min(cleanValues);
@@ -210,7 +216,7 @@ export function difference(clean = filter.ignoreMissing) {
 }
 
 export function median(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         const sorted = cleanValues.sort();
@@ -225,9 +231,8 @@ export function median(clean = filter.ignoreMissing) {
     };
 }
 
-
 export function stdev(clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         let sums = 0;
@@ -259,7 +264,7 @@ export function stdev(clean = filter.ignoreMissing) {
  * @return {number}            The percentile
  */
 export function percentile(q, interp = "linear", clean = filter.ignoreMissing) {
-    return function (values) {
+    return function(values) {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
 
@@ -303,3 +308,4 @@ export function percentile(q, interp = "linear", clean = filter.ignoreMissing) {
         return v;
     };
 }
+

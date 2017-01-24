@@ -16,7 +16,6 @@ import { isPipeline } from "../pipeline";
  * and uses that to either output a new event
  */
 export default class Mapper extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -43,3 +42,4 @@ export default class Mapper extends Processor {
         }
     }
 }
+

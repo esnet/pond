@@ -21,7 +21,6 @@ import { isPipeline } from "../pipeline";
  * event
  */
 export default class Taker extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -58,17 +57,21 @@ export default class Taker extends Processor {
     addEvent(event) {
         if (this.hasObservers()) {
             const timestamp = event.timestamp();
-            
+
             const windowType = this._windowType;
             let windowKey;
             if (windowType === "fixed") {
-                windowKey = Index.getIndexString(this._windowDuration, timestamp);
+                windowKey = Index.getIndexString(
+                    this._windowDuration,
+                    timestamp
+                );
             } else {
                 windowKey = windowType;
             }
             const groupByKey = this._groupBy(event);
-            const collectionKey = groupByKey ?
-                `${windowKey}::${groupByKey}` : windowKey;
+            const collectionKey = groupByKey
+                ? `${windowKey}::${groupByKey}`
+                : windowKey;
 
             if (!_.has(this._count, collectionKey)) {
                 this._count[collectionKey] = 0;
@@ -82,3 +85,4 @@ export default class Taker extends Processor {
         }
     }
 }
+

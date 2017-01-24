@@ -50,7 +50,6 @@ import {
  * they can be used as a pipeline source.
  */
 class Collection extends Bounded {
-
     /**
      * Construct a new Collection.
      *
@@ -70,9 +69,11 @@ class Collection extends Bounded {
         super();
 
         this._id = _.uniqueId("collection-");
-        this._eventList = null;  // The events in this collection
-        this._type = null;       // The type (class) of the events in this collection
+        this._eventList = null;
+        // The events in this collection
+        this._type = null;
 
+        // The type (class) of the events in this collection
         if (!arg1) {
             this._eventList = new Immutable.List();
         } else if (arg1 instanceof Collection) {
@@ -239,7 +240,7 @@ class Collection extends Bounded {
      * }
      * ```
      */
-    * events() {
+    *events() {
         for (let i = 0; i < this.size(); i++) {
             yield this.at(i);
         }
@@ -295,7 +296,6 @@ class Collection extends Bounded {
     //
     // De-duplicate
     //
-
     /**
      * Removes duplicates from the Collection. If duplicates
      * exist in the collection with the same key but with different
@@ -311,7 +311,6 @@ class Collection extends Bounded {
     //
     // Sorting
     //
-
     /**
      * Sorts the Collection by the timestamp. In the case
      * of TimeRangeEvents and IndexedEvents, it will be sorted
@@ -323,10 +322,12 @@ class Collection extends Bounded {
      * @return {Collection} The sorted Collection
      */
     sortByTime() {
-        return this.setEvents(this._eventList.sortBy(event => {
-            const e = new this._type(event);
-            return e.timestamp().getTime();
-        }));
+        return this.setEvents(
+            this._eventList.sortBy(event => {
+                const e = new this._type(event);
+                return e.timestamp().getTime();
+            })
+        );
     }
 
     /**
@@ -337,16 +338,17 @@ class Collection extends Bounded {
      */
     sort(fieldPath) {
         const fs = util.fieldPathToArray(fieldPath);
-        return this.setEvents(this._eventList.sortBy(event => {
-            const e = new this._type(event);
-            return e.get(fs);
-        }));
+        return this.setEvents(
+            this._eventList.sortBy(event => {
+                const e = new this._type(event);
+                return e.get(fs);
+            })
+        );
     }
 
     //
     // Series range
     //
-
     /**
      * From the range of times, or Indexes within the TimeSeries, return
      * the extents of the TimeSeries as a TimeRange. This is currently implemented
@@ -367,7 +369,6 @@ class Collection extends Bounded {
     //
     // Collection mutation
     //
-
     /**
      * Adds an event to the collection, returns a new Collection. The event added
      * can be an Event, TimeRangeEvent or IndexedEvent, but it must be of the
@@ -458,7 +459,6 @@ class Collection extends Bounded {
     //
     // Aggregate the event list to a single value
     //
-
     /**
      * Returns the number of events in this collection
      *
@@ -653,10 +653,17 @@ class Collection extends Bounded {
             // it will map all the columns.
             fpath = "value";
         } else {
-            throw new Error("Collection.aggregate() takes a string/array fieldPath");
+            throw new Error(
+                "Collection.aggregate() takes a string/array fieldPath"
+            );
         }
 
-        const result = Event.mapReduce(this.eventListAsArray(), fpath, func, options);
+        const result = Event.mapReduce(
+            this.eventListAsArray(),
+            fpath,
+            func,
+            options
+        );
         return result[fpath];
     }
 
@@ -738,8 +745,7 @@ class Collection extends Bounded {
     /**
      * STATIC
      */
-
-     /**
+    /**
       * Static function to compare two collections to each other. If the collections
       * are of the same instance as each other then equals will return true.
       *
@@ -749,11 +755,11 @@ class Collection extends Bounded {
       * @return {bool} result
       */
     static equal(collection1, collection2) {
-        return (collection1._type === collection2._type &&
-                collection1._eventList === collection2._eventList);
+        return collection1._type === collection2._type &&
+            collection1._eventList === collection2._eventList;
     }
 
-     /**
+    /**
       * Static function to compare two collections to each other. If the collections
       * are of the same value as each other then equals will return true.
       *
@@ -763,9 +769,10 @@ class Collection extends Bounded {
       * @return {bool} result
       */
     static is(collection1, collection2) {
-        return (collection1._type === collection2._type &&
-                Immutable.is(collection1._eventList, collection2._eventList));
+        return collection1._type === collection2._type &&
+            Immutable.is(collection1._eventList, collection2._eventList);
     }
 }
 
 export default Collection;
+

@@ -64,14 +64,12 @@ import Taker from "./processors/taker";
  *       this purpose.
  */
 class Runner {
-
     /**
      * Create a new batch runner.
      * @param  {Pipeline} pipeline The pipeline to run
      * @param  {PipelineOut} output   The output driving this runner
      */
     constructor(pipeline, output) {
-
         this._output = output;
         this._pipeline = pipeline;
 
@@ -85,7 +83,6 @@ class Runner {
         // TODO: we do not currently support merging, so this is
         // a linear chain.
         //
-
         let processChain = [];
         if (pipeline.last()) {
             processChain = pipeline.last().chain();
@@ -101,8 +98,7 @@ class Runner {
         // processing pipeline. We run this execution chain later by
         // evoking start().
         //
-
-        this._executionChain = [this._output];
+        this._executionChain = [ this._output ];
         let prev = this._output;
         processChain.forEach(p => {
             if (p instanceof Processor) {
@@ -120,7 +116,6 @@ class Runner {
      *                         to cause any buffers to emit.
      */
     start(force = false) {
-
         // Clear any results ready for the run
         this._pipeline.clearResults();
 
@@ -129,7 +124,6 @@ class Runner {
         // To process the source through the execution chain we add
         // each event from the input to the head.
         //
-
         const head = this._executionChain.pop();
         for (const e of this._input.events()) {
             head.addEvent(e);
@@ -140,7 +134,6 @@ class Runner {
         // data by sending a flush() call down the chain. If force is
         // set to false (the default) this is never called.
         //
-
         if (force) {
             head.flush();
         }
@@ -152,7 +145,6 @@ class Runner {
  * of collection data.
  */
 class Pipeline {
-
     /**
      * Build a new Pipeline.
      *
@@ -197,7 +189,6 @@ class Pipeline {
     //
     // Accessors to the current Pipeline state
     //
-
     in() {
         return this._d.get("in");
     }
@@ -233,12 +224,11 @@ class Pipeline {
     //
     // Results
     //
-
     clearResults() {
         this._resultsDone = false;
         this._results = null;
     }
-    
+
     addResult(arg1, arg2) {
         if (!this._results) {
             if (_.isString(arg1) && arg2) {
@@ -263,7 +253,6 @@ class Pipeline {
     //
     // Pipeline mutations
     //
-
     /**
      * Setting the In for the Pipeline returns a new Pipeline
      *
@@ -284,8 +273,7 @@ class Pipeline {
         }
 
         const d = this._d.withMutations(map => {
-            map.set("in", source)
-               .set("mode", mode);
+            map.set("in", source).set("mode", mode);
         });
 
         return new Pipeline(d);
@@ -327,8 +315,7 @@ class Pipeline {
         last = processor;
 
         const d = this._d.withMutations(map => {
-            map.set("first", first)
-               .set("last", last);
+            map.set("first", first).set("last", last);
         });
         return new Pipeline(d);
     }
@@ -340,7 +327,6 @@ class Pipeline {
     //
     // Pipeline state chained methods
     //
-
     /**
      * Set the window, returning a new Pipeline. A new window will
      * have a type and duration associated with it. Current available
@@ -392,8 +378,7 @@ class Pipeline {
         }
 
         const d = this._d.withMutations(map => {
-            map.set("windowType", type)
-               .set("windowDuration", duration);
+            map.set("windowType", type).set("windowDuration", duration);
         });
 
         return new Pipeline(d);
@@ -447,8 +432,7 @@ class Pipeline {
             grp = e => _.map(groupBy, c => `${e.get(c)}`).join("::");
         } else if (_.isString(groupBy)) {
             // group by a column value
-            grp = e =>
-                `${e.get(groupBy)}`;
+            grp = e => `${e.get(groupBy)}`;
         } else {
             // Reset to no grouping
             grp = () => "";
@@ -505,7 +489,6 @@ class Pipeline {
     //
     // I/O
     //
-
     /**
      * The source to get events from. The source needs to be able to
      * iterate its events using `for..of` loop for bounded Ins, or
@@ -592,9 +575,11 @@ class Pipeline {
         }
 
         if (!this.in()) {
-            throw new Error("Tried to eval pipeline without a In. Missing from() in chain?");
+            throw new Error(
+                "Tried to eval pipeline without a In. Missing from() in chain?"
+            );
         }
-       
+
         const out = new Out(this, options, observer);
 
         if (this.mode() === "batch") {
@@ -630,15 +615,18 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     count(observer, force = true) {
-        return this.to(CollectionOut, (collection, windowKey, groupByKey) => {
-            observer(collection.size(), windowKey, groupByKey);
-        }, force);
+        return this.to(
+            CollectionOut,
+            (collection, windowKey, groupByKey) => {
+                observer(collection.size(), windowKey, groupByKey);
+            },
+            force
+        );
     }
 
     //
     // Processors
     //
-    
     /**
      * Processor to offset a set of fields by a value. Mostly used for
      * testing processor and pipeline operations with a simple operation.
@@ -649,11 +637,7 @@ class Pipeline {
      * @return {Pipeline}               The modified Pipeline
      */
     offsetBy(by, fieldSpec) {
-        const p = new Offset(this, {
-            by,
-            fieldSpec,
-            prev: this._chainPrev()
-        });
+        const p = new Offset(this, { by, fieldSpec, prev: this._chainPrev() });
 
         return this._append(p);
     }
@@ -694,10 +678,7 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     aggregate(fields) {
-        const p = new Aggregator(this, {
-            fields,
-            prev: this._chainPrev()
-        });
+        const p = new Aggregator(this, { fields, prev: this._chainPrev() });
         return this._append(p);
     }
 
@@ -722,7 +703,7 @@ class Pipeline {
             ...options,
             prev: this._chainPrev()
         });
-        
+
         return this._append(p);
     }
 
@@ -734,10 +715,7 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     map(op) {
-        const p = new Mapper(this, {
-            op,
-            prev: this._chainPrev()
-        });
+        const p = new Mapper(this, { op, prev: this._chainPrev() });
 
         return this._append(p);
     }
@@ -750,10 +728,7 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     filter(op) {
-        const p = new Filter(this, {
-            op,
-            prev: this._chainPrev()
-        });
+        const p = new Filter(this, { op, prev: this._chainPrev() });
 
         return this._append(p);
     }
@@ -770,10 +745,7 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     select(fieldSpec) {
-        const p = new Selector(this, {
-            fieldSpec,
-            prev: this._chainPrev()
-        });
+        const p = new Selector(this, { fieldSpec, prev: this._chainPrev() });
 
         return this._append(p);
     }
@@ -835,14 +807,25 @@ class Pipeline {
      *
      * @return {Pipeline}               The Pipeline
      */
-    fill({fieldSpec = null, method = "linear", limit = null}) {
+    fill({ fieldSpec = null, method = "linear", limit = null }) {
         const prev = this._chainPrev();
-        return this._append(new Filler(this, {fieldSpec, method, limit, prev}));
+        return this._append(new Filler(this, {
+            fieldSpec,
+            method,
+            limit,
+            prev
+        }));
     }
 
     align(fieldSpec, window, method, limit) {
         const prev = this._chainPrev();
-        return this._append(new Aligner(this, {fieldSpec, window, method, limit, prev}));
+        return this._append(new Aligner(this, {
+            fieldSpec,
+            window,
+            method,
+            limit,
+            prev
+        }));
     }
 
     rate(fieldSpec, allowNegative = true) {
@@ -863,10 +846,7 @@ class Pipeline {
      * @return {Pipeline} The Pipeline
      */
     take(limit) {
-        const p = new Taker(this, {
-            limit,
-            prev: this._chainPrev()
-        });
+        const p = new Taker(this, { limit, prev: this._chainPrev() });
 
         return this._append(p);
     }
@@ -896,7 +876,7 @@ class Pipeline {
             ...options,
             prev: this._chainPrev()
         });
-        
+
         return this._append(p);
     }
 
@@ -932,3 +912,4 @@ function is(p) {
 }
 
 export { pipeline as Pipeline, is as isPipeline };
+

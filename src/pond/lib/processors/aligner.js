@@ -25,7 +25,6 @@ import util from "../base/util";
  * A processor to align the data into bins of regular time period.
  */
 export default class Aligner extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -47,7 +46,6 @@ export default class Aligner extends Processor {
             this._window = window;
             this._method = method;
             this._limit = limit;
-
         } else {
             throw new Error("Unknown arg to Aligner constructor", arg1);
         }
@@ -55,24 +53,24 @@ export default class Aligner extends Processor {
         //
         // Internal members
         //
-
         this._previous = null;
 
         // work out field specs
         if (_.isString(this._fieldSpec)) {
-            this._fieldSpec = [this._fieldSpec];
+            this._fieldSpec = [ this._fieldSpec ];
         }
 
         // check input of method
-        if (!_.contains(["linear", "hold"], this._method)) {
-            throw new Error(`Unknown method '${this._method}' passed to Aligner`);
+        if (!_.contains([ "linear", "hold" ], this._method)) {
+            throw new Error(
+                `Unknown method '${this._method}' passed to Aligner`
+            );
         }
 
         // check limit
         if (this._limit && !Number.isInteger(this._limit)) {
             throw new Error("Limit passed to Aligner is not an integer");
         }
-
     }
 
     clone() {
@@ -93,12 +91,19 @@ export default class Aligner extends Processor {
      * they are in the same window, return an empty list.
      */
     getBoundaries(event) {
-        const prevIndex =
-            Index.getIndexString(this._window, this._previous.timestamp());
-        const currentIndex =
-            Index.getIndexString(this._window, event.timestamp());
+        const prevIndex = Index.getIndexString(
+            this._window,
+            this._previous.timestamp()
+        );
+        const currentIndex = Index.getIndexString(
+            this._window,
+            event.timestamp()
+        );
         if (prevIndex !== currentIndex) {
-            const range = new TimeRange(this._previous.timestamp(), event.timestamp());
+            const range = new TimeRange(
+                this._previous.timestamp(),
+                event.timestamp()
+            );
             return Index.getIndexStringList(this._window, range).slice(1);
         } else {
             return [];
@@ -137,7 +142,7 @@ export default class Aligner extends Processor {
         return new TimeEvent(t, d);
     }
 
-     /**
+    /**
       * Generate a linear differential between two counter values that lie
       * on either side of a window boundary.
       */
@@ -158,13 +163,14 @@ export default class Aligner extends Processor {
             // Generate the delta beteen the values and
             // bulletproof against non-numeric or bad paths
             //
-
             const previousVal = this._previous.get(fieldPath);
             const currentVal = event.get(fieldPath);
 
             let interpolatedVal = null;
             if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
-                console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
+                console.warn(
+                    `Path ${fieldPath} contains a non-numeric value or does not exist`
+                );
             } else {
                 interpolatedVal = previousVal + f * (currentVal - previousVal);
             }
@@ -178,9 +184,10 @@ export default class Aligner extends Processor {
      * Perform the fill operation on the event and emit.
      */
     addEvent(event) {
-        if (event instanceof TimeRangeEvent ||
-            event instanceof IndexedEvent) {
-            throw new Error("TimeRangeEvent and IndexedEvent series can not be aligned.");
+        if (event instanceof TimeRangeEvent || event instanceof IndexedEvent) {
+            throw new Error(
+                "TimeRangeEvent and IndexedEvent series can not be aligned."
+            );
         }
 
         if (this.hasObservers()) {
@@ -198,7 +205,6 @@ export default class Aligner extends Processor {
             // If the returned list is not empty, interpolate an event
             // on each of the boundaries and emit them
             //
-
             const count = boundaries.length;
             boundaries.forEach(boundary => {
                 let outputEvent;
@@ -217,9 +223,8 @@ export default class Aligner extends Processor {
             //
             // The current event now becomes the previous event
             //
-            
             this._previous = event;
-
         }
     }
 }
+
