@@ -20,7 +20,7 @@ of collection data.
     * [.count(observer, force)](#Pipeline+count) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.offsetBy(by, fieldSpec)](#Pipeline+offsetBy) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.aggregate(fields)](#Pipeline+aggregate) ⇒ <code>[Pipeline](#Pipeline)</code>
-    * [.asEvents(options)](#Pipeline+asEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
+    * [.asTimeEvents(options)](#Pipeline+asTimeEvents) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.map(op)](#Pipeline+map) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.filter(op)](#Pipeline+filter) ⇒ <code>[Pipeline](#Pipeline)</code>
     * [.select(fieldSpec)](#Pipeline+select) ⇒ <code>[Pipeline](#Pipeline)</code>
@@ -292,24 +292,24 @@ const p = Pipeline()
      in_avg: {in: avg},
      out_avg: {in: avg}
   })
-  .asEvents()
+  .asTimeEvents()
   .to(EventOut, {}, event => {
      result[`${event.index()}`] = event; // Result
   });
 ```
-<a name="Pipeline+asEvents"></a>
+<a name="Pipeline+asTimeEvents"></a>
 
-### pipeline.asEvents(options) ⇒ <code>[Pipeline](#Pipeline)</code>
+### pipeline.asTimeEvents(options) ⇒ <code>[Pipeline](#Pipeline)</code>
 Converts incoming TimeRangeEvents or IndexedEvents to
-Events. This is helpful since some processors will
-emit TimeRangeEvents or IndexedEvents, which may be
-unsuitable for some applications.
+TimeEvents. This is helpful since some processors,
+especially aggregators, will emit TimeRangeEvents or
+IndexedEvents, which may be unsuitable for some applications.
 
 **Kind**: instance method of <code>[Pipeline](#Pipeline)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline  
 **Params**
 
-- options <code>object</code> - To convert to an Event you need
+- options <code>object</code> - To convert to an TimeEvent you need
 to convert a time range to a single time. There are three options:
  1. use the beginning time (options = {alignment: "lag"})
  2. use the center time (options = {alignment: "center"})

@@ -29,21 +29,20 @@ an Immutable.Map.
 
 * [IndexedEvent](#IndexedEvent)
     * [new IndexedEvent()](#new_IndexedEvent_new)
-    * [.type()](#IndexedEvent+type)
-    * [.key()](#IndexedEvent+key)
-    * [.toPoint()](#IndexedEvent+toPoint)
-    * [.index()](#IndexedEvent+index) ⇒ <code>[Index](#Index)</code>
-    * [.setData()](#IndexedEvent+setData)
-    * [.data()](#IndexedEvent+data) ⇒ <code>Immutable.Map</code>
-    * [.indexAsString()](#IndexedEvent+indexAsString) ⇒ <code>string</code>
-    * [.timerangeAsUTCString()](#IndexedEvent+timerangeAsUTCString) ⇒ <code>string</code>
-    * [.timerangeAsLocalString()](#IndexedEvent+timerangeAsLocalString) ⇒ <code>string</code>
-    * [.timerange()](#IndexedEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
-    * [.begin()](#IndexedEvent+begin) ⇒ <code>Data</code>
-    * [.end()](#IndexedEvent+end) ⇒ <code>Data</code>
-    * [.timestamp()](#IndexedEvent+timestamp) ⇒ <code>Data</code>
-    * [.get()](#IndexedEvent+get)
-    * [.collapse()](#IndexedEvent+collapse)
+    * _instance_
+        * [.key()](#IndexedEvent+key)
+        * [.toJSON()](#IndexedEvent+toJSON)
+        * [.toPoint()](#IndexedEvent+toPoint)
+        * [.index()](#IndexedEvent+index) ⇒ <code>[Index](#Index)</code>
+        * [.indexAsString()](#IndexedEvent+indexAsString) ⇒ <code>string</code>
+        * [.timerangeAsUTCString()](#IndexedEvent+timerangeAsUTCString) ⇒ <code>string</code>
+        * [.timerangeAsLocalString()](#IndexedEvent+timerangeAsLocalString) ⇒ <code>string</code>
+        * [.timerange()](#IndexedEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
+        * [.begin()](#IndexedEvent+begin) ⇒ <code>Data</code>
+        * [.end()](#IndexedEvent+end) ⇒ <code>Data</code>
+        * [.timestamp()](#IndexedEvent+timestamp) ⇒ <code>Data</code>
+    * _static_
+        * [.keySchema()](#IndexedEvent.keySchema)
 
 <a name="new_IndexedEvent_new"></a>
 
@@ -61,22 +60,22 @@ To specify the data you can supply either:
     - a simple type such as an integer. In the case of the simple type
       this is a shorthand for supplying {"value": v}.
 
-<a name="IndexedEvent+type"></a>
-
-### indexedEvent.type()
-Returns the type of this class instance
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
 <a name="IndexedEvent+key"></a>
 
 ### indexedEvent.key()
 Returns the timestamp (as ms since the epoch)
 
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
+<a name="IndexedEvent+toJSON"></a>
+
+### indexedEvent.toJSON()
+Express the IndexedEvent as a JSON object
+
+**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
 <a name="IndexedEvent+toPoint"></a>
 
 ### indexedEvent.toPoint()
-Returns a flat array starting with the timestamp, followed by the values.
+Returns a flat array starting with the index, followed by the values.
 
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
 <a name="IndexedEvent+index"></a>
@@ -86,19 +85,6 @@ Returns the Index associated with the data in this Event
 
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
 **Returns**: <code>[Index](#Index)</code> - The Index  
-<a name="IndexedEvent+setData"></a>
-
-### indexedEvent.setData()
-Sets the data of the event and returns a new IndexedEvent.
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-<a name="IndexedEvent+data"></a>
-
-### indexedEvent.data() ⇒ <code>Immutable.Map</code>
-Access the event data
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-**Returns**: <code>Immutable.Map</code> - Data for the Event  
 <a name="IndexedEvent+indexAsString"></a>
 
 ### indexedEvent.indexAsString() ⇒ <code>string</code>
@@ -148,20 +134,10 @@ Alias for the begin() time.
 
 **Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
 **Returns**: <code>Data</code> - Time representing this Event  
-<a name="IndexedEvent+get"></a>
+<a name="IndexedEvent.keySchema"></a>
 
-### indexedEvent.get()
-Get specific data out of the Event. The data will be converted
-to a js object. You can use a fieldSpec to address deep data.
-A fieldSpec could be "a.b"
+### IndexedEvent.keySchema()
+For Avro serialization, this defines the event's key (the Index)
+as a simple string
 
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
-<a name="IndexedEvent+collapse"></a>
-
-### indexedEvent.collapse()
-Collapses this event's columns, represented by the fieldSpecList
-into a single column. The collapsing itself is done with the reducer
-function. Optionally the collapsed column could be appended to the
-existing columns, or replace them (the default).
-
-**Kind**: instance method of <code>[IndexedEvent](#IndexedEvent)</code>  
+**Kind**: static method of <code>[IndexedEvent](#IndexedEvent)</code>  
