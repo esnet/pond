@@ -14,24 +14,20 @@ import Highlighter from "../components/Highlighter";
 import text from "raw!../docs/Index.md";
 
 export default React.createClass({
-
-    mixins: [Highlighter],
-
+    mixins: [ Highlighter ],
     getInitialState() {
-        return {
-            markdown: text
-        };
+        return { markdown: text };
     },
-
     render() {
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
-                        <Markdown source={this.state.markdown}/>
+                        <Markdown source={this.state.markdown} />
                     </div>
                 </div>
             </div>
         );
     }
 });
+

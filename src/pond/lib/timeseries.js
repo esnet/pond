@@ -24,12 +24,12 @@ function buildMetaData(meta) {
 
     // Name
     d.name = meta.name ? meta.name : "";
-    
+
     // Index
     if (meta.index) {
         if (_.isString(meta.index)) {
             d.index = new Index(meta.index);
-        } else if (meta.index instanceof(Index)) {
+        } else if (meta.index instanceof Index) {
             d.index = meta.index;
         }
     }
@@ -139,37 +139,36 @@ series.avg("NASA_north", d => d.in);  // 250
 ```
  */
 class TimeSeries {
-
     constructor(arg) {
-        this._collection = null;  // Collection
-        this._data = null;        // Meta data
+        this._collection = null;
+        // Collection
+        this._data = null;
 
+        // Meta data
         if (arg instanceof TimeSeries) {
-
             //
             // Copy another TimeSeries
             //
-
             const other = arg;
             this._data = other._data;
             this._collection = other._collection;
-
         } else if (arg instanceof Buffer) {
-
             //
             // Turns the buffer into a JSON object using the AVRO schema
             //
-
             let obj;
             try {
                 obj = this.schema().fromBuffer(arg);
             } catch (err) {
-                console.error(`Unable to construct ${this.constructor.name} from Avro Buffer: ${err}`);
+                console.error(
+                    `Unable to construct ${this.constructor.name} from Avro Buffer: ${err}`
+                );
             }
 
-            const { columns, points, utc = true, ...meta2 } = obj; //eslint-disable-line
+            const { columns, points, utc = true, ...meta2 } = obj;
+            //eslint-disable-line
             const [ eventKey ] = columns;
-            const events = points.map((point) => {
+            const events = points.map(point => {
                 const t = point[columns[0]];
                 const d = point.data;
                 const options = utc;
@@ -181,9 +180,7 @@ class TimeSeries {
             this._data = buildMetaData(meta2);
 
             return;
-
         } else if (_.isObject(arg)) {
-
             //
             // TimeSeries(object data) where data may be:
             //    { "events": [event-1, event-2, ..., event-n]}
@@ -195,39 +192,33 @@ class TimeSeries {
             //         ...
             //      ]
             //    }
-
             const obj = arg;
 
             if (_.has(obj, "events")) {
-
                 //
                 // Initialized from an event list
                 //
-
-                const { events, ...meta1 } = obj; //eslint-disable-line
+                const { events, ...meta1 } = obj;
+                //eslint-disable-line
                 this._collection = new Collection(events);
                 this._data = buildMetaData(meta1);
-
             } else if (_.has(obj, "collection")) {
-
                 //
                 // Initialized from a Collection
                 //
-
-                const { collection, ...meta3 } = obj; //eslint-disable-line
+                const { collection, ...meta3 } = obj;
+                //eslint-disable-line
                 this._collection = collection;
                 this._data = buildMetaData(meta3);
-
             } else if (_.has(obj, "columns") && _.has(obj, "points")) {
-
                 //
                 // Initialized from the wire format
                 //
-
-                const { columns, points, utc = true, ...meta2 } = obj; //eslint-disable-line
+                const { columns, points, utc = true, ...meta2 } = obj;
+                //eslint-disable-line
                 const [ eventKey, ...eventFields ] = columns;
                 const events = points.map(point => {
-                    const [t, ...eventValues] = point;
+                    const [ t, ...eventValues ] = point;
                     const d = _.object(eventFields, eventValues);
                     const options = utc;
                     const Event = this.constructor.event(eventKey);
@@ -239,7 +230,9 @@ class TimeSeries {
             }
 
             if (!this._collection.isChronological()) {
-                throw new Error("TimeSeries was passed non-chronological events");
+                throw new Error(
+                    "TimeSeries was passed non-chronological events"
+                );
             }
         }
     }
@@ -254,9 +247,7 @@ class TimeSeries {
      * ```
      */
     metaSchema() {
-        return [
-            {name: "name", type: "string"}
-        ];
+        return [ { name: "name", type: "string" } ];
     }
 
     keySchema(eventKey) {
@@ -273,12 +264,9 @@ class TimeSeries {
         const s = {
             type: "record",
             name: "TimeSeries",
-            fields : [
+            fields: [
                 ...this.metaSchema(),
-                {
-                    name: "columns",
-                    type: {type: "array", items: "string" }
-                },
+                { name: "columns", type: { type: "array", items: "string" } },
                 {
                     name: "points",
                     type: {
@@ -286,9 +274,12 @@ class TimeSeries {
                         items: {
                             type: "record",
                             name: "Event",
-                            fields : [
+                            fields: [
                                 this.keySchema(eventKey),
-                                {name: "data", type: this.dataSchema(eventKey)}
+                                {
+                                    name: "data",
+                                    type: this.dataSchema(eventKey)
+                                }
                             ]
                         }
                     }
@@ -310,24 +301,23 @@ class TimeSeries {
             columns.forEach((c, i) => {
                 data[c] = point[i + 1];
             });
-            return {
-                [eventKey]: point[0],
-                data
-            };
+            return { [eventKey]: point[0], data };
         });
         d.points = points;
 
         try {
             return this.schema(eventKey).toBuffer(d);
         } catch (err) {
-            console.error("Unable to convert TimeSeries to avro based on schema", err);
+            console.error(
+                "Unable to convert TimeSeries to avro based on schema",
+                err
+            );
         }
     }
 
     //
     // Serialize
     //
-
     /**
      * Turn the TimeSeries into regular javascript objects
      */
@@ -339,11 +329,11 @@ class TimeSeries {
 
         let columns;
         if (e instanceof TimeEvent) {
-            columns = ["time", ...this.columns()];
+            columns = [ "time", ...this.columns() ];
         } else if (e instanceof TimeRangeEvent) {
-            columns = ["timerange", ...this.columns()];
+            columns = [ "timerange", ...this.columns() ];
         } else if (e instanceof IndexedEvent) {
-            columns = ["index", ...this.columns()];
+            columns = [ "index", ...this.columns() ];
         }
 
         const points = [];
@@ -351,10 +341,7 @@ class TimeSeries {
             points.push(e.toPoint());
         }
 
-        return _.extend(this._data.toJSON(), {
-            columns,
-            points
-        });
+        return _.extend(this._data.toJSON(), { columns, points });
     }
 
     /**
@@ -447,7 +434,7 @@ class TimeSeries {
      * }
      * ```
      */
-    * events() {
+    *events() {
         for (let i = 0; i < this.size(); i++) {
             yield this.at(i);
         }
@@ -560,17 +547,15 @@ class TimeSeries {
      * }
      * ```
      */
-    * events() {
+    *events() {
         for (let i = 0; i < this.size(); i++) {
             yield this.at(i);
         }
     }
 
-
     //
     // Access meta data about the series
     //
-
     /**
      * Fetch the timeseries name
      *
@@ -639,7 +624,9 @@ class TimeSeries {
         const c = {};
         for (const e of this._collection.events()) {
             const d = e.toJSON().data;
-            _.each(d, (val, key) => {c[key] = true;});
+            _.each(d, (val, key) => {
+                c[key] = true;
+            });
         }
         return _.keys(c);
     }
@@ -685,7 +672,6 @@ class TimeSeries {
     //
     // Access the series itself
     //
-
     /**
      * Returns the number of events in this TimeSeries
      *
@@ -890,8 +876,7 @@ class TimeSeries {
      * @return {Pipeline} The Pipeline.
      */
     pipeline() {
-        return new Pipeline()
-            .from(this._collection);
+        return new Pipeline().from(this._collection);
     }
 
     /**
@@ -903,9 +888,7 @@ class TimeSeries {
      * @return {TimeSeries}               A TimeSeries containing the remapped events
      */
     map(op) {
-        const collections = this.pipeline()
-            .map(op)
-            .toKeyedCollections();
+        const collections = this.pipeline().map(op).toKeyedCollections();
         return this.setCollection(collections["all"], true);
     }
 
@@ -929,7 +912,8 @@ class TimeSeries {
      */
     select(options) {
         const { fieldSpec } = options;
-        const collections = this.pipeline()
+        const collections = this
+            .pipeline()
             .select(fieldSpec)
             .toKeyedCollections();
         return this.setCollection(collections["all"], true);
@@ -965,7 +949,8 @@ class TimeSeries {
      */
     collapse(options) {
         const { fieldSpecList, name, reducer, append } = options;
-        const collections = this.pipeline()
+        const collections = this
+            .pipeline()
             .collapse(fieldSpecList, name, reducer, append)
             .toKeyedCollections();
         return this.setCollection(collections["all"], true);
@@ -995,11 +980,9 @@ class TimeSeries {
      */
     renameColumns(options) {
         const { renameMap } = options;
-        return this.map((event) => {
+        return this.map(event => {
             const eventType = event.type();
-            const d = event.data().mapKeys(key =>
-                renameMap[key] || key
-            );
+            const d = event.data().mapKeys(key => renameMap[key] || key);
             return new eventType(event.key(), d);
         });
     }
@@ -1035,26 +1018,25 @@ class TimeSeries {
      * @return {TimeSeries}                         The resulting filled TimeSeries
      */
     fill(options) {
-        const {
-            fieldSpec = null,
-            method = "zero",
-            limit = null
-        } = options;
+        const { fieldSpec = null, method = "zero", limit = null } = options;
 
         let pipeline = this.pipeline();
 
         if (method === "zero" || method === "pad") {
-            pipeline = pipeline.fill({fieldSpec, method, limit});
+            pipeline = pipeline.fill({ fieldSpec, method, limit });
         } else if (method === "linear" && _.isArray(fieldSpec)) {
             fieldSpec.forEach(fieldPath => {
-                pipeline = pipeline.fill({fieldSpec: fieldPath, method, limit});
+                pipeline = pipeline.fill({
+                    fieldSpec: fieldPath,
+                    method,
+                    limit
+                });
             });
         } else {
             throw new Error("Invalid fill method:", method);
         }
 
-        const collections = pipeline
-            .toKeyedCollections();
+        const collections = pipeline.toKeyedCollections();
 
         return this.setCollection(collections["all"], true);
     }
@@ -1107,10 +1089,11 @@ class TimeSeries {
         const {
             fieldSpec = "value",
             period = "5m",
-            method="linear",
+            method = "linear",
             limit = null
         } = options;
-        const collection = this.pipeline()
+        const collection = this
+            .pipeline()
             .align(fieldSpec, period, method, limit)
             .toKeyedCollections();
 
@@ -1134,8 +1117,9 @@ class TimeSeries {
      * @return {TimeSeries}                         The resulting `TimeSeries` containing calculated rates.
      */
     rate(options = {}) {
-        const {fieldSpec = "value", allowNegative = true} = options;
-        const collection = this.pipeline()
+        const { fieldSpec = "value", allowNegative = true } = options;
+        const collection = this
+            .pipeline()
             .rate(fieldSpec, allowNegative)
             .toKeyedCollections();
 
@@ -1176,22 +1160,28 @@ class TimeSeries {
      * @return {TimeSeries}                         The resulting rolled up `TimeSeries`
      */
     fixedWindowRollup(options) {
-        const {windowSize, aggregation, toTimeEvents = false} = options;
+        const { windowSize, aggregation, toTimeEvents = false } = options;
         if (!windowSize) {
-            throw new Error("windowSize must be supplied, for example '5m' for five minute rollups");
+            throw new Error(
+                "windowSize must be supplied, for example '5m' for five minute rollups"
+            );
         }
 
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
+            throw new Error(
+                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+            );
         }
 
-        const aggregatorPipeline = this.pipeline()
+        const aggregatorPipeline = this
+            .pipeline()
             .windowBy(windowSize)
             .emitOn("discard")
             .aggregate(aggregation);
 
-        const eventTypePipeline = toTimeEvents ?
-            aggregatorPipeline.asTimeEvents() : aggregatorPipeline;
+        const eventTypePipeline = toTimeEvents
+            ? aggregatorPipeline.asTimeEvents()
+            : aggregatorPipeline;
 
         const collections = eventTypePipeline
             .clearWindow()
@@ -1218,10 +1208,12 @@ class TimeSeries {
      * @return {TimeSeries}     The resulting rolled up TimeSeries
      */
     hourlyRollup(options) {
-        const {aggregation, toTimeEvents = false} = options;
+        const { aggregation, toTimeEvents = false } = options;
 
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
+            throw new Error(
+                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+            );
         }
 
         return this.fixedWindowRollup("1h", aggregation, toTimeEvents);
@@ -1245,10 +1237,12 @@ class TimeSeries {
      * @return {TimeSeries}     The resulting rolled up TimeSeries
      */
     dailyRollup(options) {
-        const {aggregation, toTimeEvents = false} = options;
+        const { aggregation, toTimeEvents = false } = options;
 
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
+            throw new Error(
+                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+            );
         }
 
         return this._rollup("daily", aggregation, toTimeEvents);
@@ -1272,10 +1266,12 @@ class TimeSeries {
      * @return {TimeSeries}                         The resulting rolled up `TimeSeries`
      */
     monthlyRollup(options) {
-        const {aggregation, toTimeEvents = false} = options;
+        const { aggregation, toTimeEvents = false } = options;
 
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
+            throw new Error(
+                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+            );
         }
 
         return this._rollup("monthly", aggregation, toTimeEvents);
@@ -1300,10 +1296,12 @@ class TimeSeries {
      * @return {TimeSeries}                         The resulting rolled up `TimeSeries`
      */
     yearlyRollup(options) {
-        const {aggregation, toTimeEvents = false} = options;
+        const { aggregation, toTimeEvents = false } = options;
 
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
+            throw new Error(
+                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+            );
         }
 
         return this._rollup("yearly", aggregation, toTimeEvents);
@@ -1316,13 +1314,15 @@ class TimeSeries {
      * an aggregator Pipeline.
      */
     _rollup(type, aggregation, toTimeEvents = false) {
-        const aggregatorPipeline = this.pipeline()
+        const aggregatorPipeline = this
+            .pipeline()
             .windowBy(type)
             .emitOn("discard")
             .aggregate(aggregation);
 
-        const eventTypePipeline = toTimeEvents ?
-            aggregatorPipeline.asTimeEvents() : aggregatorPipeline;
+        const eventTypePipeline = toTimeEvents
+            ? aggregatorPipeline.asTimeEvents()
+            : aggregatorPipeline;
 
         const collections = eventTypePipeline
             .clearWindow()
@@ -1348,8 +1348,9 @@ class TimeSeries {
      *
      * @return {map}    The result is a mapping from window index to a Collection.
      */
-    collectByFixedWindow({windowSize}) {
-        return this.pipeline()
+    collectByFixedWindow({ windowSize }) {
+        return this
+            .pipeline()
             .windowBy(windowSize)
             .emitOn("discard")
             .toKeyedCollections();
@@ -1358,8 +1359,7 @@ class TimeSeries {
     /*
      * STATIC
      */
-
-     /**
+    /**
       * Defines the event type contained in this TimeSeries. The default here
       * is to use the supplied type (time, timerange or index) to build either
       * a TimeEvent, TimeRangeEvent or IndexedEvent. However, you can also
@@ -1381,7 +1381,7 @@ class TimeSeries {
         }
     }
 
-     /**
+    /**
       * Static function to compare two TimeSeries to each other. If the TimeSeries
       * are of the same instance as each other then equals will return true.
       * @param  {TimeSeries} series1
@@ -1389,11 +1389,11 @@ class TimeSeries {
       * @return {bool} result
       */
     static equal(series1, series2) {
-        return (series1._data === series2._data &&
-                series1._collection === series2._collection);
+        return series1._data === series2._data &&
+            series1._collection === series2._collection;
     }
 
-     /**
+    /**
       * Static function to compare two TimeSeries to each other. If the TimeSeries
       * are of the same value as each other then equals will return true.
       * @param  {TimeSeries} series1
@@ -1401,40 +1401,40 @@ class TimeSeries {
       * @return {bool} result
       */
     static is(series1, series2) {
-        return (Immutable.is(series1._data, series2._data) &&
-                Collection.is(series1._collection, series2._collection));
+        return Immutable.is(series1._data, series2._data) &&
+            Collection.is(series1._collection, series2._collection);
     }
 
     /**
-     * Reduces a list of TimeSeries objects using an event reducer function. This works
+     * Reduces a list of TimeSeries objects using a reducer function. This works
      * by taking each event in each TimeSeries and collecting them together
      * based on timestamp. All events for a given time are then merged together
-     * using the reducer function to produce a new Event. Those Events are then
+     * using the reducer function to produce a new Event. The reducer function is
+     * applied to all columns in the fieldSpec. Those new Events are then
      * collected together to form a new TimeSeries.
      *
-     * This is a fairly low level function in that you need to provide an
-     * Event reducer (rather than a regular value reducer like `avg()` or `sum()`).
-     * The two existing examples of event reducers are `Event.sum` and `Event.avg`, however
-     * you can use those directly by evoking `timeseriesListSum()` and
-     * `timeseriesListAvg()` directly. Therefore if you have need for this function
-     * you will need to create you own event reducer function. This is fairly simple,
-     * since the implementation of `Event.sum` looks like this:
+     * @example
+     *
+     * For example you might have three TimeSeries with columns "in" and "out" which
+     * corresponds to two measurements per timestamp. You could use this function to
+     * obtain a new TimeSeries which was the sum of the the three measurements using
+     * the `sum()` reducer function and an ["in", "out"] fieldSpec.
      *
      * ```
-     *     static sum(events, fieldSpec) {
-     *         return Event.combine(events, fieldSpec, sum());
-     *     }
+     * const totalSeries = TimeSeries.timeSeriesListReduce({
+     *     name: "totals",
+     *     seriesList: [inTraffic, outTraffic],
+     *     reducer: sum(),
+     *     fieldSpec: [ "in", "out" ]
+     * });
      * ```
-     *
-     * Where `sum()` is one of the simple reducers. Swapping this out with you own
-     * function should be all this is needed.
      *
      * @param                  options                An object containing options. Additional key
      *                                                values in the options will be added as meta data
      *                                                to the resulting TimeSeries.
      * @param {array}          options.seriesList     A list of `TimeSeries` (required)
-     * @param {function}       options.reducer        The event reducer function (required)
-     * @param {array | string} options.fieldSpec      Column or columns to sum. If you
+     * @param {function}       options.reducer        The reducer function e.g. `max()` (required)
+     * @param {array | string} options.fieldSpec      Column or columns to reduce. If you
      *                                                need to retrieve multiple deep
      *                                                nested values that ['can.be', 'done.with',
      *                                                'this.notation']. A single deep value with a
@@ -1443,39 +1443,13 @@ class TimeSeries {
      * @return {TimeSeries}                           The reduced TimeSeries
      */
     static timeSeriesListReduce(options) {
-        const {seriesList, fieldSpec, reducer, ...data} = options;
-
-        if (!seriesList || !_.isArray(seriesList)) {
-            throw new Error("A list of TimeSeries must be supplied to reduce");
-        }
-
-        if (!reducer || !_.isFunction(reducer)) {
-            throw new Error("reducer function must be supplied, for example avg()");
-        }
-
-        // for each series, make a map from timestamp to the
-        // list of events with that timestamp
-        const eventList = [];
-        seriesList.forEach(series => {
-            for (const event of series.events()) {
-                eventList.push(event);
-            }
+        const { fieldSpec, reducer, ...data } = options;
+        const combiner = Event.combiner(fieldSpec, reducer);
+        return TimeSeries.timeSeriesListEventReduce({
+            fieldSpec,
+            reducer: combiner,
+            ...data
         });
-
-        const events = reducer(eventList, fieldSpec);
-
-        // Make a collection. If the events are out of order, sort them.
-        // It's always possible that events are out of order here, depending
-        // on the start times of the series, along with it the series
-        // have missing data, so I think we don't have a choice here.
-        let collection = new Collection(events);
-        if (!collection.isChronological()) {
-            collection = collection.sortByTime();
-        }
-
-        const timeseries = new TimeSeries({...data, collection});
-
-        return timeseries;
     }
 
     /**
@@ -1483,8 +1457,12 @@ class TimeSeries {
      * Timeseries.
      *
      * Merging will produce a new Event only when events are conflict free, so
-     * it is useful to combine multiple TimeSeries which have different time ranges
-     * as well as combine TimeSeries which have different columns.
+     * it is useful in the following cases:
+     *  * to combine multiple TimeSeries which have different time ranges, essentially
+     *  concatenating them together
+     *  * combine TimeSeries which have different columns, for example inTraffic has
+     *  a column "in" and outTraffic has a column "out" and you want to produce a merged
+     *  trafficSeries with columns "in" and "out".
      *
      * @example
      * ```
@@ -1509,73 +1487,56 @@ class TimeSeries {
      * @return {TimeSeries}                           The merged TimeSeries
      */
     static timeSeriesListMerge(options) {
-        const reducer = Event.merge;
-        return TimeSeries.timeSeriesListReduce({...options, reducer});
+        const { fieldSpec, ...data } = options;
+        const merger = Event.merger(fieldSpec);
+        return TimeSeries.timeSeriesListEventReduce({
+            fieldSpec,
+            reducer: merger,
+            ...data
+        });
     }
 
     /**
-     * Takes a list of TimeSeries and sums them together to form a new
-     * Timeseries.
-     *
-     * @example
-     *
-     * ```
-     * const ts1 = new TimeSeries(weather1);
-     * const ts2 = new TimeSeries(weather2);
-     * const sum = TimeSeries.timeSeriesListSum({
-     *     name: "sum",
-     *     seriesList: [ts1, ts2],
-     *     fieldSpec: "temperature"
-     * });
-     * ```
-     *
-     * @param                  options                An object containing options. Additional key
-     *                                                values in the options will be added as meta data
-     *                                                to the resulting TimeSeries.
-     * @param {array}          options.seriesList     A list of `TimeSeries` (required)
-     * @param {array | string} options.fieldSpec      Column or columns to sum. If you
-     *                                                need to retrieve multiple deep
-     *                                                nested values that ['can.be', 'done.with',
-     *                                                'this.notation']. A single deep value with a
-     *                                                string.like.this.
-     * @return {TimeSeries}                           The summed TimeSeries
+     * @private
      */
-    static timeSeriesListSum(options) {
-        const reducer = Event.sum;
-        return TimeSeries.timeSeriesListReduce({...options, reducer});
-    }
+    static timeSeriesListEventReduce(options) {
+        const { seriesList, fieldSpec, reducer, ...data } = options;
 
-    /**
-     * Takes a list of TimeSeries and averages corrsponding fields
-     * together to form a new Timeseries.
-     *
-     * @example
-     *
-     * ```
-     * const ts1 = new TimeSeries(weather1);
-     * const ts2 = new TimeSeries(weather2);
-     * const sum = TimeSeries.timeSeriesListAvg({
-     *     name: "avg",
-     *     seriesList: [ts1, ts2],
-     *     fieldSpec: "temperature"
-     * });
-     * ```
-     *
-     * @param                  options                An object containing options. Additional key
-     *                                                values in the options will be added as meta data
-     *                                                to the resulting TimeSeries.
-     * @param {array}          options.seriesList     A list of `TimeSeries` (required)
-     * @param {array | string} options.fieldSpec      Column or columns to avg. If you
-     *                                                need to retrieve multiple deep
-     *                                                nested values that ['can.be', 'done.with',
-     *                                                'this.notation']. A single deep value with a
-     *                                                string.like.this.
-     * @return {TimeSeries}                           The averaged TimeSeries
-     */
-    static timeSeriesListAvg(options) {
-        const reducer = Event.avg;
-        return TimeSeries.timeSeriesListReduce({...options, reducer});
+        if (!seriesList || !_.isArray(seriesList)) {
+            throw new Error("A list of TimeSeries must be supplied to reduce");
+        }
+
+        if (!reducer || !_.isFunction(reducer)) {
+            throw new Error(
+                "reducer function must be supplied, for example avg()"
+            );
+        }
+
+        // for each series, make a map from timestamp to the
+        // list of events with that timestamp
+        const eventList = [];
+        seriesList.forEach(series => {
+            for (const event of series.events()) {
+                eventList.push(event);
+            }
+        });
+
+        const events = reducer(eventList, fieldSpec);
+
+        // Make a collection. If the events are out of order, sort them.
+        // It's always possible that events are out of order here, depending
+        // on the start times of the series, along with it the series
+        // have missing data, so I think we don't have a choice here.
+        let collection = new Collection(events);
+        if (!collection.isChronological()) {
+            collection = collection.sortByTime();
+        }
+
+        const timeseries = new TimeSeries({ ...data, collection });
+
+        return timeseries;
     }
 }
 
 export default TimeSeries;
+

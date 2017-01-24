@@ -93,7 +93,6 @@ outageEvent.data()
 to fetch the whole data object, which will be an Immutable Map.
 */
 class TimeEvent extends Event {
-
     /**
      * The creation of an TimeEvent is done by combining two parts:
      * the timestamp and the data.
@@ -111,7 +110,7 @@ class TimeEvent extends Event {
      */
     constructor(arg1, arg2) {
         super();
-        
+
         if (arg1 instanceof TimeEvent) {
             const other = arg1;
             this._d = other._d;
@@ -121,20 +120,25 @@ class TimeEvent extends Event {
             try {
                 avroData = this.schema().fromBuffer(arg1);
             } catch (err) {
-                console.error("Unable to convert supplied avro buffer to event");
+                console.error(
+                    "Unable to convert supplied avro buffer to event"
+                );
             }
             this._d = new Immutable.Map();
             this._d = this._d.set("time", new Date(avroData.time));
             this._d = this._d.set("data", new Immutable.Map(avroData.data));
             return;
-        } else if (arg1 instanceof Immutable.Map &&
-            arg1.has("time") && arg1.has("data")) {
+        } else if (
+            arg1 instanceof Immutable.Map &&
+                arg1.has("time") &&
+                arg1.has("data")
+        ) {
             this._d = arg1;
             return;
         }
         const time = util.timestampFromArg(arg1);
         const data = util.dataFromArg(arg2);
-        this._d = new Immutable.Map({time, data});
+        this._d = new Immutable.Map({ time, data });
     }
 
     /**
@@ -151,10 +155,7 @@ class TimeEvent extends Event {
     static keySchema() {
         return {
             name: "time",
-            type: {
-                type: "long",
-                logicalType: "timestamp-millis"
-            }
+            type: { type: "long", logicalType: "timestamp-millis" }
         };
     }
 
@@ -164,17 +165,17 @@ class TimeEvent extends Event {
      * @return {Object} The event as JSON.
      */
     toJSON() {
-        return {
-            time: this.timestamp().getTime(),
-            data: this.data().toJSON()
-        };
+        return { time: this.timestamp().getTime(), data: this.data().toJSON() };
     }
 
     /**
      * Returns a flat array starting with the timestamp, followed by the values.
      */
     toPoint() {
-        return [this.timestamp().getTime(), ..._.values(this.data().toJSON())];
+        return [
+            this.timestamp().getTime(),
+            ..._.values(this.data().toJSON())
+        ];
     }
 
     /**
@@ -222,3 +223,4 @@ class TimeEvent extends Event {
 }
 
 export default TimeEvent;
+

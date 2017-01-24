@@ -23,15 +23,8 @@ import Index from "./index";
  * callback.
  */
 export default class Collector {
-
     constructor(options, onTrigger) {
-
-        const {
-            windowType,
-            windowDuration,
-            groupBy,
-            emitOn
-        } = options;
+        const { windowType, windowDuration, groupBy, emitOn } = options;
 
         this._groupBy = groupBy;
         this._emitOn = emitOn;
@@ -53,7 +46,8 @@ export default class Collector {
         if (this._onTrigger) {
             _.each(collections, c => {
                 const { collection, windowKey, groupByKey } = c;
-                this._onTrigger && this._onTrigger(collection, windowKey, groupByKey);
+                this._onTrigger &&
+                    this._onTrigger(collection, windowKey, groupByKey);
             });
         }
     }
@@ -64,7 +58,6 @@ export default class Collector {
         //
         // Window key
         //
-
         const windowType = this._windowType;
         let windowKey;
         if (windowType === "fixed") {
@@ -82,15 +75,14 @@ export default class Collector {
         //
         // Groupby key
         //
-
         const groupByKey = this._groupBy(event);
 
         //
         // Collection key
         //
-
-        const collectionKey = groupByKey ?
-            `${windowKey}::${groupByKey}` : windowKey;
+        const collectionKey = groupByKey
+            ? `${windowKey}::${groupByKey}`
+            : windowKey;
 
         let discard = false;
         if (!_.has(this._collections, collectionKey)) {
@@ -101,14 +93,14 @@ export default class Collector {
             };
             discard = true;
         }
-        this._collections[collectionKey].collection =
-            this._collections[collectionKey].collection.addEvent(event);
-        
+        this._collections[collectionKey].collection = this._collections[collectionKey].collection.addEvent(
+            event
+        );
+
         //
         // If fixed windows, collect together old collections that
         // will be discarded
         //
-        
         const discards = {};
         if (discard && windowType === "fixed") {
             _.each(this._collections, (c, k) => {
@@ -121,7 +113,6 @@ export default class Collector {
         //
         // Emit
         //
-
         const emitOn = this._emitOn;
         if (emitOn === "eachEvent") {
             this.emitCollections(this._collections);
@@ -137,3 +128,4 @@ export default class Collector {
         }
     }
 }
+

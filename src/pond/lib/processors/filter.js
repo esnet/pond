@@ -9,7 +9,6 @@
  */
 
 import Processor from "./processor";
-
 import { isPipeline } from "../pipeline";
 
 /**
@@ -18,7 +17,6 @@ import { isPipeline } from "../pipeline";
  * event
  */
 export default class Filter extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -47,3 +45,4 @@ export default class Filter extends Processor {
         }
     }
 }
+

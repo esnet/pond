@@ -17,7 +17,6 @@ import _ from "underscore";
  * to the interested observers.
  */
 class Observable {
-
     constructor() {
         this._id = _.uniqueId("id-");
         this._observers = [];
@@ -52,3 +51,4 @@ class Observable {
 }
 
 export default Observable;
+

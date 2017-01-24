@@ -14,25 +14,25 @@ import TimeSeries from "../timeseries";
 
 const RATE = {
     name: "traffic",
-    columns: ["time", "in"],
+    columns: [ "time", "in" ],
     points: [
-        [0, 1],
-        [30000, 3],
-        [60000, 10],
-        [90000, 40],
-        [120000, 70],
-        [150000, 130],
-        [180000, 190],
-        [210000, 220],
-        [240000, 300],
-        [270000, 390],
-        [300000, 510]
+        [ 0, 1 ],
+        [ 30000, 3 ],
+        [ 60000, 10 ],
+        [ 90000, 40 ],
+        [ 120000, 70 ],
+        [ 150000, 130 ],
+        [ 180000, 190 ],
+        [ 210000, 220 ],
+        [ 240000, 300 ],
+        [ 270000, 390 ],
+        [ 300000, 510 ]
     ]
 };
 
 it("can calculate the rate using TimeSeries.rate()", () => {
     const ts = new TimeSeries(RATE);
-    const rate = ts.rate({fieldSpec: "in"});
+    const rate = ts.rate({ fieldSpec: "in" });
 
     // one less than source
     expect(rate.size()).toEqual(RATE["points"].length - 1);
@@ -50,18 +50,14 @@ it("can calculate the rate using TimeSeries.rate()", () => {
  |               |              |              |              |             |
  |<- ? --------->|<- 1.08/s --->|<- 1.08/s --->|<- 1.08/s --->|<- ? ------->|   result
  */
-
 it("can replicate basic esmond alignment and rate", done => {
     const RAW_RATES = {
         name: "traffic",
-        columns: ["time", "value"],
-        points: [
-            [89000, 100],
-            [181000, 200]
-        ]
+        columns: [ "time", "value" ],
+        points: [ [ 89000, 100 ], [ 181000, 200 ] ]
     };
     const ts = new TimeSeries(RAW_RATES);
-    const rates = ts.align({fieldSpec: "value", period: "30s"}).rate();
+    const rates = ts.align({ fieldSpec: "value", period: "30s" }).rate();
 
     expect(rates.size()).toEqual(3);
     expect(rates.at(0).get("value_rate")).toEqual(1.0869565217391313);
@@ -72,17 +68,13 @@ it("can replicate basic esmond alignment and rate", done => {
 });
 
 it("can output nulls for negative values", done => {
-
     const ts = new TimeSeries({
         name: "traffic",
-        columns: ["time", "value"],
-        points: [
-            [89000, 100],
-            [181000, 50]
-        ]
+        columns: [ "time", "value" ],
+        points: [ [ 89000, 100 ], [ 181000, 50 ] ]
     });
 
-    const rates1 = ts.align({fieldSpec: "value", period: "30s"}).rate();
+    const rates1 = ts.align({ fieldSpec: "value", period: "30s" }).rate();
 
     //lower counter will produce negative derivatives
     expect(rates1.size()).toEqual(3);
@@ -91,13 +83,14 @@ it("can output nulls for negative values", done => {
     expect(rates1.at(2).get("value_rate")).toEqual(-0.5434782608695653);
 
     const rates2 = ts
-        .align({fieldSpec: "value", period: "30s"})
-        .rate({allowNegative: false});
+        .align({ fieldSpec: "value", period: "30s" })
+        .rate({ allowNegative: false });
 
     expect(rates2.size()).toEqual(3);
     expect(rates2.at(0).get("value_rate")).toBeNull();
     expect(rates2.at(1).get("value_rate")).toBeNull();
     expect(rates2.at(2).get("value_rate")).toBeNull();
-    
+
     done();
 });
+

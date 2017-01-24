@@ -12,11 +12,10 @@ import _ from "underscore";
 import Observable from "../base/observable";
 
 class PipelineIn extends Observable {
-
     constructor() {
         super();
         this._id = _.uniqueId("in-");
-        this._type = null;       // The type (class) of the events in this In
+        this._type = null; // The type (class) of the events in this In
     }
 
     _check(e) {
@@ -31,3 +30,4 @@ class PipelineIn extends Observable {
 }
 
 export default PipelineIn;
+

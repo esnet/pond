@@ -27,7 +27,6 @@ import util from "../base/util";
  * with the Align processor for snmp rates, etc.
  */
 export default class Derivator extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -36,10 +35,7 @@ export default class Derivator extends Processor {
             this._fieldSpec = other._fieldSpec;
             this._allowNegative = other._allowNegative;
         } else if (isPipeline(arg1)) {
-            const {
-                fieldSpec,
-                allowNegative
-            } = options;
+            const { fieldSpec, allowNegative } = options;
             this._fieldSpec = fieldSpec;
             this._allowNegative = allowNegative;
         } else {
@@ -49,14 +45,13 @@ export default class Derivator extends Processor {
         //
         // Internal members
         //
-
         this._previous = null;
 
         // work out field specs
         if (_.isString(this._fieldSpec)) {
-            this._fieldSpec = [this._fieldSpec];
+            this._fieldSpec = [ this._fieldSpec ];
         } else if (!this._fieldSpec) {
-            this._fieldSpec = ["value"];
+            this._fieldSpec = [ "value" ];
         }
     }
 
@@ -85,7 +80,9 @@ export default class Derivator extends Processor {
 
             let rate = null;
             if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
-                console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
+                console.warn(
+                    `Path ${fieldPath} contains a non-numeric value or does not exist`
+                );
             } else {
                 rate = (currentVal - previousVal) / deltaTime;
             }
@@ -98,16 +95,17 @@ export default class Derivator extends Processor {
             }
         });
 
-        return new TimeRangeEvent([previousTime, currentTime], d);
+        return new TimeRangeEvent([ previousTime, currentTime ], d);
     }
 
     /**
      * Perform the fill operation on the event and emit.
      */
     addEvent(event) {
-        if (event instanceof TimeRangeEvent ||
-            event instanceof IndexedEvent) {
-            throw new Error("TimeRangeEvent and IndexedEvent series can not be aligned.");
+        if (event instanceof TimeRangeEvent || event instanceof IndexedEvent) {
+            throw new Error(
+                "TimeRangeEvent and IndexedEvent series can not be aligned."
+            );
         }
 
         if (this.hasObservers()) {
@@ -121,7 +119,7 @@ export default class Derivator extends Processor {
 
             // The current event now becomes the previous event
             this._previous = event;
-
         }
     }
 }
+

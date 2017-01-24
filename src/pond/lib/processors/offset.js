@@ -19,7 +19,6 @@ import { isPipeline } from "../pipeline";
  * A simple processor used by the testing code to verify Pipeline behavior
  */
 export default class Offset extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -56,3 +55,4 @@ export default class Offset extends Processor {
         }
     }
 }
+

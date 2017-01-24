@@ -11,11 +11,9 @@
 import _ from "underscore";
 import Immutable from "immutable";
 import avro from "avsc";
-import { sum, avg } from "./base/functions";
 import util from "./base/util";
 
 class Event {
-
     constructor() {
         if (new.target === Event) {
             throw new TypeError("Cannot construct Event instances directly");
@@ -24,14 +22,18 @@ class Event {
 
     keySchema() {
         if (this.constructor.keySchema === undefined) {
-            throw new TypeError("Must implement the event's keySchema() static method");
+            throw new TypeError(
+                "Must implement the event's keySchema() static method"
+            );
         }
         return this.constructor.keySchema();
     }
 
     dataSchema() {
         if (this.constructor.dataSchema === undefined) {
-            throw new TypeError("Must implement the event's dataSchema() static method");
+            throw new TypeError(
+                "Must implement the event's dataSchema() static method"
+            );
         }
         return this.constructor.dataSchema();
     }
@@ -40,9 +42,9 @@ class Event {
         const schema = {
             type: "record",
             name: "Event",
-            fields : [
+            fields: [
                 this.keySchema(),
-                {name: "data", type: this.dataSchema()}
+                { name: "data", type: this.dataSchema() }
             ]
         };
         return avro.parse(schema);
@@ -55,7 +57,10 @@ class Event {
         try {
             return this.schema().toBuffer(this.toJSON());
         } catch (err) {
-            console.error("Unable to convert event to avro based on schema", err);
+            console.error(
+                "Unable to convert event to avro based on schema",
+                err
+            );
         }
     }
 
@@ -104,7 +109,7 @@ class Event {
      * to a JS Object. You can use a `fieldSpec` to address deep data.
      * A `fieldSpec` could be "a.b"
      */
-    get(fieldSpec = ["value"]) {
+    get(fieldSpec = [ "value" ]) {
         let v;
         if (_.isArray(fieldSpec)) {
             v = this.data().getIn(fieldSpec);
@@ -122,7 +127,7 @@ class Event {
     /**
      * Alias for `get()`.
      */
-    value(fieldSpec = ["value"]) {
+    value(fieldSpec = [ "value" ]) {
         return this.get(fieldSpec);
     }
 
@@ -142,7 +147,6 @@ class Event {
     //
     // Static Event functions
     //
-
     /**
      * Do the two supplied events contain the same data,
      * even if they are not the same instance.
@@ -151,10 +155,8 @@ class Event {
      * @return {Boolean}       Result
      */
     static is(event1, event2) {
-        return (
-            event1.key() === event2.key() &&
-            Immutable.is(event1._d.get("data"), event2._d.get("data"))
-        );
+        return event1.key() === event2.key() &&
+            Immutable.is(event1._d.get("data"), event2._d.get("data"));
     }
 
     /**
@@ -170,15 +172,10 @@ class Event {
      */
     static isDuplicate(event1, event2, ignoreValues = true) {
         if (ignoreValues) {
-            return (
-                event1.type() === event2.type() &&
-                event1.key() === event2.key()
-            );
+            return event1.type() === event2.type() &&
+                event1.key() === event2.key();
         } else {
-            return (
-                event1.type() === event2.type() &&
-                Event.is(event1, event2)
-            );
+            return event1.type() === event2.type() && Event.is(event1, event2);
         }
     }
 
@@ -191,7 +188,7 @@ class Event {
      */
     static isValidValue(event, fieldPath) {
         const v = event.value(fieldPath);
-        const invalid = (_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
+        const invalid = _.isUndefined(v) || _.isNaN(v) || _.isNull(v);
         return !invalid;
     }
 
@@ -240,8 +237,10 @@ class Event {
      * @return {Immutable.List|array}        Array or Immutable.List of events
      */
     static merge(events, deep) {
-        if (events instanceof Immutable.List && events.size === 0 ||
-            _.isArray(events) && events.length === 0) {
+        if (
+            events instanceof Immutable.List && events.size === 0 ||
+                _.isArray(events) && events.length === 0
+        ) {
             return [];
         }
 
@@ -251,7 +250,6 @@ class Event {
         // they are homogeneous and also so we can build an output
         // event for this key
         //
-
         const eventMap = {};
         const typeMap = {};
 
@@ -267,7 +265,9 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(`Events for time ${key} are not homogeneous`);
+                    throw new Error(
+                        `Events for time ${key} are not homogeneous`
+                    );
                 }
             }
         });
@@ -277,13 +277,13 @@ class Event {
         // events. Here we loop through all the events for that key, then for each field
         // we are considering, we get all the values and reduce them (sum, avg, etc).
         //
-
         const outEvents = [];
         _.each(eventMap, (events, key) => {
             let data = Immutable.Map();
             events.forEach(event => {
-                data = deep ? data.mergeDeep(event.data()) :
-                              data.merge(event.data());
+                data = deep
+                    ? data.mergeDeep(event.data())
+                    : data.merge(event.data());
             });
             const type = typeMap[key];
             outEvents.push(new type(key, data));
@@ -327,15 +327,17 @@ class Event {
      *
      * @return {Immutable.List|array}   An Immutable.List or array of events
      */
-    static combine(events, fieldSpec, reducer) {
-        if (events instanceof Immutable.List && events.size === 0 ||
-            _.isArray(events) && events.length === 0) {
+    static combine(events, reducer, fieldSpec) {
+        if (
+            events instanceof Immutable.List && events.size === 0 ||
+                _.isArray(events) && events.length === 0
+        ) {
             return [];
         }
 
         let fieldNames;
         if (_.isString(fieldSpec)) {
-            fieldNames = [fieldSpec];
+            fieldNames = [ fieldSpec ];
         } else if (_.isArray(fieldSpec)) {
             fieldNames = fieldSpec;
         }
@@ -349,7 +351,6 @@ class Event {
         // they are homogeneous and also so we can build an output
         // event for this key
         //
-
         events.forEach(e => {
             const type = e.type();
             const key = e.key();
@@ -361,7 +362,9 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(`Events for time ${key} are not homogeneous`);
+                    throw new Error(
+                        `Events for time ${key} are not homogeneous`
+                    );
                 }
             }
         });
@@ -371,14 +374,16 @@ class Event {
         // events. Here we loop through all the events for that key, then for each field
         // we are considering, we get all the values and reduce them (sum, avg, etc).
         //
-
         const outEvents = [];
         _.each(eventMap, (events, key) => {
             const mapEvent = {};
             events.forEach(event => {
                 let fields = fieldNames;
                 if (!fieldNames) {
-                    fields = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
+                    fields = _.map(
+                        event.data().toJSON(),
+                        (value, fieldName) => fieldName
+                    );
                 }
                 fields.forEach(fieldName => {
                     if (!mapEvent[fieldName]) {
@@ -408,34 +413,22 @@ class Event {
     }
 
     /**
-     * Sum takes multiple events and sums them together. The result is a
-     * single event for each timestamp. Events should be homogeneous.
-     *
-     * @param {array}        events     Array of event objects
-     * @param {string|array} fieldSpec  Column or columns to look up. If you need
-     *                                  to retrieve multiple deep nested values that
-     *                                  ['can.be', 'done.with', 'this.notation'].
-     *                                  A single deep value with a string.like.this.
-     *                                  If not supplied, all columns will be operated on.
+     * Returns a function that will take a list of events and combine them
+     * together using the fieldSpec and reducer function provided. This is
+     * used as an event reducer for merging multiple TimeSeries together
+     * with `timeSeriesListReduce()`.
      */
-    static sum(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, sum());
+    static combiner(fieldSpec, reducer) {
+        return events => Event.combine(events, reducer, fieldSpec);
     }
 
     /**
-     * Sum takes multiple events, groups them by timestamp, and uses combine()
-     * to average them. If the events do not have the same timestamp an
-     * exception will be thrown.
-     *
-     * @param {array}        events     Array of event objects
-     * @param {string|array} fieldSpec  Column or columns to look up. If you need
-     *                                  to retrieve multiple deep nested values that
-     *                                  ['can.be', 'done.with', 'this.notation'].
-     *                                  A single deep value with a string.like.this.
-     *                                  If not supplied, all columns will be operated on.
+     * Returns a function that will take a list of events and merge them
+     * together using the fieldSpec provided. This is used as a reducer for
+     * merging multiple TimeSeries together with `timeSeriesListMerge()`.
      */
-    static avg(events, fieldSpec) {
-        return Event.combine(events, fieldSpec, avg());
+    static merger(fieldSpec) {
+        return events => Event.merge(events, fieldSpec);
     }
 
     /**
@@ -471,7 +464,9 @@ class Event {
         } else if (_.isArray(evts)) {
             events = new Immutable.List(evts);
         } else {
-            throw new Error("Unknown event list type. Should be an array or Immutable List");
+            throw new Error(
+                "Unknown event list type. Should be an array or Immutable List"
+            );
         }
 
         if (_.isString(multiFieldSpec)) {
@@ -481,13 +476,12 @@ class Event {
                     result[fieldSpec] = [];
                 }
                 const value = event.get(fieldSpec);
-                
+
                 result[fieldSpec].push(value);
             });
         } else if (_.isArray(multiFieldSpec)) {
             _.each(multiFieldSpec, fieldSpec => {
                 events.forEach(event => {
-
                     if (!_.has(result, fieldSpec)) {
                         result[fieldSpec] = [];
                     }
@@ -551,3 +545,4 @@ class Event {
 }
 
 export default Event;
+

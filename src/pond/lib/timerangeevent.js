@@ -37,7 +37,6 @@ import util from "./base/util";
  * `toString()` will serialize the entire event to a string.
  */
 class TimeRangeEvent extends Event {
-
     /**
      * The creation of an TimeRangeEvent is done by combining two parts:
      * the timerange and the data.
@@ -62,11 +61,13 @@ class TimeRangeEvent extends Event {
             try {
                 avroData = this.schema().fromBuffer(arg1);
             } catch (err) {
-                console.error("Unable to convert supplied avro buffer to event");
+                console.error(
+                    "Unable to convert supplied avro buffer to event"
+                );
             }
             const range = new TimeRange(avroData.timerange);
             const data = new Immutable.Map(avroData.data);
-            this._d = new Immutable.Map({range, data});
+            this._d = new Immutable.Map({ range, data });
             return;
         } else if (arg1 instanceof Immutable.Map) {
             this._d = arg1;
@@ -74,7 +75,7 @@ class TimeRangeEvent extends Event {
         }
         const range = util.timeRangeFromArg(arg1);
         const data = util.dataFromArg(arg2);
-        this._d = new Immutable.Map({range, data});
+        this._d = new Immutable.Map({ range, data });
     }
 
     /**
@@ -96,27 +97,17 @@ class TimeRangeEvent extends Event {
      * (the TimeRange as an array)
      */
     static keySchema() {
-        return {
-            name: "timerange",
-            type: {
-                type: "array",
-                items: "long"
-            }
-        };
+        return { name: "timerange", type: { type: "array", items: "long" } };
     }
 
     //
     // Access the timerange represented by the index
     //
-
     /**
      * Returns a flat array starting with the timestamp, followed by the values.
      */
     toPoint() {
-        return [
-            this.timerange().toJSON(),
-            ..._.values(this.data().toJSON())
-        ];
+        return [ this.timerange().toJSON(), ..._.values(this.data().toJSON()) ];
     }
 
     /**
@@ -173,3 +164,4 @@ class TimeRangeEvent extends Event {
 }
 
 export default TimeRangeEvent;
+
