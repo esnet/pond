@@ -42,7 +42,7 @@ ReactDOM.render(
             <Route path="timerange" component={TimeRange} />
             <Route path="index" component={Index} />
             <Route path="event" component={Event} />
-            <Route path="event" component={TimeEvent} />
+            <Route path="timeevent" component={TimeEvent} />
             <Route path="timerangeevent" component={TimeRangeEvent} />
             <Route path="indexedevent" component={IndexedEvent} />
             <Route path="collection" component={Collection} />
