@@ -50,7 +50,6 @@ import {
  * they can be used as a pipeline source.
  */
 class Collection extends Bounded {
-
     /**
      * Construct a new Collection.
      *
@@ -70,9 +69,11 @@ class Collection extends Bounded {
         super();
 
         this._id = _.uniqueId("collection-");
-        this._eventList = null;  // The events in this collection
-        this._type = null;       // The type (class) of the events in this collection
+        this._eventList = null;
+        // The events in this collection
+        this._type = null;
 
+        // The type (class) of the events in this collection
         if (!arg1) {
             this._eventList = new Immutable.List();
         } else if (arg1 instanceof Collection) {
@@ -128,9 +129,8 @@ class Collection extends Bounded {
      * or `TimeRangeEvent`) this will return that type. If no events
      * have been added to the Collection it will return `undefined`.
      *
-     * @return {Event|IndexedEvent|TimeRangeEvent} - The class of the type
-     *                                               of events contained in
-     *                                               this Collection.
+     * @return {Event} - The class of the type of events contained in
+     *                   this Collection.
      */
     type() {
         return this._type;
@@ -172,8 +172,7 @@ class Collection extends Bounded {
      * }
      * ```
      * @param  {number} pos The position of the event
-     * @return {Event|TimeRangeEvent|IndexedEvent}     Returns the
-     * event at the pos specified.
+     * @return {Event}      Returns the event at the pos specified.
      */
     at(pos) {
         if (this._eventList.size > 0) {
@@ -183,23 +182,36 @@ class Collection extends Bounded {
     }
 
     /**
-     * Returns an event in the Collection by its time. This is the same
-     * as calling `bisect` first and then using `at` with the index.
+     * Returns a list of events in the Collection which have
+     * the exact key (time, timerange or index) as the key specified
+     * by 'at'. Note that this is an O(n) search for the time specified,
+     * since collections are an unordered bag of events.
      *
-     * @param  {Date} time The time of the event.
-     * @return {Event|TimeRangeEvent|IndexedEvent}
+     * @param  {Date|string|TimeRange} key The key of the event.
+     * @return {Array} All events at that key
      */
-    atTime(time) {
-        const pos = this.bisect(time);
-        if (pos >= 0 && pos < this.size()) {
-            return this.at(pos);
+    atKey(k) {
+        const result = [];
+        let key;
+        if (k instanceof Date) {
+            key = k.getTime();
+        } else if (_.isString(k)) {
+            key = k;
+        } else if (k instanceof TimeRange) {
+            key = `${this.timerange().begin()},${this.timerange().end()}`;
         }
+        for (const e of this.events()) {
+            if (e.key() === key) {
+                result.push(e);
+            }
+        }
+        return result;
     }
 
     /**
      * Returns the first event in the Collection.
      *
-     * @return {Event|TimeRangeEvent|IndexedEvent}
+     * @return {Event}
      */
     atFirst() {
         if (this.size()) {
@@ -210,40 +222,12 @@ class Collection extends Bounded {
     /**
      * Returns the last event in the Collection.
      *
-     * @return {Event|TimeRangeEvent|IndexedEvent}
+     * @return {Event}
      */
     atLast() {
         if (this.size()) {
             return this.at(this.size() - 1);
         }
-    }
-
-    /**
-     * Returns the index that bisects the Collection at the time specified.
-     *
-     * @param  {Date}    t   The time to bisect the Collection with
-     * @param  {number}  b   The position to begin searching at
-     *
-     * @return {number}      The row number that is the greatest, but still below t.
-     */
-    bisect(t, b) {
-        const tms = t.getTime();
-        const size = this.size();
-        let i = b || 0;
-
-        if (!size) {
-            return undefined;
-        }
-
-        for (; i < size; i++) {
-            const ts = this.at(i).timestamp().getTime();
-            if (ts > tms) {
-                return i - 1 >= 0 ? i - 1 : 0;
-            } else if (ts === tms) {
-                return i;
-            }
-        }
-        return i - 1;
     }
 
     /**
@@ -256,7 +240,7 @@ class Collection extends Bounded {
      * }
      * ```
      */
-    * events() {
+    *events() {
         for (let i = 0; i < this.size(); i++) {
             yield this.at(i);
         }
@@ -290,35 +274,81 @@ class Collection extends Bounded {
         return events;
     }
 
+    /**
+     * Returns the events in the collection as a Javascript Map, where
+     * the key is the timestamp, index or timerange and the
+     * value is an array of events with that key.
+     *
+     * @return {map} The map of events
+     */
+    eventListAsMap() {
+        const events = {};
+        for (const e of this.events()) {
+            const key = e.key();
+            if (!_.has(events, key)) {
+                events[key] = [];
+            }
+            events[key].push(e);
+        }
+        return events;
+    }
+
+    //
+    // De-duplicate
+    //
+    /**
+     * Removes duplicates from the Collection. If duplicates
+     * exist in the collection with the same key but with different
+     * values, then later event values will be used.
+     *
+     * @return {Collection} The sorted Collection.
+     */
+    dedup() {
+        const events = Event.merge(this.eventListAsArray());
+        return new Collection(events);
+    }
+
     //
     // Sorting
     //
-
+    /**
+     * Sorts the Collection by the timestamp. In the case
+     * of TimeRangeEvents and IndexedEvents, it will be sorted
+     * by the begin time. This is useful when the collection
+     * will be passed into a TimeSeries.
+     *
+     * See also isChronological().
+     *
+     * @return {Collection} The sorted Collection
+     */
     sortByTime() {
-        return this.setEvents(this._eventList.sortBy(event => {
-            const e = new this._type(event);
-            return e.timestamp().getTime();
-        }));
+        return this.setEvents(
+            this._eventList.sortBy(event => {
+                const e = new this._type(event);
+                return e.timestamp().getTime();
+            })
+        );
     }
 
     /**
      * Sorts the Collection using the value referenced by
      * the fieldPath.
      *
-     * @return {TimeRange} The extents of the TimeSeries
+     * @return {Collection} The extents of the Collection
      */
     sort(fieldPath) {
         const fs = util.fieldPathToArray(fieldPath);
-        return this.setEvents(this._eventList.sortBy(event => {
-            const e = new this._type(event);
-            return e.get(fs);
-        }));
+        return this.setEvents(
+            this._eventList.sortBy(event => {
+                const e = new this._type(event);
+                return e.get(fs);
+            })
+        );
     }
 
     //
     // Series range
     //
-
     /**
      * From the range of times, or Indexes within the TimeSeries, return
      * the extents of the TimeSeries as a TimeRange. This is currently implemented
@@ -339,13 +369,12 @@ class Collection extends Bounded {
     //
     // Collection mutation
     //
-
     /**
      * Adds an event to the collection, returns a new Collection. The event added
      * can be an Event, TimeRangeEvent or IndexedEvent, but it must be of the
      * same type as other events within the Collection.
      *
-     * @param {Event|TimeRangeEvent|IndexedEvent} event The event being added.
+     * @param {Event} event The event being added.
      *
      * @return {Collection} A new, modified, Collection containing the new event.
      */
@@ -393,6 +422,7 @@ class Collection extends Bounded {
      * the supplied function.
      * @param {function} func The mapping function, that should return
      * a new event when passed in the old event.
+     *
      * @return {Collection} A new, modified, Collection.
      */
     map(mapFunc) {
@@ -429,7 +459,6 @@ class Collection extends Bounded {
     //
     // Aggregate the event list to a single value
     //
-
     /**
      * Returns the number of events in this collection
      *
@@ -624,10 +653,17 @@ class Collection extends Bounded {
             // it will map all the columns.
             fpath = "value";
         } else {
-            throw new Error("Collection.aggregate() takes a string/array fieldPath");
+            throw new Error(
+                "Collection.aggregate() takes a string/array fieldPath"
+            );
         }
 
-        const result = Event.mapReduce(this.eventListAsArray(), fpath, func, options);
+        const result = Event.mapReduce(
+            this.eventListAsArray(),
+            fpath,
+            func,
+            options
+        );
         return result[fpath];
     }
 
@@ -709,8 +745,7 @@ class Collection extends Bounded {
     /**
      * STATIC
      */
-
-     /**
+    /**
       * Static function to compare two collections to each other. If the collections
       * are of the same instance as each other then equals will return true.
       *
@@ -720,11 +755,11 @@ class Collection extends Bounded {
       * @return {bool} result
       */
     static equal(collection1, collection2) {
-        return (collection1._type === collection2._type &&
-                collection1._eventList === collection2._eventList);
+        return collection1._type === collection2._type &&
+            collection1._eventList === collection2._eventList;
     }
 
-     /**
+    /**
       * Static function to compare two collections to each other. If the collections
       * are of the same value as each other then equals will return true.
       *
@@ -734,9 +769,10 @@ class Collection extends Bounded {
       * @return {bool} result
       */
     static is(collection1, collection2) {
-        return (collection1._type === collection2._type &&
-                Immutable.is(collection1._eventList, collection2._eventList));
+        return collection1._type === collection2._type &&
+            Immutable.is(collection1._eventList, collection2._eventList);
     }
 }
 
 export default Collection;
+

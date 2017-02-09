@@ -11,34 +11,8 @@
 import _ from "underscore";
 import Immutable from "immutable";
 import Index from "./index";
-
-function indexFromArgs(arg1, arg2 = true) {
-    if (_.isString(arg1)) {
-        return new Index(arg1, arg2);
-    } else if (arg1 instanceof Index) {
-        return arg1;
-    } else {
-        throw new Error(`Unable to get index from ${arg1}. Should be a string or Index.`);
-    }
-}
-
-function dataFromArg(arg) {
-    let data;
-    if (_.isObject(arg)) {
-        // Deeply convert the data to Immutable Map
-        data = new Immutable.fromJS(arg);
-    } else if (data instanceof Immutable.Map) {
-        // Copy reference to the data
-        data = arg;
-    } else if (_.isNumber(arg) || _.isString(arg)) {
-        // Just add it to the value key of a new Map
-        // e.g. new Event(t, 25); -> t, {value: 25}
-        data = new Immutable.Map({value: arg});
-    } else {
-        throw new Error(`Unable to interpret event data from ${arg}.`);
-    }
-    return data;
-}
+import Event from "./event";
+import util from "./base/util";
 
 /**
  * An IndexedEvent uses an Index to specify a timerange over which the event
@@ -65,8 +39,7 @@ function dataFromArg(arg) {
  * The get the data out of an IndexedEvent instance use `data()`. It will return
  * an Immutable.Map.
  */
-class IndexedEvent {
-
+class IndexedEvent extends Event {
     /**
      * The creation of an IndexedEvent is done by combining two parts:
      * the Index and the data.
@@ -82,38 +55,62 @@ class IndexedEvent {
      *       this is a shorthand for supplying {"value": v}.
      */
     constructor(arg1, arg2, arg3) {
+        super();
+
         if (arg1 instanceof IndexedEvent) {
             const other = arg1;
             this._d = other._d;
+            return;
+        } else if (arg1 instanceof Buffer) {
+            let avroData;
+            try {
+                avroData = this.schema().fromBuffer(arg1);
+            } catch (err) {
+                console.error(
+                    "Unable to convert supplied avro buffer to event"
+                );
+            }
+
+            this._d = new Immutable.Map();
+            this._d = this._d.set("index", new Index(avroData.index));
+            this._d = this._d.set("data", new Immutable.Map(avroData.data));
             return;
         } else if (arg1 instanceof Immutable.Map) {
             this._d = arg1;
             return;
         }
-        const index = indexFromArgs(arg1, arg3);
-        const data = dataFromArg(arg2);
-        this._d = new Immutable.Map({index, data});
-    }
-
-    toJSON() {
-        return {
-            index: this.indexAsString(),
-            data: this.data().toJSON()
-        };
-    }
-
-    toString() {
-        return JSON.stringify(this.toJSON());
+        const index = util.indexFromArgs(arg1, arg3);
+        const data = util.dataFromArg(arg2);
+        this._d = new Immutable.Map({ index, data });
     }
 
     /**
-     * Returns a flat array starting with the timestamp, followed by the values.
+     * Returns the timestamp (as ms since the epoch)
+     */
+    key() {
+        return this.indexAsString();
+    }
+
+    /**
+     * For Avro serialization, this defines the event's key (the Index)
+     * as a simple string
+     */
+    static keySchema() {
+        return { name: "index", type: "string" };
+    }
+
+    /**
+     * Express the IndexedEvent as a JSON object
+     */
+    toJSON() {
+        return { index: this.indexAsString(), data: this.data().toJSON() };
+    }
+
+    /**
+     * Returns a flat array starting with the index, followed by the values.
      */
     toPoint() {
-        return [
-            this.indexAsString(),
-            ..._.values(this.data().toJSON())
-        ];
+        return [ this.indexAsString(), ..._.values(this.data().toJSON()) ];
     }
 
     /**
@@ -122,22 +119,6 @@ class IndexedEvent {
      */
     index() {
         return this._d.get("index");
-    }
-
-    /**
-     * Sets the data of the event and returns a new IndexedEvent.
-     */
-    setData(data) {
-        const d = this._d.set("data", dataFromArg(data));
-        return new IndexedEvent(d);
-    }
-
-    /**
-     * Access the event data
-     * @return {Immutable.Map} Data for the Event
-     */
-    data() {
-        return this._d.get("data");
     }
 
     /**
@@ -195,44 +176,7 @@ class IndexedEvent {
     timestamp() {
         return this.begin();
     }
-
-    /**
-     * Get specific data out of the Event. The data will be converted
-     * to a js object. You can use a fieldSpec to address deep data.
-     * A fieldSpec could be "a.b"
-     */
-    get(fieldSpec = ["value"]) {
-        let v;
-        if (_.isArray(fieldSpec)) {
-            v = this.data().getIn(fieldSpec);
-        } else if (_.isString(fieldSpec)) {
-            const searchKeyPath = fieldSpec.split(".");
-            v = this.data().getIn(searchKeyPath);
-        }
-
-        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
-            return v.toJS();
-        }
-        return v;
-    }
-
-    value(fieldSpec) {
-        return this.get(fieldSpec);
-    }
-
-    /**
-     * Collapses this event's columns, represented by the fieldSpecList
-     * into a single column. The collapsing itself is done with the reducer
-     * function. Optionally the collapsed column could be appended to the
-     * existing columns, or replace them (the default).
-     */
-    collapse(fieldSpecList, name, reducer, append = false) {
-        const data = append ? this.data().toJS() : {};
-        const d = fieldSpecList.map(fs => this.get(fs));
-        data[name] = reducer(d);
-        return this.setData(data);
-    }
-
 }
 
 export default IndexedEvent;
+

@@ -91,10 +91,15 @@ to fetch the whole data object, which will be an Immutable Map.
         * [.value(fieldPath)](#Event+value) ⇒
         * [.stringify()](#Event+stringify) ⇒ <code>string</code>
         * [.collapse()](#Event+collapse)
+        * [.key()](#Event+key)
+        * [.type()](#Event+type)
     * _static_
+        * [.is(event1, event2)](#Event.is) ⇒ <code>Boolean</code>
+        * [.isDuplicate()](#Event.isDuplicate) ⇒ <code>Boolean</code>
         * [.isValidValue(event, The)](#Event.isValidValue)
         * [.selector()](#Event.selector)
-        * [.combine(events, fieldSpec, reducer)](#Event.combine)
+        * [.merge(events)](#Event.merge) ⇒ <code>Immutable.List</code> &#124; <code>array</code>
+        * [.combine(events, fieldSpec, reducer)](#Event.combine) ⇒ <code>Immutable.List</code> &#124; <code>array</code>
         * [.sum(events, fieldSpec)](#Event.sum)
         * [.avg(events, fieldSpec)](#Event.avg)
         * [.map(fieldSpec)](#Event.map)
@@ -224,6 +229,46 @@ function. Optionally the collapsed column could be appended to the
 existing columns, or replace them (the default).
 
 **Kind**: instance method of <code>[Event](#Event)</code>  
+<a name="Event+key"></a>
+
+### event.key()
+Returns the timestamp (as ms since the epoch)
+
+**Kind**: instance method of <code>[Event](#Event)</code>  
+<a name="Event+type"></a>
+
+### event.type()
+Returns the timestamp (as ms since the epoch) for an Event,
+the index string for an IndexedEvent or the TimeRange
+expressed as beginTime,endTime for a TimeRangeEvent.
+
+**Kind**: instance method of <code>[Event](#Event)</code>  
+<a name="Event.is"></a>
+
+### Event.is(event1, event2) ⇒ <code>Boolean</code>
+Do the two supplied events contain the same data,
+even if they are not the same instance.
+
+**Kind**: static method of <code>[Event](#Event)</code>  
+**Returns**: <code>Boolean</code> - Result  
+**Params**
+
+- event1 <code>[Event](#Event)</code> - First event to compare
+- event2 <code>[Event](#Event)</code> - Second event to compare
+
+<a name="Event.isDuplicate"></a>
+
+### Event.isDuplicate() ⇒ <code>Boolean</code>
+Returns if the two supplied events are duplicates
+of each other. By default, duplicated means that the
+timestamps are the same. This is the case with incoming events
+where the second event is either known to be the same (but
+duplicate) of the first, or supersedes the first. You can
+also pass in false for ignoreValues and get a full
+compare.
+
+**Kind**: static method of <code>[Event](#Event)</code>  
+**Returns**: <code>Boolean</code> - The result of the compare  
 <a name="Event.isValidValue"></a>
 
 ### Event.isValidValue(event, The)
@@ -249,30 +294,64 @@ The fieldPath currently can be:
 The function returns a new event.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
-<a name="Event.combine"></a>
+<a name="Event.merge"></a>
 
-### Event.combine(events, fieldSpec, reducer)
-Combines multiple events with the same time together
-to form a new event. Doesn't currently work on IndexedEvents
-or TimeRangeEvents.
+### Event.merge(events) ⇒ <code>Immutable.List</code> &#124; <code>array</code>
+Merges multiple `events` together into a new array of events, one
+for each time/index/timerange of the source events. Merging is done on
+the data of each event. Values from later events in the list overwrite
+early values if fields conflict.
+
+Common use cases:
+  - append events of different timestamps
+  - merge in events with one field to events with another
+  - merge in events that supersede the previous events
+
+See also: TimeSeries.timeSeriesListMerge()
 
 **Kind**: static method of <code>[Event](#Event)</code>  
+**Returns**: <code>Immutable.List</code> &#124; <code>array</code> - Array or Immutable.List of events  
 **Params**
 
-- events <code>array</code> - Array of event objects
+- events <code>Immutable.List</code> | <code>array</code> - Array or Immutable.List of events
+
+<a name="Event.combine"></a>
+
+### Event.combine(events, fieldSpec, reducer) ⇒ <code>Immutable.List</code> &#124; <code>array</code>
+Combines multiple `events` together into a new array of events, one
+for each time/index/timerange of the source events. The list of
+events may be specified as an array or `Immutable.List`. Combining acts
+on the fields specified in the `fieldSpec` and uses the reducer
+function to take the multiple values and reducer them down to one.
+
+The return result will be an of the same form as the input. If you
+pass in an array of events, you will get an array of events back. If
+you pass an `Immutable.List` of events then you will get an
+`Immutable.List` of events back.
+
+This is the general version of `Event.sum()` and `Event.avg()`. If those
+common use cases are what you want, just use those functions. If you
+want to specify your own reducer you can use this function.
+
+See also: `TimeSeries.timeSeriesListSum()`
+
+**Kind**: static method of <code>[Event](#Event)</code>  
+**Returns**: <code>Immutable.List</code> &#124; <code>array</code> - An Immutable.List or array of events  
+**Params**
+
+- events <code>Immutable.List</code> | <code>array</code> - Array of event objects
 - fieldSpec <code>string</code> | <code>array</code> - Column or columns to look up. If you need
-                                 to retrieve multiple deep nested values that
-                                 ['can.be', 'done.with', 'this.notation'].
-                                 A single deep value with a string.like.this.
-                                 If not supplied, all columns will be operated on.
+                                         to retrieve multiple deep nested values that
+                                         ['can.be', 'done.with', 'this.notation'].
+                                         A single deep value with a string.like.this.
+                                         If not supplied, all columns will be operated on.
 - reducer <code>function</code> - Reducer function to apply to column data.
 
 <a name="Event.sum"></a>
 
 ### Event.sum(events, fieldSpec)
-Sum takes multiple events, groups them by timestamp, and uses combine()
-to add them together. If the events do not have the same timestamp an
-exception will be thrown.
+Sum takes multiple events and sums them together. The result is a
+single event for each timestamp. Events should be homogeneous.
 
 **Kind**: static method of <code>[Event](#Event)</code>  
 **Params**

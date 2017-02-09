@@ -41,7 +41,7 @@ export {
     avg,
     max,
     min,
-    cound,
+    count,
     first,
     last,
     difference,

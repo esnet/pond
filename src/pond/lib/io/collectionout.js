@@ -12,32 +12,34 @@ import Collector from "../collector";
 import PipelineOut from "./pipelineout";
 
 class CollectionOut extends PipelineOut {
-
     constructor(pipeline, options, callback) {
         super(pipeline);
-        
+
         this._callback = callback;
-        this._collector = new Collector({
-            windowType: pipeline.getWindowType(),
-            windowDuration: pipeline.getWindowDuration(),
-            groupBy: pipeline.getGroupBy(),
-            emitOn: pipeline.getEmitOn()
-        }, (collection, windowKey, groupByKey) => {
-            const groupBy = groupByKey ? groupByKey : "all";
-            if (this._callback) {
-                this._callback(collection, windowKey, groupBy);
-            } else {
-                let keys = [];
-                if (windowKey !== "global") {
-                    keys.push(windowKey);
+        this._collector = new Collector(
+            {
+                windowType: pipeline.getWindowType(),
+                windowDuration: pipeline.getWindowDuration(),
+                groupBy: pipeline.getGroupBy(),
+                emitOn: pipeline.getEmitOn()
+            },
+            (collection, windowKey, groupByKey) => {
+                const groupBy = groupByKey ? groupByKey : "all";
+                if (this._callback) {
+                    this._callback(collection, windowKey, groupBy);
+                } else {
+                    let keys = [];
+                    if (windowKey !== "global") {
+                        keys.push(windowKey);
+                    }
+                    if (groupBy !== "all") {
+                        keys.push(groupBy);
+                    }
+                    const k = keys.length > 0 ? keys.join("--") : "all";
+                    this._pipeline.addResult(k, collection);
                 }
-                if (groupBy !== "all") {
-                    keys.push(groupBy);
-                }
-                const k = keys.length > 0 ? keys.join("--") : "all";
-                this._pipeline.addResult(k, collection);
             }
-        });
+        );
     }
 
     addEvent(event) {
@@ -47,7 +49,7 @@ class CollectionOut extends PipelineOut {
     onEmit(cb) {
         this._callback = cb;
     }
-    
+
     flush() {
         this._collector.flushCollections();
         if (!this._callback) {
@@ -57,3 +59,4 @@ class CollectionOut extends PipelineOut {
 }
 
 export default CollectionOut;
+

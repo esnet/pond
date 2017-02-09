@@ -15,18 +15,17 @@ import Highlighter from "../components/Highlighter";
 import markdown from "raw!../docs/Pipeline.md";
 
 export default React.createClass({
-
-    mixins: [Highlighter],
-
+    mixins: [ Highlighter ],
     render() {
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
-                        <Markdown source={markdown}/>
+                        <Markdown source={markdown} />
                     </div>
                 </div>
             </div>
         );
     }
 });
+

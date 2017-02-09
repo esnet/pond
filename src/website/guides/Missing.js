@@ -14,19 +14,19 @@ import text from "raw!./missing.md";
 import logo from "../img/pond.png";
 
 export default React.createClass({
-
     render() {
         return (
             <div>
                 <div className="row">
                     <div className="col-md-2">
-                        <img src={logo} alt="ESnet" width={120} height={120}/>
+                        <img src={logo} alt="ESnet" width={120} height={120} />
                     </div>
                     <div className="col-md-9">
-                        <Markdown source={text}/>
+                        <Markdown source={text} />
                     </div>
                 </div>
             </div>
         );
     }
 });
+

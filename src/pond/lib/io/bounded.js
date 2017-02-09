@@ -11,7 +11,6 @@
 import PipelineIn from "./pipelinein";
 
 class Bounded extends PipelineIn {
-
     constructor() {
         super();
     }
@@ -30,3 +29,4 @@ class Bounded extends PipelineIn {
 }
 
 export default Bounded;
+

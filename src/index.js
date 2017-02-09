@@ -27,9 +27,8 @@ import Pipeline from "./website/api/Pipeline";
 
 const appHistory = useRouterHistory(createHashHistory)({ queryKey: false });
 
-ReactDOM.render((
-    <Router history={appHistory}
-            onUpdate={() => window.scrollTo(0, 0)}>
+ReactDOM.render(
+    <Router history={appHistory} onUpdate={() => window.scrollTo(0, 0)}>
         <Route path="/" component={App}>
             <IndexRoute component={Intro} />
             <Route path="start" component={Start} />
@@ -39,7 +38,6 @@ ReactDOM.render((
             <Route path="glossary" component={Glossary} />
             <Route path="processing" component={Processing} />
             <Route path="counter" component={Counters} />
-
             <Route path="timerange" component={TimeRange} />
             <Route path="index" component={Index} />
             <Route path="event" component={Event} />
@@ -49,5 +47,7 @@ ReactDOM.render((
             <Route path="timeseries" component={TimeSeries} />
             <Route path="pipeline" component={Pipeline} />
         </Route>
-    </Router>
-), document.getElementById("root"));
+    </Router>,
+    document.getElementById("root")
+);
+

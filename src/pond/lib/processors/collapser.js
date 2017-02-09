@@ -20,7 +20,6 @@ import { isPipeline } from "../pipeline";
  * the existing columns in the event.
  */
 export default class Collapser extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -46,10 +45,15 @@ export default class Collapser extends Processor {
 
     addEvent(event) {
         if (this.hasObservers()) {
-            this.emit(event.collapse(this._fieldSpecList,
-                                     this._name,
-                                     this._reducer,
-                                     this._append));
+            this.emit(
+                event.collapse(
+                    this._fieldSpecList,
+                    this._name,
+                    this._reducer,
+                    this._append
+                )
+            );
         }
     }
 }
+

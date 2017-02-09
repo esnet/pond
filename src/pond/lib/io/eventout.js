@@ -11,7 +11,6 @@
 import PipelineOut from "./pipelineout";
 
 class EventOut extends PipelineOut {
-
     constructor(pipeline, options, callback) {
         super(pipeline);
         this._callback = callback;
@@ -37,3 +36,4 @@ class EventOut extends PipelineOut {
 }
 
 export default EventOut;
+

@@ -58,8 +58,8 @@ Alternatively, you can construct a `TimeSeries` with a list of events. These may
 
 ```javascript
 const events = [];
-events.push(new Event(new Date(2015, 7, 1), {value: 27}));
-events.push(new Event(new Date(2015, 8, 1), {value: 29}));
+events.push(new TimeEvent(new Date(2015, 7, 1), {value: 27}));
+events.push(new TimeEvent(new Date(2015, 8, 1), {value: 29}));
 const series = new TimeSeries({
     name: "avg temps",
     events: events
@@ -99,15 +99,18 @@ series.avg("NASA_north", d => d.in);  // 250
 
 * [TimeSeries](#TimeSeries)
     * _instance_
+        * [.metaSchema()](#TimeSeries+metaSchema)
+        * [.toAvro()](#TimeSeries+toAvro)
         * [.toJSON()](#TimeSeries+toJSON)
         * [.toString()](#TimeSeries+toString)
         * [.timerange()](#TimeSeries+timerange)
+        * [.range()](#TimeSeries+range)
         * [.begin()](#TimeSeries+begin) ⇒ <code>Date</code>
         * [.end()](#TimeSeries+end) ⇒ <code>Date</code>
         * [.at(pos)](#TimeSeries+at)
-        * [.atTime(time)](#TimeSeries+atTime) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
-        * [.atFirst()](#TimeSeries+atFirst) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
-        * [.atLast()](#TimeSeries+atLast) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+        * [.atTime(time)](#TimeSeries+atTime) ⇒ <code>Event</code>
+        * [.atFirst()](#TimeSeries+atFirst) ⇒ <code>Event</code>
+        * [.atLast()](#TimeSeries+atLast) ⇒ <code>Event</code>
         * [.events()](#TimeSeries+events)
         * [.setCollection(collection, isChronological)](#TimeSeries+setCollection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.bisect(t, b)](#TimeSeries+bisect) ⇒ <code>number</code>
@@ -153,12 +156,30 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.yearlyRollup(options)](#TimeSeries+yearlyRollup) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.collectByFixedWindow(options)](#TimeSeries+collectByFixedWindow) ⇒ <code>map</code>
     * _static_
+        * [.event()](#TimeSeries.event)
         * [.equal(series1, series2)](#TimeSeries.equal) ⇒ <code>bool</code>
         * [.is(series1, series2)](#TimeSeries.is) ⇒ <code>bool</code>
-        * [.timeseriesListReduce(options)](#TimeSeries.timeseriesListReduce) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+        * [.timeSeriesListReduce(options)](#TimeSeries.timeSeriesListReduce) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.timeSeriesListMerge(options)](#TimeSeries.timeSeriesListMerge) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-        * [.timeSeriesListSum(options)](#TimeSeries.timeSeriesListSum) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 
+<a name="TimeSeries+metaSchema"></a>
+
+### timeSeries.metaSchema()
+Should return a list of definitions. e.g.
+```
+    [
+        {name: "name", type: "string"},
+        {name: "myvalue", type: "long"}
+    ]
+```
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+toAvro"></a>
+
+### timeSeries.toAvro()
+Express the event as an avro buffer
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+toJSON"></a>
 
 ### timeSeries.toJSON()
@@ -175,6 +196,12 @@ Represent the TimeSeries as a string
 
 ### timeSeries.timerange()
 Returns the extents of the TimeSeries as a TimeRange.
+
+**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
+<a name="TimeSeries+range"></a>
+
+### timeSeries.range()
+Alias for `timerange()`
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+begin"></a>
@@ -203,7 +230,7 @@ Access a specific TimeSeries event via its position
 
 <a name="TimeSeries+atTime"></a>
 
-### timeSeries.atTime(time) ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+### timeSeries.atTime(time) ⇒ <code>Event</code>
 Returns an event in the series by its time. This is the same
 as calling `bisect` first and then using `at` with the index.
 
@@ -214,13 +241,13 @@ as calling `bisect` first and then using `at` with the index.
 
 <a name="TimeSeries+atFirst"></a>
 
-### timeSeries.atFirst() ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+### timeSeries.atFirst() ⇒ <code>Event</code>
 Returns the first event in the series.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+atLast"></a>
 
-### timeSeries.atLast() ⇒ <code>[Event](#Event)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code>
+### timeSeries.atLast() ⇒ <code>Event</code>
 Returns the last event in the series.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -346,15 +373,15 @@ Fetch the timeseries Index, as a string, if it has one.
 <a name="TimeSeries+indexAsRange"></a>
 
 ### timeSeries.indexAsRange() ⇒ <code>[TimeRange](#TimeRange)</code>
-Fetch the timeseries Index, as a TimeRange, if it has one.
+Fetch the timeseries `Index`, as a `TimeRange`, if it has one.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeRange](#TimeRange)</code> - The Index, as a TimeRange, given to this TimeSeries  
+**Returns**: <code>[TimeRange](#TimeRange)</code> - The `Index`, as a `TimeRange`, given to this `TimeSeries`  
 <a name="TimeSeries+isUTC"></a>
 
 ### timeSeries.isUTC() ⇒ <code>[TimeRange](#TimeRange)</code>
-Fetch the UTC flag, i.e. are the events in this TimeSeries in
-UTC or local time (if they are IndexedEvents an event might be
+Fetch the UTC flag, i.e. are the events in this `TimeSeries` in
+UTC or local time (if they are `IndexedEvent`s an event might be
 "2014-08-31". The actual time range of that representation
 depends on where you are. Pond supports thinking about that in
 either as a UTC day, or a local day).
@@ -374,10 +401,10 @@ Note: the order is not defined
 <a name="TimeSeries+collection"></a>
 
 ### timeSeries.collection() ⇒ <code>[Collection](#Collection)</code>
-Returns the internal collection of events for this TimeSeries
+Returns the internal `Collection` of events for this `TimeSeries`
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[Collection](#Collection)</code> - The collection backing this TimeSeries  
+**Returns**: <code>[Collection](#Collection)</code> - The collection backing this `TimeSeries`  
 <a name="TimeSeries+meta"></a>
 
 ### timeSeries.meta(key) ⇒ <code>object</code>
@@ -395,7 +422,8 @@ data as a JSON object, or a specific key if `key` is supplied.
 <a name="TimeSeries+setMeta"></a>
 
 ### timeSeries.setMeta()
-Rename the timeseries
+Set new meta data for the TimeSeries. The result will
+be a new TimeSeries.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+size"></a>
@@ -769,7 +797,7 @@ be per second. Optionally you can substitute in `null` values if the rate
 is negative. This is useful when a negative rate would be considered invalid.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting TimeSeries containing calculated rates.  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting `TimeSeries` containing calculated rates.  
 **Params**
 
 - options - An object containing options:
@@ -802,13 +830,13 @@ will aggregate both "in" and "out" using the average aggregation
 function and return the result as in_avg and out_avg.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up `TimeSeries`  
 **Params**
 
 - options - An object containing options:
     - .windowSize <code>string</code> - The size of the window. e.g. "6h" or "5m"
     - .aggregation <code>object</code> - The aggregation specification (see description above)
-    - .toEvents <code>bool</code> - Output as Events, rather than IndexedEvents
+    - .toTimeEvents <code>bool</code> - Output as `TimeEvent`s, rather than `IndexedEvent`s
 
 **Example**  
 ```
@@ -835,8 +863,8 @@ fieldNames to aggregation functions and their fieldPath. For example:
 **Params**
 
 - options - An object containing options:
-    - .toEvents <code>bool</code> - Convert the rollup events to `Events`, otherwise it
-                                             will be returned as a TimeSeries of `IndexedEvent`s.
+    - .toTimeEvents <code>bool</code> - Convert the rollup events to `TimeEvent`s, otherwise it
+                                             will be returned as a `TimeSeries` of `IndexedEvent`s.
     - .aggregation <code>object</code> - The aggregation specification (see description above)
 
 <a name="TimeSeries+dailyRollup"></a>
@@ -856,8 +884,8 @@ fieldNames to aggregation functions and their fieldPath. For example:
 **Params**
 
 - options - An object containing options:
-    - .toEvents <code>bool</code> - Convert the rollup events to `Events`, otherwise it
-                                             will be returned as a TimeSeries of `IndexedEvent`s.
+    - .toTimeEvents <code>bool</code> - Convert the rollup events to `TimeEvent`s, otherwise it
+                                             will be returned as a `TimeSeries` of `IndexedEvent`s.
     - .aggregation <code>object</code> - The aggregation specification (see description above)
 
 <a name="TimeSeries+monthlyRollup"></a>
@@ -873,12 +901,12 @@ fieldNames to aggregation functions and their fieldPath. For example:
 ```
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up `TimeSeries`  
 **Params**
 
 - options - An object containing options:
-    - .toEvents <code>bool</code> - Convert the rollup events to `Events`, otherwise it
-                                             will be returned as a TimeSeries of `IndexedEvent`s.
+    - .toTimeEvents <code>bool</code> - Convert the rollup events to `TimeEvent`s, otherwise it
+                                             will be returned as a `TimeSeries` of `IndexedEvent`s.
     - .aggregation <code>object</code> - The aggregation specification (see description above)
 
 <a name="TimeSeries+yearlyRollup"></a>
@@ -895,12 +923,12 @@ fieldNames to aggregation functions and their fieldPath. For example:
 ```
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up TimeSeries  
+**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up `TimeSeries`  
 **Params**
 
 - options - An object containing options:
-    - .toEvents <code>bool</code> - Convert the rollup events to `Events`, otherwise it
-                                             will be returned as a TimeSeries of `IndexedEvent`s.
+    - .toTimeEvents <code>bool</code> - Convert the rollup events to `TimeEvent`s, otherwise it
+                                             will be returned as a `TimeSeries` of `IndexedEvent`s.
     - .aggregation <code>object</code> - The aggregation specification (see description above)
 
 <a name="TimeSeries+collectByFixedWindow"></a>
@@ -923,6 +951,18 @@ const timeseries = new TimeSeries(data);
 const collections = timeseries.collectByFixedWindow({windowSize: "1d"});
 console.log(collections); // {1d-16314: Collection, 1d-16315: Collection, ...}
 ```
+<a name="TimeSeries.event"></a>
+
+### TimeSeries.event()
+Defines the event type contained in this TimeSeries. The default here
+is to use the supplied type (time, timerange or index) to build either
+a TimeEvent, TimeRangeEvent or IndexedEvent. However, you can also
+subclass the TimeSeries and reimplement this to return another event
+type. Typically you might want to do this to provide an Event subclass
+that carries its own schema, for better validated and compact Avro
+serialization.
+
+**Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries.equal"></a>
 
 ### TimeSeries.equal(series1, series2) ⇒ <code>bool</code>
@@ -949,13 +989,14 @@ are of the same value as each other then equals will return true.
 - series1 <code>[TimeSeries](#TimeSeries)</code>
 - series2 <code>[TimeSeries](#TimeSeries)</code>
 
-<a name="TimeSeries.timeseriesListReduce"></a>
+<a name="TimeSeries.timeSeriesListReduce"></a>
 
-### TimeSeries.timeseriesListReduce(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
+### TimeSeries.timeSeriesListReduce(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Reduces a list of TimeSeries objects using a reducer function. This works
 by taking each event in each TimeSeries and collecting them together
 based on timestamp. All events for a given time are then merged together
-using the reducer function to produce a new Event. Those Events are then
+using the reducer function to produce a new Event. The reducer function is
+applied to all columns in the fieldSpec. Those new Events are then
 collected together to form a new TimeSeries.
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -966,13 +1007,27 @@ collected together to form a new TimeSeries.
                                                values in the options will be added as meta data
                                                to the resulting TimeSeries.
     - .seriesList <code>array</code> - A list of `TimeSeries` (required)
-    - .reducer <code>function</code> - The reducer function (required)
-    - .fieldSpec <code>array</code> | <code>string</code> - Column or columns to sum. If you
+    - .reducer <code>function</code> - The reducer function e.g. `max()` (required)
+    - .fieldSpec <code>array</code> | <code>string</code> - Column or columns to reduce. If you
                                                need to retrieve multiple deep
                                                nested values that ['can.be', 'done.with',
                                                'this.notation']. A single deep value with a
                                                string.like.this.
 
+**Example**  
+For example you might have three TimeSeries with columns "in" and "out" which
+corresponds to two measurements per timestamp. You could use this function to
+obtain a new TimeSeries which was the sum of the the three measurements using
+the `sum()` reducer function and an ["in", "out"] fieldSpec.
+
+```
+const totalSeries = TimeSeries.timeSeriesListReduce({
+    name: "totals",
+    seriesList: [inTraffic, outTraffic],
+    reducer: sum(),
+    fieldSpec: [ "in", "out" ]
+});
+```
 <a name="TimeSeries.timeSeriesListMerge"></a>
 
 ### TimeSeries.timeSeriesListMerge(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
@@ -980,8 +1035,12 @@ Takes a list of TimeSeries and merges them together to form a new
 Timeseries.
 
 Merging will produce a new Event only when events are conflict free, so
-it is useful to combine multiple TimeSeries which have different time ranges
-as well as combine TimeSeries which have different columns.
+it is useful in the following cases:
+ * to combine multiple TimeSeries which have different time ranges, essentially
+ concatenating them together
+ * combine TimeSeries which have different columns, for example inTraffic has
+ a column "in" and outTraffic has a column "out" and you want to produce a merged
+ trafficSeries with columns "in" and "out".
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The merged TimeSeries  
@@ -1004,35 +1063,5 @@ const outTraffic = new TimeSeries(trafficDataOut);
 const trafficSeries = TimeSeries.timeSeriesListMerge({
     name: "traffic",
     seriesList: [inTraffic, outTraffic]
-});
-```
-<a name="TimeSeries.timeSeriesListSum"></a>
-
-### TimeSeries.timeSeriesListSum(options) ⇒ <code>[TimeSeries](#TimeSeries)</code>
-Takes a list of TimeSeries and sums them together to form a new
-Timeseries.
-
-**Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
-**Returns**: <code>[TimeSeries](#TimeSeries)</code> - The summed TimeSeries  
-**Params**
-
-- options - An object containing options. Additional key
-                                               values in the options will be added as meta data
-                                               to the resulting TimeSeries.
-    - .seriesList <code>array</code> - A list of `TimeSeries` (required)
-    - .fieldSpec <code>array</code> | <code>string</code> - Column or columns to sum. If you
-                                               need to retrieve multiple deep
-                                               nested values that ['can.be', 'done.with',
-                                               'this.notation']. A single deep value with a
-                                               string.like.this.
-
-**Example**  
-```
-const ts1 = new TimeSeries(weather1);
-const ts2 = new TimeSeries(weather2);
-const sum = TimeSeries.timeSeriesListSum({
-    name: "sum",
-    seriesList: [ts1, ts2],
-    fieldSpec: "temperature"
 });
 ```

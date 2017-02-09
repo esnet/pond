@@ -9,7 +9,6 @@
  */
 
 export default {
-
     highlightCodeBlocks() {
         const els = document.querySelectorAll("pre code");
         for (let i = 0; i < els.length; i++) {
@@ -18,12 +17,11 @@ export default {
             }
         }
     },
-
     componentDidMount() {
         this.highlightCodeBlocks();
     },
-
     componentDidUpdate() {
         this.highlightCodeBlocks();
     }
 };
+

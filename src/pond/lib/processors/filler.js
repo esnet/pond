@@ -11,9 +11,7 @@
 /*eslint no-console: 0 */
 
 import _ from "underscore";
-
 import Processor from "./processor";
-
 import { isPipeline } from "../pipeline";
 import util from "../base/util";
 
@@ -26,7 +24,6 @@ import util from "../base/util";
  * If no fieldSpec is supplied, the default field "value" will be used.
  */
 export default class Filler extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
@@ -36,7 +33,7 @@ export default class Filler extends Processor {
             this._method = other._method;
             this._limit = other._limit;
         } else if (isPipeline(arg1)) {
-            const {fieldSpec = null, method = "zero", limit = null} = options;
+            const { fieldSpec = null, method = "zero", limit = null } = options;
             this._fieldSpec = fieldSpec;
             this._method = method;
             this._limit = limit;
@@ -47,7 +44,6 @@ export default class Filler extends Processor {
         //
         // Internal members
         //
-        
         // state for pad to refer to previous event
         this._previousEvent = null;
 
@@ -63,8 +59,7 @@ export default class Filler extends Processor {
         //
         // Sanity checks
         //
-
-        if (!_.contains(["zero", "pad", "linear"], this._method)) {
+        if (!_.contains([ "zero", "pad", "linear" ], this._method)) {
             throw new Error(`Unknown method ${this._method} passed to Filler`);
         }
 
@@ -73,9 +68,9 @@ export default class Filler extends Processor {
         }
 
         if (_.isString(this._fieldSpec)) {
-            this._fieldSpec = [this._fieldSpec];
+            this._fieldSpec = [ this._fieldSpec ];
         } else if (_.isNull(this._fieldSpec)) {
-            this._fieldSpec = ["value"];
+            this._fieldSpec = [ "value" ];
         }
 
         // Special case: when using linear mode, only a single
@@ -83,7 +78,6 @@ export default class Filler extends Processor {
         if (this._method === "linear" && this._fieldSpec.length > 1) {
             throw new Error("Linear fill takes a path to a single column");
         }
-
     }
 
     clone() {
@@ -98,7 +92,6 @@ export default class Filler extends Processor {
         let newData = data;
 
         for (const path of this._fieldSpec) {
-
             const fieldPath = util.fieldPathToArray(path);
             const pathKey = fieldPath.join(":");
 
@@ -116,20 +109,21 @@ export default class Filler extends Processor {
             const val = newData.getIn(fieldPath);
 
             if (util.isMissing(val)) {
-
                 // Have we hit the limit?
-                if (this._limit &&
-                    this._keyCount[pathKey] >= this._limit) {
+                if (this._limit && this._keyCount[pathKey] >= this._limit) {
                     continue;
                 }
 
-                if (this._method === "zero") {       // set to zero
+                if (this._method === "zero") {
+                    // set to zero
                     newData = newData.setIn(fieldPath, 0);
                     this._keyCount[pathKey]++;
-                } else if (this._method === "pad") { // set to previous value
+                } else if (this._method === "pad") {
+                    // set to previous value
                     if (!_.isNull(this._previousEvent)) {
-                        const prevVal =
-                            this._previousEvent.data().getIn(fieldPath);
+                        const prevVal = this._previousEvent
+                            .data()
+                            .getIn(fieldPath);
 
                         if (!util.isMissing(prevVal)) {
                             newData = newData.setIn(fieldPath, prevVal);
@@ -197,17 +191,17 @@ export default class Filler extends Processor {
 
         const events = [];
         if (isValidEvent && !this._linearFillCache.length) {
-            
             // Valid event, no cached events, use as last good val
             this._lastGoodLinear = event;
             events.push(event);
-        
         } else if (!isValidEvent && !_.isNull(this._lastGoodLinear)) {
             this._linearFillCache.push(event);
 
             // Check limit
-            if (!_.isNull(this._limit) && this._linearFillCache.length >= this._limit) {
-
+            if (
+                !_.isNull(this._limit) &&
+                    this._linearFillCache.length >= this._limit
+            ) {
                 // Flush the cache now because limit is reached
                 this._linearFillCache.forEach(e => {
                     this.emit(e);
@@ -217,21 +211,20 @@ export default class Filler extends Processor {
                 this._linearFillCache = [];
                 this._lastGoodLinear = null;
             }
-        
         } else if (!isValidEvent && _.isNull(this._lastGoodLinear)) {
-            
             //
             // An invalid event but we have not seen a good
             // event yet so there is nothing to start filling "from"
             // so just return and live with it.
             //
-            
             events.push(event);
-
         } else if (isValidEvent && this._linearFillCache) {
-
             // Linear interpolation between last good and this event
-            const eventList = [this._lastGoodLinear, ...this._linearFillCache, event];
+            const eventList = [
+                this._lastGoodLinear,
+                ...this._linearFillCache,
+                event
+            ];
             const interpolatedEvents = this.interpolateEventList(eventList);
 
             //
@@ -239,7 +232,6 @@ export default class Filler extends Processor {
             // is our last good event. This event has already been emitted so
             // it is sliced off.
             //
-            
             interpolatedEvents.slice(1).forEach(e => {
                 events.push(e);
             });
@@ -290,14 +282,18 @@ export default class Filler extends Processor {
             }
 
             // Detect non-numeric value
-            if (!util.isMissing(e.get(fieldPath)) && !_.isNumber(e.get(fieldPath))) {
-                console.warn(`linear requires numeric values - skipping this field_spec`);
+            if (
+                !util.isMissing(e.get(fieldPath)) &&
+                    !_.isNumber(e.get(fieldPath))
+            ) {
+                console.warn(
+                    `linear requires numeric values - skipping this field_spec`
+                );
                 return events;
             }
 
             // Found a missing value so start calculating.
             if (util.isMissing(e.get(fieldPath))) {
-
                 // Find the next valid value in the original events
                 let ii = i + 1;
                 let nextValue = null;
@@ -305,7 +301,8 @@ export default class Filler extends Processor {
                 while (_.isNull(nextValue) && ii < events.length) {
                     const val = events[ii].get(fieldPath);
                     if (!util.isMissing(val)) {
-                        nextValue = val; // exits loop
+                        nextValue = val;
+                        // exits loop
                         nextTime = events[ii].timestamp().getTime();
                     }
                     ii++;
@@ -319,8 +316,10 @@ export default class Filler extends Processor {
                         const newValue = (prevValue + nextValue) / 2;
                         newEvents.push(e.setData(newValue));
                     } else {
-                        const f = (currentTime - prevTime) / (nextTime - prevTime);
-                        const newValue = prevValue + f * (nextValue - prevValue);
+                        const f = (currentTime - prevTime) /
+                            (nextTime - prevTime);
+                        const newValue = prevValue +
+                            f * (nextValue - prevValue);
                         const d = e.data().setIn(fieldPath, newValue);
                         newEvents.push(e.setData(d));
                     }
@@ -367,3 +366,4 @@ export default class Filler extends Processor {
         super.flush();
     }
 }
+

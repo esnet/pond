@@ -11,7 +11,6 @@
 import _ from "underscore";
 
 import Processor from "./processor";
-
 import Collector from "../collector";
 import IndexedEvent from "../indexedevent";
 import TimeRangeEvent from "../timerangeevent";
@@ -23,24 +22,19 @@ import { isPipeline } from "../pipeline";
  * emitted from the Collector it is aggregated into a new event
  * and emitted from this Processor.
  */
-
 class Aggregator extends Processor {
-
     constructor(arg1, options) {
         super(arg1, options);
 
         if (arg1 instanceof Aggregator) {
-            
             const other = arg1;
-            
+
             this._fields = other._fields;
             this._windowType = other._windowType;
             this._windowDuration = other._windowDuration;
             this._groupBy = other._groupBy;
             this._emitOn = other._emitOn;
-
         } else if (isPipeline(arg1)) {
-
             const pipeline = arg1;
 
             this._windowType = pipeline.getWindowType();
@@ -49,35 +43,44 @@ class Aggregator extends Processor {
             this._emitOn = pipeline.getEmitOn();
 
             if (!_.has(options, "fields")) {
-                throw new Error("Aggregator: constructor needs an aggregator field mapping");
+                throw new Error(
+                    "Aggregator: constructor needs an aggregator field mapping"
+                );
             }
 
             // Check each of the aggregator -> field mappings
             _.forEach(options.fields, (operator, field) => {
                 // Field should either be an array or a string
                 if (!_.isString(field) && !_.isArray(field)) {
-                    throw new Error("Aggregator: field of unknown type: " + field);
+                    throw new Error(
+                        "Aggregator: field of unknown type: " + field
+                    );
                 }
             });
 
             if (pipeline.mode() === "stream") {
-                if (!pipeline.getWindowType() || !pipeline.getWindowDuration()) {
-                    throw new Error("Unable to aggregate because no windowing strategy was specified in pipeline");
+                if (
+                    !pipeline.getWindowType() || !pipeline.getWindowDuration()
+                ) {
+                    throw new Error(
+                        "Unable to aggregate because no windowing strategy was specified in pipeline"
+                    );
                 }
             }
             this._fields = options.fields;
-
         } else {
             throw new Error("Unknown arg to Filter constructor", arg1);
         }
 
-        this._collector = new Collector({
-            windowType: this._windowType,
-            windowDuration: this._windowDuration,
-            groupBy: this._groupBy,
-            emitOn: this._emitOn
-        }, (collection, windowKey, groupByKey) =>
-            this.handleTrigger(collection, windowKey, groupByKey)
+        this._collector = new Collector(
+            {
+                windowType: this._windowType,
+                windowDuration: this._windowDuration,
+                groupBy: this._groupBy,
+                emitOn: this._emitOn
+            },
+            (collection, windowKey, groupByKey) =>
+                this.handleTrigger(collection, windowKey, groupByKey)
         );
     }
 
@@ -123,3 +126,4 @@ class Aggregator extends Processor {
 }
 
 export default Aggregator;
+

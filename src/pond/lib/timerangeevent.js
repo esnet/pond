@@ -10,7 +10,9 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
+import Event from "./event";
 import TimeRange from "./timerange";
+import util from "./base/util";
 
 /**
  * A TimeRangeEvent uses a TimeRange to specify the range over
@@ -34,8 +36,7 @@ import TimeRange from "./timerange";
  * to return a Javascript object representation of the data, while
  * `toString()` will serialize the entire event to a string.
  */
-class TimeRangeEvent {
-
+class TimeRangeEvent extends Event {
     /**
      * The creation of an TimeRangeEvent is done by combining two parts:
      * the timerange and the data.
@@ -49,17 +50,39 @@ class TimeRangeEvent {
      *       this is a shorthand for supplying {"value": v}.
      */
     constructor(arg1, arg2) {
+        super();
+
         if (arg1 instanceof TimeRangeEvent) {
             const other = arg1;
             this._d = other._d;
+            return;
+        } else if (arg1 instanceof Buffer) {
+            let avroData;
+            try {
+                avroData = this.schema().fromBuffer(arg1);
+            } catch (err) {
+                console.error(
+                    "Unable to convert supplied avro buffer to event"
+                );
+            }
+            const range = new TimeRange(avroData.timerange);
+            const data = new Immutable.Map(avroData.data);
+            this._d = new Immutable.Map({ range, data });
             return;
         } else if (arg1 instanceof Immutable.Map) {
             this._d = arg1;
             return;
         }
-        const range = timeRangeFromArg(arg1);
-        const data = dataFromArg(arg2);
-        this._d = new Immutable.Map({range, data});
+        const range = util.timeRangeFromArg(arg1);
+        const data = util.dataFromArg(arg2);
+        this._d = new Immutable.Map({ range, data });
+    }
+
+    /**
+     * Returns the timerange as a string
+     */
+    key() {
+        return `${+this.timerange().begin()},${+this.timerange().end()}`;
     }
 
     toJSON() {
@@ -69,22 +92,22 @@ class TimeRangeEvent {
         };
     }
 
-    toString() {
-        return JSON.stringify(this.toJSON());
+    /**
+     * For Avro serialization, this defines the event's key
+     * (the TimeRange as an array)
+     */
+    static keySchema() {
+        return { name: "timerange", type: { type: "array", items: "long" } };
     }
 
     //
     // Access the timerange represented by the index
     //
-
     /**
      * Returns a flat array starting with the timestamp, followed by the values.
      */
     toPoint() {
-        return [
-            this.timerange().toJSON(),
-            ..._.values(this.data().toJSON())
-        ];
+        return [ this.timerange().toJSON(), ..._.values(this.data().toJSON()) ];
     }
 
     /**
@@ -96,24 +119,7 @@ class TimeRangeEvent {
     }
 
     /**
-     * Access the event data
-     * @return {Immutable.Map} Data for the Event
-     */
-    data() {
-        return this._d.get("data");
-    }
-
-    /**
-     * Sets the data portion of the event and
-     * returns a new TimeRangeEvent.
-     */
-    setData(data) {
-        const d = this._d.set("data", dataFromArg(data));
-        return new TimeRangeEvent(d);
-    }
-
-    /**
-     * The TimeRange of this data, in UTC, as a string.
+     * The TimeRange of this event, in UTC, as a string.
      * @return {string} TimeRange of this data.
      */
     timerangeAsUTCString() {
@@ -121,7 +127,7 @@ class TimeRangeEvent {
     }
 
     /**
-     * The TimeRange of this data, in Local time, as a string.
+     * The TimeRange of this event, in Local time, as a string.
      * @return {string} TimeRange of this data.
      */
     timerangeAsLocalString() {
@@ -155,71 +161,7 @@ class TimeRangeEvent {
     humanizeDuration() {
         return this.timerange().humanizeDuration();
     }
-
-    /**
-     * Get specific data out of the Event. The data will be converted
-     * to a js object. You can use a fieldSpec to address deep data.
-     * A fieldSpec could be "a.b"
-     */
-    get(fieldSpec = ["value"]) {
-        let v;
-        if (_.isArray(fieldSpec)) {
-            v = this.data().getIn(fieldSpec);
-        } else if (_.isString(fieldSpec)) {
-            const searchKeyPath = fieldSpec.split(".");
-            v = this.data().getIn(searchKeyPath);
-        }
-
-        if (v instanceof Immutable.Map || v instanceof Immutable.List) {
-            return v.toJS();
-        }
-        return v;
-    }
-
-    value(fieldSpec) {
-        return this.get(fieldSpec);
-    }
-
-    /**
-     * Collapses this event's columns, represented by the fieldSpecList
-     * into a single column. The collapsing itself is done with the reducer
-     * function. Optionally the collapsed column could be appended to the
-     * existing columns, or replace them (the default).
-     */
-    collapse(fieldSpecList, name, reducer, append = false) {
-        const data = append ? this.data().toJS() : {};
-        const d = fieldSpecList.map(fs => this.get(fs));
-        data[name] = reducer(d);
-        return this.setData(data);
-    }
-}
-
-function timeRangeFromArg(arg) {
-    if (arg instanceof TimeRange) {
-        return arg;
-    } else if (_.isArray(arg) && arg.length === 2) {
-        return new TimeRange(arg);
-    } else {
-        throw new Error(`Unable to parse timerange. Should be a TimeRange. Got ${arg}.`);
-    }
-}
-
-function dataFromArg(arg) {
-    let data;
-    if (_.isObject(arg)) {
-        // Deeply convert the data to Immutable Map
-        data = new Immutable.fromJS(arg);
-    } else if (data instanceof Immutable.Map) {
-        // Copy reference to the data
-        data = arg;
-    } else if (_.isNumber(arg) || _.isString(arg)) {
-        // Just add it to the value key of a new Map
-        // e.g. new Event(t, 25); -> t, {value: 25}
-        data = new Immutable.Map({value: arg});
-    } else {
-        throw new Error(`Unable to interpret event data from ${arg}.`);
-    }
-    return data;
 }
 
 export default TimeRangeEvent;
+

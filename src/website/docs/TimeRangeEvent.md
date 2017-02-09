@@ -26,17 +26,17 @@ to return a Javascript object representation of the data, while
 
 * [TimeRangeEvent](#TimeRangeEvent)
     * [new TimeRangeEvent()](#new_TimeRangeEvent_new)
-    * [.toPoint()](#TimeRangeEvent+toPoint)
-    * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
-    * [.data()](#TimeRangeEvent+data) ⇒ <code>Immutable.Map</code>
-    * [.setData()](#TimeRangeEvent+setData)
-    * [.timerangeAsUTCString()](#TimeRangeEvent+timerangeAsUTCString) ⇒ <code>string</code>
-    * [.timerangeAsLocalString()](#TimeRangeEvent+timerangeAsLocalString) ⇒ <code>string</code>
-    * [.begin()](#TimeRangeEvent+begin) ⇒ <code>Data</code>
-    * [.end()](#TimeRangeEvent+end) ⇒ <code>Data</code>
-    * [.timestamp()](#TimeRangeEvent+timestamp) ⇒ <code>Data</code>
-    * [.get()](#TimeRangeEvent+get)
-    * [.collapse()](#TimeRangeEvent+collapse)
+    * _instance_
+        * [.key()](#TimeRangeEvent+key)
+        * [.toPoint()](#TimeRangeEvent+toPoint)
+        * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
+        * [.timerangeAsUTCString()](#TimeRangeEvent+timerangeAsUTCString) ⇒ <code>string</code>
+        * [.timerangeAsLocalString()](#TimeRangeEvent+timerangeAsLocalString) ⇒ <code>string</code>
+        * [.begin()](#TimeRangeEvent+begin) ⇒ <code>Data</code>
+        * [.end()](#TimeRangeEvent+end) ⇒ <code>Data</code>
+        * [.timestamp()](#TimeRangeEvent+timestamp) ⇒ <code>Data</code>
+    * _static_
+        * [.keySchema()](#TimeRangeEvent.keySchema)
 
 <a name="new_TimeRangeEvent_new"></a>
 
@@ -52,6 +52,12 @@ To specify the data you can supply either:
     - a simple type such as an integer. In the case of the simple type
       this is a shorthand for supplying {"value": v}.
 
+<a name="TimeRangeEvent+key"></a>
+
+### timeRangeEvent.key()
+Returns the timerange as a string
+
+**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 <a name="TimeRangeEvent+toPoint"></a>
 
 ### timeRangeEvent.toPoint()
@@ -65,31 +71,17 @@ The TimeRange of this data
 
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 **Returns**: <code>[TimeRange](#TimeRange)</code> - TimeRange of this data.  
-<a name="TimeRangeEvent+data"></a>
-
-### timeRangeEvent.data() ⇒ <code>Immutable.Map</code>
-Access the event data
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-**Returns**: <code>Immutable.Map</code> - Data for the Event  
-<a name="TimeRangeEvent+setData"></a>
-
-### timeRangeEvent.setData()
-Sets the data portion of the event and
-returns a new TimeRangeEvent.
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 <a name="TimeRangeEvent+timerangeAsUTCString"></a>
 
 ### timeRangeEvent.timerangeAsUTCString() ⇒ <code>string</code>
-The TimeRange of this data, in UTC, as a string.
+The TimeRange of this event, in UTC, as a string.
 
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 **Returns**: <code>string</code> - TimeRange of this data.  
 <a name="TimeRangeEvent+timerangeAsLocalString"></a>
 
 ### timeRangeEvent.timerangeAsLocalString() ⇒ <code>string</code>
-The TimeRange of this data, in Local time, as a string.
+The TimeRange of this event, in Local time, as a string.
 
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 **Returns**: <code>string</code> - TimeRange of this data.  
@@ -114,20 +106,10 @@ Alias for the begin() time.
 
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
 **Returns**: <code>Data</code> - Time representing this Event  
-<a name="TimeRangeEvent+get"></a>
+<a name="TimeRangeEvent.keySchema"></a>
 
-### timeRangeEvent.get()
-Get specific data out of the Event. The data will be converted
-to a js object. You can use a fieldSpec to address deep data.
-A fieldSpec could be "a.b"
+### TimeRangeEvent.keySchema()
+For Avro serialization, this defines the event's key
+(the TimeRange as an array)
 
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-<a name="TimeRangeEvent+collapse"></a>
-
-### timeRangeEvent.collapse()
-Collapses this event's columns, represented by the fieldSpecList
-into a single column. The collapsing itself is done with the reducer
-function. Optionally the collapsed column could be appended to the
-existing columns, or replace them (the default).
-
-**Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
+**Kind**: static method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  

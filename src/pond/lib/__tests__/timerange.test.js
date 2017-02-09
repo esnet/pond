@@ -19,7 +19,6 @@ const fmt2 = "YYYY-MM-DD HH:mm:ss";
 //
 // Creation
 //
-
 it("can create a new range with a begin and end time", () => {
     const beginTime = moment("2012-01-11 11:11", fmt).toDate();
     const endTime = moment("2012-02-22 12:12", fmt).toDate();
@@ -29,8 +28,8 @@ it("can create a new range with a begin and end time", () => {
 });
 
 it("can create a new range with two UNIX epoch times in an array", () => {
-    const range = new TimeRange([1326309060000, 1329941520000]);
-    expect(range.toJSON()).toEqual([1326309060000, 1329941520000]);
+    const range = new TimeRange([ 1326309060000, 1329941520000 ]);
+    expect(range.toJSON()).toEqual([ 1326309060000, 1329941520000 ]);
 });
 
 it("can be used to give a new range", () => {
@@ -48,12 +47,11 @@ it("can be used to give a new range", () => {
 //
 // Serialization
 //
-
 it("can output JSON in the correct format", () => {
     const beginTime = moment.utc("2012-01-11 11:11", fmt).toDate();
     const endTime = moment.utc("2012-02-22 12:12", fmt).toDate();
     const range = new TimeRange(beginTime, endTime);
-    expect(range.toJSON()).toEqual([1326280260000, 1329912720000]);
+    expect(range.toJSON()).toEqual([ 1326280260000, 1329912720000 ]);
 });
 
 it("can output a string representation", () => {
@@ -66,7 +64,6 @@ it("can output a string representation", () => {
 //
 // Display
 //
-
 it("can display a range as a human friendly string", () => {
     const beginTime = moment("2014-08-01 05:19:59", fmt2).toDate();
     const endTime = moment("2014-08-01 07:41:06", fmt2).toDate();
@@ -108,7 +105,6 @@ it("can display last 90 days as a human friendly string", () => {
 //
 // Mutation
 //
-
 it("can be mutatated to form a new range", () => {
     const beginTime = moment("2012-01-11 1:11", fmt).toDate();
     const endTime = moment("2012-02-12 2:12", fmt).toDate();
@@ -124,7 +120,6 @@ it("can be mutatated to form a new range", () => {
 //
 // Compare
 //
-
 it("can be compared to see if they are equal", () => {
     const ta = moment("2010-01-01 12:00", fmt).toDate();
     const tb = moment("2010-02-01 12:00", fmt).toDate();
@@ -163,17 +158,20 @@ it("can be compared for overlap to an overlapping range", () => {
     expect(range2.overlaps(range1)).toBeTruthy();
 });
 
-it("can be compared for containment to an range contained within it completely", () => {
-    const ta = moment("2010-01-01 12:00", fmt).toDate();
-    const tb = moment("2010-09-01 12:00", fmt).toDate();
-    const range1 = new TimeRange(ta, tb);
+it(
+    "can be compared for containment to an range contained within it completely",
+    () => {
+        const ta = moment("2010-01-01 12:00", fmt).toDate();
+        const tb = moment("2010-09-01 12:00", fmt).toDate();
+        const range1 = new TimeRange(ta, tb);
 
-    const td = moment("2010-03-15 12:00", fmt).toDate();
-    const te = moment("2010-06-15 12:00", fmt).toDate();
-    const range2 = new TimeRange(td, te);
+        const td = moment("2010-03-15 12:00", fmt).toDate();
+        const te = moment("2010-06-15 12:00", fmt).toDate();
+        const range2 = new TimeRange(td, te);
 
-    expect(range1.contains(range2)).toBeTruthy();
-});
+        expect(range1.contains(range2)).toBeTruthy();
+    }
+);
 
 it("can be compared for containment to an overlapping range", () => {
     const ta = moment("2010-01-01 12:00", fmt).toDate();
@@ -190,7 +188,6 @@ it("can be compared for containment to an overlapping range", () => {
 //
 // Compare TimeRanges relative to each other
 //
-
 it("can be compared to a time before the range", () => {
     const ta = moment("2010-06-01 12:00", fmt).toDate();
     const tb = moment("2010-08-01 12:00", fmt).toDate();
@@ -238,20 +235,39 @@ it("can be a new range if the ranges intersect", () => {
     const endTimeOverlap = moment("2010-07-01 12:00", fmt).toDate();
     const rangeOverlap = new TimeRange(beginTimeOverlap, endTimeOverlap);
     const expected = new TimeRange(beginTimeOverlap, endTime);
-    expect(range.intersection(rangeOverlap).toString()).toBe(expected.toString());
+    expect(
+        range.intersection(rangeOverlap).toString()
+    ).toBe(expected.toString());
 });
 
-it("can be a new range (the smaller range) if one range surrounds another", () => {
-    // One range fully inside the other intersect() returns the smaller range
-    //    01 -------06    range
-    //       02--04       rangeInside
-    //       02--04       intersection
+it(
+    "can be a new range (the smaller range) if one range surrounds another",
+    () => {
+        // One range fully inside the other intersect() returns the smaller range
+        //    01 -------06    range
+        //       02--04       rangeInside
+        //       02--04       intersection
+        const beginTime = moment("2010-01-01 12:00", fmt).toDate();
+        const endTime = moment("2010-06-01 12:00", fmt).toDate();
+        const range = new TimeRange(beginTime, endTime);
+        const beginTimeInside = moment("2010-02-01 12:00", fmt).toDate();
+        const endTimeInside = moment("2010-04-01 12:00", fmt).toDate();
+        const rangeInside = new TimeRange(beginTimeInside, endTimeInside);
+        expect(
+            range.intersection(rangeInside).toString()
+        ).toBe(rangeInside.toString());
+        expect(
+            rangeInside.intersection(range).toString()
+        ).toBe(rangeInside.toString());
+    }
+);
+
+it("can convert the timeseries to avro", () => {
     const beginTime = moment("2010-01-01 12:00", fmt).toDate();
     const endTime = moment("2010-06-01 12:00", fmt).toDate();
-    const range = new TimeRange(beginTime, endTime);
-    const beginTimeInside = moment("2010-02-01 12:00", fmt).toDate();
-    const endTimeInside = moment("2010-04-01 12:00", fmt).toDate();
-    const rangeInside = new TimeRange(beginTimeInside, endTimeInside);
-    expect(range.intersection(rangeInside).toString()).toBe(rangeInside.toString());
-    expect(rangeInside.intersection(range).toString()).toBe(rangeInside.toString());
+    const range1 = new TimeRange(beginTime, endTime);
+    const serialized = range1.toAvro();
+    const range2 = new TimeRange(serialized);
+    expect(range1.equals(range2)).toBeTruthy();
 });
+
