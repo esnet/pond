@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -79,7 +79,7 @@ class TimeRange {
                     new Date(e.valueOf())
                 ]);
             } else if (_.isNumber(b) && _.isNumber(e)) {
-                this._range = new Immutable.List([ new Date(b), new Date(e) ]);
+                this._range = new Immutable.List([new Date(b), new Date(e)]);
             }
         }
     }
@@ -112,7 +112,7 @@ class TimeRange {
      * @return {number[]} JSON representation of the TimeRange
      */
     toJSON() {
-        return [ this.begin().getTime(), this.end().getTime() ];
+        return [this.begin().getTime(), this.end().getTime()];
     }
 
     /**
@@ -374,4 +374,3 @@ class TimeRange {
 }
 
 export default TimeRange;
-

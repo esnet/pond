@@ -7,11 +7,11 @@ In this example we have an simulated incoming stream of measurements, represente
 To do this, each event is generated semi-randomly, but they could be coming from a real source. We add a new Event for each minute, but emit 5 per second to speed up the simulation. Essentially we do this:
 
 ```js
-import { Event } from "pondjs";
+import { TimeEvent } from "pondjs";
 
 const value = getRandomValue();
 const time = getNextTime();
-const event = new Event(t, value);
+const event = new TimeEvent(t, value);
 ```
 
 Now we want to do some things with that Event:

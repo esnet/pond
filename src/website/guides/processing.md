@@ -7,7 +7,7 @@ While Pond started life as a data structure library, as it grew up we discovered
 
 As a parallel requirement we were interested in providing a TimeSeries orientated approach to processing data on the cloud. Our first venture into this was with AWS Kinesis, which we wanted to process events in TimeSeries specific ways and then output new events as a result.
 
-From the need for better framework to build up our TimeSeries processing capabilities, combined with our need to process streams of Events, grew a pipeline mechanism in Pond.
+From the need for better framework to build up our TimeSeries processing capabilities, combined with our need to process streams of events, grew a pipeline mechanism in Pond.
 
 ### Pipelines
 
@@ -47,7 +47,7 @@ Finally, if the input is a TimeSeries, this is just a special case of a bounded 
 
 Pond contains a growing collection of processing nodes. These nodes are constructed using chained methods on the pipeline itself. You do not need to initialize the processing nodes themselves manually. However, it's worth understanding that behind the scenes you are constructing a chain of processing nodes.
 
-All processing nodes take incoming events and output new events. Events may be Pond Events, TimeRangeEvents or IndexedEvents, depending on the type of processor. For instance if you calculate the `rate()` (change over time) between incoming events, the output will be a TimeRangeEvent because the rate value applies to a time range. Events can be converted within the chain using the Converter node (`pipeline.asEvents()`, `pipeline.asTimeRangeEvents()` and `pipeline.asIndexedEvents()`).
+All processing nodes take incoming events and output new events. Events may be Pond TimeEvents, TimeRangeEvents or IndexedEvents, depending on the type of processor. For instance if you calculate the `rate()` (change over time) between incoming events, the output will be a TimeRangeEvent because the rate value applies to a time range. Events can be converted within the chain using the Converter node (`pipeline.asTimeEvents()`, `pipeline.asTimeRangeEvents()` and `pipeline.asIndexedEvents()`).
 
 Current processors:
 

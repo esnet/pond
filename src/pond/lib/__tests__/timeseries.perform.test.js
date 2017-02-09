@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -32,7 +32,7 @@ it("can take 80 interfaces and sum them together in less than 2 sec", () => {
         name: "sum",
         seriesList: list,
         reducer: sum(),
-        fieldSpec: [ "in", "out" ]
+        fieldSpec: ["in", "out"]
     });
     const end = new Date().getTime();
     //console.log("Time", (end - begin)/1000, "sec");
@@ -63,4 +63,3 @@ it("can take 80 interfaces and sum them together in less than 2 sec", () => {
     // Disabled this test because there's no way to get this consistent on travis
     //expect(end - begin).toBeLessThan(120);
 });
-

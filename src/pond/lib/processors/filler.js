@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -59,7 +59,7 @@ export default class Filler extends Processor {
         //
         // Sanity checks
         //
-        if (!_.contains([ "zero", "pad", "linear" ], this._method)) {
+        if (!_.contains(["zero", "pad", "linear"], this._method)) {
             throw new Error(`Unknown method ${this._method} passed to Filler`);
         }
 
@@ -68,9 +68,9 @@ export default class Filler extends Processor {
         }
 
         if (_.isString(this._fieldSpec)) {
-            this._fieldSpec = [ this._fieldSpec ];
+            this._fieldSpec = [this._fieldSpec];
         } else if (_.isNull(this._fieldSpec)) {
-            this._fieldSpec = [ "value" ];
+            this._fieldSpec = ["value"];
         }
 
         // Special case: when using linear mode, only a single
@@ -366,4 +366,3 @@ export default class Filler extends Processor {
         super.flush();
     }
 }
-

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -28,8 +28,8 @@ it("can create a new range with a begin and end time", () => {
 });
 
 it("can create a new range with two UNIX epoch times in an array", () => {
-    const range = new TimeRange([ 1326309060000, 1329941520000 ]);
-    expect(range.toJSON()).toEqual([ 1326309060000, 1329941520000 ]);
+    const range = new TimeRange([1326309060000, 1329941520000]);
+    expect(range.toJSON()).toEqual([1326309060000, 1329941520000]);
 });
 
 it("can be used to give a new range", () => {
@@ -51,7 +51,7 @@ it("can output JSON in the correct format", () => {
     const beginTime = moment.utc("2012-01-11 11:11", fmt).toDate();
     const endTime = moment.utc("2012-02-22 12:12", fmt).toDate();
     const range = new TimeRange(beginTime, endTime);
-    expect(range.toJSON()).toEqual([ 1326280260000, 1329912720000 ]);
+    expect(range.toJSON()).toEqual([1326280260000, 1329912720000]);
 });
 
 it("can output a string representation", () => {
@@ -235,9 +235,9 @@ it("can be a new range if the ranges intersect", () => {
     const endTimeOverlap = moment("2010-07-01 12:00", fmt).toDate();
     const rangeOverlap = new TimeRange(beginTimeOverlap, endTimeOverlap);
     const expected = new TimeRange(beginTimeOverlap, endTime);
-    expect(
-        range.intersection(rangeOverlap).toString()
-    ).toBe(expected.toString());
+    expect(range.intersection(rangeOverlap).toString()).toBe(
+        expected.toString()
+    );
 });
 
 it(
@@ -253,12 +253,12 @@ it(
         const beginTimeInside = moment("2010-02-01 12:00", fmt).toDate();
         const endTimeInside = moment("2010-04-01 12:00", fmt).toDate();
         const rangeInside = new TimeRange(beginTimeInside, endTimeInside);
-        expect(
-            range.intersection(rangeInside).toString()
-        ).toBe(rangeInside.toString());
-        expect(
-            rangeInside.intersection(range).toString()
-        ).toBe(rangeInside.toString());
+        expect(range.intersection(rangeInside).toString()).toBe(
+            rangeInside.toString()
+        );
+        expect(rangeInside.intersection(range).toString()).toBe(
+            rangeInside.toString()
+        );
     }
 );
 
@@ -270,4 +270,3 @@ it("can convert the timeseries to avro", () => {
     const range2 = new TimeRange(serialized);
     expect(range1.equals(range2)).toBeTruthy();
 });
-

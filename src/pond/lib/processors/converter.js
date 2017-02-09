@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -97,7 +97,7 @@ export default class Converter extends Processor {
                 default:
                     throw new Error("Unknown alignment of converter");
             }
-            const timeRange = new TimeRange([ begin, end ]);
+            const timeRange = new TimeRange([begin, end]);
             return new T(timeRange, event.data());
         } else if (isSubclass(IndexedEvent, T)) {
             const timestamp = event.timestamp();
@@ -194,4 +194,3 @@ export default class Converter extends Processor {
         }
     }
 }
-

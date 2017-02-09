@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -171,4 +171,3 @@ it("can express the collection events as a map", () => {
     expect(dedup.at(1).get("in")).toBe(4);
     expect(dedup.at(2).get("in")).toBe(5);
 });
-

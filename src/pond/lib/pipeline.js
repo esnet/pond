@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -98,7 +98,7 @@ class Runner {
         // processing pipeline. We run this execution chain later by
         // evoking start().
         //
-        this._executionChain = [ this._output ];
+        this._executionChain = [this._output];
         let prev = this._output;
         processChain.forEach(p => {
             if (p instanceof Processor) {
@@ -912,4 +912,3 @@ function is(p) {
 }
 
 export { pipeline as Pipeline, is as isPipeline };
-

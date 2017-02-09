@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -93,9 +93,9 @@ export default class Collector {
             };
             discard = true;
         }
-        this._collections[collectionKey].collection = this._collections[collectionKey].collection.addEvent(
-            event
-        );
+        this._collections[collectionKey].collection = this._collections[
+            collectionKey
+        ].collection.addEvent(event);
 
         //
         // If fixed windows, collect together old collections that
@@ -128,4 +128,3 @@ export default class Collector {
         }
     }
 }
-

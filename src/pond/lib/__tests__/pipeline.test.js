@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -38,145 +38,145 @@ const EVENT_LIST = [
 
 const TRAFFIC_DATA = {
     name: "traffic",
-    columns: [ "time", "value" ],
+    columns: ["time", "value"],
     points: [
-        [ 1409529600000, 80 ],
-        [ 1409533200000, 88 ],
-        [ 1409536800000, 52 ],
-        [ 1409540400000, 80 ],
+        [1409529600000, 80],
+        [1409533200000, 88],
+        [1409536800000, 52],
+        [1409540400000, 80],
         // < 50
-        [ 1409544000000, 26 ],
+        [1409544000000, 26],
         //1
-        [ 1409547600000, 37 ],
+        [1409547600000, 37],
         //2
-        [ 1409551200000, 6 ],
+        [1409551200000, 6],
         //3
-        [ 1409554800000, 32 ],
+        [1409554800000, 32],
         //4
-        [ 1409558400000, 69 ],
-        [ 1409562000000, 21 ],
+        [1409558400000, 69],
+        [1409562000000, 21],
         //5
-        [ 1409565600000, 6 ],
+        [1409565600000, 6],
         //6
-        [ 1409569200000, 54 ],
-        [ 1409572800000, 88 ],
-        [ 1409576400000, 41 ],
+        [1409569200000, 54],
+        [1409572800000, 88],
+        [1409576400000, 41],
         //7
-        [ 1409580000000, 35 ],
+        [1409580000000, 35],
         //8
-        [ 1409583600000, 43 ],
+        [1409583600000, 43],
         //9
-        [ 1409587200000, 84 ],
-        [ 1409590800000, 32 ],
+        [1409587200000, 84],
+        [1409590800000, 32],
         //10  avg= (26 + 37 + 6 + 32 + 21 + 6 + 41 + 35 + 43 + 32)/10 = 27.9
-        [ 1409594400000, 41 ],
-        [ 1409598000000, 57 ],
-        [ 1409601600000, 27 ],
-        [ 1409605200000, 50 ],
-        [ 1409608800000, 13 ],
-        [ 1409612400000, 63 ],
-        [ 1409616000000, 58 ],
-        [ 1409619600000, 80 ],
-        [ 1409623200000, 59 ],
-        [ 1409626800000, 96 ],
-        [ 1409630400000, 2 ],
-        [ 1409634000000, 20 ],
-        [ 1409637600000, 64 ],
-        [ 1409641200000, 7 ],
-        [ 1409644800000, 50 ],
-        [ 1409648400000, 88 ],
-        [ 1409652000000, 34 ],
-        [ 1409655600000, 31 ],
-        [ 1409659200000, 16 ],
-        [ 1409662800000, 38 ],
-        [ 1409666400000, 94 ],
-        [ 1409670000000, 78 ],
-        [ 1409673600000, 86 ],
-        [ 1409677200000, 13 ],
-        [ 1409680800000, 34 ],
-        [ 1409684400000, 29 ],
-        [ 1409688000000, 48 ],
-        [ 1409691600000, 80 ],
-        [ 1409695200000, 30 ],
-        [ 1409698800000, 15 ],
-        [ 1409702400000, 62 ],
-        [ 1409706000000, 66 ],
-        [ 1409709600000, 44 ],
-        [ 1409713200000, 94 ],
-        [ 1409716800000, 78 ],
-        [ 1409720400000, 29 ],
-        [ 1409724000000, 21 ],
-        [ 1409727600000, 4 ],
-        [ 1409731200000, 83 ],
-        [ 1409734800000, 15 ],
-        [ 1409738400000, 89 ],
-        [ 1409742000000, 53 ],
-        [ 1409745600000, 70 ],
-        [ 1409749200000, 41 ],
-        [ 1409752800000, 47 ],
-        [ 1409756400000, 30 ],
-        [ 1409760000000, 68 ],
-        [ 1409763600000, 89 ],
-        [ 1409767200000, 29 ],
-        [ 1409770800000, 17 ],
-        [ 1409774400000, 38 ],
-        [ 1409778000000, 67 ],
-        [ 1409781600000, 75 ],
-        [ 1409785200000, 89 ],
-        [ 1409788800000, 47 ],
-        [ 1409792400000, 82 ],
-        [ 1409796000000, 33 ],
-        [ 1409799600000, 67 ],
-        [ 1409803200000, 93 ],
-        [ 1409806800000, 86 ],
-        [ 1409810400000, 97 ],
-        [ 1409814000000, 19 ],
-        [ 1409817600000, 19 ],
-        [ 1409821200000, 31 ],
-        [ 1409824800000, 56 ],
-        [ 1409828400000, 19 ],
-        [ 1409832000000, 43 ],
-        [ 1409835600000, 29 ],
-        [ 1409839200000, 72 ],
-        [ 1409842800000, 27 ],
-        [ 1409846400000, 21 ],
-        [ 1409850000000, 88 ],
-        [ 1409853600000, 18 ],
-        [ 1409857200000, 30 ],
-        [ 1409860800000, 46 ],
-        [ 1409864400000, 34 ],
-        [ 1409868000000, 31 ],
-        [ 1409871600000, 20 ],
-        [ 1409875200000, 45 ],
-        [ 1409878800000, 17 ],
-        [ 1409882400000, 24 ],
-        [ 1409886000000, 84 ],
-        [ 1409889600000, 6 ],
-        [ 1409893200000, 91 ],
-        [ 1409896800000, 82 ],
-        [ 1409900400000, 71 ],
-        [ 1409904000000, 97 ],
-        [ 1409907600000, 43 ],
-        [ 1409911200000, 38 ],
-        [ 1409914800000, 1 ],
-        [ 1409918400000, 71 ],
-        [ 1409922000000, 50 ],
-        [ 1409925600000, 19 ],
-        [ 1409929200000, 19 ],
-        [ 1409932800000, 86 ],
-        [ 1409936400000, 65 ],
-        [ 1409940000000, 93 ],
-        [ 1409943600000, 35 ]
+        [1409594400000, 41],
+        [1409598000000, 57],
+        [1409601600000, 27],
+        [1409605200000, 50],
+        [1409608800000, 13],
+        [1409612400000, 63],
+        [1409616000000, 58],
+        [1409619600000, 80],
+        [1409623200000, 59],
+        [1409626800000, 96],
+        [1409630400000, 2],
+        [1409634000000, 20],
+        [1409637600000, 64],
+        [1409641200000, 7],
+        [1409644800000, 50],
+        [1409648400000, 88],
+        [1409652000000, 34],
+        [1409655600000, 31],
+        [1409659200000, 16],
+        [1409662800000, 38],
+        [1409666400000, 94],
+        [1409670000000, 78],
+        [1409673600000, 86],
+        [1409677200000, 13],
+        [1409680800000, 34],
+        [1409684400000, 29],
+        [1409688000000, 48],
+        [1409691600000, 80],
+        [1409695200000, 30],
+        [1409698800000, 15],
+        [1409702400000, 62],
+        [1409706000000, 66],
+        [1409709600000, 44],
+        [1409713200000, 94],
+        [1409716800000, 78],
+        [1409720400000, 29],
+        [1409724000000, 21],
+        [1409727600000, 4],
+        [1409731200000, 83],
+        [1409734800000, 15],
+        [1409738400000, 89],
+        [1409742000000, 53],
+        [1409745600000, 70],
+        [1409749200000, 41],
+        [1409752800000, 47],
+        [1409756400000, 30],
+        [1409760000000, 68],
+        [1409763600000, 89],
+        [1409767200000, 29],
+        [1409770800000, 17],
+        [1409774400000, 38],
+        [1409778000000, 67],
+        [1409781600000, 75],
+        [1409785200000, 89],
+        [1409788800000, 47],
+        [1409792400000, 82],
+        [1409796000000, 33],
+        [1409799600000, 67],
+        [1409803200000, 93],
+        [1409806800000, 86],
+        [1409810400000, 97],
+        [1409814000000, 19],
+        [1409817600000, 19],
+        [1409821200000, 31],
+        [1409824800000, 56],
+        [1409828400000, 19],
+        [1409832000000, 43],
+        [1409835600000, 29],
+        [1409839200000, 72],
+        [1409842800000, 27],
+        [1409846400000, 21],
+        [1409850000000, 88],
+        [1409853600000, 18],
+        [1409857200000, 30],
+        [1409860800000, 46],
+        [1409864400000, 34],
+        [1409868000000, 31],
+        [1409871600000, 20],
+        [1409875200000, 45],
+        [1409878800000, 17],
+        [1409882400000, 24],
+        [1409886000000, 84],
+        [1409889600000, 6],
+        [1409893200000, 91],
+        [1409896800000, 82],
+        [1409900400000, 71],
+        [1409904000000, 97],
+        [1409907600000, 43],
+        [1409911200000, 38],
+        [1409914800000, 1],
+        [1409918400000, 71],
+        [1409922000000, 50],
+        [1409925600000, 19],
+        [1409929200000, 19],
+        [1409932800000, 86],
+        [1409936400000, 65],
+        [1409940000000, 93],
+        [1409943600000, 35]
     ]
 };
 
 const inOutData = {
     name: "traffic",
-    columns: [ "time", "in", "out", "perpendicular" ],
+    columns: ["time", "in", "out", "perpendicular"],
     points: [
-        [ 1409529600000, 80, 37, 1000 ],
-        [ 1409533200000, 88, 22, 1001 ],
-        [ 1409536800000, 52, 56, 1002 ]
+        [1409529600000, 80, 37, 1000],
+        [1409533200000, 88, 22, 1001],
+        [1409536800000, 52, 56, 1002]
     ]
 };
 
@@ -195,8 +195,7 @@ describe("Pipeline", () => {
                 .offsetBy(2)
                 .to(CollectionOut, c => c1 = c);
             // --> Specified output, evokes batch op
-            const p2 = //            ||
-            p1.offsetBy(3, "in").to(CollectionOut, c => {
+            const p2 = p1.offsetBy(3, "in").to(CollectionOut, c => { //            ||
                 c2 = c;
             });
 
@@ -269,12 +268,12 @@ describe("Pipeline", () => {
     describe("TimeSeries pipeline", () => {
         const data = {
             name: "traffic",
-            columns: [ "time", "value", "status" ],
+            columns: ["time", "value", "status"],
             points: [
-                [ 1400425947000, 52, "ok" ],
-                [ 1400425948000, 18, "ok" ],
-                [ 1400425949000, 26, "fail" ],
-                [ 1400425950000, 93, "offline" ]
+                [1400425947000, 52, "ok"],
+                [1400425948000, 18, "ok"],
+                [1400425949000, 26, "fail"],
+                [1400425950000, 93, "offline"]
             ]
         };
 
@@ -559,9 +558,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeRangeEvents({ alignment: "front", duration: "1h" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"timerange":[1426316400000,1426320000000],"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"timerange":[1426316400000,1426320000000],"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(e);
@@ -576,9 +575,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeRangeEvents({ alignment: "center", duration: "1h" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"timerange":[1426314600000,1426318200000],"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"timerange":[1426314600000,1426318200000],"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(e);
@@ -593,9 +592,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeRangeEvents({ alignment: "behind", duration: "1h" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"timerange":[1426312800000,1426316400000],"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"timerange":[1426312800000,1426316400000],"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(e);
@@ -610,9 +609,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asIndexedEvents({ duration: "1h" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"index":"1h-396199","data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"index":"1h-396199","data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(e);
@@ -633,7 +632,7 @@ describe("Pipeline", () => {
     });
 
     describe("TimeRangeEvent conversion", () => {
-        const timeRange = new TimeRange([ 1426316400000, 1426320000000 ]);
+        const timeRange = new TimeRange([1426316400000, 1426320000000]);
         const timeRangeEvent = new TimeRangeEvent(timeRange, 3);
 
         it(
@@ -644,9 +643,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeEvents({ alignment: "center" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"time":1426318200000,"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"time":1426318200000,"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(timeRangeEvent);
@@ -661,9 +660,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeEvents({ alignment: "lag" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"time":1426316400000,"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"time":1426316400000,"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(timeRangeEvent);
@@ -678,9 +677,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeEvents({ alignment: "lead" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"time":1426320000000,"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"time":1426320000000,"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(timeRangeEvent);
@@ -714,9 +713,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeEvents({ alignment: "center" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"time":1426318200000,"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"time":1426318200000,"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(indexedEvent);
@@ -731,9 +730,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeEvents({ alignment: "lag" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"time":1426316400000,"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"time":1426316400000,"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(indexedEvent);
@@ -748,9 +747,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeEvents({ alignment: "lead" })
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"time":1426320000000,"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"time":1426320000000,"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(indexedEvent);
@@ -765,9 +764,9 @@ describe("Pipeline", () => {
                     .from(stream)
                     .asTimeRangeEvents()
                     .to(EventOut, event => {
-                        expect(
-                            `${event}`
-                        ).toBe(`{"timerange":[1426316400000,1426320000000],"data":{"value":3}}`);
+                        expect(`${event}`).toBe(
+                            `{"timerange":[1426316400000,1426320000000],"data":{"value":3}}`
+                        );
                         done();
                     });
                 stream.addEvent(indexedEvent);
@@ -806,35 +805,27 @@ describe("Pipeline", () => {
         it("should be able select a single column", () => {
             let result;
             const timeseries = new TimeSeries(inOutData);
-            Pipeline()
-                .from(timeseries)
-                .select("in")
-                .to(
-                    CollectionOut,
-                    c =>
-                        result = new TimeSeries({
-                            name: "newTimeseries",
-                            collection: c
-                        })
-                );
-            expect(result.columns()).toEqual([ "in" ]);
+            Pipeline().from(timeseries).select("in").to(
+                CollectionOut,
+                c => result = new TimeSeries({
+                    name: "newTimeseries",
+                    collection: c
+                })
+            );
+            expect(result.columns()).toEqual(["in"]);
         });
 
         it("should be able select a subset of columns", () => {
             let result;
             const timeseries = new TimeSeries(inOutData);
-            Pipeline()
-                .from(timeseries)
-                .select([ "out", "perpendicular" ])
-                .to(
-                    CollectionOut,
-                    c =>
-                        result = new TimeSeries({
-                            name: "subset",
-                            collection: c
-                        })
-                );
-            expect(result.columns()).toEqual([ "out", "perpendicular" ]);
+            Pipeline().from(timeseries).select(["out", "perpendicular"]).to(
+                CollectionOut,
+                c => result = new TimeSeries({
+                    name: "subset",
+                    collection: c
+                })
+            );
+            expect(result.columns()).toEqual(["out", "perpendicular"]);
         });
     });
 
@@ -843,7 +834,7 @@ describe("Pipeline", () => {
             const timeseries = new TimeSeries(inOutData);
             Pipeline()
                 .from(timeseries)
-                .collapse([ "in", "out" ], "in_out_sum", sum())
+                .collapse(["in", "out"], "in_out_sum", sum())
                 .emitOn("flush")
                 .to(
                     CollectionOut,
@@ -866,8 +857,8 @@ describe("Pipeline", () => {
             const timeseries = new TimeSeries(inOutData);
             Pipeline()
                 .from(timeseries)
-                .collapse([ "in", "out" ], "in_out_sum", sum(), true)
-                .collapse([ "in", "out" ], "in_out_max", max(), true)
+                .collapse(["in", "out"], "in_out_sum", sum(), true)
+                .collapse(["in", "out"], "in_out_max", max(), true)
                 .emitOn("flush")
                 .to(
                     CollectionOut,
@@ -896,7 +887,7 @@ describe("Pipeline", () => {
             const timeseries = new TimeSeries(inOutData);
             Pipeline()
                 .from(timeseries)
-                .collapse([ "in", "out" ], "total", sum())
+                .collapse(["in", "out"], "total", sum())
                 .emitOn("flush")
                 .aggregate({ max_total: { total: max() } })
                 .to(
@@ -959,17 +950,13 @@ describe("Pipeline", () => {
         it("should be able to take 10 events from a TimeSeries", () => {
             let result;
             const timeseries = new TimeSeries(TRAFFIC_DATA);
-            Pipeline()
-                .from(timeseries)
-                .take(10)
-                .to(
-                    CollectionOut,
-                    c =>
-                        result = new TimeSeries({
-                            name: "result",
-                            collection: c
-                        })
-                );
+            Pipeline().from(timeseries).take(10).to(
+                CollectionOut,
+                c => result = new TimeSeries({
+                    name: "result",
+                    collection: c
+                })
+            );
             expect(result.size()).toBe(10);
         });
 
@@ -990,9 +977,9 @@ describe("Pipeline", () => {
                     true
                 );
 
-            expect(
-                result.timerange().toString()
-            ).toBe("[1409544000000,1409590800000]");
+            expect(result.timerange().toString()).toBe(
+                "[1409544000000,1409590800000]"
+            );
             expect(result.value()).toBe(27.9);
         });
 
@@ -1082,4 +1069,3 @@ describe("Pipeline", () => {
         });
     });
 });
-

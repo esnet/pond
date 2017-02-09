@@ -28,13 +28,13 @@ they can be used as a pipeline source.
     * _instance_
         * [.toJSON()](#Collection+toJSON) ⇒ <code>Object</code>
         * [.toString()](#Collection+toString) ⇒ <code>string</code>
-        * [.type()](#Collection+type) ⇒ <code>Event</code>
+        * [.type()](#Collection+type) ⇒ <code>[Event](#Event)</code>
         * [.size()](#Collection+size) ⇒ <code>number</code>
         * [.sizeValid()](#Collection+sizeValid) ⇒ <code>number</code>
-        * [.at(pos)](#Collection+at) ⇒ <code>Event</code>
+        * [.at(pos)](#Collection+at) ⇒ <code>[Event](#Event)</code>
         * [.atKey(key)](#Collection+atKey) ⇒ <code>Array</code>
-        * [.atFirst()](#Collection+atFirst) ⇒ <code>Event</code>
-        * [.atLast()](#Collection+atLast) ⇒ <code>Event</code>
+        * [.atFirst()](#Collection+atFirst) ⇒ <code>[Event](#Event)</code>
+        * [.atLast()](#Collection+atLast) ⇒ <code>[Event](#Event)</code>
         * [.events()](#Collection+events)
         * [.eventList()](#Collection+eventList) ⇒ <code>Immutable.List</code>
         * [.eventListAsArray()](#Collection+eventListAsArray) ⇒ <code>Array</code>
@@ -100,7 +100,7 @@ string representation of `toJSON()`.
 **Returns**: <code>string</code> - The Collection serialized as a string.  
 <a name="Collection+type"></a>
 
-### collection.type() ⇒ <code>Event</code>
+### collection.type() ⇒ <code>[Event](#Event)</code>
 Returns the Event object type in this Collection.
 
 Since Collections may only have one type of event (`Event`, `IndexedEvent`
@@ -108,7 +108,7 @@ or `TimeRangeEvent`) this will return that type. If no events
 have been added to the Collection it will return `undefined`.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>Event</code> - - The class of the type of events contained in
+**Returns**: <code>[Event](#Event)</code> - - The class of the type of events contained in
                   this Collection.  
 <a name="Collection+size"></a>
 
@@ -130,11 +130,11 @@ specifically are not NaN, undefined or null.
 **Returns**: <code>number</code> - Count of valid events  
 <a name="Collection+at"></a>
 
-### collection.at(pos) ⇒ <code>Event</code>
+### collection.at(pos) ⇒ <code>[Event](#Event)</code>
 Returns an event in the Collection by its position.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
-**Returns**: <code>Event</code> - Returns the event at the pos specified.  
+**Returns**: <code>[Event](#Event)</code> - Returns the event at the pos specified.  
 **Params**
 
 - pos <code>number</code> - The position of the event
@@ -162,13 +162,13 @@ since collections are an unordered bag of events.
 
 <a name="Collection+atFirst"></a>
 
-### collection.atFirst() ⇒ <code>Event</code>
+### collection.atFirst() ⇒ <code>[Event](#Event)</code>
 Returns the first event in the Collection.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
 <a name="Collection+atLast"></a>
 
-### collection.atLast() ⇒ <code>Event</code>
+### collection.atLast() ⇒ <code>[Event](#Event)</code>
 Returns the last event in the Collection.
 
 **Kind**: instance method of <code>[Collection](#Collection)</code>  
@@ -256,7 +256,7 @@ same type as other events within the Collection.
 **Returns**: <code>[Collection](#Collection)</code> - A new, modified, Collection containing the new event.  
 **Params**
 
-- event <code>Event</code> - The event being added.
+- event <code>[Event](#Event)</code> - The event being added.
 
 <a name="Collection+slice"></a>
 

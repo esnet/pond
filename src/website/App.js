@@ -95,6 +95,7 @@ class App extends Component {
                             <li><Link to="timerange">TimeRange</Link></li>
                             <li><Link to="index">Index</Link></li>
                             <li><Link to="event">Event</Link></li>
+                            <li><Link to="timeevent">TimeEvent</Link></li>
                             <li>
                                 <Link to="timerangeevent">TimeRangeEvent</Link>
                             </li>
@@ -152,4 +153,3 @@ class App extends Component {
 }
 
 export default App;
-

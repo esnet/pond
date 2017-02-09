@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -13,6 +13,19 @@ import Immutable from "immutable";
 import avro from "avsc";
 import util from "./base/util";
 
+/**
+There are three types of Events in Pond, while this class provides the base class
+for them all:
+
+1. *TimeEvent* - a generic event which associates a timestamp with some data
+2. *TimeRangeEvent* - associates a TimeRange with some data
+3. *IndexedEvent* - associates a time range specified as an Index
+
+Event contains several static methods that may be useful, though in general
+are used by the Collection and TimeSeries classes. So, if you already have a
+TimeSeries or Collection you may want to examine the API there to see if you
+can do what you want to do.
+*/
 class Event {
     constructor() {
         if (new.target === Event) {
@@ -109,7 +122,7 @@ class Event {
      * to a JS Object. You can use a `fieldSpec` to address deep data.
      * A `fieldSpec` could be "a.b"
      */
-    get(fieldSpec = [ "value" ]) {
+    get(fieldSpec = ["value"]) {
         let v;
         if (_.isArray(fieldSpec)) {
             v = this.data().getIn(fieldSpec);
@@ -127,7 +140,7 @@ class Event {
     /**
      * Alias for `get()`.
      */
-    value(fieldSpec = [ "value" ]) {
+    value(fieldSpec = ["value"]) {
         return this.get(fieldSpec);
     }
 
@@ -337,7 +350,7 @@ class Event {
 
         let fieldNames;
         if (_.isString(fieldSpec)) {
-            fieldNames = [ fieldSpec ];
+            fieldNames = [fieldSpec];
         } else if (_.isArray(fieldSpec)) {
             fieldNames = fieldSpec;
         }
@@ -545,4 +558,3 @@ class Event {
 }
 
 export default Event;
-

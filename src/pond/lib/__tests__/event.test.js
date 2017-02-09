@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -38,8 +38,10 @@ const OUTAGE_EVENT_LIST = {
             start_time: "2015-04-22T03:30:00Z",
             end_time: "2015-04-22T16:50:00Z",
             title: "STAR-CR5 < 100 ge 06519 > ANL  - Outage",
-            description: `The listed circuit was unavailable due to
-bent pins in two clots of the optical node chassis.`,
+            description: (
+                `The listed circuit was unavailable due to
+bent pins in two clots of the optical node chassis.`
+            ),
             completed: true,
             external_ticket: "3576:144",
             esnet_ticket: "ESNET-20150421-013",
@@ -140,7 +142,7 @@ it("can merge multiple events together", () => {
     const t = new Date("2015-04-22T03:30:00Z");
     const event1 = new TimeEvent(t, { a: 5, b: 6 });
     const event2 = new TimeEvent(t, { c: 2 });
-    const merged = Event.merge([ event1, event2 ]);
+    const merged = Event.merge([event1, event2]);
 
     expect(merged[0].get("a")).toBe(5);
     expect(merged[0].get("b")).toBe(6);
@@ -151,7 +153,7 @@ it("can merge multiple events together using an Immutable.List", () => {
     const t = new Date("2015-04-22T03:30:00Z");
     const event1 = new TimeEvent(t, { a: 5, b: 6 });
     const event2 = new TimeEvent(t, { c: 2 });
-    const merged = Event.merge(new Immutable.List([ event1, event2 ]));
+    const merged = Event.merge(new Immutable.List([event1, event2]));
 
     expect(merged.get(0).get("a")).toBe(5);
     expect(merged.get(0).get("b")).toBe(6);
@@ -162,7 +164,7 @@ it("can merge multiple indexed events together", () => {
     const index = "1h-396206";
     const event1 = new IndexedEvent(index, { a: 5, b: 6 });
     const event2 = new IndexedEvent(index, { c: 2 });
-    const merged = Event.merge([ event1, event2 ]);
+    const merged = Event.merge([event1, event2]);
 
     expect(merged[0].get("a")).toBe(5);
     expect(merged[0].get("b")).toBe(6);
@@ -175,7 +177,7 @@ it("can merge multiple timerange events together", () => {
     const timerange = new TimeRange(beginTime, endTime);
     const event1 = new TimeRangeEvent(timerange, { a: 5, b: 6 });
     const event2 = new TimeRangeEvent(timerange, { c: 2 });
-    const merged = Event.merge([ event1, event2 ]);
+    const merged = Event.merge([event1, event2]);
 
     expect(merged[0].get("a")).toBe(5);
     expect(merged[0].get("b")).toBe(6);
@@ -186,7 +188,7 @@ it("can deeply merge multiple events together", () => {
     const t = new Date("2015-04-22T03:30:00Z");
     const event1 = new TimeEvent(t, { a: 5, b: { c: 6 } });
     const event2 = new TimeEvent(t, { d: 2, b: { e: 4 } });
-    const merged = Event.merge([ event1, event2 ], true);
+    const merged = Event.merge([event1, event2], true);
 
     expect(merged[0].get("a")).toBe(5);
     expect(merged[0].get("b.c")).toBe(6);
@@ -220,9 +222,9 @@ it("can sum multiple events together using an Immutable.List", () => {
     ];
     const result = Event.combine(new Immutable.List(events), sum());
 
-    expect(result.getIn([ 0, "a" ])).toBe(8);
-    expect(result.getIn([ 0, "b" ])).toBe(11);
-    expect(result.getIn([ 0, "c" ])).toBe(14);
+    expect(result.getIn([0, "a"])).toBe(8);
+    expect(result.getIn([0, "b"])).toBe(11);
+    expect(result.getIn([0, "c"])).toBe(14);
 });
 
 it("can pass no events to sum and get back an empty list", () => {
@@ -297,7 +299,7 @@ it(
         const event = new TimeEvent(timestamp, DEEP_EVENT_DATA);
         let eventValue;
         for (let i = 0; i < 100000; i++) {
-            eventValue = event.get([ "NorthRoute", "in" ]); //1550ms
+            eventValue = event.get(["NorthRoute", "in"]); //1550ms
         }
 
         expect(eventValue).toBe(123);
@@ -308,13 +310,14 @@ it(
 // Event map and reduce
 //
 it("should generate the correct key values for a string selector", () => {
-    expect(Event.map(EVENT_LIST, "in")).toEqual({ in: [ 2, 4, 6, 8 ] });
+    expect(Event.map(EVENT_LIST, "in")).toEqual({ in: [2, 4, 6, 8] });
 });
 
 it("should generate the correct key values for a string selector", () => {
-    expect(
-        Event.map(EVENT_LIST, [ "in", "out" ])
-    ).toEqual({ in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] });
+    expect(Event.map(EVENT_LIST, ["in", "out"])).toEqual({
+        in: [2, 4, 6, 8],
+        out: [11, 13, 15, 18]
+    });
 });
 
 it("should generate the correct key values for a string selector", () => {
@@ -322,13 +325,13 @@ it("should generate the correct key values for a string selector", () => {
         sum: event.get("in") + event.get("out")
     }));
 
-    expect(result).toEqual({ sum: [ 13, 17, 21, 26 ] });
+    expect(result).toEqual({ sum: [13, 17, 21, 26] });
 
     expect(Event.reduce(result, avg())).toEqual({ sum: 19.25 });
 });
 
 it("should be able to run a simple mapReduce calculation", () => {
-    const result = Event.mapReduce(EVENT_LIST, [ "in", "out" ], avg());
+    const result = Event.mapReduce(EVENT_LIST, ["in", "out"], avg());
 
     expect(result).toEqual({ in: 5, out: 14.25 });
 });
@@ -417,4 +420,3 @@ it("can convert an TimeRangeEvent subclass to avro", () => {
     const event2 = new StatusEvent(event1.toAvro());
     expect(Event.is(event1, event2)).toBeTruthy();
 });
-

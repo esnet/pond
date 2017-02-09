@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -21,62 +21,62 @@ import { sum, max, avg } from "../base/functions";
 
 const TIMESERIES_TEST_DATA = {
     name: "traffic",
-    columns: [ "time", "value", "status" ],
+    columns: ["time", "value", "status"],
     points: [
-        [ 1400425947000, 52, "ok" ],
-        [ 1400425948000, 18, "ok" ],
-        [ 1400425949000, 26, "fail" ],
-        [ 1400425950000, 93, "offline" ]
+        [1400425947000, 52, "ok"],
+        [1400425948000, 18, "ok"],
+        [1400425949000, 26, "fail"],
+        [1400425950000, 93, "offline"]
     ]
 };
 
 const INDEXED_DATA = {
     index: "1d-625",
     name: "traffic",
-    columns: [ "time", "value", "status" ],
+    columns: ["time", "value", "status"],
     points: [
-        [ 1400425947000, 52, "ok" ],
-        [ 1400425948000, 18, "ok" ],
-        [ 1400425949000, 26, "fail" ],
-        [ 1400425950000, 93, "offline" ]
+        [1400425947000, 52, "ok"],
+        [1400425948000, 18, "ok"],
+        [1400425949000, 26, "fail"],
+        [1400425950000, 93, "offline"]
     ]
 };
 
 const AVAILABILITY_DATA = {
     name: "availability",
-    columns: [ "index", "uptime" ],
+    columns: ["index", "uptime"],
     points: [
-        [ "2014-07", "100%" ],
-        [ "2014-08", "88%" ],
-        [ "2014-09", "95%" ],
-        [ "2014-10", "99%" ],
-        [ "2014-11", "91%" ],
-        [ "2014-12", "99%" ],
-        [ "2015-01", "100%" ],
-        [ "2015-02", "92%" ],
-        [ "2015-03", "99%" ],
-        [ "2015-04", "87%" ],
-        [ "2015-05", "92%" ],
-        [ "2015-06", "100%" ]
+        ["2014-07", "100%"],
+        ["2014-08", "88%"],
+        ["2014-09", "95%"],
+        ["2014-10", "99%"],
+        ["2014-11", "91%"],
+        ["2014-12", "99%"],
+        ["2015-01", "100%"],
+        ["2015-02", "92%"],
+        ["2015-03", "99%"],
+        ["2015-04", "87%"],
+        ["2015-05", "92%"],
+        ["2015-06", "100%"]
     ]
 };
 
 const AVAILABILITY_DATA_2 = {
     name: "availability",
-    columns: [ "index", "uptime", "notes", "outages" ],
+    columns: ["index", "uptime", "notes", "outages"],
     points: [
-        [ "2014-07", 100, "", 2 ],
-        [ "2014-08", 88, "", 17 ],
-        [ "2014-09", 95, "", 6 ],
-        [ "2014-10", 99, "", 3 ],
-        [ "2014-11", 91, "", 14 ],
-        [ "2014-12", 99, "", 3 ],
-        [ "2015-01", 100, "", 0 ],
-        [ "2015-02", 92, "", 12 ],
-        [ "2015-03", 99, "Minor outage March 2", 4 ],
-        [ "2015-04", 87, "Planned downtime in April", 82 ],
-        [ "2015-05", 92, "Router failure June 12", 26 ],
-        [ "2015-06", 100, "", 0 ]
+        ["2014-07", 100, "", 2],
+        ["2014-08", 88, "", 17],
+        ["2014-09", 95, "", 6],
+        ["2014-10", 99, "", 3],
+        ["2014-11", 91, "", 14],
+        ["2014-12", 99, "", 3],
+        ["2015-01", 100, "", 0],
+        ["2015-02", 92, "", 12],
+        ["2015-03", 99, "Minor outage March 2", 4],
+        ["2015-04", 87, "Planned downtime in April", 82],
+        ["2015-05", 92, "Router failure June 12", 26],
+        ["2015-06", 100, "", 0]
     ]
 };
 
@@ -95,32 +95,32 @@ const INTERFACE_TEST_DATA = {
     site_interface: "et-1/0/0",
     stats_type: "Standard",
     title: null,
-    columns: [ "time", "in", "out" ],
+    columns: ["time", "in", "out"],
     points: [
-        [ 1400425947000, 52, 34 ],
-        [ 1400425948000, 18, 13 ],
-        [ 1400425949000, 26, 67 ],
-        [ 1400425950000, 93, 91 ]
+        [1400425947000, 52, 34],
+        [1400425948000, 18, 13],
+        [1400425949000, 26, 67],
+        [1400425950000, 93, 91]
     ]
 };
 
 const TRAFFIC_BNL_TO_NEWY = {
     name: "BNL to NEWY",
-    columns: [ "time", "in" ],
+    columns: ["time", "in"],
     points: [
-        [ 1441051950000, 2998846524.2666664 ],
-        [ 1441051980000, 2682032885.3333335 ],
-        [ 1441052010000, 2753537586.9333334 ]
+        [1441051950000, 2998846524.2666664],
+        [1441051980000, 2682032885.3333335],
+        [1441052010000, 2753537586.9333334]
     ]
 };
 
 const TRAFFIC_NEWY_TO_BNL = {
     name: "NEWY to BNL",
-    columns: [ "time", "out" ],
+    columns: ["time", "out"],
     points: [
-        [ 1441051950000, 22034579982.4 ],
-        [ 1441051980000, 24783871443.2 ],
-        [ 1441052010000, 26907368572.800003 ]
+        [1441051950000, 22034579982.4],
+        [1441051980000, 24783871443.2],
+        [1441052010000, 26907368572.800003]
     ]
 };
 
@@ -128,59 +128,59 @@ const fmt = "YYYY-MM-DD HH:mm";
 
 const BISECT_TEST_DATA = {
     name: "test",
-    columns: [ "time", "value" ],
+    columns: ["time", "value"],
     points: [
-        [ moment("2012-01-11 01:00", fmt).valueOf(), 22 ],
-        [ moment("2012-01-11 02:00", fmt).valueOf(), 33 ],
-        [ moment("2012-01-11 03:00", fmt).valueOf(), 44 ],
-        [ moment("2012-01-11 04:00", fmt).valueOf(), 55 ],
-        [ moment("2012-01-11 05:00", fmt).valueOf(), 66 ],
-        [ moment("2012-01-11 06:00", fmt).valueOf(), 77 ],
-        [ moment("2012-01-11 07:00", fmt).valueOf(), 88 ]
+        [moment("2012-01-11 01:00", fmt).valueOf(), 22],
+        [moment("2012-01-11 02:00", fmt).valueOf(), 33],
+        [moment("2012-01-11 03:00", fmt).valueOf(), 44],
+        [moment("2012-01-11 04:00", fmt).valueOf(), 55],
+        [moment("2012-01-11 05:00", fmt).valueOf(), 66],
+        [moment("2012-01-11 06:00", fmt).valueOf(), 77],
+        [moment("2012-01-11 07:00", fmt).valueOf(), 88]
     ]
 };
 
 const TRAFFIC_DATA_IN = {
     name: "star-cr5:to_anl_ip-a_v4",
-    columns: [ "time", "in" ],
+    columns: ["time", "in"],
     points: [
-        [ 1400425947000, 52 ],
-        [ 1400425948000, 18 ],
-        [ 1400425949000, 26 ],
-        [ 1400425950000, 93 ]
+        [1400425947000, 52],
+        [1400425948000, 18],
+        [1400425949000, 26],
+        [1400425950000, 93]
     ]
 };
 
 const TRAFFIC_DATA_OUT = {
     name: "star-cr5:to_anl_ip-a_v4",
-    columns: [ "time", "out" ],
+    columns: ["time", "out"],
     points: [
-        [ 1400425947000, 34 ],
-        [ 1400425948000, 13 ],
-        [ 1400425949000, 67 ],
-        [ 1400425950000, 91 ]
+        [1400425947000, 34],
+        [1400425948000, 13],
+        [1400425949000, 67],
+        [1400425950000, 91]
     ]
 };
 
 const PARTIAL_TRAFFIC_PART_A = {
     name: "star-cr5:to_anl_ip-a_v4",
-    columns: [ "time", "value" ],
+    columns: ["time", "value"],
     points: [
-        [ 1400425947000, 34 ],
-        [ 1400425948000, 13 ],
-        [ 1400425949000, 67 ],
-        [ 1400425950000, 91 ]
+        [1400425947000, 34],
+        [1400425948000, 13],
+        [1400425949000, 67],
+        [1400425950000, 91]
     ]
 };
 
 const PARTIAL_TRAFFIC_PART_B = {
     name: "star-cr5:to_anl_ip-a_v4",
-    columns: [ "time", "value" ],
+    columns: ["time", "value"],
     points: [
-        [ 1400425951000, 65 ],
-        [ 1400425952000, 86 ],
-        [ 1400425953000, 27 ],
-        [ 1400425954000, 72 ]
+        [1400425951000, 65],
+        [1400425952000, 86],
+        [1400425953000, 27],
+        [1400425954000, 72]
     ]
 };
 
@@ -222,146 +222,146 @@ const OUTAGE_EVENT_LIST = [
 
 const sumPart1 = {
     name: "part1",
-    columns: [ "time", "in", "out" ],
+    columns: ["time", "in", "out"],
     points: [
-        [ 1400425951000, 1, 6 ],
-        [ 1400425952000, 2, 7 ],
-        [ 1400425953000, 3, 8 ],
-        [ 1400425954000, 4, 9 ]
+        [1400425951000, 1, 6],
+        [1400425952000, 2, 7],
+        [1400425953000, 3, 8],
+        [1400425954000, 4, 9]
     ]
 };
 const sumPart2 = {
     name: "part2",
-    columns: [ "time", "in", "out" ],
+    columns: ["time", "in", "out"],
     points: [
-        [ 1400425951000, 9, 1 ],
-        [ 1400425952000, 7, 2 ],
-        [ 1400425953000, 5, 3 ],
-        [ 1400425954000, 3, 4 ]
+        [1400425951000, 9, 1],
+        [1400425952000, 7, 2],
+        [1400425953000, 5, 3],
+        [1400425954000, 3, 4]
     ]
 };
 
 const sept2014Data = {
     utc: false,
     name: "traffic",
-    columns: [ "time", "value" ],
+    columns: ["time", "value"],
     points: [
-        [ 1409529600000, 80 ],
-        [ 1409533200000, 88 ],
-        [ 1409536800000, 52 ],
-        [ 1409540400000, 80 ],
-        [ 1409544000000, 26 ],
-        [ 1409547600000, 37 ],
-        [ 1409551200000, 6 ],
-        [ 1409554800000, 32 ],
-        [ 1409558400000, 69 ],
-        [ 1409562000000, 21 ],
-        [ 1409565600000, 6 ],
-        [ 1409569200000, 54 ],
-        [ 1409572800000, 88 ],
-        [ 1409576400000, 41 ],
-        [ 1409580000000, 35 ],
-        [ 1409583600000, 43 ],
-        [ 1409587200000, 84 ],
-        [ 1409590800000, 32 ],
-        [ 1409594400000, 41 ],
-        [ 1409598000000, 57 ],
-        [ 1409601600000, 27 ],
-        [ 1409605200000, 50 ],
-        [ 1409608800000, 13 ],
-        [ 1409612400000, 63 ],
-        [ 1409616000000, 58 ],
-        [ 1409619600000, 80 ],
-        [ 1409623200000, 59 ],
-        [ 1409626800000, 96 ],
-        [ 1409630400000, 2 ],
-        [ 1409634000000, 20 ],
-        [ 1409637600000, 64 ],
-        [ 1409641200000, 7 ],
-        [ 1409644800000, 50 ],
-        [ 1409648400000, 88 ],
-        [ 1409652000000, 34 ],
-        [ 1409655600000, 31 ],
-        [ 1409659200000, 16 ],
-        [ 1409662800000, 38 ],
-        [ 1409666400000, 94 ],
-        [ 1409670000000, 78 ],
-        [ 1409673600000, 86 ],
-        [ 1409677200000, 13 ],
-        [ 1409680800000, 34 ],
-        [ 1409684400000, 29 ],
-        [ 1409688000000, 48 ],
-        [ 1409691600000, 80 ],
-        [ 1409695200000, 30 ],
-        [ 1409698800000, 15 ],
-        [ 1409702400000, 62 ],
-        [ 1409706000000, 66 ],
-        [ 1409709600000, 44 ],
-        [ 1409713200000, 94 ],
-        [ 1409716800000, 78 ],
-        [ 1409720400000, 29 ],
-        [ 1409724000000, 21 ],
-        [ 1409727600000, 4 ],
-        [ 1409731200000, 83 ],
-        [ 1409734800000, 15 ],
-        [ 1409738400000, 89 ],
-        [ 1409742000000, 53 ],
-        [ 1409745600000, 70 ],
-        [ 1409749200000, 41 ],
-        [ 1409752800000, 47 ],
-        [ 1409756400000, 30 ],
-        [ 1409760000000, 68 ],
-        [ 1409763600000, 89 ],
-        [ 1409767200000, 29 ],
-        [ 1409770800000, 17 ],
-        [ 1409774400000, 38 ],
-        [ 1409778000000, 67 ],
-        [ 1409781600000, 75 ],
-        [ 1409785200000, 89 ],
-        [ 1409788800000, 47 ],
-        [ 1409792400000, 82 ],
-        [ 1409796000000, 33 ],
-        [ 1409799600000, 67 ],
-        [ 1409803200000, 93 ],
-        [ 1409806800000, 86 ],
-        [ 1409810400000, 97 ],
-        [ 1409814000000, 19 ],
-        [ 1409817600000, 19 ],
-        [ 1409821200000, 31 ],
-        [ 1409824800000, 56 ],
-        [ 1409828400000, 19 ],
-        [ 1409832000000, 43 ],
-        [ 1409835600000, 29 ],
-        [ 1409839200000, 72 ],
-        [ 1409842800000, 27 ],
-        [ 1409846400000, 21 ],
-        [ 1409850000000, 88 ],
-        [ 1409853600000, 18 ],
-        [ 1409857200000, 30 ],
-        [ 1409860800000, 46 ],
-        [ 1409864400000, 34 ],
-        [ 1409868000000, 31 ],
-        [ 1409871600000, 20 ],
-        [ 1409875200000, 45 ],
-        [ 1409878800000, 17 ],
-        [ 1409882400000, 24 ],
-        [ 1409886000000, 84 ],
-        [ 1409889600000, 6 ],
-        [ 1409893200000, 91 ],
-        [ 1409896800000, 82 ],
-        [ 1409900400000, 71 ],
-        [ 1409904000000, 97 ],
-        [ 1409907600000, 43 ],
-        [ 1409911200000, 38 ],
-        [ 1409914800000, 1 ],
-        [ 1409918400000, 71 ],
-        [ 1409922000000, 50 ],
-        [ 1409925600000, 19 ],
-        [ 1409929200000, 19 ],
-        [ 1409932800000, 86 ],
-        [ 1409936400000, 65 ],
-        [ 1409940000000, 93 ],
-        [ 1409943600000, 35 ]
+        [1409529600000, 80],
+        [1409533200000, 88],
+        [1409536800000, 52],
+        [1409540400000, 80],
+        [1409544000000, 26],
+        [1409547600000, 37],
+        [1409551200000, 6],
+        [1409554800000, 32],
+        [1409558400000, 69],
+        [1409562000000, 21],
+        [1409565600000, 6],
+        [1409569200000, 54],
+        [1409572800000, 88],
+        [1409576400000, 41],
+        [1409580000000, 35],
+        [1409583600000, 43],
+        [1409587200000, 84],
+        [1409590800000, 32],
+        [1409594400000, 41],
+        [1409598000000, 57],
+        [1409601600000, 27],
+        [1409605200000, 50],
+        [1409608800000, 13],
+        [1409612400000, 63],
+        [1409616000000, 58],
+        [1409619600000, 80],
+        [1409623200000, 59],
+        [1409626800000, 96],
+        [1409630400000, 2],
+        [1409634000000, 20],
+        [1409637600000, 64],
+        [1409641200000, 7],
+        [1409644800000, 50],
+        [1409648400000, 88],
+        [1409652000000, 34],
+        [1409655600000, 31],
+        [1409659200000, 16],
+        [1409662800000, 38],
+        [1409666400000, 94],
+        [1409670000000, 78],
+        [1409673600000, 86],
+        [1409677200000, 13],
+        [1409680800000, 34],
+        [1409684400000, 29],
+        [1409688000000, 48],
+        [1409691600000, 80],
+        [1409695200000, 30],
+        [1409698800000, 15],
+        [1409702400000, 62],
+        [1409706000000, 66],
+        [1409709600000, 44],
+        [1409713200000, 94],
+        [1409716800000, 78],
+        [1409720400000, 29],
+        [1409724000000, 21],
+        [1409727600000, 4],
+        [1409731200000, 83],
+        [1409734800000, 15],
+        [1409738400000, 89],
+        [1409742000000, 53],
+        [1409745600000, 70],
+        [1409749200000, 41],
+        [1409752800000, 47],
+        [1409756400000, 30],
+        [1409760000000, 68],
+        [1409763600000, 89],
+        [1409767200000, 29],
+        [1409770800000, 17],
+        [1409774400000, 38],
+        [1409778000000, 67],
+        [1409781600000, 75],
+        [1409785200000, 89],
+        [1409788800000, 47],
+        [1409792400000, 82],
+        [1409796000000, 33],
+        [1409799600000, 67],
+        [1409803200000, 93],
+        [1409806800000, 86],
+        [1409810400000, 97],
+        [1409814000000, 19],
+        [1409817600000, 19],
+        [1409821200000, 31],
+        [1409824800000, 56],
+        [1409828400000, 19],
+        [1409832000000, 43],
+        [1409835600000, 29],
+        [1409839200000, 72],
+        [1409842800000, 27],
+        [1409846400000, 21],
+        [1409850000000, 88],
+        [1409853600000, 18],
+        [1409857200000, 30],
+        [1409860800000, 46],
+        [1409864400000, 34],
+        [1409868000000, 31],
+        [1409871600000, 20],
+        [1409875200000, 45],
+        [1409878800000, 17],
+        [1409882400000, 24],
+        [1409886000000, 84],
+        [1409889600000, 6],
+        [1409893200000, 91],
+        [1409896800000, 82],
+        [1409900400000, 71],
+        [1409904000000, 97],
+        [1409907600000, 43],
+        [1409911200000, 38],
+        [1409914800000, 1],
+        [1409918400000, 71],
+        [1409922000000, 50],
+        [1409925600000, 19],
+        [1409929200000, 19],
+        [1409932800000, 86],
+        [1409936400000, 65],
+        [1409940000000, 93],
+        [1409943600000, 35]
     ]
 };
 
@@ -460,12 +460,12 @@ it("can create a series with meta data and get that data back", () => {
 it("can create a series with a nested object", () => {
     const series = new TimeSeries({
         name: "Map Traffic",
-        columns: [ "time", "NASA_north", "NASA_south" ],
+        columns: ["time", "NASA_north", "NASA_south"],
         points: [
-            [ 1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 } ],
-            [ 1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 } ],
-            [ 1400425953000, { in: 300, out: 600 }, { in: 147, out: 158 } ],
-            [ 1400425954000, { in: 400, out: 800 }, { in: 155, out: 175 } ]
+            [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
+            [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
+            [1400425953000, { in: 300, out: 600 }, { in: 147, out: 158 }],
+            [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175 }]
         ]
     });
     expect(series.at(0).get("NASA_north").in).toBe(100);
@@ -608,9 +608,9 @@ it("can return the time range of the series", () => {
 it("can create an series with indexed data (in UTC time)", () => {
     const series = new TimeSeries(AVAILABILITY_DATA);
     const event = series.at(2);
-    expect(
-        event.timerangeAsUTCString()
-    ).toBe("[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]");
+    expect(event.timerangeAsUTCString()).toBe(
+        "[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]"
+    );
     expect(series.range().begin().getTime()).toBe(1404172800000);
     expect(series.range().end().getTime()).toBe(1435708799999);
 });
@@ -639,7 +639,7 @@ it("can merge two timeseries columns together using merge", () => {
     const outTraffic = new TimeSeries(TRAFFIC_DATA_OUT);
     const trafficSeries = TimeSeries.timeSeriesListMerge({
         name: "traffic",
-        seriesList: [ inTraffic, outTraffic ]
+        seriesList: [inTraffic, outTraffic]
     });
 
     expect(trafficSeries.at(2).get("in")).toBe(26);
@@ -652,7 +652,7 @@ it("can append two timeseries together using merge", () => {
     const trafficSeries = TimeSeries.timeSeriesListMerge({
         name: "traffic",
         source: "router",
-        seriesList: [ tile1, tile2 ]
+        seriesList: [tile1, tile2]
     });
     expect(trafficSeries.size()).toBe(8);
     expect(trafficSeries.at(0).get()).toBe(34);
@@ -672,17 +672,17 @@ it("can merge two series and preserve the correct time format", () => {
     const outTraffic = new TimeSeries(TRAFFIC_NEWY_TO_BNL);
     const trafficSeries = TimeSeries.timeSeriesListMerge({
         name: "traffic",
-        seriesList: [ inTraffic, outTraffic ]
+        seriesList: [inTraffic, outTraffic]
     });
-    expect(
-        trafficSeries.at(0).timestampAsUTCString()
-    ).toBe("Mon, 31 Aug 2015 20:12:30 GMT");
-    expect(
-        trafficSeries.at(1).timestampAsUTCString()
-    ).toBe("Mon, 31 Aug 2015 20:13:00 GMT");
-    expect(
-        trafficSeries.at(2).timestampAsUTCString()
-    ).toBe("Mon, 31 Aug 2015 20:13:30 GMT");
+    expect(trafficSeries.at(0).timestampAsUTCString()).toBe(
+        "Mon, 31 Aug 2015 20:12:30 GMT"
+    );
+    expect(trafficSeries.at(1).timestampAsUTCString()).toBe(
+        "Mon, 31 Aug 2015 20:13:00 GMT"
+    );
+    expect(trafficSeries.at(2).timestampAsUTCString()).toBe(
+        "Mon, 31 Aug 2015 20:13:30 GMT"
+    );
 });
 
 //
@@ -694,9 +694,9 @@ it("can merge two timeseries into a new timeseries that is the sum", () => {
 
     const result = TimeSeries.timeSeriesListReduce({
         name: "sum",
-        seriesList: [ part1, part2 ],
+        seriesList: [part1, part2],
         reducer: sum(),
-        fieldSpec: [ "in", "out" ]
+        fieldSpec: ["in", "out"]
     });
 
     //10, 9, 8, 7
@@ -718,29 +718,29 @@ it("can merge two timeseries into a new timeseries that is the sum", () => {
 it("can merge two timeseries into a new timeseries that is the sum", () => {
     const part1 = new TimeSeries({
         name: "part1",
-        columns: [ "time", "in", "out" ],
+        columns: ["time", "in", "out"],
         points: [
-            [ 1400425951000, 1, 6 ],
-            [ 1400425952000, 2, 7 ],
-            [ 1400425953000, 3, 8 ],
-            [ 1400425954000, 4, 9 ]
+            [1400425951000, 1, 6],
+            [1400425952000, 2, 7],
+            [1400425953000, 3, 8],
+            [1400425954000, 4, 9]
         ]
     });
     const part2 = new TimeSeries({
         name: "part2",
-        columns: [ "time", "in", "out" ],
+        columns: ["time", "in", "out"],
         points: [
-            [ 1400425951000, 9, 1 ],
-            [ 1400425952000, 7, 2 ],
-            [ 1400425953000, 5, 3 ],
-            [ 1400425954000, 3, 4 ]
+            [1400425951000, 9, 1],
+            [1400425952000, 7, 2],
+            [1400425953000, 5, 3],
+            [1400425954000, 3, 4]
         ]
     });
 
     const avgSeries = TimeSeries.timeSeriesListReduce({
         name: "avg",
-        seriesList: [ part1, part2 ],
-        fieldSpec: [ "in", "out" ],
+        seriesList: [part1, part2],
+        fieldSpec: ["in", "out"],
         reducer: avg()
     });
 
@@ -756,9 +756,9 @@ it("can merge two timeseries into a new timeseries that is the sum", () => {
 
     const avgSeries2 = TimeSeries.timeSeriesListReduce({
         name: "avg",
-        seriesList: [ part1, part2 ],
+        seriesList: [part1, part2],
         reducer: avg(),
-        fieldSpec: [ "in", "out" ]
+        fieldSpec: ["in", "out"]
     });
 
     expect(avgSeries2.at(0).get("in")).toBe(5);
@@ -777,7 +777,7 @@ it(
 
         const sums = ts.collapse({
             name: "sum",
-            fieldSpecList: [ "in", "out" ],
+            fieldSpecList: ["in", "out"],
             reducer: sum(),
             append: false
         });
@@ -795,7 +795,7 @@ it(
         const timeseries = new TimeSeries(sumPart2);
         const c = timeseries.collapse({
             name: "max_in_out",
-            fieldSpecList: [ "in", "out" ],
+            fieldSpecList: ["in", "out"],
             reducer: max(),
             append: true
         });
@@ -813,7 +813,7 @@ it(
         const ts = new TimeSeries(sumPart1);
         const sums = ts.collapse({
             name: "value",
-            fieldSpecList: [ "in", "out" ],
+            fieldSpecList: ["in", "out"],
             reducer: sum(),
             append: false
         });
@@ -826,19 +826,19 @@ it(
 //
 it("can select a single column from a TimeSeries", () => {
     const timeseries = new TimeSeries(INTERFACE_TEST_DATA);
-    expect(timeseries.columns()).toEqual([ "in", "out" ]);
+    expect(timeseries.columns()).toEqual(["in", "out"]);
 
     const ts = timeseries.select({ fieldSpec: "in" });
-    expect(ts.columns()).toEqual([ "in" ]);
+    expect(ts.columns()).toEqual(["in"]);
     expect(ts.name()).toBe("star-cr5:to_anl_ip-a_v4");
 });
 
 it("can select multiple columns from a TimeSeries", () => {
     const timeseries = new TimeSeries(AVAILABILITY_DATA_2);
-    expect(timeseries.columns()).toEqual([ "uptime", "notes", "outages" ]);
+    expect(timeseries.columns()).toEqual(["uptime", "notes", "outages"]);
 
-    const ts = timeseries.select({ fieldSpec: [ "uptime", "notes" ] });
-    expect(ts.columns()).toEqual([ "uptime", "notes" ]);
+    const ts = timeseries.select({ fieldSpec: ["uptime", "notes"] });
+    expect(ts.columns()).toEqual(["uptime", "notes"]);
     expect(ts.name()).toBe("availability");
 });
 
@@ -848,11 +848,10 @@ it("can select multiple columns from a TimeSeries", () => {
 it("can use re-mapping to reverse the values in a TimeSeries", () => {
     const timeseries = new TimeSeries(INTERFACE_TEST_DATA);
 
-    expect(timeseries.columns()).toEqual([ "in", "out" ]);
+    expect(timeseries.columns()).toEqual(["in", "out"]);
 
-    const ts = timeseries.map(
-        e => e.setData({ in: e.get("out"), out: e.get("in") })
-    );
+    const ts = timeseries.map(e =>
+        e.setData({ in: e.get("out"), out: e.get("in") }));
 
     expect(ts.at(0).get("in")).toBe(34);
     expect(ts.at(0).get("out")).toBe(52);
@@ -921,7 +920,7 @@ class StatusSeries extends TimeSeries {
     }
 
     metaSchema() {
-        return [ { name: "name", type: "string" } ];
+        return [{ name: "name", type: "string" }];
     }
 
     static event(key) {
@@ -932,12 +931,12 @@ class StatusSeries extends TimeSeries {
 it("can convert a timeseries to avro", () => {
     const timeseries1 = new StatusSeries({
         name: "traffic",
-        columns: [ "time", "value", "status" ],
+        columns: ["time", "value", "status"],
         points: [
-            [ 1400425947000, 52, "ok" ],
-            [ 1400425948000, 18, "ok" ],
-            [ 1400425949000, 26, "fail" ],
-            [ 1400425950000, 93, "offline" ]
+            [1400425947000, 52, "ok"],
+            [1400425948000, 18, "ok"],
+            [1400425949000, 26, "fail"],
+            [1400425950000, 93, "offline"]
         ]
     });
 
@@ -945,4 +944,3 @@ it("can convert a timeseries to avro", () => {
     const timeseries2 = new StatusSeries(buffer);
     TimeSeries.is(timeseries1, timeseries2);
 });
-

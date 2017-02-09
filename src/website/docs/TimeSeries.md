@@ -27,7 +27,7 @@ const data = {
 To create a new TimeSeries object from the above format, simply use the constructor:
 
 ```javascript
-var series = new TimeSeries(data);
+const series = new TimeSeries(data);
 ```
 
 The format of the data is as follows:
@@ -35,7 +35,7 @@ The format of the data is as follows:
  - **name** - optional, but a good practice
  - **columns** - are necessary and give labels to the data in the points.
  - **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
-   
+
 As just hinted at, the first column may actually be:
 
  - "time"
@@ -43,7 +43,7 @@ As just hinted at, the first column may actually be:
  - "index" - a time range represented by an `Index`. By using an index it is possible, for example, to refer to a specific month:
 
 ```javascript
-var availabilityData = {
+const availabilityData = {
     name: "Last 3 months availability",
     columns: ["index", "uptime"],
     points: [
@@ -54,7 +54,8 @@ var availabilityData = {
 };
 ```
 
-Alternatively, you can construct a `TimeSeries` with a list of events. These may be `Events`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
+Alternatively, you can construct a `TimeSeries` with a list of events.
+These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
 
 ```javascript
 const events = [];
@@ -68,7 +69,8 @@ const series = new TimeSeries({
 
 ### Nested data
 
-The values do not have to be simple types like the above examples. Here's an example where each value is itself an object with "in" and "out" keys:
+The values do not have to be simple types like the above examples. Here's an
+example where each value is itself an object with "in" and "out" keys:
 
 ```javascript
 const series = new TimeSeries({
@@ -83,13 +85,17 @@ const series = new TimeSeries({
 });
 ```
 
-Complex data is stored in an Immutable structure. To get a value out of nested data like this you will get the Event you want (by row), as usual, and then use `get()` to fetch the value by column name. The result of this call will be a JSON copy of the Immutable data so you can query deeper in the usual way:
+Complex data is stored in an Immutable structure. To get a value out of nested
+data like this you will get the event you want (by row), as usual, and then use
+`get()` to fetch the value by column name. The result of this call will be a
+JSON copy of the Immutable data so you can query deeper in the usual way:
 
 ```javascript
 series.at(0).get("NASA_north")["in"]  // 200`
 ```
 
-It is then possible to use a value mapper function when calculating different properties. For example, to get the average "in" value of the NASA_north column:
+It is then possible to use a value mapper function when calculating different
+properties. For example, to get the average "in" value of the NASA_north column:
 
 ```javascript
 series.avg("NASA_north", d => d.in);  // 250
@@ -108,9 +114,9 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.begin()](#TimeSeries+begin) ⇒ <code>Date</code>
         * [.end()](#TimeSeries+end) ⇒ <code>Date</code>
         * [.at(pos)](#TimeSeries+at)
-        * [.atTime(time)](#TimeSeries+atTime) ⇒ <code>Event</code>
-        * [.atFirst()](#TimeSeries+atFirst) ⇒ <code>Event</code>
-        * [.atLast()](#TimeSeries+atLast) ⇒ <code>Event</code>
+        * [.atTime(time)](#TimeSeries+atTime) ⇒ <code>[TimeEvent](#TimeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
+        * [.atFirst()](#TimeSeries+atFirst) ⇒ <code>[TimeEvent](#TimeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
+        * [.atLast()](#TimeSeries+atLast) ⇒ <code>[TimeEvent](#TimeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
         * [.events()](#TimeSeries+events)
         * [.setCollection(collection, isChronological)](#TimeSeries+setCollection) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.bisect(t, b)](#TimeSeries+bisect) ⇒ <code>number</code>
@@ -230,7 +236,7 @@ Access a specific TimeSeries event via its position
 
 <a name="TimeSeries+atTime"></a>
 
-### timeSeries.atTime(time) ⇒ <code>Event</code>
+### timeSeries.atTime(time) ⇒ <code>[TimeEvent](#TimeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
 Returns an event in the series by its time. This is the same
 as calling `bisect` first and then using `at` with the index.
 
@@ -241,13 +247,13 @@ as calling `bisect` first and then using `at` with the index.
 
 <a name="TimeSeries+atFirst"></a>
 
-### timeSeries.atFirst() ⇒ <code>Event</code>
+### timeSeries.atFirst() ⇒ <code>[TimeEvent](#TimeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
 Returns the first event in the series.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+atLast"></a>
 
-### timeSeries.atLast() ⇒ <code>Event</code>
+### timeSeries.atLast() ⇒ <code>[TimeEvent](#TimeEvent)</code> &#124; <code>[IndexedEvent](#IndexedEvent)</code> &#124; <code>[TimeRangeEvent](#TimeRangeEvent)</code>
 Returns the last event in the series.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -611,7 +617,7 @@ For example `timeseries.quantile(4)` would be the same as using percentile with 
 Returns a new Pipeline with input source being initialized to
 this TimeSeries collection. This allows pipeline operations
 to be chained directly onto the TimeSeries to produce a new
-TimeSeries or Event result.
+TimeSeries or event result.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[Pipeline](#Pipeline)</code> - The Pipeline.  
@@ -626,7 +632,7 @@ timeseries.pipeline()
 
 ### timeSeries.map(operator) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 Takes an operator that is used to remap events from this TimeSeries to
-a new set of Events.
+a new set of events.
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - A TimeSeries containing the remapped events  
@@ -995,8 +1001,8 @@ are of the same value as each other then equals will return true.
 Reduces a list of TimeSeries objects using a reducer function. This works
 by taking each event in each TimeSeries and collecting them together
 based on timestamp. All events for a given time are then merged together
-using the reducer function to produce a new Event. The reducer function is
-applied to all columns in the fieldSpec. Those new Events are then
+using the reducer function to produce a new event. The reducer function is
+applied to all columns in the fieldSpec. Those new events are then
 collected together to form a new TimeSeries.
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -1034,7 +1040,8 @@ const totalSeries = TimeSeries.timeSeriesListReduce({
 Takes a list of TimeSeries and merges them together to form a new
 Timeseries.
 
-Merging will produce a new Event only when events are conflict free, so
+Merging will produce a new Event;
+ only when events are conflict free, so
 it is useful in the following cases:
  * to combine multiple TimeSeries which have different time ranges, essentially
  concatenating them together

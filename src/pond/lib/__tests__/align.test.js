@@ -15,40 +15,40 @@ import { Pipeline } from "../pipeline";
 
 const SIMPLE_GAP_DATA = {
     name: "traffic",
-    columns: [ "time", "value" ],
+    columns: ["time", "value"],
     points: [
-        [ 1471824030000, .75 ],
+        [1471824030000, 0.75],
         // Mon, 22 Aug 2016 00:00:30 GMT
-        [ 1471824105000, 2 ],
+        [1471824105000, 2],
         // Mon, 22 Aug 2016 00:01:45 GMT
-        [ 1471824210000, 1 ],
+        [1471824210000, 1],
         // Mon, 22 Aug 2016 00:03:30 GMT
-        [ 1471824390000, 1 ],
+        [1471824390000, 1],
         // Mon, 22 Aug 2016 00:06:30 GMT
-        [ 1471824510000, 3 ],
+        [1471824510000, 3],
         // Mon, 22 Aug 2016 00:08:30 GMT
         //final point in same window, does nothing, for coverage
         // Mon, 22 Aug 2016 00:08:45 GMT
-        [ 1471824525000, 5 ]
+        [1471824525000, 5]
     ]
 };
 
 const SIMPLE_GAP_DATA_BAD = {
     name: "traffic",
-    columns: [ "time", "value" ],
+    columns: ["time", "value"],
     points: [
-        [ 1471824030000, .75 ],
+        [1471824030000, 0.75],
         // Mon, 22 Aug 2016 00:00:30 GMT
-        [ 1471824105000, 2 ],
+        [1471824105000, 2],
         // Mon, 22 Aug 2016 00:01:45 GMT
-        [ 1471824210000, 1 ],
+        [1471824210000, 1],
         // Mon, 22 Aug 2016 00:03:30 GMT
-        [ 1471824390000, 1 ],
+        [1471824390000, 1],
         // Mon, 22 Aug 2016 00:06:30 GMT
-        [ 1471824510000, "bob!" ],
+        [1471824510000, "bob!"],
         // Mon, 22 Aug 2016 00:08:30 GMT
         // Mon, 22 Aug 2016 00:08:45 GMT
-        [ 1471824525000, 5 ]
+        [1471824525000, 5]
     ]
 };
 
@@ -80,7 +80,7 @@ it(
         });
 
         expect(aligned.size()).toBe(8);
-        expect(aligned.at(0).get()).toBe(.75);
+        expect(aligned.at(0).get()).toBe(0.75);
         expect(aligned.at(1).get()).toBe(2);
         expect(aligned.at(2).get()).toBe(2);
         expect(aligned.at(3).get()).toBe(1);
@@ -105,7 +105,7 @@ it(
         });
 
         expect(aligned.size()).toBe(8);
-        expect(aligned.at(0).get()).toBe(.75);
+        expect(aligned.at(0).get()).toBe(0.75);
         expect(aligned.at(1).get()).toBe(2);
         expect(aligned.at(2).get()).toBe(2);
         expect(aligned.at(3).get()).toBeNull();
@@ -179,12 +179,12 @@ it(
 it("can do alignment on an already aligned timeseries", () => {
     const ts = new TimeSeries({
         name: "traffic",
-        columns: [ "time", "value" ],
+        columns: ["time", "value"],
         points: [
-            [ 1473490770000, 10 ],
-            [ 1473490800000, 20 ],
-            [ 1473490830000, 30 ],
-            [ 1473490860000, 40 ]
+            [1473490770000, 10],
+            [1473490800000, 20],
+            [1473490830000, 30],
+            [1473490860000, 40]
         ]
     });
 
@@ -207,4 +207,3 @@ it("can do alignment on an already aligned timeseries", () => {
     expect(timeseries.at(3).timestamp().getTime()).toEqual(1473490860000);
     expect(timeseries.at(3).value()).toEqual(40);
 });
-

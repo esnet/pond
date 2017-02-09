@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -25,43 +25,43 @@ const EVENT_LIST = [
 
 const TICKET_RANGE = {
     name: "outages",
-    columns: [ "timerange", "title", "esnet_ticket" ],
+    columns: ["timerange", "title", "esnet_ticket"],
     points: [
-        [ [ 1429673400000, 1429707600000 ], "BOOM", "ESNET-20080101-001" ],
-        [ [ 1429673400000, 1429707600000 ], "BAM!", "ESNET-20080101-002" ]
+        [[1429673400000, 1429707600000], "BOOM", "ESNET-20080101-001"],
+        [[1429673400000, 1429707600000], "BAM!", "ESNET-20080101-002"]
     ]
 };
 
 const AVAILABILITY_DATA = {
     name: "availability",
-    columns: [ "index", "uptime" ],
+    columns: ["index", "uptime"],
     points: [
-        [ "2014-07", "100%" ],
-        [ "2014-08", "88%" ],
-        [ "2014-09", "95%" ],
-        [ "2014-10", "99%" ],
-        [ "2014-11", "91%" ],
-        [ "2014-12", "99%" ],
-        [ "2015-01", "100%" ],
-        [ "2015-02", "92%" ],
-        [ "2015-03", "99%" ],
-        [ "2015-04", "87%" ],
-        [ "2015-05", "92%" ],
-        [ "2015-06", "100%" ]
+        ["2014-07", "100%"],
+        ["2014-08", "88%"],
+        ["2014-09", "95%"],
+        ["2014-10", "99%"],
+        ["2014-11", "91%"],
+        ["2014-12", "99%"],
+        ["2015-01", "100%"],
+        ["2015-02", "92%"],
+        ["2015-03", "99%"],
+        ["2015-04", "87%"],
+        ["2015-05", "92%"],
+        ["2015-06", "100%"]
     ]
 };
 
 it("can use the TimeSeries.fill() to fill missing values with zero", () => {
     const ts = new TimeSeries({
         name: "traffic",
-        columns: [ "time", "direction" ],
+        columns: ["time", "direction"],
         points: [
-            [ 1400425947000, { in: 1, out: null } ],
-            [ 1400425948000, { in: null, out: 4 } ],
-            [ 1400425949000, { in: 5, out: null } ],
-            [ 1400425950000, { in: null, out: 8 } ],
-            [ 1400425960000, { in: 9, out: null } ],
-            [ 1400425970000, { in: null, out: 12 } ]
+            [1400425947000, { in: 1, out: null }],
+            [1400425948000, { in: null, out: 4 }],
+            [1400425949000, { in: 5, out: null }],
+            [1400425950000, { in: null, out: 8 }],
+            [1400425960000, { in: 9, out: null }],
+            [1400425970000, { in: null, out: 12 }]
         ]
     });
 
@@ -69,7 +69,7 @@ it("can use the TimeSeries.fill() to fill missing values with zero", () => {
     // fill all columns, limit to 3
     //
     const newTS = ts.fill({
-        fieldSpec: [ "direction.in", "direction.out" ],
+        fieldSpec: ["direction.in", "direction.out"],
         method: "zero",
         limit: 3
     });
@@ -100,7 +100,7 @@ it(
     () => {
         const ts = new TimeSeries({
             name: "traffic",
-            columns: [ "time", "direction" ],
+            columns: ["time", "direction"],
             points: [
                 [
                     1400425947000,
@@ -130,7 +130,7 @@ it(
         });
 
         const newTS = ts.fill({
-            fieldSpec: [ "direction.out.tcp", "direction.in.udp" ]
+            fieldSpec: ["direction.out.tcp", "direction.in.udp"]
         });
 
         expect(newTS.at(0).get("direction.in.udp")).toBe(3);
@@ -155,7 +155,7 @@ it(
         //
         // do it again, but only fill the out.tcp
         //
-        const newTS2 = ts.fill({ fieldSpec: [ "direction.out.tcp" ] });
+        const newTS2 = ts.fill({ fieldSpec: ["direction.out.tcp"] });
 
         expect(newTS2.at(0).get("direction.out.tcp")).toBe(2);
         expect(newTS2.at(1).get("direction.out.tcp")).toBe(4);
@@ -181,25 +181,25 @@ it(
 it("can use TimeSeries.fill() with limit pad and zero filling", () => {
     const ts = new TimeSeries({
         name: "traffic",
-        columns: [ "time", "direction" ],
+        columns: ["time", "direction"],
         points: [
-            [ 1400425947000, { in: 1, out: null } ],
-            [ 1400425948000, { in: null, out: null } ],
-            [ 1400425949000, { in: null, out: null } ],
-            [ 1400425950000, { in: 3, out: 8 } ],
-            [ 1400425960000, { in: null, out: null } ],
-            [ 1400425970000, { in: null, out: 12 } ],
-            [ 1400425980000, { in: null, out: 13 } ],
-            [ 1400425990000, { in: 7, out: null } ],
-            [ 1400426000000, { in: 8, out: null } ],
-            [ 1400426010000, { in: 9, out: null } ],
-            [ 1400426020000, { in: 10, out: null } ]
+            [1400425947000, { in: 1, out: null }],
+            [1400425948000, { in: null, out: null }],
+            [1400425949000, { in: null, out: null }],
+            [1400425950000, { in: 3, out: 8 }],
+            [1400425960000, { in: null, out: null }],
+            [1400425970000, { in: null, out: 12 }],
+            [1400425980000, { in: null, out: 13 }],
+            [1400425990000, { in: 7, out: null }],
+            [1400426000000, { in: 8, out: null }],
+            [1400426010000, { in: 9, out: null }],
+            [1400426020000, { in: 10, out: null }]
         ]
     });
 
     //verify fill limit for zero fill
     const zeroTS = ts.fill({
-        fieldSpec: [ "direction.in", "direction.out" ],
+        fieldSpec: ["direction.in", "direction.out"],
         method: "zero",
         limit: 2
     });
@@ -243,7 +243,7 @@ it("can use TimeSeries.fill() with limit pad and zero filling", () => {
     // over limit skip
     // verify fill limit for pad fill
     const padTS = ts.fill({
-        fieldSpec: [ "direction.in", "direction.out" ],
+        fieldSpec: ["direction.in", "direction.out"],
         method: "pad",
         limit: 2
     });
@@ -288,20 +288,20 @@ it("can use TimeSeries.fill() with limit pad and zero filling", () => {
 it("can do linear interpolation fill (test_linear)", () => {
     const ts = new TimeSeries({
         name: "traffic",
-        columns: [ "time", "direction" ],
+        columns: ["time", "direction"],
         points: [
-            [ 1400425947000, { in: 1, out: 2 } ],
-            [ 1400425948000, { in: null, out: null } ],
-            [ 1400425949000, { in: null, out: null } ],
-            [ 1400425950000, { in: 3, out: null } ],
-            [ 1400425960000, { in: null, out: null } ],
-            [ 1400425970000, { in: 5, out: 12 } ],
-            [ 1400425980000, { in: 6, out: 13 } ]
+            [1400425947000, { in: 1, out: 2 }],
+            [1400425948000, { in: null, out: null }],
+            [1400425949000, { in: null, out: null }],
+            [1400425950000, { in: 3, out: null }],
+            [1400425960000, { in: null, out: null }],
+            [1400425970000, { in: 5, out: 12 }],
+            [1400425980000, { in: 6, out: 13 }]
         ]
     });
 
     const result = ts.fill({
-        fieldSpec: [ "direction.in", "direction.out" ],
+        fieldSpec: ["direction.in", "direction.out"],
         method: "linear"
     });
 
@@ -334,15 +334,15 @@ it(
     () => {
         const ts = new TimeSeries({
             name: "traffic",
-            columns: [ "time", "direction" ],
+            columns: ["time", "direction"],
             points: [
-                [ 1400425947000, { in: 1, out: 2 } ],
-                [ 1400425948000, { in: null, out: null } ],
-                [ 1400425949000, { in: null, out: null } ],
-                [ 1400425950000, { in: 3, out: null } ],
-                [ 1400425960000, { in: null, out: null } ],
-                [ 1400425970000, { in: 5, out: 12 } ],
-                [ 1400425980000, { in: 6, out: 13 } ]
+                [1400425947000, { in: 1, out: 2 }],
+                [1400425948000, { in: null, out: null }],
+                [1400425949000, { in: null, out: null }],
+                [1400425950000, { in: 3, out: null }],
+                [1400425960000, { in: null, out: null }],
+                [1400425970000, { in: 5, out: 12 }],
+                [1400425980000, { in: 6, out: 13 }]
             ]
         });
 
@@ -382,20 +382,20 @@ it(
     () => {
         const ts = new TimeSeries({
             name: "traffic",
-            columns: [ "time", "direction" ],
+            columns: ["time", "direction"],
             points: [
-                [ 1400425947000, { in: 1, out: null } ],
-                [ 1400425948000, { in: null, out: null } ],
-                [ 1400425949000, { in: null, out: null } ],
-                [ 1400425950000, { in: 3, out: 8 } ],
-                [ 1400425960000, { in: null, out: null } ],
-                [ 1400425970000, { in: 5, out: 12 } ],
-                [ 1400425980000, { in: 6, out: 13 } ]
+                [1400425947000, { in: 1, out: null }],
+                [1400425948000, { in: null, out: null }],
+                [1400425949000, { in: null, out: null }],
+                [1400425950000, { in: 3, out: 8 }],
+                [1400425960000, { in: null, out: null }],
+                [1400425970000, { in: 5, out: 12 }],
+                [1400425980000, { in: 6, out: 13 }]
             ]
         });
 
         const result = ts.fill({
-            fieldSpec: [ "direction.in", "direction.out" ],
+            fieldSpec: ["direction.in", "direction.out"],
             method: "linear"
         });
 
@@ -537,4 +537,3 @@ it("can throw on bad args", () => {
     done();
 });
 */
-

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -14,9 +14,10 @@ import Index from "../index";
 
 it("can create a daily index", done => {
     const index = new Index("1d-12355");
-    expect(
-        index.asTimerange().toJSON()
-    ).toEqual([ 1067472000000, 1067558400000 ]);
+    expect(index.asTimerange().toJSON()).toEqual([
+        1067472000000,
+        1067558400000
+    ]);
     expect(index.asTimerange().humanizeDuration()).toBe("a day");
     done();
 });
@@ -117,4 +118,3 @@ it("can create a year index for a date", done => {
     expect(Index.getYearlyIndexString(date)).toBe(expected);
     done();
 });
-

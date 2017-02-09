@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -80,8 +80,8 @@ export default {
                     const month = parseInt(parts[1], 10);
                     const day = parseInt(parts[2], 10);
                     beginTime = isUTC
-                        ? moment.utc([ year, month - 1, day ])
-                        : moment([ year, month - 1, day ]);
+                        ? moment.utc([year, month - 1, day])
+                        : moment([year, month - 1, day]);
                     endTime = isUTC
                         ? moment.utc(beginTime).endOf("day")
                         : moment(beginTime).endOf("day");
@@ -117,8 +117,8 @@ export default {
                     const year = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10);
                     beginTime = isUTC
-                        ? moment.utc([ year, month - 1 ])
-                        : moment([ year, month - 1 ]);
+                        ? moment.utc([year, month - 1])
+                        : moment([year, month - 1]);
                     endTime = isUTC
                         ? moment.utc(beginTime).endOf("month")
                         : moment(beginTime).endOf("month");
@@ -128,7 +128,7 @@ export default {
             // A year e.g. 2015
             case 1:
                 const year = parts[0];
-                beginTime = isUTC ? moment.utc([ year ]) : moment([ year ]);
+                beginTime = isUTC ? moment.utc([year]) : moment([year]);
                 endTime = isUTC
                     ? moment.utc(beginTime).endOf("year")
                     : moment(beginTime).endOf("year");
@@ -164,7 +164,7 @@ export default {
                     const year = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10);
                     const day = parseInt(parts[2], 10);
-                    t = moment.utc([ year, month - 1, day ]);
+                    t = moment.utc([year, month - 1, day]);
                     if (format) {
                         return t.format(format);
                     } else {
@@ -188,7 +188,7 @@ export default {
                 ) {
                     const year = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10);
-                    t = moment.utc([ year, month - 1 ]);
+                    t = moment.utc([year, month - 1]);
                     if (format) {
                         return t.format(format);
                     } else {
@@ -199,7 +199,7 @@ export default {
 
             case 1:
                 const year = parts[0];
-                t = moment.utc([ year ]);
+                t = moment.utc([year]);
                 if (format) {
                     return t.format(format);
                 } else {
@@ -229,7 +229,7 @@ export default {
         } else if (_.isString(fieldSpec)) {
             return fieldSpec.split(".");
         } else if (_.isUndefined(fieldSpec)) {
-            return [ "value" ];
+            return ["value"];
         }
     },
     /**
@@ -242,7 +242,7 @@ export default {
         function* recurse(data, keys = []) {
             if (_.isObject(data)) {
                 for (const key of Object.keys(data)) {
-                    for (const path of recurse(data[key], [ ...keys, key ])) {
+                    for (const path of recurse(data[key], [...keys, key])) {
                         yield path;
                     }
                 }
@@ -280,8 +280,8 @@ export default {
         if (arg instanceof TimeRange) {
             return arg;
         } else if (_.isString(arg)) {
-            const [ begin, end ] = arg.split(",");
-            return new TimeRange([ +begin, +end ]);
+            const [begin, end] = arg.split(",");
+            return new TimeRange([+begin, +end]);
         } else if (_.isArray(arg) && arg.length === 2) {
             return new TimeRange(arg);
         } else {
@@ -319,4 +319,3 @@ export default {
         return data;
     }
 };
-

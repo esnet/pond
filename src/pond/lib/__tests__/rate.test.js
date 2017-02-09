@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2016, The Regents of the University of California,
+ *  Copyright (c) 2016-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -14,19 +14,19 @@ import TimeSeries from "../timeseries";
 
 const RATE = {
     name: "traffic",
-    columns: [ "time", "in" ],
+    columns: ["time", "in"],
     points: [
-        [ 0, 1 ],
-        [ 30000, 3 ],
-        [ 60000, 10 ],
-        [ 90000, 40 ],
-        [ 120000, 70 ],
-        [ 150000, 130 ],
-        [ 180000, 190 ],
-        [ 210000, 220 ],
-        [ 240000, 300 ],
-        [ 270000, 390 ],
-        [ 300000, 510 ]
+        [0, 1],
+        [30000, 3],
+        [60000, 10],
+        [90000, 40],
+        [120000, 70],
+        [150000, 130],
+        [180000, 190],
+        [210000, 220],
+        [240000, 300],
+        [270000, 390],
+        [300000, 510]
     ]
 };
 
@@ -53,8 +53,8 @@ it("can calculate the rate using TimeSeries.rate()", () => {
 it("can replicate basic esmond alignment and rate", done => {
     const RAW_RATES = {
         name: "traffic",
-        columns: [ "time", "value" ],
-        points: [ [ 89000, 100 ], [ 181000, 200 ] ]
+        columns: ["time", "value"],
+        points: [[89000, 100], [181000, 200]]
     };
     const ts = new TimeSeries(RAW_RATES);
     const rates = ts.align({ fieldSpec: "value", period: "30s" }).rate();
@@ -70,8 +70,8 @@ it("can replicate basic esmond alignment and rate", done => {
 it("can output nulls for negative values", done => {
     const ts = new TimeSeries({
         name: "traffic",
-        columns: [ "time", "value" ],
-        points: [ [ 89000, 100 ], [ 181000, 50 ] ]
+        columns: ["time", "value"],
+        points: [[89000, 100], [181000, 50]]
     });
 
     const rates1 = ts.align({ fieldSpec: "value", period: "30s" }).rate();
@@ -93,4 +93,3 @@ it("can output nulls for negative values", done => {
 
     done();
 });
-

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, The Regents of the University of California,
+ *  Copyright (c) 2015-2017, The Regents of the University of California,
  *  through Lawrence Berkeley National Laboratory (subject to receipt
  *  of any required approvals from the U.S. Dept. of Energy).
  *  All rights reserved.
@@ -44,99 +44,105 @@ function buildMetaData(meta) {
 }
 
 /**
-A `TimeSeries` represents a series of events, with each event being a combination of:
-
- - time (or `TimeRange`, or `Index`)
- - data - corresponding set of key/values.
-
-### Construction
-
-Currently you can initialize a `TimeSeries` with either a list of events, or with a data format that looks like this:
-
-```javascript
-const data = {
-    name: "trafficc",
-    columns: ["time", "value"],
-    points: [
-        [1400425947000, 52],
-        [1400425948000, 18],
-        [1400425949000, 26],
-        [1400425950000, 93],
-        ...
-    ]
-};
-```
-
-To create a new TimeSeries object from the above format, simply use the constructor:
-
-```javascript
-var series = new TimeSeries(data);
-```
-
-The format of the data is as follows:
-
- - **name** - optional, but a good practice
- - **columns** - are necessary and give labels to the data in the points.
- - **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
-   
-As just hinted at, the first column may actually be:
-
- - "time"
- - "timeRange" represented by a `TimeRange`
- - "index" - a time range represented by an `Index`. By using an index it is possible, for example, to refer to a specific month:
-
-```javascript
-var availabilityData = {
-    name: "Last 3 months availability",
-    columns: ["index", "uptime"],
-    points: [
-        ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
-        ["2015-05", "92%"],
-        ["2015-04", "87%"],
-    ]
-};
-```
-
-Alternatively, you can construct a `TimeSeries` with a list of events. These may be `Events`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
-
-```javascript
-const events = [];
-events.push(new TimeEvent(new Date(2015, 7, 1), {value: 27}));
-events.push(new TimeEvent(new Date(2015, 8, 1), {value: 29}));
-const series = new TimeSeries({
-    name: "avg temps",
-    events: events
-});
-```
-
-### Nested data
-
-The values do not have to be simple types like the above examples. Here's an example where each value is itself an object with "in" and "out" keys:
-
-```javascript
-const series = new TimeSeries({
-    name: "Map Traffic",
-    columns: ["time", "NASA_north", "NASA_south"],
-    points: [
-        [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
-        [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
-        [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
-        [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
-    ]
-});
-```
-
-Complex data is stored in an Immutable structure. To get a value out of nested data like this you will get the Event you want (by row), as usual, and then use `get()` to fetch the value by column name. The result of this call will be a JSON copy of the Immutable data so you can query deeper in the usual way:
-
-```javascript
-series.at(0).get("NASA_north")["in"]  // 200`
-```
-
-It is then possible to use a value mapper function when calculating different properties. For example, to get the average "in" value of the NASA_north column:
-
-```javascript
-series.avg("NASA_north", d => d.in);  // 250
-```
+ * A `TimeSeries` represents a series of events, with each event being a combination of:
+ *
+ *  - time (or `TimeRange`, or `Index`)
+ *  - data - corresponding set of key/values.
+ *
+ * ### Construction
+ *
+ * Currently you can initialize a `TimeSeries` with either a list of events, or with a data format that looks like this:
+ *
+ * ```javascript
+ * const data = {
+ *     name: "trafficc",
+ *     columns: ["time", "value"],
+ *     points: [
+ *         [1400425947000, 52],
+ *         [1400425948000, 18],
+ *         [1400425949000, 26],
+ *         [1400425950000, 93],
+ *         ...
+ *     ]
+ * };
+ * ```
+ *
+ * To create a new TimeSeries object from the above format, simply use the constructor:
+ *
+ * ```javascript
+ * const series = new TimeSeries(data);
+ * ```
+ *
+ * The format of the data is as follows:
+ *
+ *  - **name** - optional, but a good practice
+ *  - **columns** - are necessary and give labels to the data in the points.
+ *  - **points** - are an array of tuples. Each row is at a different time (or timerange), and each value corresponds to the column labels.
+ *
+ * As just hinted at, the first column may actually be:
+ *
+ *  - "time"
+ *  - "timeRange" represented by a `TimeRange`
+ *  - "index" - a time range represented by an `Index`. By using an index it is possible, for example, to refer to a specific month:
+ *
+ * ```javascript
+ * const availabilityData = {
+ *     name: "Last 3 months availability",
+ *     columns: ["index", "uptime"],
+ *     points: [
+ *         ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
+ *         ["2015-05", "92%"],
+ *         ["2015-04", "87%"],
+ *     ]
+ * };
+ * ```
+ *
+ * Alternatively, you can construct a `TimeSeries` with a list of events.
+ * These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
+ *
+ * ```javascript
+ * const events = [];
+ * events.push(new TimeEvent(new Date(2015, 7, 1), {value: 27}));
+ * events.push(new TimeEvent(new Date(2015, 8, 1), {value: 29}));
+ * const series = new TimeSeries({
+ *     name: "avg temps",
+ *     events: events
+ * });
+ * ```
+ *
+ * ### Nested data
+ *
+ * The values do not have to be simple types like the above examples. Here's an
+ * example where each value is itself an object with "in" and "out" keys:
+ *
+ * ```javascript
+ * const series = new TimeSeries({
+ *     name: "Map Traffic",
+ *     columns: ["time", "NASA_north", "NASA_south"],
+ *     points: [
+ *         [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
+ *         [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
+ *         [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
+ *         [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
+ *     ]
+ * });
+ * ```
+ *
+ * Complex data is stored in an Immutable structure. To get a value out of nested
+ * data like this you will get the event you want (by row), as usual, and then use
+ * `get()` to fetch the value by column name. The result of this call will be a
+ * JSON copy of the Immutable data so you can query deeper in the usual way:
+ *
+ * ```javascript
+ * series.at(0).get("NASA_north")["in"]  // 200`
+ * ```
+ *
+ * It is then possible to use a value mapper function when calculating different
+ * properties. For example, to get the average "in" value of the NASA_north column:
+ *
+ * ```javascript
+ * series.avg("NASA_north", d => d.in);  // 250
+ * ```
  */
 class TimeSeries {
     constructor(arg) {
@@ -167,7 +173,7 @@ class TimeSeries {
 
             const { columns, points, utc = true, ...meta2 } = obj;
             //eslint-disable-line
-            const [ eventKey ] = columns;
+            const [eventKey] = columns;
             const events = points.map(point => {
                 const t = point[columns[0]];
                 const d = point.data;
@@ -216,9 +222,9 @@ class TimeSeries {
                 //
                 const { columns, points, utc = true, ...meta2 } = obj;
                 //eslint-disable-line
-                const [ eventKey, ...eventFields ] = columns;
+                const [eventKey, ...eventFields] = columns;
                 const events = points.map(point => {
-                    const [ t, ...eventValues ] = point;
+                    const [t, ...eventValues] = point;
                     const d = _.object(eventFields, eventValues);
                     const options = utc;
                     const Event = this.constructor.event(eventKey);
@@ -247,7 +253,7 @@ class TimeSeries {
      * ```
      */
     metaSchema() {
-        return [ { name: "name", type: "string" } ];
+        return [{ name: "name", type: "string" }];
     }
 
     keySchema(eventKey) {
@@ -294,7 +300,7 @@ class TimeSeries {
      */
     toAvro() {
         const d = this.toJSON();
-        const [ eventKey, ...columns ] = d.columns;
+        const [eventKey, ...columns] = d.columns;
 
         const points = d.points.map(point => {
             const data = {};
@@ -329,11 +335,11 @@ class TimeSeries {
 
         let columns;
         if (e instanceof TimeEvent) {
-            columns = [ "time", ...this.columns() ];
+            columns = ["time", ...this.columns()];
         } else if (e instanceof TimeRangeEvent) {
-            columns = [ "timerange", ...this.columns() ];
+            columns = ["timerange", ...this.columns()];
         } else if (e instanceof IndexedEvent) {
-            columns = [ "index", ...this.columns() ];
+            columns = ["index", ...this.columns()];
         }
 
         const points = [];
@@ -397,7 +403,7 @@ class TimeSeries {
      * as calling `bisect` first and then using `at` with the index.
      *
      * @param  {Date} time The time of the event.
-     * @return {Event}
+     * @return {TimeEvent|IndexedEvent|TimeRangeEvent}
      */
     atTime(time) {
         const pos = this.bisect(time);
@@ -409,7 +415,7 @@ class TimeSeries {
     /**
      * Returns the first event in the series.
      *
-     * @return {Event}
+     * @return {TimeEvent|IndexedEvent|TimeRangeEvent}
      */
     atFirst() {
         return this._collection.atFirst();
@@ -418,7 +424,7 @@ class TimeSeries {
     /**
      * Returns the last event in the series.
      *
-     * @return {Event}
+     * @return {TimeEvent|IndexedEvent|TimeRangeEvent}
      */
     atLast() {
         return this._collection.atLast();
@@ -862,7 +868,7 @@ class TimeSeries {
      * Returns a new Pipeline with input source being initialized to
      * this TimeSeries collection. This allows pipeline operations
      * to be chained directly onto the TimeSeries to produce a new
-     * TimeSeries or Event result.
+     * TimeSeries or event result.
      *
      * @example
      *
@@ -881,7 +887,7 @@ class TimeSeries {
 
     /**
      * Takes an operator that is used to remap events from this TimeSeries to
-     * a new set of Events.
+     * a new set of events.
      *
      * @param  {function}   operator      An operator which will be passed each
      *                                    event and which should return a new event.
@@ -1409,8 +1415,8 @@ class TimeSeries {
      * Reduces a list of TimeSeries objects using a reducer function. This works
      * by taking each event in each TimeSeries and collecting them together
      * based on timestamp. All events for a given time are then merged together
-     * using the reducer function to produce a new Event. The reducer function is
-     * applied to all columns in the fieldSpec. Those new Events are then
+     * using the reducer function to produce a new event. The reducer function is
+     * applied to all columns in the fieldSpec. Those new events are then
      * collected together to form a new TimeSeries.
      *
      * @example
@@ -1456,7 +1462,8 @@ class TimeSeries {
      * Takes a list of TimeSeries and merges them together to form a new
      * Timeseries.
      *
-     * Merging will produce a new Event only when events are conflict free, so
+     * Merging will produce a new Event;
+ only when events are conflict free, so
      * it is useful in the following cases:
      *  * to combine multiple TimeSeries which have different time ranges, essentially
      *  concatenating them together
@@ -1539,4 +1546,3 @@ class TimeSeries {
 }
 
 export default TimeSeries;
-
