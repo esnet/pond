@@ -19,6 +19,7 @@ import Processing from "./website/guides/Processing";
 import TimeRange from "./website/api/TimeRange";
 import Index from "./website/api/Index";
 import Event from "./website/api/Event";
+import TimeEvent from "./website/api/TimeEvent";
 import TimeRangeEvent from "./website/api/TimeRangeEvent";
 import IndexedEvent from "./website/api/IndexedEvent";
 import Collection from "./website/api/Collection";
@@ -41,6 +42,7 @@ ReactDOM.render(
             <Route path="timerange" component={TimeRange} />
             <Route path="index" component={Index} />
             <Route path="event" component={Event} />
+            <Route path="event" component={TimeEvent} />
             <Route path="timerangeevent" component={TimeRangeEvent} />
             <Route path="indexedevent" component={IndexedEvent} />
             <Route path="collection" component={Collection} />
@@ -50,4 +52,3 @@ ReactDOM.render(
     </Router>,
     document.getElementById("root")
 );
-
