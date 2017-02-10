@@ -9,7 +9,7 @@
  */
 
 import _ from "underscore";
-import avro from "avsc";
+import avro from "avsc/etc/browser/avsc";
 import Immutable from "immutable";
 import Collection from "./collection";
 import Index from "./index";
