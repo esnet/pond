@@ -76,19 +76,16 @@ outageEvent.get("title")  // "STAR-CR5 - Outage"
 
 * [TimeRangeEvent](#TimeRangeEvent)
     * [new TimeRangeEvent()](#new_TimeRangeEvent_new)
-    * _instance_
-        * [.key()](#TimeRangeEvent+key)
-        * [.toJSON()](#TimeRangeEvent+toJSON)
-        * [.toPoint()](#TimeRangeEvent+toPoint)
-        * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
-        * [.timerangeAsUTCString()](#TimeRangeEvent+timerangeAsUTCString) ⇒ <code>string</code>
-        * [.timerangeAsLocalString()](#TimeRangeEvent+timerangeAsLocalString) ⇒ <code>string</code>
-        * [.begin()](#TimeRangeEvent+begin) ⇒ <code>Data</code>
-        * [.end()](#TimeRangeEvent+end) ⇒ <code>Data</code>
-        * [.timestamp()](#TimeRangeEvent+timestamp) ⇒ <code>Data</code>
-        * [.humanizeDuration()](#TimeRangeEvent+humanizeDuration)
-    * _static_
-        * [.keySchema()](#TimeRangeEvent.keySchema)
+    * [.key()](#TimeRangeEvent+key)
+    * [.toJSON()](#TimeRangeEvent+toJSON)
+    * [.toPoint()](#TimeRangeEvent+toPoint)
+    * [.timerange()](#TimeRangeEvent+timerange) ⇒ <code>[TimeRange](#TimeRange)</code>
+    * [.timerangeAsUTCString()](#TimeRangeEvent+timerangeAsUTCString) ⇒ <code>string</code>
+    * [.timerangeAsLocalString()](#TimeRangeEvent+timerangeAsLocalString) ⇒ <code>string</code>
+    * [.begin()](#TimeRangeEvent+begin) ⇒ <code>Data</code>
+    * [.end()](#TimeRangeEvent+end) ⇒ <code>Data</code>
+    * [.timestamp()](#TimeRangeEvent+timestamp) ⇒ <code>Data</code>
+    * [.humanizeDuration()](#TimeRangeEvent+humanizeDuration)
 
 <a name="new_TimeRangeEvent_new"></a>
 
@@ -171,11 +168,3 @@ Alias for the begin() time.
 A human friendly version of the duration of this event
 
 **Kind**: instance method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  
-<a name="TimeRangeEvent.keySchema"></a>
-
-### TimeRangeEvent.keySchema()
-For Avro serialization, this defines the event's key (the TimeRange in this case)
-as an Avro schema (as an array containing the start and end timestamps in this
-case)
-
-**Kind**: static method of <code>[TimeRangeEvent](#TimeRangeEvent)</code>  

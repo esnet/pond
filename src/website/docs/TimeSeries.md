@@ -105,8 +105,6 @@ series.avg("NASA_north", d => d.in);  // 250
 
 * [TimeSeries](#TimeSeries)
     * _instance_
-        * [.metaSchema()](#TimeSeries+metaSchema)
-        * [.toAvro()](#TimeSeries+toAvro)
         * [.toJSON()](#TimeSeries+toJSON)
         * [.toString()](#TimeSeries+toString)
         * [.timerange()](#TimeSeries+timerange)
@@ -168,24 +166,6 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.timeSeriesListReduce(options)](#TimeSeries.timeSeriesListReduce) ⇒ <code>[TimeSeries](#TimeSeries)</code>
         * [.timeSeriesListMerge(options)](#TimeSeries.timeSeriesListMerge) ⇒ <code>[TimeSeries](#TimeSeries)</code>
 
-<a name="TimeSeries+metaSchema"></a>
-
-### timeSeries.metaSchema()
-Should return a list of definitions. e.g.
-```
-    [
-        {name: "name", type: "string"},
-        {name: "myvalue", type: "long"}
-    ]
-```
-
-**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
-<a name="TimeSeries+toAvro"></a>
-
-### timeSeries.toAvro()
-Express the event as an avro buffer
-
-**Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries+toJSON"></a>
 
 ### timeSeries.toJSON()
@@ -964,9 +944,7 @@ Defines the event type contained in this TimeSeries. The default here
 is to use the supplied type (time, timerange or index) to build either
 a TimeEvent, TimeRangeEvent or IndexedEvent. However, you can also
 subclass the TimeSeries and reimplement this to return another event
-type. Typically you might want to do this to provide an Event subclass
-that carries its own schema, for better validated and compact Avro
-serialization.
+type.
 
 **Kind**: static method of <code>[TimeSeries](#TimeSeries)</code>  
 <a name="TimeSeries.equal"></a>

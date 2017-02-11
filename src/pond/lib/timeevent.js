@@ -54,19 +54,6 @@ class TimeEvent extends Event {
             const other = arg1;
             this._d = other._d;
             return;
-        } else if (arg1 instanceof Buffer) {
-            let avroData;
-            try {
-                avroData = this.schema().fromBuffer(arg1);
-            } catch (err) {
-                console.error(
-                    "Unable to convert supplied avro buffer to event"
-                );
-            }
-            this._d = new Immutable.Map();
-            this._d = this._d.set("time", new Date(avroData.time));
-            this._d = this._d.set("data", new Immutable.Map(avroData.data));
-            return;
         } else if (
             arg1 instanceof Immutable.Map &&
                 arg1.has("time") &&
@@ -85,17 +72,6 @@ class TimeEvent extends Event {
      */
     key() {
         return this.timestamp().getTime();
-    }
-
-    /**
-     * For Avro serialization, this defines the event's key (the timestamp)
-     * as a simple a long (logicalType of timestamp milliseconds)
-     */
-    static keySchema() {
-        return {
-            name: "time",
-            type: { type: "long", logicalType: "timestamp-millis" }
-        };
     }
 
     /**

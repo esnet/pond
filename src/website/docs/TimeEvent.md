@@ -21,18 +21,15 @@ const event1 = new TimeEvent(t, { a: 5, b: 6 });
 
 * [TimeEvent](#TimeEvent)
     * [new TimeEvent()](#new_TimeEvent_new)
-    * _instance_
-        * [.key()](#TimeEvent+key)
-        * [.toJSON()](#TimeEvent+toJSON) ⇒ <code>Object</code>
-        * [.toPoint()](#TimeEvent+toPoint)
-        * [.timestampAsUTCString()](#TimeEvent+timestampAsUTCString)
-        * [.timestampAsLocalString()](#TimeEvent+timestampAsLocalString)
-        * [.timestamp()](#TimeEvent+timestamp)
-        * [.begin()](#TimeEvent+begin)
-        * [.end()](#TimeEvent+end)
-        * [.stringify()](#TimeEvent+stringify) ⇒ <code>string</code>
-    * _static_
-        * [.keySchema()](#TimeEvent.keySchema)
+    * [.key()](#TimeEvent+key)
+    * [.toJSON()](#TimeEvent+toJSON) ⇒ <code>Object</code>
+    * [.toPoint()](#TimeEvent+toPoint)
+    * [.timestampAsUTCString()](#TimeEvent+timestampAsUTCString)
+    * [.timestampAsLocalString()](#TimeEvent+timestampAsLocalString)
+    * [.timestamp()](#TimeEvent+timestamp)
+    * [.begin()](#TimeEvent+begin)
+    * [.end()](#TimeEvent+end)
+    * [.stringify()](#TimeEvent+stringify) ⇒ <code>string</code>
 
 <a name="new_TimeEvent_new"></a>
 
@@ -108,10 +105,3 @@ Turn the Collection data into a string
 
 **Kind**: instance method of <code>[TimeEvent](#TimeEvent)</code>  
 **Returns**: <code>string</code> - The collection as a string  
-<a name="TimeEvent.keySchema"></a>
-
-### TimeEvent.keySchema()
-For Avro serialization, this defines the event's key (the timestamp)
-as a simple a long (logicalType of timestamp milliseconds)
-
-**Kind**: static method of <code>[TimeEvent](#TimeEvent)</code>  
