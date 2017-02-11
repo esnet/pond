@@ -1,6 +1,11 @@
 ## Changelog
 ---
 
+## 0.8.3
+> February 2017
+
+ * Removed AVRO support because of browser/webpack problems. Hopefully this will be added back in the future.
+
 ## 0.8
 > February 2017
 
@@ -18,7 +23,7 @@ The API is headed towards a 1.0 release, hopefully by the summer. As we head the
  * **TimeSeries merging**: Improves performance for merging and combining TimeSeries events up to 10 times (Fixes [#51](https://github.com/esnet/pond/issues/51)).
  * **TimeSeries merging API** TimeSeries level API has been simplified, allowing any reducer function (e.g. `avg()` to be used when combining multiple TimeSeries, but removing some wrapper functions (see breaking changes below). (Fixes [#58](https://github.com/esnet/pond/issues/58), [#59](https://github.com/esnet/pond/issues/59))
  * **Event class hierarchy**: The event class structure was finally cleaned up internally, but this comes with a major breaking change: events that were of class `Event` before (i.e. had a timestamp) are now `TimeEvents`, while `Event` is a base class shared by `TimeEvent`, `TimeRangeEvent` and `IndexedEvent`. Further, `Events` can now be further sub-classed (see Avro change for why). Static event methods are still on `Event`.
- * **Avro support**. Along with the ability to subclass an `Event` comes the ability to define a schema for the subclass. This allows `Event`s, `TimeSeries` and `TimeRange`s to serialize themselves to Avro buffers for compact and correct transfers. This feature is still experimental, and isn't currently supported in PyPond.
+ * **Avro support**. Along with the ability to subclass an `Event` comes the ability to define a schema for the subclass. This allows `Event`s, `TimeSeries` and `TimeRange`s to serialize themselves to Avro buffers for compact and correct transfers. This feature is still experimental, and isn't currently supported in PyPond. [Removed in 0.8.3]
  * **De-duplication** - you can now de-duplicate the events in a `Collection` with `Collection.dedup()`. Later events win. In a related change you can use `collection.atKey()` to get back a list of events at that exact time, timerange or index, or a map of key to a list of events at that key with `eventListAsMap()`. This partially addresses [#52](https://github.com/esnet/pond/issues/52).
  * **Prettier** - Uses prettier for code formatting now, so lots of stylistic changes in this release. Hopefully this will simplify that part of code maintenance going forward.
 

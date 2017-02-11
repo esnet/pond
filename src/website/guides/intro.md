@@ -51,7 +51,7 @@ const p = Pipeline()
 Pond has three main goals:
 
  1. **Data Structures** - Provide a robust set of time-related data structures, built on Immutable.js
- 2. **Serialization** - Provide serialization of these structures for transmission across the wire as Avro buffers or strings, including to our Python version of this library
+ 2. **Serialization** - Provide serialization of these structures for transmission across the wire
  3. **Processing** - Provide processing operations to work with those structures
 
 Here is a summary of what is provided:

@@ -17,7 +17,6 @@ can do what you want to do.
 
 * [Event](#Event)
     * _instance_
-        * [.toAvro()](#Event+toAvro)
         * [.toString()](#Event+toString)
         * [.type()](#Event+type)
         * [.setData(data)](#Event+setData) ⇒ <code>object</code>
@@ -37,12 +36,6 @@ can do what you want to do.
         * [.map(fieldSpec)](#Event.map)
         * [.reduce(mapped, reducer)](#Event.reduce)
 
-<a name="Event+toAvro"></a>
-
-### event.toAvro()
-Express the event as an avro buffer
-
-**Kind**: instance method of <code>[Event](#Event)</code>  
 <a name="Event+toString"></a>
 
 ### event.toString()
