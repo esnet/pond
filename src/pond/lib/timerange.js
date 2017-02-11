@@ -10,7 +10,7 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
-import avro from "avsc/etc/browser/avsc";
+import avro from "avsc/etc/browser/avsc-protocols";
 
 import moment from "moment";
 
