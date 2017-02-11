@@ -11,7 +11,6 @@
 import _ from "underscore";
 import Immutable from "immutable";
 import Event from "./event";
-import TimeRange from "./timerange";
 import util from "./base/util";
 
 /**
@@ -106,19 +105,6 @@ class TimeRangeEvent extends Event {
             const other = arg1;
             this._d = other._d;
             return;
-        } else if (arg1 instanceof Buffer) {
-            let avroData;
-            try {
-                avroData = this.schema().fromBuffer(arg1);
-            } catch (err) {
-                console.error(
-                    "Unable to convert supplied avro buffer to event"
-                );
-            }
-            const range = new TimeRange(avroData.timerange);
-            const data = new Immutable.Map(avroData.data);
-            this._d = new Immutable.Map({ range, data });
-            return;
         } else if (arg1 instanceof Immutable.Map) {
             this._d = arg1;
             return;
@@ -144,15 +130,6 @@ class TimeRangeEvent extends Event {
             timerange: this.timerange().toJSON(),
             data: this.data().toJSON()
         };
-    }
-
-    /**
-     * For Avro serialization, this defines the event's key (the TimeRange in this case)
-     * as an Avro schema (as an array containing the start and end timestamps in this
-     * case)
-     */
-    static keySchema() {
-        return { name: "timerange", type: { type: "array", items: "long" } };
     }
 
     /**

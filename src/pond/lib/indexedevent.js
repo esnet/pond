@@ -10,7 +10,6 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
-import Index from "./index";
 import Event from "./event";
 import util from "./base/util";
 
@@ -60,20 +59,6 @@ class IndexedEvent extends Event {
         if (arg1 instanceof IndexedEvent) {
             const other = arg1;
             this._d = other._d;
-            return;
-        } else if (arg1 instanceof Buffer) {
-            let avroData;
-            try {
-                avroData = this.schema().fromBuffer(arg1);
-            } catch (err) {
-                console.error(
-                    "Unable to convert supplied avro buffer to event"
-                );
-            }
-
-            this._d = new Immutable.Map();
-            this._d = this._d.set("index", new Index(avroData.index));
-            this._d = this._d.set("data", new Immutable.Map(avroData.data));
             return;
         } else if (arg1 instanceof Immutable.Map) {
             this._d = arg1;

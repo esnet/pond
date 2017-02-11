@@ -10,7 +10,6 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
-import avro from "avsc/etc/browser/avsc-protocols";
 import util from "./base/util";
 
 /**
@@ -30,50 +29,6 @@ class Event {
     constructor() {
         if (new.target === Event) {
             throw new TypeError("Cannot construct Event instances directly");
-        }
-    }
-
-    keySchema() {
-        if (this.constructor.keySchema === undefined) {
-            throw new TypeError(
-                "Must implement the event's keySchema() static method"
-            );
-        }
-        return this.constructor.keySchema();
-    }
-
-    dataSchema() {
-        if (this.constructor.dataSchema === undefined) {
-            throw new TypeError(
-                "Must implement the event's dataSchema() static method"
-            );
-        }
-        return this.constructor.dataSchema();
-    }
-
-    schema() {
-        const schema = {
-            type: "record",
-            name: "Event",
-            fields: [
-                this.keySchema(),
-                { name: "data", type: this.dataSchema() }
-            ]
-        };
-        return avro.parse(schema);
-    }
-
-    /**
-     * Express the event as an avro buffer
-     */
-    toAvro() {
-        try {
-            return this.schema().toBuffer(this.toJSON());
-        } catch (err) {
-            console.error(
-                "Unable to convert event to avro based on schema",
-                err
-            );
         }
     }
 

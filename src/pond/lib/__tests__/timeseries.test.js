@@ -927,20 +927,3 @@ class StatusSeries extends TimeSeries {
         return StatusEvent;
     }
 }
-
-it("can convert a timeseries to avro", () => {
-    const timeseries1 = new StatusSeries({
-        name: "traffic",
-        columns: ["time", "value", "status"],
-        points: [
-            [1400425947000, 52, "ok"],
-            [1400425948000, 18, "ok"],
-            [1400425949000, 26, "fail"],
-            [1400425950000, 93, "offline"]
-        ]
-    });
-
-    const buffer = timeseries1.toAvro();
-    const timeseries2 = new StatusSeries(buffer);
-    TimeSeries.is(timeseries1, timeseries2);
-});

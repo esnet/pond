@@ -9,7 +9,6 @@
  */
 
 import _ from "underscore";
-import avro from "avsc/etc/browser/avsc-protocols";
 import Immutable from "immutable";
 import Collection from "./collection";
 import Index from "./index";
@@ -158,34 +157,6 @@ class TimeSeries {
             const other = arg;
             this._data = other._data;
             this._collection = other._collection;
-        } else if (arg instanceof Buffer) {
-            //
-            // Turns the buffer into a JSON object using the AVRO schema
-            //
-            let obj;
-            try {
-                obj = this.schema().fromBuffer(arg);
-            } catch (err) {
-                console.error(
-                    `Unable to construct ${this.constructor.name} from Avro Buffer: ${err}`
-                );
-            }
-
-            const { columns, points, utc = true, ...meta2 } = obj;
-            //eslint-disable-line
-            const [eventKey] = columns;
-            const events = points.map(point => {
-                const t = point[columns[0]];
-                const d = point.data;
-                const options = utc;
-                const Event = this.constructor.event(eventKey);
-                return new Event(t, d, options);
-            });
-
-            this._collection = new Collection(events);
-            this._data = buildMetaData(meta2);
-
-            return;
         } else if (_.isObject(arg)) {
             //
             // TimeSeries(object data) where data may be:
@@ -240,84 +211,6 @@ class TimeSeries {
                     "TimeSeries was passed non-chronological events"
                 );
             }
-        }
-    }
-
-    /**
-     * Should return a list of definitions. e.g.
-     * ```
-     *     [
-     *         {name: "name", type: "string"},
-     *         {name: "myvalue", type: "long"}
-     *     ]
-     * ```
-     */
-    metaSchema() {
-        return [{ name: "name", type: "string" }];
-    }
-
-    keySchema(eventKey) {
-        const Event = this.constructor.event(eventKey);
-        return Event.keySchema();
-    }
-
-    dataSchema(eventKey) {
-        const Event = this.constructor.event(eventKey);
-        return Event.dataSchema();
-    }
-
-    schema(eventKey) {
-        const s = {
-            type: "record",
-            name: "TimeSeries",
-            fields: [
-                ...this.metaSchema(),
-                { name: "columns", type: { type: "array", items: "string" } },
-                {
-                    name: "points",
-                    type: {
-                        type: "array",
-                        items: {
-                            type: "record",
-                            name: "Event",
-                            fields: [
-                                this.keySchema(eventKey),
-                                {
-                                    name: "data",
-                                    type: this.dataSchema(eventKey)
-                                }
-                            ]
-                        }
-                    }
-                }
-            ]
-        };
-        return avro.parse(s);
-    }
-
-    /**
-     * Express the event as an avro buffer
-     */
-    toAvro() {
-        const d = this.toJSON();
-        const [eventKey, ...columns] = d.columns;
-
-        const points = d.points.map(point => {
-            const data = {};
-            columns.forEach((c, i) => {
-                data[c] = point[i + 1];
-            });
-            return { [eventKey]: point[0], data };
-        });
-        d.points = points;
-
-        try {
-            return this.schema(eventKey).toBuffer(d);
-        } catch (err) {
-            console.error(
-                "Unable to convert TimeSeries to avro based on schema",
-                err
-            );
         }
     }
 
@@ -1370,9 +1263,7 @@ class TimeSeries {
       * is to use the supplied type (time, timerange or index) to build either
       * a TimeEvent, TimeRangeEvent or IndexedEvent. However, you can also
       * subclass the TimeSeries and reimplement this to return another event
-      * type. Typically you might want to do this to provide an Event subclass
-      * that carries its own schema, for better validated and compact Avro
-      * serialization.
+      * type.
       */
     static event(eventKey) {
         switch (eventKey) {
