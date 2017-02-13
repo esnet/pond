@@ -10,7 +10,7 @@
 
 import _ from "underscore";
 import Immutable from "immutable";
-import avro from "avsc/etc/browser/avsc-protocols";
+import avro from "avsc/etc/browser/avsc-types";
 import util from "./base/util";
 
 /**
