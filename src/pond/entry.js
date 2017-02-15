@@ -17,6 +17,7 @@ if (typeof window !== "undefined") {
 
 // Structures
 export Event from "./lib/event";
+export TimeEvent from "./lib/timeevent";
 export TimeRangeEvent from "./lib/timerangeevent";
 export IndexedEvent from "./lib/indexedevent";
 export Index from "./lib/index.js";

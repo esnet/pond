@@ -1,6 +1,11 @@
 ## Changelog
 ---
 
+## 0.8.4
+> February 2017
+
+ * Fix export of TimeEvent
+
 ## 0.8.3
 > February 2017
 
