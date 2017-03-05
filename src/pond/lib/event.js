@@ -27,7 +27,7 @@ can do what you want to do.
 */
 class Event {
     constructor() {
-        if (new.target === Event) {
+        if (this.constructor.name === "Event") {
             throw new TypeError("Cannot construct Event instances directly");
         }
     }
