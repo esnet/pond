@@ -1,0 +1,1453 @@
+{
+	"id": 0,
+	"name": "pondjs",
+	"kind": 0,
+	"flags": {},
+	"children": [
+		{
+			"id": 81,
+			"name": "\"index\"",
+			"kind": 1,
+			"kindString": "External module",
+			"flags": {
+				"isExported": true
+			},
+			"originalName": "/Users/pmurphy/Code/pondjs/src/index.ts",
+			"sources": [
+				{
+					"fileName": "index.ts",
+					"line": 1,
+					"character": 0
+				}
+			]
+		},
+		{
+			"id": 1,
+			"name": "\"timerange\"",
+			"kind": 1,
+			"kindString": "External module",
+			"flags": {
+				"isExported": true,
+				"isExternal": true
+			},
+			"originalName": "/Users/pmurphy/Code/pondjs/src/timerange.ts",
+			"children": [
+				{
+					"id": 2,
+					"name": "TimeRange",
+					"kind": 128,
+					"kindString": "Class",
+					"flags": {
+						"isExported": true,
+						"isExternal": true
+					},
+					"comment": {
+						"shortText": "A time range is a simple representation of a begin and end time, used\nto maintain consistency across an application.",
+						"text": "### Construction\n\nYou can define a TimeRange with moments, Javascript Date objects\nor ms since UNIX epoch. Here we construct one with two moments:\n\n```js\nvar fmt = \"YYYY-MM-DD HH:mm\";\nvar beginTime = moment(\"2012-01-11 11:11\", fmt);\nvar endTime =   moment(\"2012-02-22 12:12\", fmt);\nvar range = new TimeRange(beginTime, endTime);\n```\n\nor with ms times:\n\n```js\nvar range = new TimeRange([1326309060000, 1329941520000]);\n```\n\n"
+					},
+					"children": [
+						{
+							"id": 4,
+							"name": "constructor",
+							"kind": 512,
+							"kindString": "Constructor",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"comment": {
+								"shortText": "Builds a new TimeRange which may be of several different formats:\n  - Another TimeRange (copy constructor)\n  - An Immutable.List containing two Dates.\n  - A Javascript array containing two Date or ms timestamps\n  - Two arguments, begin and end, each of which may be a Data,\n    a Moment, or a ms timestamp."
+							},
+							"signatures": [
+								{
+									"id": 5,
+									"name": "new TimeRange",
+									"kind": 16384,
+									"kindString": "Constructor signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Builds a new TimeRange which may be of several different formats:\n  - Another TimeRange (copy constructor)\n  - An Immutable.List containing two Dates.\n  - A Javascript array containing two Date or ms timestamps\n  - Two arguments, begin and end, each of which may be a Data,\n    a Moment, or a ms timestamp."
+									},
+									"parameters": [
+										{
+											"id": 6,
+											"name": "timerange",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								},
+								{
+									"id": 7,
+									"name": "new TimeRange",
+									"kind": 16384,
+									"kindString": "Constructor signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Builds a new TimeRange which may be of several different formats:\n  - Another TimeRange (copy constructor)\n  - An Immutable.List containing two Dates.\n  - A Javascript array containing two Date or ms timestamps\n  - Two arguments, begin and end, each of which may be a Data,\n    a Moment, or a ms timestamp."
+									},
+									"parameters": [
+										{
+											"id": 8,
+											"name": "dateList",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "List",
+												"typeArguments": [
+													{
+														"type": "reference",
+														"name": "Date"
+													}
+												]
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								},
+								{
+									"id": 9,
+									"name": "new TimeRange",
+									"kind": 16384,
+									"kindString": "Constructor signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Builds a new TimeRange which may be of several different formats:\n  - Another TimeRange (copy constructor)\n  - An Immutable.List containing two Dates.\n  - A Javascript array containing two Date or ms timestamps\n  - Two arguments, begin and end, each of which may be a Data,\n    a Moment, or a ms timestamp."
+									},
+									"parameters": [
+										{
+											"id": 10,
+											"name": "begin",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "Date"
+											}
+										},
+										{
+											"id": 11,
+											"name": "end",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "Date"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								},
+								{
+									"id": 12,
+									"name": "new TimeRange",
+									"kind": 16384,
+									"kindString": "Constructor signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Builds a new TimeRange which may be of several different formats:\n  - Another TimeRange (copy constructor)\n  - An Immutable.List containing two Dates.\n  - A Javascript array containing two Date or ms timestamps\n  - Two arguments, begin and end, each of which may be a Data,\n    a Moment, or a ms timestamp."
+									},
+									"parameters": [
+										{
+											"id": 13,
+											"name": "begin",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "Moment"
+											}
+										},
+										{
+											"id": 14,
+											"name": "end",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "Moment"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								},
+								{
+									"id": 15,
+									"name": "new TimeRange",
+									"kind": 16384,
+									"kindString": "Constructor signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Builds a new TimeRange which may be of several different formats:\n  - Another TimeRange (copy constructor)\n  - An Immutable.List containing two Dates.\n  - A Javascript array containing two Date or ms timestamps\n  - Two arguments, begin and end, each of which may be a Data,\n    a Moment, or a ms timestamp."
+									},
+									"parameters": [
+										{
+											"id": 16,
+											"name": "begin",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "instrinct",
+												"name": "number"
+											}
+										},
+										{
+											"id": 17,
+											"name": "end",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "instrinct",
+												"name": "number"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 45,
+									"character": 42
+								},
+								{
+									"fileName": "timerange.ts",
+									"line": 55,
+									"character": 39
+								},
+								{
+									"fileName": "timerange.ts",
+									"line": 56,
+									"character": 49
+								},
+								{
+									"fileName": "timerange.ts",
+									"line": 57,
+									"character": 42
+								},
+								{
+									"fileName": "timerange.ts",
+									"line": 58,
+									"character": 46
+								},
+								{
+									"fileName": "timerange.ts",
+									"line": 59,
+									"character": 46
+								}
+							]
+						},
+						{
+							"id": 3,
+							"name": "_range",
+							"kind": 1024,
+							"kindString": "Property",
+							"flags": {
+								"isPrivate": true,
+								"isExported": true,
+								"isExternal": true
+							},
+							"comment": {
+								"shortText": "Internally, the timerange is stored as an Immutable.List"
+							},
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 45,
+									"character": 18
+								}
+							],
+							"type": {
+								"type": "reference",
+								"name": "List",
+								"typeArguments": [
+									{
+										"type": "reference",
+										"name": "Date"
+									}
+								]
+							}
+						},
+						{
+							"id": 32,
+							"name": "begin",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 33,
+									"name": "begin",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the begin time of the TimeRange."
+									},
+									"type": {
+										"type": "reference",
+										"name": "Date"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 151,
+									"character": 9
+								}
+							]
+						},
+						{
+							"id": 45,
+							"name": "contains",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 46,
+									"name": "contains",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Determine if a Date or a TimeRange is contained entirely\nwithin this TimeRange"
+									},
+									"parameters": [
+										{
+											"id": 47,
+											"name": "date",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "Date"
+											}
+										}
+									],
+									"type": {
+										"type": "instrinct",
+										"name": "boolean"
+									}
+								},
+								{
+									"id": 48,
+									"name": "contains",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"parameters": [
+										{
+											"id": 49,
+											"name": "other",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "instrinct",
+										"name": "boolean"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 191,
+									"character": 12
+								},
+								{
+									"fileName": "timerange.ts",
+									"line": 192,
+									"character": 12
+								},
+								{
+									"fileName": "timerange.ts",
+									"line": 193,
+									"character": 12
+								}
+							]
+						},
+						{
+							"id": 56,
+							"name": "disjoint",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 57,
+									"name": "disjoint",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns true if the passed in other TimeRange in no way\noverlaps this TimeRange."
+									},
+									"parameters": [
+										{
+											"id": 58,
+											"name": "other",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "instrinct",
+										"name": "boolean"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 234,
+									"character": 12
+								}
+							]
+						},
+						{
+							"id": 65,
+							"name": "duration",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 66,
+									"name": "duration",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the duration of the TimeRange in milliseconds"
+									},
+									"type": {
+										"type": "instrinct",
+										"name": "number"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 264,
+									"character": 12
+								}
+							]
+						},
+						{
+							"id": 34,
+							"name": "end",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 35,
+									"name": "end",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the end time of the TimeRange."
+									},
+									"type": {
+										"type": "reference",
+										"name": "Date"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 158,
+									"character": 7
+								}
+							]
+						},
+						{
+							"id": 42,
+							"name": "equals",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 43,
+									"name": "equals",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns if the two TimeRanges can be considered equal,\nin that they have the same times."
+									},
+									"parameters": [
+										{
+											"id": 44,
+											"name": "other",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "instrinct",
+										"name": "boolean"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 182,
+									"character": 10
+								}
+							]
+						},
+						{
+							"id": 59,
+							"name": "extents",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 60,
+									"name": "extents",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns a new Timerange which covers the extents of this and\nother combined."
+									},
+									"parameters": [
+										{
+											"id": 61,
+											"name": "other",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 242,
+									"character": 11
+								}
+							]
+						},
+						{
+							"id": 28,
+							"name": "humanize",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 29,
+									"name": "humanize",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns a human friendly version of the TimeRange, e.g.\n\"Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am\""
+									},
+									"type": {
+										"type": "instrinct",
+										"name": "string"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 129,
+									"character": 12
+								}
+							]
+						},
+						{
+							"id": 67,
+							"name": "humanizeDuration",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 68,
+									"name": "humanizeDuration",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "A user friendly version of the duration."
+									},
+									"type": {
+										"type": "instrinct",
+										"name": "string"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 271,
+									"character": 20
+								}
+							]
+						},
+						{
+							"id": 62,
+							"name": "intersection",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 63,
+									"name": "intersection",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns a new TimeRange which represents the intersection\n(overlapping) part of this and other."
+									},
+									"parameters": [
+										{
+											"id": 64,
+											"name": "other",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "union",
+										"types": [
+											{
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											},
+											{
+												"type": "instrinct",
+												"name": "void"
+											}
+										]
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 252,
+									"character": 16
+								}
+							]
+						},
+						{
+							"id": 53,
+							"name": "overlaps",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 54,
+									"name": "overlaps",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns true if the passed in other TimeRange overlaps\nthis time Range."
+									},
+									"parameters": [
+										{
+											"id": 55,
+											"name": "other",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "instrinct",
+										"name": "boolean"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 219,
+									"character": 12
+								}
+							]
+						},
+						{
+							"id": 18,
+							"name": "range",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 19,
+									"name": "range",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the internal range, which is an Immutable.List containing\nbegin and end times as Dates."
+									},
+									"type": {
+										"type": "reference",
+										"name": "List",
+										"typeArguments": [
+											{
+												"type": "reference",
+												"name": "Date"
+											}
+										]
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 90,
+									"character": 9
+								}
+							]
+						},
+						{
+							"id": 30,
+							"name": "relativeString",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 31,
+									"name": "relativeString",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns a human friendly version of the TimeRange",
+										"tags": [
+											{
+												"tag": "example",
+												"text": "\n\"a few seconds ago to a month ago\"\n"
+											}
+										]
+									},
+									"type": {
+										"type": "instrinct",
+										"name": "string"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 142,
+									"character": 18
+								}
+							]
+						},
+						{
+							"id": 36,
+							"name": "setBegin",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 37,
+									"name": "setBegin",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets a new begin time on the TimeRange. The result will be\na new TimeRange."
+									},
+									"parameters": [
+										{
+											"id": 38,
+											"name": "t",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "Date"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 166,
+									"character": 12
+								}
+							]
+						},
+						{
+							"id": 39,
+							"name": "setEnd",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 40,
+									"name": "setEnd",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Sets a new end time on the TimeRange. The result will be\na new TimeRange."
+									},
+									"parameters": [
+										{
+											"id": 41,
+											"name": "t",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "Date"
+											}
+										}
+									],
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 174,
+									"character": 10
+								}
+							]
+						},
+						{
+							"id": 20,
+							"name": "toJSON",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 21,
+									"name": "toJSON",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the TimeRange as JSON, which will be a Javascript array\nof two ms timestamps."
+									},
+									"type": {
+										"type": "reference",
+										"name": "Array",
+										"typeArguments": [
+											{
+												"type": "instrinct",
+												"name": "number"
+											}
+										]
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 98,
+									"character": 10
+								}
+							]
+						},
+						{
+							"id": 24,
+							"name": "toLocalString",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 25,
+									"name": "toLocalString",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the TimeRange as a string expressed in local time"
+									},
+									"type": {
+										"type": "instrinct",
+										"name": "string"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 114,
+									"character": 17
+								}
+							]
+						},
+						{
+							"id": 22,
+							"name": "toString",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 23,
+									"name": "toString",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the TimeRange as a string, useful for serialization.",
+										"returns": "String representation of the TimeRange\n"
+									},
+									"type": {
+										"type": "instrinct",
+										"name": "string"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 107,
+									"character": 12
+								}
+							]
+						},
+						{
+							"id": 26,
+							"name": "toUTCString",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 27,
+									"name": "toUTCString",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns the TimeRange as a string expressed in UTC time"
+									},
+									"type": {
+										"type": "instrinct",
+										"name": "string"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 121,
+									"character": 15
+								}
+							]
+						},
+						{
+							"id": 50,
+							"name": "within",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 51,
+									"name": "within",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "Returns true if this TimeRange is completely within the supplied\nother TimeRange."
+									},
+									"parameters": [
+										{
+											"id": 52,
+											"name": "other",
+											"kind": 32768,
+											"kindString": "Parameter",
+											"flags": {},
+											"type": {
+												"type": "reference",
+												"name": "TimeRange",
+												"id": 2
+											}
+										}
+									],
+									"type": {
+										"type": "instrinct",
+										"name": "boolean"
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 211,
+									"character": 10
+								}
+							]
+						},
+						{
+							"id": 69,
+							"name": "lastDay",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isStatic": true,
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 70,
+									"name": "lastDay",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "The last day, as a TimeRange"
+									},
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 281,
+									"character": 18
+								}
+							]
+						},
+						{
+							"id": 75,
+							"name": "lastMonth",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isStatic": true,
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 76,
+									"name": "lastMonth",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "The last month, as a TimeRange"
+									},
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 308,
+									"character": 20
+								}
+							]
+						},
+						{
+							"id": 77,
+							"name": "lastNinetyDays",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isStatic": true,
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 78,
+									"name": "lastNinetyDays",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "The last 90 days, as a TimeRange"
+									},
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 317,
+									"character": 25
+								}
+							]
+						},
+						{
+							"id": 71,
+							"name": "lastSevenDays",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isStatic": true,
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 72,
+									"name": "lastSevenDays",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "The last seven days, as a TimeRange"
+									},
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 290,
+									"character": 24
+								}
+							]
+						},
+						{
+							"id": 73,
+							"name": "lastThirtyDays",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isStatic": true,
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 74,
+									"name": "lastThirtyDays",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "The last thirty days, as a TimeRange"
+									},
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 299,
+									"character": 25
+								}
+							]
+						},
+						{
+							"id": 79,
+							"name": "lastYear",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isStatic": true,
+								"isExported": true,
+								"isExternal": true
+							},
+							"signatures": [
+								{
+									"id": 80,
+									"name": "lastYear",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"comment": {
+										"shortText": "The last year, as a TimeRange"
+									},
+									"type": {
+										"type": "reference",
+										"name": "TimeRange",
+										"id": 2
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "timerange.ts",
+									"line": 326,
+									"character": 19
+								}
+							]
+						}
+					],
+					"groups": [
+						{
+							"title": "Constructors",
+							"kind": 512,
+							"children": [
+								4
+							]
+						},
+						{
+							"title": "Properties",
+							"kind": 1024,
+							"children": [
+								3
+							]
+						},
+						{
+							"title": "Methods",
+							"kind": 2048,
+							"children": [
+								32,
+								45,
+								56,
+								65,
+								34,
+								42,
+								59,
+								28,
+								67,
+								62,
+								53,
+								18,
+								30,
+								36,
+								39,
+								20,
+								24,
+								22,
+								26,
+								50,
+								69,
+								75,
+								77,
+								71,
+								73,
+								79
+							]
+						}
+					],
+					"sources": [
+						{
+							"fileName": "timerange.ts",
+							"line": 40,
+							"character": 15
+						}
+					]
+				}
+			],
+			"groups": [
+				{
+					"title": "Classes",
+					"kind": 128,
+					"children": [
+						2
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "timerange.ts",
+					"line": 1,
+					"character": 0
+				}
+			]
+		}
+	],
+	"groups": [
+		{
+			"title": "External modules",
+			"kind": 1,
+			"children": [
+				81,
+				1
+			]
+		}
+	]
+}
