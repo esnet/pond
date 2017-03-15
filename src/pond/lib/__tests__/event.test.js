@@ -100,6 +100,13 @@ it("can create a regular TimeEvent, with deep data", () => {
     expect(event.get("SouthRoute")).toEqual({ in: 654, out: 223 });
 });
 
+it("can't make an Event directly", () => {
+    const timestamp = new Date("2015-04-22T03:30:00Z");
+    expect(() => {
+      const event = new Event(timestamp, DEEP_EVENT_DATA);
+    }).toThrow();   
+});
+
 it("can create an IndexedEvent using a string index and data", () => {
     const event = new IndexedEvent("1d-12355", { value: 42 });
     const expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
