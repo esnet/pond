@@ -1,20 +1,5 @@
-/*
- *  Copyright (c) 2016-2017, The Regents of the University of California,
- *  through Lawrence Berkeley National Laboratory (subject to receipt
- *  of any required approvals from the U.S. Dept. of Energy).
- *  All rights reserved.
- *
- *  This source code is licensed under the BSD-style license found in the
- *  LICENSE file in the root directory of this source tree.
- */
-
-import util from "./util";
 import TimeRange from "./timerange";
-import * as moment from "moment";
-import Moment = moment.Moment;
-
 import EventKey from "./eventkey";
-
 /**
 An index is simply a string that represents a fixed range of time.
 There are two basic types:
@@ -53,84 +38,49 @@ specific day ("1d"). See the processing section within these docs.
 
  */
 export default class Indexed extends EventKey {
-
-    private _utc : boolean;
-    private _string : string;
-    private _timerange : TimeRange;
-
-    constructor(s, utc = true) {
-        super();
-        this._utc = utc;
-        this._string = s;
-        this._timerange = util.rangeFromIndexString(s, this._utc);
-    }
-
-    type() {
-        return "index";
-    }
-
+    private _utc;
+    private _string;
+    private _timerange;
+    constructor(s: any, utc?: boolean);
+    type(): string;
     /**
      * Returns the timestamp to represent this Index
      * which in this case will return the midpoint
      * of the TimeRange
      */
-    timestamp(): Date {
-        return this._timerange.mid();
-    }
-
+    timestamp(): Date;
     /**
      * Returns the Index as JSON, which will just be its string
      * representation
      */
-    toJSON() : string {
-        return this._string;
-    }
-
+    toJSON(): string;
     /**
      * Simply returns the Index as its string
      */
-    toString() : string {
-        return this._string;
-    }
-
+    toString(): string;
     /**
      * for the calendar range style Indexes, this lets you return
      * that calendar range as a human readable format, e.g. "June, 2014".
      *
      * The format specified is a Moment.format.
      */
-    toNiceString(format: string) : string {
-        return util.niceIndexString(this._string, format);
-    }
-
+    toNiceString(format: string): string;
     /**
      * Alias for toString()
      */
-    asString() : string {
-        return this.toString();
-    }
-
+    asString(): string;
     /**
      * Returns the Index as a TimeRange
      */
-    asTimerange() : TimeRange {
-        return this._timerange;
-    }
-
+    asTimerange(): TimeRange;
     /**
      * Returns the start date of the Index
      */
-    begin() : Date {
-        return this._timerange.begin();
-    }
-
+    begin(): Date;
     /**
      * Returns the end date of the Index
      */
-    end() : Date {
-        return this._timerange.end();
-    }
-
+    end(): Date;
     /**
      * Return the index string given an time period (e.g. 1 hour) and a Date.
      * The resulting string represents the 1 hour period that Date is in.
@@ -143,11 +93,7 @@ export default class Indexed extends EventKey {
      *     const index = Index.getIndexString("1h", d);   // '1h-412715'
      * ```
      */
-    static getIndexString(period: string, date: Date) : string {
-        const pos = util.windowPositionFromDate(period, date);
-        return `${period}-${pos}`;
-    }
-
+    static getIndexString(period: string, date: Date): string;
     /**
      * Given a TimeRange, return a list of strings of index values,
      * assuming a period, e.g. "1h".
@@ -155,46 +101,17 @@ export default class Indexed extends EventKey {
      * This is like `Index.getIndexString()` except it returns a sequence of
      * index strings.
      */
-    static getIndexStringList(period: string, timerange: TimeRange) : Array<string> {
-        const pos1 = util.windowPositionFromDate(period, timerange.begin());
-        const pos2 = util.windowPositionFromDate(period, timerange.end());
-        const indexList = [];
-        if (pos1 <= pos2) {
-            for (let pos = pos1; pos <= pos2; pos++) {
-                indexList.push(`${period}-${pos}`);
-            }
-        }
-        return indexList;
-    }
-
+    static getIndexStringList(period: string, timerange: TimeRange): Array<string>;
     /**
      * Generate an index string with day granularity.
      */
-    static getDailyIndexString(date: Date, utc: boolean = false) : string {
-        let day = util.leftPad(utc ? date.getUTCDate() : date.getDate());
-        let month = util.leftPad(
-            utc ? date.getUTCMonth() + 1 : date.getMonth() + 1
-        );
-        const year = utc ? date.getUTCFullYear() : date.getFullYear();
-        return `${year}-${month}-${day}`;
-    }
-
+    static getDailyIndexString(date: Date, utc?: boolean): string;
     /**
      * Generate an index string with month granularity.
      */
-    static getMonthlyIndexString(date: Date, utc: boolean = false) : string {
-        let month = util.leftPad(
-            utc ? date.getUTCMonth() + 1 : date.getMonth() + 1
-        );
-        const year = utc ? date.getUTCFullYear() : date.getFullYear();
-        return `${year}-${month}`;
-    }
-
+    static getMonthlyIndexString(date: Date, utc?: boolean): string;
     /**
      * Generate an index string with year granularity.
      */
-    static getYearlyIndexString(date: Date, utc: boolean = false) : string {
-        const year = utc ? date.getUTCFullYear() : date.getFullYear();
-        return `${year}`;
-    }
+    static getYearlyIndexString(date: Date, utc?: boolean): string;
 }

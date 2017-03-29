@@ -13,7 +13,7 @@ import * as Immutable from "immutable";
 import * as moment from "moment";
 import Moment = moment.Moment;
 
-import EventKey from "./eventkey";
+import Key from "./key";
 import Time from "./time";
 import Period from "./period";
 
@@ -41,12 +41,12 @@ var range = new TimeRange([1326309060000, 1329941520000]);
 
  */
 
-class TimeRange extends EventKey {
+class TimeRange extends Key {
 
     /**
      * Internally, the timerange is stored as an Immutable.List
      */
-    private _range : Immutable.List<Date>;
+    private _range: Immutable.List<Date>;
 
     /**
      * Builds a new TimeRange which may be of several different formats:
@@ -56,13 +56,13 @@ class TimeRange extends EventKey {
      *   - Two arguments, begin and end, each of which may be a Data,
      *     a Moment, or a ms timestamp.
      */
-    constructor(timerange : TimeRange);
-    constructor(dateList : Immutable.List<Date>);
-    constructor(begin : Date, end : Date);
-    constructor(begin : Time, end : Time);
-    constructor(begin : Moment, end : Moment);
-    constructor(begin : number, end : number);
-    constructor(arg1 : any, arg2? : any) {
+    constructor(timerange: TimeRange);
+    constructor(dateList: Immutable.List<Date>);
+    constructor(begin: Date, end: Date);
+    constructor(begin: Time, end: Time);
+    constructor(begin: Moment, end: Moment);
+    constructor(begin: number, end: number);
+    constructor(arg1: any, arg2?: any) {
         super();
         if (arg1 instanceof TimeRange) {
             const other = arg1;
@@ -102,7 +102,7 @@ class TimeRange extends EventKey {
      * Returns the internal range, which is an Immutable.List of two elements
      * containing begin and end times as Dates.
      */
-    internal() : Immutable.List<Date> {
+    internal(): Immutable.List<Date> {
         return this._range;
     }
 
@@ -110,7 +110,7 @@ class TimeRange extends EventKey {
      * Returns the TimeRange as JSON, which will be a Javascript array
      * of two ms timestamps.
      */
-    toJSON() : Array<number> {
+    toJSON(): Array<number> {
         return [this.begin().getTime(), this.end().getTime()];
     }
 
@@ -119,21 +119,21 @@ class TimeRange extends EventKey {
      *
      * @return {string} String representation of the TimeRange
      */
-    toString() : string {
+    toString(): string {
         return JSON.stringify(this.toJSON());
     }
 
     /**
      * Returns the TimeRange as a string expressed in local time
      */
-    toLocalString() : string {
+    toLocalString(): string {
         return `[${this.begin()}, ${this.end()}]`;
     }
 
     /**
      * Returns the TimeRange as a string expressed in UTC time
      */
-    toUTCString() : string {
+    toUTCString(): string {
         return `[${this.begin().toUTCString()}, ${this.end().toUTCString()}]`;
     }
 
@@ -141,7 +141,7 @@ class TimeRange extends EventKey {
      * Returns a human friendly version of the TimeRange, e.g.
      * "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am"
      */
-    humanize() : string {
+    humanize(): string {
         const begin = moment(this.begin());
         const end = moment(this.end());
         const beginStr = begin.format("MMM D, YYYY hh:mm:ss a");
@@ -154,7 +154,7 @@ class TimeRange extends EventKey {
      * @example
      * "a few seconds ago to a month ago"
      */
-    relativeString() : string {
+    relativeString(): string {
         const begin = moment(this.begin());
         const end = moment(this.end());
         return `${begin.fromNow()} to ${end.fromNow()}`;
@@ -163,14 +163,14 @@ class TimeRange extends EventKey {
     /**
      * Returns the begin time of the TimeRange.
      */
-    begin() : Date {
+    begin(): Date {
         return this._range.get(0);
     }
 
     /**
      * Returns the end time of the TimeRange.
      */
-    end() : Date {
+    end(): Date {
         return this._range.get(1);
     }
 
@@ -178,22 +178,22 @@ class TimeRange extends EventKey {
      * Returns the midpoint of the TimeRange
      */
     mid(): Date {
-        return new Date((+this.begin() + +this.end())/2);
+        return new Date((+this.begin() + +this.end()) / 2);
     }
 
     /**
      * Returns the midpoint of the TimeRange as the representitive
      * timestamp for the timerange.
      */
-     timestamp() {
-         return this.mid();
-     }
+    timestamp() {
+        return this.mid();
+    }
 
     /**
      * Sets a new begin time on the TimeRange. The result will be
      * a new TimeRange.
      */
-    setBegin(t : Date) : TimeRange {
+    setBegin(t: Date): TimeRange {
         return new TimeRange(this._range.set(0, t));
     }
 
@@ -201,7 +201,7 @@ class TimeRange extends EventKey {
      * Sets a new end time on the TimeRange. The result will be
      * a new TimeRange.
      */
-    setEnd(t : Date) : TimeRange {
+    setEnd(t: Date): TimeRange {
         return new TimeRange(this._range.set(1, t));
     }
 
@@ -209,7 +209,7 @@ class TimeRange extends EventKey {
      * Returns if the two TimeRanges can be considered equal,
      * in that they have the same times.
      */
-    equals(other : TimeRange) : boolean {
+    equals(other: TimeRange): boolean {
         return this.begin().getTime() === other.begin().getTime() &&
             this.end().getTime() === other.end().getTime();
     }
@@ -218,9 +218,9 @@ class TimeRange extends EventKey {
      * Determine if a Date or a TimeRange is contained entirely
      * within this TimeRange
      */
-    contains(date : Date) : boolean;
-    contains(other : TimeRange) : boolean;
-    contains(other : any) : boolean {
+    contains(date: Date): boolean;
+    contains(other: TimeRange): boolean;
+    contains(other: any): boolean {
         if (_.isDate(other)) {
             return (
                 this.begin() <= other &&
@@ -238,7 +238,7 @@ class TimeRange extends EventKey {
      * Returns true if this TimeRange is completely within the supplied
      * other TimeRange.
      */
-    within(other: TimeRange) : boolean {
+    within(other: TimeRange): boolean {
         return this.begin() >= other.begin() && this.end() <= other.end();
     }
 
@@ -246,10 +246,10 @@ class TimeRange extends EventKey {
      * Returns true if the passed in other TimeRange overlaps
      * this time Range.
      */
-    overlaps(other : TimeRange) : boolean {
+    overlaps(other: TimeRange): boolean {
         if (
             this.contains(other.begin()) && !this.contains(other.end()) ||
-                this.contains(other.end()) && !this.contains(other.begin())
+            this.contains(other.end()) && !this.contains(other.begin())
         ) {
             return true;
         } else {
@@ -261,7 +261,7 @@ class TimeRange extends EventKey {
      * Returns true if the passed in other TimeRange in no way
      * overlaps this TimeRange.
      */
-    disjoint(other : TimeRange) : boolean {
+    disjoint(other: TimeRange): boolean {
         return this.end() < other.begin() || this.begin() > other.end();
     }
 
@@ -269,7 +269,7 @@ class TimeRange extends EventKey {
      * Returns a new Timerange which covers the extents of this and
      * other combined.
      */
-    extents(other : TimeRange) : TimeRange {
+    extents(other: TimeRange): TimeRange {
         const b = this.begin() < other.begin() ? this.begin() : other.begin();
         const e = this.end() > other.end() ? this.end() : other.end();
         return new TimeRange(new Date(b.getTime()), new Date(e.getTime()));
@@ -279,7 +279,7 @@ class TimeRange extends EventKey {
      * Returns a new TimeRange which represents the intersection
      * (overlapping) part of this and other.
      */
-    intersection(other : TimeRange) : TimeRange|void {
+    intersection(other: TimeRange): TimeRange | void {
         if (this.disjoint(other)) {
             return;
         }
@@ -291,14 +291,14 @@ class TimeRange extends EventKey {
     /**
      * Returns the duration of the TimeRange in milliseconds
      */
-    duration() : number {
+    duration(): number {
         return this.end().getTime() - this.begin().getTime();
     }
 
     /**
      * A user friendly version of the duration.
      */
-    humanizeDuration() : string {
+    humanizeDuration(): string {
         return moment.duration(this.duration()).humanize();
     }
 

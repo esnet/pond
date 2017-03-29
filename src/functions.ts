@@ -8,7 +8,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import * as _ from "underscore";
+import * as _ from "lodash";
 
 function isValid(v: number): boolean {
     return !(_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
@@ -24,7 +24,7 @@ const propagateMissing = (values: number[]) =>
     ignoreMissing(values).length === values.length ? values : null;
 const noneIfEmpty = (values: number[]) => values.length === 0 ? null : values;
 
-interface ReducerFunction {
+export interface ReducerFunction {
     (values: number[]): number;
 }
 
@@ -68,7 +68,7 @@ export function keep(clean = filter.ignoreMissing): ReducerFunction {
  *     `zeroMissing` - will replace missing values with a zero
  */
 export function sum(clean = filter.ignoreMissing): ReducerFunction {
-    return function(values: number[]): number {
+    return function (values: number[]): number {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         return _.reduce(cleanValues, (a: number, b: number) => a + b, 0);
@@ -86,7 +86,7 @@ export function sum(clean = filter.ignoreMissing): ReducerFunction {
  *     `zeroMissing` - will replace missing values with a zero
  */
 export function avg(clean = filter.ignoreMissing): ReducerFunction {
-    return function(values: number[]): number {
+    return function (values: number[]): number {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
         const sum = _.reduce(
@@ -255,9 +255,9 @@ export function stdev(clean = filter.ignoreMissing): ReducerFunction {
 }
 
 interface PercentileOptions {
-  q?: number;           // The percentile (should be between 0 and 100)
-  interp?: "linear" | "lower" | "higher" | "nearest" | "midpoint",
-  clean?: (a: number[]) => number[];
+    q?: number;           // The percentile (should be between 0 and 100)
+    interp?: "linear" | "lower" | "higher" | "nearest" | "midpoint",
+    clean?: (a: number[]) => number[];
 }
 
 /**
@@ -279,8 +279,8 @@ interface PercentileOptions {
  *                 with a zero
  */
 export function percentile(q: number,
-                           interp: "linear" | "lower" | "higher" | "nearest" | "midpoint" = "linear" ,
-                           clean = filter.ignoreMissing): ReducerFunction {
+    interp: "linear" | "lower" | "higher" | "nearest" | "midpoint" = "linear",
+    clean = filter.ignoreMissing): ReducerFunction {
     return (values: number[]): number => {
         const cleanValues = clean(values);
         if (!cleanValues) return null;

@@ -8,15 +8,15 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import * as _ from "underscore";
+import * as _ from "lodash";
 import * as Immutable from "immutable";
 
-import EventKey from "./eventkey";
+import Key from "./key";
 import Time from "./time";
-import Index from "./indexed";
+import Index from "./index";
 import util from "./util";
 
-interface ReducerFunction {
+export interface ReducerFunction {
     (values: number[]): number;
 }
 
@@ -24,7 +24,7 @@ interface ReducerFunction {
  * An Event is a mapping from a time based key to a set
  * of unstuctured data.
  * 
- * The key needs to be a sub-class of the `EventKey`, though
+ * The key needs to be a sub-class of the `Key`, though
  * typically, this would either be one of the following:
  *  * `Time` - a single timestamp
  *  * `TimeRange` - a timerange over which the Event took place
@@ -37,7 +37,7 @@ interface ReducerFunction {
  * either a path (as an array) or dot notation. Not specifying
  * a field implies a field of name "value".
  */
-class Event<T extends EventKey> {
+class Event<T extends Key> {
 
     protected _key: T;
     protected _data: Immutable.Map<string, any>
@@ -163,7 +163,7 @@ class Event<T extends EventKey> {
      * the same instance? Uses Immutable.is() to compare the event data and
      * the string representation of the key to compare those.
      */
-    static is(event1: Event<EventKey>, event2: Event<EventKey>): boolean {
+    static is(event1: Event<Key>, event2: Event<Key>): boolean {
         return (
             event1.key().toString() === event2.key().toString() &&
             Immutable.is(event1.data(), event2.data())
@@ -180,8 +180,8 @@ class Event<T extends EventKey> {
      * You can also pass in false for ignoreValues and get a full compare,
      * including the data of the event, thus ignoring the supersede case.
      */
-    static isDuplicate(event1: Event<EventKey>,
-        event2: Event<EventKey>,
+    static isDuplicate(event1: Event<Key>,
+        event2: Event<Key>,
         ignoreValues: boolean = true): boolean {
         if (ignoreValues) {
             return event1.keyType() === event2.keyType() &&
@@ -206,11 +206,11 @@ class Event<T extends EventKey> {
      * 
      * See also: TimeSeries.timeSeriesListMerge()
      */
-    static merge<T extends EventKey>(eventList: Event<T>[],
+    static merge<T extends Key>(eventList: Event<T>[],
         deep?: boolean): Event<T>[];
-    static merge<T extends EventKey>(eventList: Immutable.List<Event<T>>,
+    static merge<T extends Key>(eventList: Immutable.List<Event<T>>,
         deep?: boolean): Immutable.List<Event<T>>;
-    static merge<T extends EventKey>(eventList: any,
+    static merge<T extends Key>(eventList: any,
         deep?: boolean): any {
         // Early exit
         if (eventList instanceof Immutable.List && eventList.size === 0) {
@@ -291,13 +291,13 @@ class Event<T extends EventKey> {
      *
      * See also: `TimeSeries.timeSeriesListSum()`
      */
-    static combine<T extends EventKey>(eventList: Event<T>[],
+    static combine<T extends Key>(eventList: Event<T>[],
         reducer: ReducerFunction,
         fieldSpec?: string | string[]): Event<T>[];
-    static combine<T extends EventKey>(eventList: Immutable.List<Event<T>>,
+    static combine<T extends Key>(eventList: Immutable.List<Event<T>>,
         reducer: ReducerFunction,
         fieldSpec?: string | string[]): Immutable.List<Event<T>>;
-    static combine<T extends EventKey>(eventList: any,
+    static combine<T extends Key>(eventList: any,
         reducer: ReducerFunction,
         fieldSpec?: string | string[]): any {
         // Early exit
@@ -352,7 +352,7 @@ class Event<T extends EventKey> {
                 if (!fields) {
                     fields = _.map(
                         event.data().toJS(),
-                        (v, fieldName) => fieldName
+                        (v, fieldName) => `${fieldName}`
                     );
                 }
                 fields.forEach(fieldName => {

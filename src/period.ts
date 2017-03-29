@@ -21,11 +21,11 @@ const UNITS: { [key: string]: number } = {
 };
 
 const SHORT_UNITS: { [key: string]: number } = {
-    s: UNITS.seconds,
-    m: UNITS.minutes,
-    h: UNITS.hours,
-    d: UNITS.days,
-    w: UNITS.days
+    s: 1000,
+    m: 1000 * 60,
+    h: 1000 * 60 * 60,
+    d: 1000 * 60 * 60 * 24,
+    w: 1000 * 60 * 60 * 24 * 7
 };
 
 /**

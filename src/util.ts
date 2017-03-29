@@ -13,7 +13,7 @@ import * as Immutable from "immutable";
 import * as moment from "moment";
 import Moment = moment.Moment;
 
-import Index from "./indexed";
+import Index from "./index";
 import TimeRange from "./timerange";
 
 const UNITS = {
@@ -271,7 +271,7 @@ function timeRangeFromArg(arg: any): any {
         return new TimeRange(+begin, +end);
     } else if (_.isArray(arg) && arg.length === 2) {
         const argArray = <Array<Date>>(arg);
-        return new TimeRange(argArray);
+        return new TimeRange(argArray[0], argArray[1]);
     } else {
         throw new Error(
             `Unable to parse timerange. Should be a TimeRange. Got ${arg}.`

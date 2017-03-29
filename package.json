@@ -6,17 +6,23 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "immutable": "^3.8.1"
+    "immutable": "^3.8.1",
+    "moment": "^2.17.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.52",
+    "eslint": "^3.17.1",
+    "eslint-config-standard": "^7.0.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^2.1.1",
     "jest": "19",
     "ts-jest": "^19.0.0",
+    "tsc": "^1.20150623.0",
     "typedoc": "^0.5.7",
     "typescript": "2.1"
   },
   "scripts": {
-    "docs": "typedoc --json docs/doc.json --mode modules .",
+    "docs": "typedoc --json docs/doc.json --mode modules ./src/*.ts",
     "test": "jest --config jestconfig.json --watch"
   },
   "jest": {

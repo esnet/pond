@@ -11,7 +11,7 @@
 /**
  * Defines the interface for all event keys
  */
-abstract class EventKey {
+abstract class Key {
     abstract type(): string;
     abstract toJSON(): Object;
     abstract toString(): string;
@@ -20,4 +20,4 @@ abstract class EventKey {
     abstract end(): Date;
 }
 
-export default EventKey;
+export default Key;

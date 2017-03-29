@@ -9,7 +9,7 @@
  */
 
 import * as _ from "lodash";
-import EventKey from "./eventkey";
+import Key from "./key";
 
 /**
  * Constructs a new Time object that can be used as
@@ -19,7 +19,7 @@ import EventKey from "./eventkey";
  * is conforms to the interface required to be an
  * Event key.
  */
-export default class Time extends EventKey {
+export default class Time extends Key {
 
     private _d: Date;
 

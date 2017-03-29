@@ -8,20 +8,20 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import * as _ from "underscore";
+import * as _ from "lodash";
 import * as Immutable from "immutable";
 
-import EventKey from "./eventkey";
+import Key from "./key";
 import Event from "./event";
 import Time from "./time";
-import Index from "./indexed";
+import Index from "./index";
 import TimeRange from "./timerange";
 import util from "./util";
 
 /**
  * A Collection holds a ordered (but not sorted) map of Events.
  *
- * The Events stored in a Collection are mapped by their key
+ * The Events stored in a `Collection` are mapped by their key
  * so a Collection can not hold more than one Event of the same
  * key, thus de-duplication is part of how a Collection works.
  * Later Events to be added supersede early ones. Internally, a
@@ -30,9 +30,9 @@ import util from "./util";
  * In Typescript, you can give a Collection<T> a type T, which is
  * the Event type accepted into the Collection (e.g. Collection<Time>).
  */
-export default class Collection<T extends EventKey> {
+class Collection<T extends Key> {
 
-    protected _events: Immutable.OrderedMap<T, Event<T>>;
+    private _events: Immutable.OrderedMap<T, Event<T>>;
 
     constructor();
     constructor(arg1: Immutable.OrderedMap<T, Event<T>>);
@@ -76,11 +76,11 @@ export default class Collection<T extends EventKey> {
     /**
      * Adds a new Event into the Collection. Since a Collection only
      * represents a bag of Events with unique keys, the Event will
-     * be deduped. You can optionally provide a callback that will
+     * be de-duped. You can optionally provide a callback that will
      * be called with the existing event in the case of an Event
      * already existing in the Collection. You can return from this
      * the Event to actually add. The default is to replace existing
-     * Events with the new Event.
+     * Event with the new Event.
      * 
      * @example
      * ```
@@ -109,6 +109,14 @@ export default class Collection<T extends EventKey> {
         return new Collection<T>(this._events.set(k, e));
     }
 
+    /**
+     * Completely replace the existing Events in this Collection.
+     * 
+     * @param events An Immutable.OrderedMap of new Events<T> which
+     *               to add as the Events within this Collection.
+     * @returns Collection<T> The new Collection with the Event
+     *                        added into it
+     */
     setEvents(
         events: Immutable.OrderedMap<T, Event<T>>
     ): Collection<T> {
@@ -126,13 +134,14 @@ export default class Collection<T extends EventKey> {
      * Returns the number of valid items in this `Collection`.
      *
      * Uses the `fieldPath` to look up values in all Events.
+     * 
      * It then counts the number that are considered valid, which
      * specifically are not:
      *  * NaN
      *  * undefined
      *  * null.
      *
-     * @param 
+     * @param fieldPath
      * 
      * @return {number} Count of valid events
      */
@@ -146,13 +155,14 @@ export default class Collection<T extends EventKey> {
 
     /**
      * Returns the Event at the given position `pos` in the
-     * Collection. Note that this probably the least efficient
-     * way to fetch a point. If you wish to scan the whole set
-     * of Events, use an iterator (see `forEach()` and `map()`).
-     * For direct access the Collection is optimised for
-     * returning results via key (see `atKey()`).
+     * Collection.
      * 
-     * @param pos The position of the Event to return
+     * Note: this is the least efficient way to fetch a point.
+     * 
+     * If you wish to scan the whole set of Events, use an
+     * iterator (see `forEach()` and `map()`). For direct access
+     * the Collection is optimised for returning results via
+     * the Event's key (see `atKey()`).
      */
     at(pos: number): Event<T> {
         return this.eventList()[pos];
@@ -161,26 +171,23 @@ export default class Collection<T extends EventKey> {
     /**
      * Returns the Event located at the key specified, if it
      * exists. Note that this doesn't find the closest key, or
-     * implement bisect. For that you need the order maintained
-     * Collection that is part of TimeSeries.
+     * implement `bisect`. For that you need the sorted
+     * Collection that is part of a TimeSeries. On the plus side,
+     * if you know the key this is an efficient way to access the
+     * Event within the Collection.
      * 
      * @example
      * ```
      * const timestamp = new Time("2015-04-22T03:30:00Z");
      * const event = collection.atKey(timestamp)
      * ```
-     * @param key The key of the Event
      */
     atKey(key: T): Event<T> {
         return this._events.get(key);
     }
 
     /**
-     * Returns all the Events as an Immutable.List
-     * 
-     * @returns Immutable.List<Event<t>> The list of Events in
-     *                                   this Collection, converted to
-     *                                   a List.
+     * Returns all the Event<T>s as an Immutable.List.
      */
     eventList() {
         return this._events.toList();
@@ -188,8 +195,8 @@ export default class Collection<T extends EventKey> {
 
     /**
      * Returns the events in the Collection as a Immutable.Map, where
-     * the key of the Event (e.g. timestamp, index, or TimeRange),
-     * represented as a string, is mapped to the Event.
+     * the key of type T (e.g. Time, Index, or TimeRange),
+     * represented as a string, is mapped to the Event itself.
      *
      * @returns Immutable.Map<T, Event<T>> Events in this Collection,
      *                                     converted to a Map.
@@ -199,17 +206,17 @@ export default class Collection<T extends EventKey> {
     }
 
     /**
-     * Returns an iterator into the internal event SortedMap.
+     * Returns an iterator (Immutable.Iterator) into the internal
+     * event OrderedMap.
      * 
      * @example
      * ```
-     * let iterator = this._events.entries();
+     * let iterator = collection.entries();
      * for (let x = iterator.next(); !x.done; x = iterator.next()) {
      *     const [key, event] = x.value;
-     *     console.log("Key:", +key, "Event:", event.toString());
+     *     console.log(`Key: ${key}, Event: ${event.toString()}`);
      * }
      * ```
-     * @returns Immutable.Iterator<any[]> Iterator
      */
     entries() {
         return this._events.entries();
@@ -219,9 +226,6 @@ export default class Collection<T extends EventKey> {
      * Iterate over the events in this Collection. Events are in the
      * order that they were added, unless the Collection has since been
      * sorted.
-     * 
-     * If you return false from the sideEffect callback, the iteration
-     * will end. The function returns the number of events iterated.
      * 
      * @example
      * ```
@@ -318,5 +322,6 @@ export default class Collection<T extends EventKey> {
             return new TimeRange(min, max);
         }
     }
-
 }
+
+export default Collection;

@@ -8,7 +8,7 @@ import Moment = moment.Moment;
 
 import Event from "../src/event";
 import Time from "../src/time";
-import Index from "../src/indexed";
+import Index from "../src/index";
 import TimeRange from "../src/timerange";
 import Collection from "../src/collection";
 import { sum } from "../src/functions";
@@ -98,13 +98,13 @@ describe("Time Events", () => {
 
     it("can create a new time event", () => {
         const time = new Time(new Date(1487983075328));
-        const timeEvent = new Event(time, Immutable.Map({name: "bob"}));
+        const timeEvent = new Event(time, Immutable.Map({ name: "bob" }));
         expect(timeEvent.toString()).toEqual(`{"time":1487983075328,"data":{"name":"bob"}}`);
     });
 
     it("can set a new value", () => {
         const time = new Time(new Date(1487983075328));
-        const timeEvent = new Event(time, Immutable.Map({name: "bob"}));
+        const timeEvent = new Event(time, Immutable.Map({ name: "bob" }));
         const newTimeEvent = timeEvent.set("name", "fred");
         expect(newTimeEvent.toString()).toEqual(`{"time":1487983075328,"data":{"name":"fred"}}`);
     });
@@ -168,10 +168,10 @@ describe("Event list merge", () => {
         const event2 = new Event(t, { c: 2 });
         const merged = Event.merge([event1, event2]);
 
-       // type error:
-       // const index = new Index("1d-12355");
-       // const event3 = new Event(index, { value: 42 });
-       // const merged2 = Event.merge([event1, event2]);
+        // type error:
+        // const index = new Index("1d-12355");
+        // const event3 = new Event(index, { value: 42 });
+        // const merged2 = Event.merge([event1, event2]);
 
         expect(merged[0].get("a")).toBe(5);
         expect(merged[0].get("b")).toBe(6);

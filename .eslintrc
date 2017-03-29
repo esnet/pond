@@ -1,6 +1,0 @@
-{
-    "extends": "eslint-config-esnet",
-    "ecmaFeatures": {
-       "experimentalObjectRestSpread": true
-    }
-}
