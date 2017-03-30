@@ -11,7 +11,7 @@ import Time from "../src/time";
 import Index from "../src/index";
 import TimeRange from "../src/timerange";
 import Collection from "../src/collection";
-import { sum } from "../src/functions";
+import { sum, avg } from "../src/functions";
 
 const fmt = "YYYY-MM-DD HH:mm";
 
@@ -299,4 +299,54 @@ describe("Event list combining", () => {
 
         expect(result[0].get("a")).toBe(7);
     });
+});
+
+const t1 = new Time(1445449170000);
+const t2 = new Time(1445449200000);
+const t3 = new Time(1445449230000);
+const t4 = new Time(1445449260000);
+
+const EVENTS = [];
+EVENTS.push(new Event(t1, {
+    name: "source1",
+    in: 2,
+    out: 11
+}));
+EVENTS.push(new Event(t2, {
+    name: "source1",
+    in: 4,
+    out: 13
+}));
+EVENTS.push(new Event(t3, {
+    name: "source1",
+    in: 6,
+    out: 15
+}));
+EVENTS.push(new Event(t4, {
+    name: "source1",
+    in: 8,
+    out: 18
+}));
+
+const EVENT_LIST = Immutable.List(EVENTS);
+
+describe("Event list map generation", () => {
+
+    it("should generate the correct key values for a string selector", () => {
+        console.log("Map:", Event.map(EVENT_LIST, ["in", "out"]));
+        expect(Event.map(EVENT_LIST, ["in"])).toEqual({ in: [2, 4, 6, 8] });
+    });
+
+    it("should generate the correct key values for a string selector", () => {
+        expect(Event.map(EVENT_LIST, ["in", "out"])).toEqual({
+            in: [2, 4, 6, 8],
+            out: [11, 13, 15, 18]
+        });
+    });
+
+    it("should be able to run a simple aggregation calculation", () => {
+        const result = Event.aggregate(EVENT_LIST, avg(), ["in", "out"]);
+        expect(result).toEqual({ in: 5, out: 14.25 });
+    });
+
 });

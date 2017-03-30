@@ -254,10 +254,12 @@ export function stdev(clean = filter.ignoreMissing): ReducerFunction {
     };
 }
 
-interface PercentileOptions {
-    q?: number;           // The percentile (should be between 0 and 100)
-    interp?: "linear" | "lower" | "higher" | "nearest" | "midpoint",
-    clean?: (a: number[]) => number[];
+export enum InterpolationType {
+    linear = 1,
+    lower,
+    higher,
+    nearest,
+    midpoint
 }
 
 /**
@@ -279,7 +281,7 @@ interface PercentileOptions {
  *                 with a zero
  */
 export function percentile(q: number,
-    interp: "linear" | "lower" | "higher" | "nearest" | "midpoint" = "linear",
+    interp: InterpolationType = InterpolationType.linear,
     clean = filter.ignoreMissing): ReducerFunction {
     return (values: number[]): number => {
         const cleanValues = clean(values);
@@ -309,15 +311,15 @@ export function percentile(q: number,
             const fraction = (size - 1) * i - index;
             const v0 = sorted[index];
             const v1 = sorted[index + 1];
-            if (interp === "lower" || fraction === 0) {
+            if (interp === InterpolationType.lower || fraction === 0) {
                 v = v0;
-            } else if (interp === "linear") {
+            } else if (interp === InterpolationType.linear) {
                 v = v0 + (v1 - v0) * fraction;
-            } else if (interp === "higher") {
+            } else if (interp === InterpolationType.higher) {
                 v = v1;
-            } else if (interp === "nearest") {
+            } else if (interp === InterpolationType.nearest) {
                 v = fraction < 0.5 ? v0 : v1;
-            } else if (interp === "midpoint") {
+            } else if (interp === InterpolationType.midpoint) {
                 v = (v0 + v1) / 2;
             }
         }

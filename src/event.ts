@@ -16,8 +16,26 @@ import Time from "./time";
 import Index from "./index";
 import util from "./util";
 
+/**
+ * A function that takes a list of numbers and
+ * returns a single number
+ */
 export interface ReducerFunction {
     (values: number[]): number;
+}
+
+/**
+ * A mapping from string to list of numbers
+ */
+export interface ValueListMap {
+    [s: string]: number[];
+}
+
+/**
+ * A mapping from string to number
+ */
+export interface ValueMap {
+    [s: string]: number[];
 }
 
 /**
@@ -124,7 +142,7 @@ class Event<T extends Key> {
             _.isUndefined(f) || _.isArray(f) ? f : [f];
         fieldList.forEach(field => {
             const v = this.get(field);
-            const invalid = (
+            invalid = (
                 _.isUndefined(v) ||
                 _.isNaN(v) ||
                 _.isNull(v)
@@ -378,6 +396,83 @@ class Event<T extends Key> {
             return Immutable.List(outEvents);
         }
         return outEvents;
+    }
+
+    /**
+     * Takes a list of Events<T> and makes a map from the Event field names 
+     * to an array of values, one value for each Event.
+     * 
+     * @example
+     * ```
+     * const eventMap = Event.map(events, ["in"]);
+     * // { in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] }
+     * ```
+     */
+    static map<T extends Key>(events: Immutable.List<Event<T>>,
+        multiFieldSpec: string): ValueListMap;
+    static map<T extends Key>(events: Immutable.List<Event<T>>,
+        multiFieldSpec: string[]): ValueListMap;
+    static map<T extends Key>(events, multiFieldSpec: any = "value") {
+        const result = {};
+        if (typeof multiFieldSpec === "string") {
+            const fieldSpec = multiFieldSpec;
+            events.forEach(event => {
+                if (!_.has(result, fieldSpec)) {
+                    result[fieldSpec] = [];
+                }
+                const value = event.get(fieldSpec);
+                result[fieldSpec].push(value);
+            });
+        } else if (_.isArray(multiFieldSpec)) {
+            const fieldSpecList = multiFieldSpec as string[];
+            _.each(fieldSpecList, fieldSpec => {
+                events.forEach(event => {
+                    if (!_.has(result, fieldSpec)) {
+                        result[fieldSpec] = [];
+                    }
+                    result[fieldSpec].push(event.get(fieldSpec));
+                });
+            });
+        } else {
+            events.forEach(event => {
+                _.each(event.data().toJSON(), (value, key) => {
+                    if (!_.has(result, key)) {
+                        result[key] = [];
+                    }
+                    result[key].push(value);
+                });
+            });
+        }
+        return result;
+    }
+
+    /**
+     * Takes a Immutable.List of events and a reducer function and a
+     * fieldSpec (or list of fieldSpecs) and returns an aggregated
+     * result in the form of a new Event, for each column.
+     * 
+     * The reducer is of the form:
+     * ```
+     * function sum(valueList) {
+     *     return calcValue;
+     * }
+     * ```
+     */
+    static aggregate<T extends Key>(events: Immutable.List<Event<T>>,
+        reducer: ReducerFunction,
+        multiFieldSpec: string): ValueMap
+    static aggregate<T extends Key>(events: Immutable.List<Event<T>>,
+        reducer: ReducerFunction,
+        multiFieldSpec: string[]): ValueMap
+    static aggregate(events: any, reducer, multiFieldSpec): ValueMap {
+        function reduce(mapped: ValueListMap, reducer: ReducerFunction): ValueMap {
+            const result = {};
+            _.each(mapped, (valueList, key) => {
+                result[key] = reducer(valueList);
+            });
+            return result;
+        }
+        return reduce(this.map(events, multiFieldSpec), reducer);
     }
 }
 

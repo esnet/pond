@@ -17,6 +17,19 @@ import Time from "./time";
 import Index from "./index";
 import TimeRange from "./timerange";
 import util from "./util";
+import {
+    ReducerFunction,
+    InterpolationType,
+    sum,
+    avg,
+    max,
+    min,
+    first,
+    last,
+    median,
+    stdev,
+    percentile
+} from "./functions";
 
 /**
  * A Collection holds a ordered (but not sorted) map of Events.
@@ -28,12 +41,28 @@ import util from "./util";
  * Collection holds its data in an Immutable.OrderedMap.
  * 
  * In Typescript, you can give a Collection<T> a type T, which is
- * the Event type accepted into the Collection (e.g. Collection<Time>).
+ * the Event type accepted into the Collection (e.g. Collection<Time>). 
  */
 class Collection<T extends Key> {
 
     private _events: Immutable.OrderedMap<T, Event<T>>;
 
+    /**
+     * Construct a new Collection
+     * 
+     * @example
+     * ```
+     * const timestamp1 = new Time("2015-04-22T03:30:00Z");
+     const timestamp2 = new Time("2015-04-22T02:30:00Z");
+     *
+     * const e1 = new Event(timestamp1, { a: 5, b: 6 });
+     * const e2 = new Event(timestamp2, { a: 4, b: 2 });
+     *
+     * let collection = new Collection<Time>();
+     * collection = collection.addEvent(e1);
+     * collection = collection.addEvent(e2);
+     * ```
+     */
     constructor();
     constructor(arg1: Immutable.OrderedMap<T, Event<T>>);
     constructor(arg1: Collection<T>);
@@ -60,7 +89,7 @@ class Collection<T extends Key> {
      * @return {Object} The JSON representation of this Collection
      */
     toJSON() {
-        return this._events.toJS();
+        return this._events.toList().toJS();
     }
 
     /**
@@ -82,6 +111,12 @@ class Collection<T extends Key> {
      * the Event to actually add. The default is to replace existing
      * Event with the new Event.
      * 
+     * @example
+     * ```
+     * let collection = new Collection<Time>()
+     *     .addEvent(e1)
+     *     .addEvent(e2);
+     * ```
      * @example
      * ```
      * collection = collection.addEvent(e2, e => {
@@ -164,8 +199,8 @@ class Collection<T extends Key> {
      * the Collection is optimised for returning results via
      * the Event's key (see `atKey()`).
      */
-    at(pos: number): Event<T> {
-        return this.eventList()[pos];
+    eventAt(pos: number): Event<T> {
+        return this.eventList().get(pos);
     }
 
     /**
@@ -182,8 +217,22 @@ class Collection<T extends Key> {
      * const event = collection.atKey(timestamp)
      * ```
      */
-    atKey(key: T): Event<T> {
+    eventAtKey(key: T): Event<T> {
         return this._events.get(key);
+    }
+
+    /**
+     * Returns the first event in the Collection.
+     */
+    firstEvent(): Event<T> {
+        return this._events.first();
+    }
+
+    /**
+     * Returns the last event in the Collection.
+     */
+    lastEvent(): Event<T> {
+        return this._events.last();
     }
 
     /**
@@ -234,15 +283,13 @@ class Collection<T extends Key> {
      * })
      * ```
      */
-    forEach(sideEffect: (value?: Event<T>,
-        key?: T,
-        iter?: Immutable.Iterable<T, Event<T>>) => any): number {
+    forEach(sideEffect: (value?: Event<T>, key?: T) => any) {
         return this._events.forEach((e, k) => {
             return sideEffect(e, k)
         });
     }
 
-    /**
+    /**a
      * Map over the events in this Collection. For each Event
      * passed to your callback function you should map that to
      * a new Event.
@@ -254,13 +301,10 @@ class Collection<T extends Key> {
      * });
      * ```
      */
-    map(mapper: (event?: Event<T>, key?: T) => void): Collection<T> {
-        const remapped = Immutable.OrderedMap<T, Event<T>>(
-            this._events.map((e, k) => {
-                return mapper(e, k);
-            })
-        );
-        return new Collection<T>(remapped);
+    map(mapper: (event?: Event<T>, key?: T) => Event<T>): Collection<T> {
+        return new Collection<T>(Immutable.OrderedMap<T, Event<T>>(
+            this._events.map(mapper)
+        ));
     }
 
     /**
@@ -295,7 +339,7 @@ class Collection<T extends Key> {
      * Sorts the Collection using the value referenced by
      * the `field`.
      */
-    sort(field: string): Collection<T> {
+    sort(field: string = "value"): Collection<T> {
         const fs = util.fieldAsArray(field);
         const sorted = Immutable.OrderedMap<T, Event<T>>(
             this._events.sortBy(event => {
@@ -303,6 +347,35 @@ class Collection<T extends Key> {
             })
         );
         return new Collection<T>(sorted);
+    }
+
+    /**
+     * Perform a slice of events within the Collection, returns a new
+     * Collection representing a portion of this TimeSeries from `begin` up to
+     * but not including `end`.
+     */
+    slice(begin?: number, end?: number): Collection<T> {
+        return this.setEvents(this._events.slice(begin, end));
+    }
+
+    /**
+     * Returns a new Collection with all Events except the first
+     */
+    rest(): Collection<T> {
+        return this.setEvents(this._events.rest());
+    }
+
+    /**
+     * Filter the Collection's Events with the supplied function
+     * @example
+     * ```
+     * const filtered = collection.filter(e => e.get("a") < 8)
+     * ```
+     */
+    filter(predicate: (event: Event<T>, key: T) => boolean) {
+        return new Collection<T>(Immutable.OrderedMap<T, Event<T>>(
+            this._events.filter(predicate)
+        ));
     }
 
     /**
@@ -322,6 +395,143 @@ class Collection<T extends Key> {
             return new TimeRange(min, max);
         }
     }
+
+    /**
+     * Aggregates the `Collection`'s `Event`s down using a user defined function
+     * `reducer` to do the reduction. Fields to be aggregated are specified using a
+     * `fieldSpec` argument, which can be a field name or array of field names.
+     * 
+     * If the `fieldSpec` matches multiple fields then an object is returned
+     * with keys being the fields and values being the aggregation.
+     * 
+     * The `Collection` class itself contains most of the common aggregation functions
+     * built in, but this is here to help when what you need isn't supplied
+     * out of the box.
+     */
+    aggregate(reducer: ReducerFunction, fieldSpec?: string[]);
+    aggregate(reducer: ReducerFunction, fieldSpec?: string);
+    aggregate(reducer: ReducerFunction, fieldSpec?) {
+        const v = Event.aggregate(this.eventList(), reducer, fieldSpec);
+        if (_.isString(fieldSpec)) {
+            return v[fieldSpec]
+        } else if (_.isArray(fieldSpec)) {
+            return v;
+        } else if (_.isUndefined(fieldSpec)) {
+            return v["value"];
+        }
+    }
+
+    /**
+     * Returns the first value in the Collection for the fieldspec
+     */
+    first(fieldSpec: string, filter?): number;
+    first(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    first(fieldSpec: any, filter?) {
+        return this.aggregate(first(filter), fieldSpec);
+    }
+
+    /**
+     * Returns the last value in the `Collection` for the fieldspec
+     */
+    last(fieldSpec: string, filter?): number;
+    last(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    last(fieldSpec: any, filter?) {
+        return this.aggregate(last(filter), fieldSpec);
+    }
+
+    /**
+     * Returns the sum of the `Event`s in this `Collection`
+     * for the fieldspec
+     */
+    sum(fieldSpec: string, filter?): number;
+    sum(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    sum(fieldSpec: any, filter?) {
+        return this.aggregate(sum(filter), fieldSpec);
+    }
+
+    /**
+     * Aggregates the `Event`s in this `Collection` down
+     * to their average(s)
+     */
+    avg(fieldSpec: string, filter?): number;
+    avg(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    avg(fieldSpec: any, filter?) {
+        return this.aggregate(avg(filter), fieldSpec);
+    }
+
+    /**
+     * Aggregates the `Event`s in this `Collection` down to
+     * their maximum value(s)
+     */
+    max(fieldSpec: string, filter?): number;
+    max(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    max(fieldSpec: any, filter?) {
+        return this.aggregate(max(filter), fieldSpec);
+    }
+
+    /**
+     * Aggregates the `Event`s in this `Collection` down to
+     * their minimum value(s)
+     */
+    min(fieldSpec: string, filter?): number;
+    min(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    min(fieldSpec: any, filter?) {
+        return this.aggregate(min(filter), fieldSpec);
+    }
+
+    /**
+     * Aggregates the events down to their minimum value
+     *
+     * @param {string} fieldPath  Column to find the median of. A deep value can be referenced with a
+     *                            string.like.this.  If not supplied the `value` column will be
+     *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
+     *
+     * @return {number}           The median value
+     */
+    median(fieldSpec: string, filter?): number;
+    median(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    median(fieldSpec: any, filter?) {
+        return this.aggregate(median(filter), fieldSpec);
+    }
+
+    /**
+     * Aggregates the events down to their stdev
+     *
+     * @param {string} fieldPath  Column to find the stdev of. A deep value can be referenced with a
+     *                            string.like.this.  If not supplied the `value` column will be
+     *                            aggregated.
+     * @param {function} filter   Optional filter function used to clean data before aggregating
+     *
+     * @return {number}           The resulting stdev value
+     */
+    stdev(fieldSpec: string, filter?): number;
+    stdev(fieldSpec: string[], filter?): { [s: string]: number[]; };
+    stdev(fieldSpec: any, filter?) {
+        return this.aggregate(stdev(filter), fieldSpec;
+    }
+
+    /**
+     * Gets percentile q within the Collection. This works the same way as numpy.
+     *
+     * The percentile function has several parameters that can be supplied:
+     * q - The percentile (should be between 0 and 100)
+     * fieldSpec - Field or fields to find the percentile of
+     * interp - Specifies the interpolation method to use when the desired
+     * percentile lies between two data points. Options are:
+     *   * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+     *   * lower: i.
+     *   * higher: j.
+     *   * nearest: i or j whichever is nearest.
+     *   * midpoint: (i + j) / 2.
+     * filter - Optional filter function used to clean data before aggregating
+     */
+    percentile(q: number, fieldSpec: string, interp?: InterpolationType, filter?): number;
+    percentile(q: number, fieldSpec: string[], interp?: InterpolationType, filter?): { [s: string]: number[]; };
+    percentile(q: number, fieldSpec: any, interp: InterpolationType = InterpolationType.linear, filter?) {
+        return this.aggregate(percentile(q, interp, filter), fieldSpec);
+    }
+
 }
 
 export default Collection;
