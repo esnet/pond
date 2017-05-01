@@ -19,7 +19,7 @@ import Key from "./key";
  * is conforms to the interface required to be an
  * Event key.
  */
-export default class Time extends Key {
+export class Time extends Key {
 
     private _d: Date;
 
@@ -93,3 +93,13 @@ export default class Time extends Key {
         return t instanceof Time;
     }
 }
+
+function timeFactory(): Time;
+function timeFactory(d: Date): Time;
+function timeFactory(d: number): Time;
+function timeFactory(d: string): Time;
+function timeFactory(d?: any): Time {
+    return new Time(d);
+}
+
+export { timeFactory as time };

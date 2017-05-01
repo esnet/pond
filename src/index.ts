@@ -9,7 +9,7 @@
  */
 
 import util from "./util";
-import TimeRange from "./timerange";
+import { TimeRange } from "./timerange";
 import * as moment from "moment";
 import Moment = moment.Moment;
 
@@ -50,9 +50,8 @@ which have variable length.
 An Index is also useful when collecting into specific time ranges,
 for example generating all the 5 min ("5m") maximum rollups within a
 specific day ("1d"). See the processing section within these docs.
-
  */
-export default class Indexed extends Key {
+export class Index extends Key {
 
     private _utc: boolean;
     private _string: string;
@@ -198,3 +197,16 @@ export default class Indexed extends Key {
         return `${year}`;
     }
 }
+/**
+ * An index is simply a string that represents a fixed range of time.
+ * There are two basic types:
+ * *Multiplier index* - the number of some unit of time
+ *    (hours, days etc) since the UNIX epoch.
+ * *Calendar index* - The second represents a calendar range,
+ *    such as Oct 2014.
+*/
+function indexFactory(s, utc = true): Index {
+    return new Index(s, utc = true);
+}
+
+export { indexFactory as index };

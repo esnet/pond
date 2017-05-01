@@ -14,8 +14,9 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import Key from "./key";
-import Time from "./time";
-import Period from "./period";
+import { Time } from "./time";
+import { Period } from "./period";
+
 
 /**
 A time range is a simple representation of a begin and end time, used
@@ -41,7 +42,7 @@ var range = new TimeRange([1326309060000, 1329941520000]);
 
  */
 
-class TimeRange extends Key {
+export class TimeRange extends Key {
 
     /**
      * Internally, the timerange is stored as an Immutable.List
@@ -313,4 +314,19 @@ class TimeRange extends Key {
 
 }
 
-export default TimeRange;
+/**
+ * A timerange is a simple representation of a begin and end time, used
+ * to maintain consistency across an application.
+ */
+function timerange(timerange: TimeRange);
+function timerange(dateList: Immutable.List<Date>);
+function timerange(begin: Date, end: Date);
+function timerange(begin: Time, end: Time);
+function timerange(begin: Moment, end: Moment);
+function timerange(begin: number, end: number);
+function timerange(arg1: any, arg2?: any) {
+    return new TimeRange(arg1, arg2);
+}
+
+export { timerange };
+

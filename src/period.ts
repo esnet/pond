@@ -10,7 +10,6 @@
 
 import * as _ from "lodash";
 
-
 const UNITS: { [key: string]: number } = {
     milliseconds: 1,
     seconds: 1000,
@@ -32,7 +31,7 @@ const SHORT_UNITS: { [key: string]: number } = {
  * Constructs a new Period object that can be used as
  * a key for Events.
  */
-export default class Period {
+export class Period {
 
     private _duration: number;
     private _string: string;
@@ -99,3 +98,13 @@ export default class Period {
         return this._duration;
     }
 }
+
+function periodFactory(d: number);
+function periodFactory(d: string);
+function periodFactory(arg1: number, arg2: string);
+function periodFactory(arg1: number | string, arg2?: string);
+function periodFactory(arg1?: any, arg2?: any): Period {
+    return new Period(arg1, arg2);
+}
+
+export { periodFactory as period }

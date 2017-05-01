@@ -7,10 +7,11 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import Event from "../src/event";
-import Time from "../src/time";
-import Index from "../src/index";
-import TimeRange from "../src/timerange";
 import Collection from "../src/collection";
+
+import { time } from "../src/time";
+import { index } from "../src/index";
+import { timerange } from "../src/timerange";
 import { sum, avg } from "../src/functions";
 
 const fmt = "YYYY-MM-DD HH:mm";
@@ -69,19 +70,17 @@ const OUTAGE_EVENT_LIST = {
 describe("Event static", () => {
 
     it("can tell if two events are the same with Event.is()", () => {
-        const timestamp = new Time(DATE);
-        const event1 = new Event(timestamp, DEEP_EVENT_DATA);
-        const event2 = new Event(timestamp, DEEP_EVENT_DATA);
-        const event3 = new Event(timestamp, ALT_DEEP_EVENT_DATA);
+        const event1 = new Event(time(DATE), DEEP_EVENT_DATA);
+        const event2 = new Event(time(DATE), DEEP_EVENT_DATA);
+        const event3 = new Event(time(DATE), ALT_DEEP_EVENT_DATA);
         expect(Event.is(event1, event2)).toBeTruthy();
         expect(Event.is(event1, event3)).toBeFalsy();
     });
 
     it("can detect duplicated event", () => {
-        const timestamp = new Time(DATE);
-        const e1 = new Event(timestamp, { a: 5, b: 6, c: 7 });
-        const e2 = new Event(timestamp, { a: 5, b: 6, c: 7 });
-        const e3 = new Event(timestamp, { a: 6, b: 6, c: 7 });
+        const e1 = new Event(time(DATE), { a: 5, b: 6, c: 7 });
+        const e2 = new Event(time(DATE), { a: 5, b: 6, c: 7 });
+        const e3 = new Event(time(DATE), { a: 6, b: 6, c: 7 });
 
         // Just check times and type
         expect(Event.isDuplicate(e1, e2)).toBeTruthy();
@@ -96,30 +95,29 @@ describe("Event static", () => {
 
 describe("Time Events", () => {
 
-    it("can create a new time event", () => {
-        const time = new Time(new Date(1487983075328));
-        const timeEvent = new Event(time, Immutable.Map({ name: "bob" }));
+    it("can create a time event", () => {
+        const t = time(new Date(1487983075328));
+        const timeEvent = new Event(t, Immutable.Map({ name: "bob" }));
         expect(timeEvent.toString()).toEqual(`{"time":1487983075328,"data":{"name":"bob"}}`);
     });
 
     it("can set a new value", () => {
-        const time = new Time(new Date(1487983075328));
-        const timeEvent = new Event(time, Immutable.Map({ name: "bob" }));
+        const t = time(new Date(1487983075328));
+        const timeEvent = new Event(t, Immutable.Map({ name: "bob" }));
         const newTimeEvent = timeEvent.set("name", "fred");
         expect(newTimeEvent.toString()).toEqual(`{"time":1487983075328,"data":{"name":"fred"}}`);
     });
 
     it("can create a regular TimeEvent, with deep data", () => {
-        const timestamp = new Time(DATE);
+        const timestamp = time(DATE);
         const event = new Event(timestamp, DEEP_EVENT_DATA);
         expect(event.get("NorthRoute")).toEqual({ in: 123, out: 456 });
         expect(event.get("SouthRoute")).toEqual({ in: 654, out: 223 });
     });
 
     it("can use dot notation to get values in deep data", () => {
-        const timestamp = new Date("2015-04-22T03:30:00Z");
-        const time = new Time(timestamp);
-        const event = new Event(time, DEEP_EVENT_DATA);
+        const timestamp = time(new Date("2015-04-22T03:30:00Z"));
+        const event = new Event(timestamp, DEEP_EVENT_DATA);
         const eventValue = event.get(["NorthRoute", "in"]);
         expect(eventValue).toBe(123);
     });
@@ -129,8 +127,7 @@ describe("Time Events", () => {
 describe("Indexed Events", () => {
 
     it("can create an IndexedEvent using a existing Index and data", () => {
-        const index = new Index("1d-12355");
-        const event = new Event(index, { value: 42 });
+        const event = new Event(index("1d-12355"), { value: 42 });
         const expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
         const timerange = event.key().asTimerange();
 
@@ -149,8 +146,7 @@ describe("TimeRange Events", () => {
         // Extract the begin and end times
         const beginTime = new Date(sampleEvent.start_time);
         const endTime = new Date(sampleEvent.end_time);
-        const timerange = new TimeRange(beginTime, endTime);
-        const event = new Event(timerange, sampleEvent);
+        const event = new Event(timerange(beginTime, endTime), sampleEvent);
         const expected = `{"timerange":[1429673400000,1429707600000],"data":{"external_ticket":"","start_time":"2015-04-22T03:30:00Z","completed":true,"end_time":"2015-04-22T13:00:00Z","organization":"Internet2 / Level 3","title":"STAR-CR5 < 100 ge 06519 > ANL  - Outage","type":"U","esnet_ticket":"ESNET-20150421-013","description":"At 13:33 pacific circuit 06519 went down."}}`;
 
         expect(`${event}`).toBe(expected);
@@ -163,13 +159,13 @@ describe("TimeRange Events", () => {
 
 describe("Event list merge", () => {
     it("can merge multiple events together", () => {
-        const t = new Time(new Date("2015-04-22T03:30:00Z"));
+        const t = time(new Date("2015-04-22T03:30:00Z"));
         const event1 = new Event(t, { a: 5, b: 6 });
         const event2 = new Event(t, { c: 2 });
         const merged = Event.merge([event1, event2]);
 
         // type error:
-        // const index = new Index("1d-12355");
+        // const index = Index("1d-12355");
         // const event3 = new Event(index, { value: 42 });
         // const merged2 = Event.merge([event1, event2]);
 
@@ -179,7 +175,7 @@ describe("Event list merge", () => {
     });
 
     it("can merge multiple events together using an Immutable.List", () => {
-        const t = new Time(new Date("2015-04-22T03:30:00Z"));
+        const t = time(new Date("2015-04-22T03:30:00Z"));
         const event1 = new Event(t, { a: 5, b: 6 });
         const event2 = new Event(t, { c: 2 });
         const merged = Event.merge(Immutable.List([event1, event2]));
@@ -190,9 +186,8 @@ describe("Event list merge", () => {
     });
 
     it("can merge multiple indexed events together", () => {
-        const index = new Index("1h-396206");
-        const event1 = new Event(index, { a: 5, b: 6 });
-        const event2 = new Event(index, { c: 2 });
+        const event1 = new Event(index("1h-396206"), { a: 5, b: 6 });
+        const event2 = new Event(index("1h-396206"), { c: 2 });
         const merged = Event.merge([event1, event2]);
 
         expect(merged[0].get("a")).toBe(5);
@@ -203,9 +198,9 @@ describe("Event list merge", () => {
     it("can merge multiple timerange events together", () => {
         const beginTime = new Date("2015-04-22T03:30:00Z");
         const endTime = new Date("2015-04-22T13:00:00Z");
-        const timerange = new TimeRange(beginTime, endTime);
-        const event1 = new Event(timerange, { a: 5, b: 6 });
-        const event2 = new Event(timerange, { c: 2 });
+        const tr = timerange(beginTime, endTime);
+        const event1 = new Event(tr, { a: 5, b: 6 });
+        const event2 = new Event(tr, { c: 2 });
         const merged = Event.merge([event1, event2]);
 
         expect(merged[0].get("a")).toBe(5);
@@ -214,7 +209,7 @@ describe("Event list merge", () => {
     });
 
     it("can deeply merge multiple events together", () => {
-        const t = new Time(new Date("2015-04-22T03:30:00Z"));
+        const t = time(new Date("2015-04-22T03:30:00Z"));
         const event1 = new Event(t, { a: 5, b: { c: 6 } });
         const event2 = new Event(t, { d: 2, b: { e: 4 } });
         const merged = Event.merge([event1, event2], true);
@@ -229,7 +224,7 @@ describe("Event list merge", () => {
 describe("Event list combining", () => {
 
     it("can sum multiple events together", () => {
-        const t = new Time("2015-04-22T03:30:00Z");
+        const t = time("2015-04-22T03:30:00Z");
         const events = [
             new Event(t, { a: 5, b: 6, c: 7 }),
             new Event(t, { a: 2, b: 3, c: 4 }),
@@ -243,7 +238,7 @@ describe("Event list combining", () => {
     });
 
     it("can sum multiple events together using an Immutable.List", () => {
-        const t = new Time("2015-04-22T03:30:00Z");
+        const t = time("2015-04-22T03:30:00Z");
         const events = [
             new Event(t, { a: 5, b: 6, c: 7 }),
             new Event(t, { a: 2, b: 3, c: 4 }),
@@ -267,9 +262,9 @@ describe("Event list combining", () => {
 
     it("can sum multiple indexed events together", () => {
         const events = [
-            new Event(new Index("1d-1234"), { a: 5, b: 6, c: 7 }),
-            new Event(new Index("1d-1234"), { a: 2, b: 3, c: 4 }),
-            new Event(new Index("1d-1235"), { a: 1, b: 2, c: 3 })
+            new Event(index("1d-1234"), { a: 5, b: 6, c: 7 }),
+            new Event(index("1d-1234"), { a: 2, b: 3, c: 4 }),
+            new Event(index("1d-1235"), { a: 1, b: 2, c: 3 })
         ];
         const result = Event.combine(events, sum());
 
@@ -287,9 +282,9 @@ describe("Event list combining", () => {
     });
 
     it("can sum multiple events together if they have different timestamps", () => {
-        const t1 = new Time("2015-04-22T03:30:00Z");
-        const t2 = new Time("2015-04-22T04:00:00Z");
-        const t3 = new Time("2015-04-22T04:30:00Z");
+        const t1 = time("2015-04-22T03:30:00Z");
+        const t2 = time("2015-04-22T04:00:00Z");
+        const t3 = time("2015-04-22T04:30:00Z");
         const events = [
             new Event(t1, { a: 5, b: 6, c: 7 }),
             new Event(t1, { a: 2, b: 3, c: 4 }),
@@ -301,10 +296,10 @@ describe("Event list combining", () => {
     });
 });
 
-const t1 = new Time(1445449170000);
-const t2 = new Time(1445449200000);
-const t3 = new Time(1445449230000);
-const t4 = new Time(1445449260000);
+const t1 = time(1445449170000);
+const t2 = time(1445449200000);
+const t3 = time(1445449230000);
+const t4 = time(1445449260000);
 
 const EVENTS = [];
 EVENTS.push(new Event(t1, {
@@ -333,7 +328,6 @@ const EVENT_LIST = Immutable.List(EVENTS);
 describe("Event list map generation", () => {
 
     it("should generate the correct key values for a string selector", () => {
-        console.log("Map:", Event.map(EVENT_LIST, ["in", "out"]));
         expect(Event.map(EVENT_LIST, ["in"])).toEqual({ in: [2, 4, 6, 8] });
     });
 

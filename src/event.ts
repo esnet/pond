@@ -12,8 +12,6 @@ import * as _ from "lodash";
 import * as Immutable from "immutable";
 
 import Key from "./key";
-import Time from "./time";
-import Index from "./index";
 import util from "./util";
 
 /**
@@ -113,12 +111,10 @@ class Event<T extends Key> {
     }
 
     /**
-     * Set a new value on the Event and return a new Event
+     * Set a new value on the Event and return a new Event.
      * 
-     * @param key The Event key, for example the Time of the Event
-     * @param value The new value to set on the Event.
-     * 
-     * @returns Event<T> The `Event` with modified data
+     * `key` is the Event key, for example the `Time` of the `Event`.
+     * `value` is the new value to set on the `Event`.
      */
     set(key: string, value: any): Event<T> {
         return new Event<T>(this.key(), this._data.set(key, value));
@@ -203,7 +199,7 @@ class Event<T extends Key> {
         ignoreValues: boolean = true): boolean {
         if (ignoreValues) {
             return event1.keyType() === event2.keyType() &&
-                event1.key() === event2.key();
+                event1.key().toString() === event2.key().toString();
         } else {
             return event1.keyType() === event2.keyType() && Event.is(event1, event2);
         }
@@ -456,6 +452,12 @@ class Event<T extends Key> {
      * function sum(valueList) {
      *     return calcValue;
      * }
+     * ```
+     * 
+     * @example
+     * ```
+     * const result = Event.aggregate(EVENT_LIST, avg(), ["in", "out"]);
+     * // result = { in: 5, out: 14.25 }
      * ```
      */
     static aggregate<T extends Key>(events: Immutable.List<Event<T>>,

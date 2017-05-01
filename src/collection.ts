@@ -13,9 +13,9 @@ import * as Immutable from "immutable";
 
 import Key from "./key";
 import Event from "./event";
-import Time from "./time";
-import Index from "./index";
-import TimeRange from "./timerange";
+import { Time } from "./time";
+import { Index } from "./index";
+import { TimeRange, timerange } from "./timerange";
 import util from "./util";
 import {
     ReducerFunction,
@@ -31,50 +31,59 @@ import {
     percentile
 } from "./functions";
 
+export interface CollectionOptions {
+    dedup?: boolean;
+}
+
 /**
- * A Collection holds a ordered (but not sorted) map of Events.
- *
- * The Events stored in a `Collection` are mapped by their key
- * so a Collection can not hold more than one Event of the same
- * key, thus de-duplication is part of how a Collection works.
- * Later Events to be added supersede early ones. Internally, a
- * Collection holds its data in an Immutable.OrderedMap.
+ * A Collection holds a ordered (but not sorted) list of Events.
  * 
  * In Typescript, you can give a Collection<T> a type T, which is
  * the Event type accepted into the Collection (e.g. Collection<Time>). 
  */
 class Collection<T extends Key> {
 
-    private _events: Immutable.OrderedMap<T, Event<T>>;
+    private _events: Immutable.List<Event<T>>;
+    private _keyMap: Immutable.Map<string, Immutable.List<number>>;
+    private _options: CollectionOptions = { dedup: false };
 
     /**
      * Construct a new Collection
      * 
      * @example
      * ```
-     * const timestamp1 = new Time("2015-04-22T03:30:00Z");
-     const timestamp2 = new Time("2015-04-22T02:30:00Z");
-     *
-     * const e1 = new Event(timestamp1, { a: 5, b: 6 });
-     * const e2 = new Event(timestamp2, { a: 4, b: 2 });
+     * const e1 = new Event(time("2015-04-22T03:30:00Z"), { a: 5, b: 6 });
+     * const e2 = new Event(time("2015-04-22T02:30:00Z"), { a: 4, b: 2 });
      *
      * let collection = new Collection<Time>();
-     * collection = collection.addEvent(e1);
-     * collection = collection.addEvent(e2);
+     * collection = collection
+     *     .addEvent(e1)
+     *     .addEvent(e2);
      * ```
      */
     constructor();
-    constructor(arg1: Immutable.OrderedMap<T, Event<T>>);
-    constructor(arg1: Collection<T>);
-    constructor(arg1?: any) {
+    constructor(options?: CollectionOptions)
+    constructor(arg1: Immutable.List<Event<T>>, options?: CollectionOptions);
+    constructor(arg1: Collection<T>, options?: CollectionOptions);
+    constructor(arg1?: any, options: CollectionOptions = { dedup: false }) {
+        console.log("Build", arg1, options);
+        if (_.isObject(options)) {
+            this._options = options;
+        }
+
         if (!arg1) {
-            this._events = Immutable.OrderedMap<T, Event<T>>();
+            this._events = Immutable.List<Event<T>>();
+            this._keyMap = Immutable.Map<string, Immutable.List<number>>();
         } else if (arg1 instanceof Collection) {
-            const other = arg1;
+            const other = arg1 as Collection<T>;
             this._events = other._events;
-        } else if (Immutable.OrderedMap.isOrderedMap(arg1)) {
+            this._keyMap = other._keyMap;
+            this._options = other._options;
+        } else if (Immutable.List.isList(arg1)) {
             this._events = arg1;
         }
+
+        console.log(">", this._events);
     }
 
     /**
@@ -85,18 +94,14 @@ class Collection<T extends Key> {
      * In the case of our OrderedMap, this code simply called
      * internalOrderedMap.toJS() and lets Immutable.js do its
      * thing.
-     *
-     * @return {Object} The JSON representation of this Collection
      */
     toJSON() {
-        return this._events.toList().toJS();
+        return this._events.toJS();
     }
 
     /**
      * Serialize out the Collection as a string. This will be the
      * string representation of `toJSON()`.
-     *
-     * @return {string} The Collection serialized as a string.
      */
     toString() {
         return JSON.stringify(this.toJSON());
@@ -126,22 +131,33 @@ class Collection<T extends Key> {
      *     );
      * });
      * ```
-     * @param event The new Event of type T to be added into the Collection
-     * @param dudup Callback function to reconcile an existing Event
-     * 
-     * @returns Collection<T> The new Collection with the Event
-     *                        added into it
      */
-    addEvent(
-        event: Event<T>,
-        dedup?: (event: Event<T>) => Event<T>
-    ): Collection<T> {
-        const k = event.key();
+    addEvent(event: Event<T>,
+        dedup?: (events: Immutable.List<Event<T>>) => Event<T>): Collection<T> {
+        console.log("Add Event", this._events);
+        const k = event.key().toString();
+
         let e = event;
-        if (this._events.has(k) && dedup) {
-            e = dedup(this._events.get(k));
+        const nextEventIndex = this._events.size;
+
+        // Updated key map
+        let eventIndexes = this._keyMap.has(k) ?
+            this._keyMap.get(k).push(nextEventIndex) :
+            Immutable.List<number>([nextEventIndex]);
+
+        // Dedup
+        if (dedup) {
+            const conflicting = this.atKey(event.key());
+            const e = dedup(conflicting);
         }
-        return new Collection<T>(this._events.set(k, e));
+
+        const keyMap = this._keyMap.set(k, eventIndexes);
+
+        // Update the event list
+        const events = this._events.push(e);
+
+        // Build the new Collection
+        return Collection.buildCollection<T>(events, keyMap);
     }
 
     /**
@@ -153,7 +169,7 @@ class Collection<T extends Key> {
      *                        added into it
      */
     setEvents(
-        events: Immutable.OrderedMap<T, Event<T>>
+        events: Immutable.List<Event<T>>
     ): Collection<T> {
         return new Collection<T>(events);
     }
@@ -199,7 +215,7 @@ class Collection<T extends Key> {
      * the Collection is optimised for returning results via
      * the Event's key (see `atKey()`).
      */
-    eventAt(pos: number): Event<T> {
+    at(pos: number): Event<T> {
         return this.eventList().get(pos);
     }
 
@@ -217,8 +233,12 @@ class Collection<T extends Key> {
      * const event = collection.atKey(timestamp)
      * ```
      */
-    eventAtKey(key: T): Event<T> {
-        return this._events.get(key);
+    atKey(key: T): Immutable.List<Event<T>> {
+        const indexes = this._keyMap.get(key.toString());
+        const events = indexes.map(i => {
+            return this._events.get(i);
+        });
+        return events;
     }
 
     /**
@@ -283,13 +303,11 @@ class Collection<T extends Key> {
      * })
      * ```
      */
-    forEach(sideEffect: (value?: Event<T>, key?: T) => any) {
-        return this._events.forEach((e, k) => {
-            return sideEffect(e, k)
-        });
+    forEach(sideEffect: (value?: Event<T>, index?: number) => any) {
+        return this._events.forEach(sideEffect);
     }
 
-    /**a
+    /**
      * Map over the events in this Collection. For each Event
      * passed to your callback function you should map that to
      * a new Event.
@@ -301,8 +319,8 @@ class Collection<T extends Key> {
      * });
      * ```
      */
-    map(mapper: (event?: Event<T>, key?: T) => Event<T>): Collection<T> {
-        return new Collection<T>(Immutable.OrderedMap<T, Event<T>>(
+    map(mapper: (value?: Event<T>, index?: number) => Event<T>): Collection<T> {
+        return new Collection<T>(Immutable.List<Event<T>>(
             this._events.map(mapper)
         ));
     }
@@ -327,7 +345,7 @@ class Collection<T extends Key> {
      *                        Event key of type T
      */
     sortByTime(): Collection<T> {
-        const sorted = Immutable.OrderedMap<T, Event<T>>(
+        const sorted = Immutable.List<Event<T>>(
             this._events.sortBy(event => {
                 return +event.key().timestamp();
             })
@@ -341,7 +359,7 @@ class Collection<T extends Key> {
      */
     sort(field: string = "value"): Collection<T> {
         const fs = util.fieldAsArray(field);
-        const sorted = Immutable.OrderedMap<T, Event<T>>(
+        const sorted = Immutable.List<Event<T>>(
             this._events.sortBy(event => {
                 return event.get(fs);
             })
@@ -372,12 +390,13 @@ class Collection<T extends Key> {
      * const filtered = collection.filter(e => e.get("a") < 8)
      * ```
      */
+    /*
     filter(predicate: (event: Event<T>, key: T) => boolean) {
         return new Collection<T>(Immutable.OrderedMap<T, Event<T>>(
             this._events.filter(predicate)
         ));
     }
-
+    */
     /**
      * Returns the extents of the Collection as a TimeRange.
      * Since this Collection is not necessarily in order, this
@@ -392,7 +411,7 @@ class Collection<T extends Key> {
             if (!max || e.end() > max) max = e.end();
         })
         if (min && max) {
-            return new TimeRange(min, max);
+            return timerange(min, max);
         }
     }
 
@@ -480,14 +499,7 @@ class Collection<T extends Key> {
     }
 
     /**
-     * Aggregates the events down to their minimum value
-     *
-     * @param {string} fieldPath  Column to find the median of. A deep value can be referenced with a
-     *                            string.like.this.  If not supplied the `value` column will be
-     *                            aggregated.
-     * @param {function} filter   Optional filter function used to clean data before aggregating
-     *
-     * @return {number}           The median value
+     * Aggregates the events down to their median value
      */
     median(fieldSpec: string, filter?): number;
     median(fieldSpec: string[], filter?): { [s: string]: number[]; };
@@ -496,19 +508,12 @@ class Collection<T extends Key> {
     }
 
     /**
-     * Aggregates the events down to their stdev
-     *
-     * @param {string} fieldPath  Column to find the stdev of. A deep value can be referenced with a
-     *                            string.like.this.  If not supplied the `value` column will be
-     *                            aggregated.
-     * @param {function} filter   Optional filter function used to clean data before aggregating
-     *
-     * @return {number}           The resulting stdev value
+     * Aggregates the events down to their standard deviation
      */
     stdev(fieldSpec: string, filter?): number;
     stdev(fieldSpec: string[], filter?): { [s: string]: number[]; };
     stdev(fieldSpec: any, filter?) {
-        return this.aggregate(stdev(filter), fieldSpec;
+        return this.aggregate(stdev(filter), fieldSpec);
     }
 
     /**
@@ -532,6 +537,86 @@ class Collection<T extends Key> {
         return this.aggregate(percentile(q, interp, filter), fieldSpec);
     }
 
+    /**
+     * Gets n quantiles within the Collection. This works the same way as numpy.
+     *
+     * @param  {integer} n        The number of quantiles to divide the
+     *                            Collection into.
+     *
+     * @param  {string} column    The field to return as the quantile
+     *
+     * @param  {string} interp    Specifies the interpolation method
+     *                            to use when the desired quantile lies between
+     *                            two data points. Options are:
+     *                            options are:
+     *                             * linear: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
+     *                             * lower: i.
+     *                             * higher: j.
+     *                             * nearest: i or j whichever is nearest.
+     *                             * midpoint: (i + j) / 2.
+     *
+     * @return {array}            An array of n quantiles
+     */
+    quantile(n: number, column: string = "value", interp: InterpolationType = InterpolationType.linear) {
+        const results = [];
+        const sorted = this.sort(column);
+        const subsets = 1.0 / n;
+
+        if (n > this.size()) {
+            throw new Error("Subset n is greater than the Collection length");
+        }
+
+        for (let i = subsets; i < 1; i += subsets) {
+            const index = Math.floor((sorted.size() - 1) * i);
+            if (index < sorted.size() - 1) {
+                const fraction = (sorted.size() - 1) * i - index;
+                const v0 = sorted.eventAt(index).get(column);
+                const v1 = sorted.eventAt(index + 1).get(column);
+                let v;
+                if (InterpolationType.lower || fraction === 0) {
+                    v = v0;
+                } else if (InterpolationType.linear) {
+                    v = v0 + (v1 - v0) * fraction;
+                } else if (InterpolationType.higher) {
+                    v = v1;
+                } else if (InterpolationType.nearest) {
+                    v = fraction < 0.5 ? v0 : v1;
+                } else if (InterpolationType.midpoint) {
+                    v = (v0 + v1) / 2;
+                }
+                results.push(v);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Returns true if all events in this Collection are in chronological order.
+     */
+    isChronological() {
+        let result = true;
+        let t;
+        this.forEach(e => {
+            if (!t) {
+                t = e.timestamp().getTime();
+            } else {
+                if (e.timestamp() < t) {
+                    result = false;
+                }
+                t = e.timestamp();
+            }
+        });
+        return result;
+    }
+
+    private static buildCollection<T extends Key>(events, keyMap): Collection<T> {
+        const c = new Collection<T>();
+        c._events = events;
+        c._keyMap = keyMap;
+        return c;
+    }
 }
+
+
 
 export default Collection;

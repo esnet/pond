@@ -12,7 +12,7 @@ declare const describe: any;
 declare const it: any;
 declare const expect: any;
 
-import { filter, sum, avg, percentile } from "../src/functions";
+import { filter, sum, avg, percentile, InterpolationType } from "../src/functions";
 
 const goodValues = [1, 2, 3, 4, 5];
 const badValues = [1, 2, null, 4, 5];

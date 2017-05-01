@@ -13,8 +13,8 @@ import * as Immutable from "immutable";
 import * as moment from "moment";
 import Moment = moment.Moment;
 
-import Index from "./index";
-import TimeRange from "./timerange";
+import { Index, index } from "./index";
+import { TimeRange, timerange } from "./timerange";
 
 const UNITS = {
     s: { label: "seconds", length: 1 },
@@ -136,7 +136,7 @@ function rangeFromIndexString(indexString: string, utc: boolean): TimeRange {
     }
 
     if (beginTime && beginTime.isValid() && endTime && endTime.isValid()) {
-        return new TimeRange(beginTime, endTime);
+        return timerange(beginTime, endTime);
     } else {
         return undefined;
     }
@@ -285,7 +285,7 @@ function timeRangeFromArg(arg: any): any {
  */
 function indexFromArgs(arg1: string | Index, arg2: boolean = true): Index {
     if (_.isString(arg1)) {
-        return new Index(arg1, arg2);
+        return index(arg1, arg2);
     } else if (arg1 instanceof Index) {
         return arg1;
     } else {

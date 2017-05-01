@@ -1,1 +1,6 @@
-export {default as TimeRange} from "./timerange";
+import { timerange, TimeRange } from "./timerange";
+
+export {
+    timerange,
+    TimeRange
+}
