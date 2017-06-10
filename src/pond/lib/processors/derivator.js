@@ -80,9 +80,7 @@ export default class Derivator extends Processor {
 
             let rate = null;
             if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
-                console.warn(
-                    `Path ${fieldPath} contains a non-numeric value or does not exist`
-                );
+                console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
             } else {
                 rate = (currentVal - previousVal) / deltaTime;
             }
@@ -103,9 +101,7 @@ export default class Derivator extends Processor {
      */
     addEvent(event) {
         if (event instanceof TimeRangeEvent || event instanceof IndexedEvent) {
-            throw new Error(
-                "TimeRangeEvent and IndexedEvent series can not be aligned."
-            );
+            throw new Error("TimeRangeEvent and IndexedEvent series can not be aligned.");
         }
 
         if (this.hasObservers()) {

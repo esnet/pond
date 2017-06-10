@@ -158,20 +158,17 @@ it("can be compared for overlap to an overlapping range", () => {
     expect(range2.overlaps(range1)).toBeTruthy();
 });
 
-it(
-    "can be compared for containment to an range contained within it completely",
-    () => {
-        const ta = moment("2010-01-01 12:00", fmt).toDate();
-        const tb = moment("2010-09-01 12:00", fmt).toDate();
-        const range1 = new TimeRange(ta, tb);
+it("can be compared for containment to an range contained within it completely", () => {
+    const ta = moment("2010-01-01 12:00", fmt).toDate();
+    const tb = moment("2010-09-01 12:00", fmt).toDate();
+    const range1 = new TimeRange(ta, tb);
 
-        const td = moment("2010-03-15 12:00", fmt).toDate();
-        const te = moment("2010-06-15 12:00", fmt).toDate();
-        const range2 = new TimeRange(td, te);
+    const td = moment("2010-03-15 12:00", fmt).toDate();
+    const te = moment("2010-06-15 12:00", fmt).toDate();
+    const range2 = new TimeRange(td, te);
 
-        expect(range1.contains(range2)).toBeTruthy();
-    }
-);
+    expect(range1.contains(range2)).toBeTruthy();
+});
 
 it("can be compared for containment to an overlapping range", () => {
     const ta = moment("2010-01-01 12:00", fmt).toDate();
@@ -235,29 +232,20 @@ it("can be a new range if the ranges intersect", () => {
     const endTimeOverlap = moment("2010-07-01 12:00", fmt).toDate();
     const rangeOverlap = new TimeRange(beginTimeOverlap, endTimeOverlap);
     const expected = new TimeRange(beginTimeOverlap, endTime);
-    expect(range.intersection(rangeOverlap).toString()).toBe(
-        expected.toString()
-    );
+    expect(range.intersection(rangeOverlap).toString()).toBe(expected.toString());
 });
 
-it(
-    "can be a new range (the smaller range) if one range surrounds another",
-    () => {
-        // One range fully inside the other intersect() returns the smaller range
-        //    01 -------06    range
-        //       02--04       rangeInside
-        //       02--04       intersection
-        const beginTime = moment("2010-01-01 12:00", fmt).toDate();
-        const endTime = moment("2010-06-01 12:00", fmt).toDate();
-        const range = new TimeRange(beginTime, endTime);
-        const beginTimeInside = moment("2010-02-01 12:00", fmt).toDate();
-        const endTimeInside = moment("2010-04-01 12:00", fmt).toDate();
-        const rangeInside = new TimeRange(beginTimeInside, endTimeInside);
-        expect(range.intersection(rangeInside).toString()).toBe(
-            rangeInside.toString()
-        );
-        expect(rangeInside.intersection(range).toString()).toBe(
-            rangeInside.toString()
-        );
-    }
-);
+it("can be a new range (the smaller range) if one range surrounds another", () => {
+    // One range fully inside the other intersect() returns the smaller range
+    //    01 -------06    range
+    //       02--04       rangeInside
+    //       02--04       intersection
+    const beginTime = moment("2010-01-01 12:00", fmt).toDate();
+    const endTime = moment("2010-06-01 12:00", fmt).toDate();
+    const range = new TimeRange(beginTime, endTime);
+    const beginTimeInside = moment("2010-02-01 12:00", fmt).toDate();
+    const endTimeInside = moment("2010-04-01 12:00", fmt).toDate();
+    const rangeInside = new TimeRange(beginTimeInside, endTimeInside);
+    expect(range.intersection(rangeInside).toString()).toBe(rangeInside.toString());
+    expect(rangeInside.intersection(range).toString()).toBe(rangeInside.toString());
+});

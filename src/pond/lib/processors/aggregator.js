@@ -43,25 +43,19 @@ class Aggregator extends Processor {
             this._emitOn = pipeline.getEmitOn();
 
             if (!_.has(options, "fields")) {
-                throw new Error(
-                    "Aggregator: constructor needs an aggregator field mapping"
-                );
+                throw new Error("Aggregator: constructor needs an aggregator field mapping");
             }
 
             // Check each of the aggregator -> field mappings
             _.forEach(options.fields, (operator, field) => {
                 // Field should either be an array or a string
                 if (!_.isString(field) && !_.isArray(field)) {
-                    throw new Error(
-                        "Aggregator: field of unknown type: " + field
-                    );
+                    throw new Error("Aggregator: field of unknown type: " + field);
                 }
             });
 
             if (pipeline.mode() === "stream") {
-                if (
-                    !pipeline.getWindowType() || !pipeline.getWindowDuration()
-                ) {
+                if (!pipeline.getWindowType() || !pipeline.getWindowDuration()) {
                     throw new Error(
                         "Unable to aggregate because no windowing strategy was specified in pipeline"
                     );

@@ -59,7 +59,7 @@ export default {
     windowPositionFromDate(w, date) {
         const duration = this.windowDuration(w);
         let dd = moment.utc(date).valueOf();
-        return parseInt(dd /= duration, 10);
+        return parseInt((dd /= duration), 10);
     },
     rangeFromIndexString(index, utc) {
         const isUTC = !_.isUndefined(utc) ? utc : true;
@@ -73,8 +73,8 @@ export default {
                 // A day, month and year e.g. 2014-10-24
                 if (
                     !_.isNaN(parseInt(parts[0], 10)) &&
-                        !_.isNaN(parseInt(parts[1], 10)) &&
-                        !_.isNaN(parseInt(parts[2], 10))
+                    !_.isNaN(parseInt(parts[1], 10)) &&
+                    !_.isNaN(parseInt(parts[2], 10))
                 ) {
                     const year = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10);
@@ -93,32 +93,19 @@ export default {
                 // range based index, e.g 1h-23478
                 const rangeRegex = /([0-9]+)([smhd])/;
                 const sizeParts = rangeRegex.exec(parts[0]);
-                if (
-                    sizeParts &&
-                        sizeParts.length >= 3 &&
-                        !_.isNaN(parseInt(parts[1], 10))
-                ) {
+                if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1], 10))) {
                     const pos = parseInt(parts[1], 10);
                     const num = parseInt(sizeParts[1], 10);
                     const unit = sizeParts[2];
                     const length = num * units[unit].length * 1000;
 
-                    beginTime = isUTC
-                        ? moment.utc(pos * length)
-                        : moment(pos * length);
-                    endTime = isUTC
-                        ? moment.utc((pos + 1) * length)
-                        : moment((pos + 1) * length);
+                    beginTime = isUTC ? moment.utc(pos * length) : moment(pos * length);
+                    endTime = isUTC ? moment.utc((pos + 1) * length) : moment((pos + 1) * length);
                     // A month and year e.g 2015-09
-                } else if (
-                    !_.isNaN(parseInt(parts[0], 10)) &&
-                        !_.isNaN(parseInt(parts[1], 10))
-                ) {
+                } else if (!_.isNaN(parseInt(parts[0], 10)) && !_.isNaN(parseInt(parts[1], 10))) {
                     const year = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10);
-                    beginTime = isUTC
-                        ? moment.utc([year, month - 1])
-                        : moment([year, month - 1]);
+                    beginTime = isUTC ? moment.utc([year, month - 1]) : moment([year, month - 1]);
                     endTime = isUTC
                         ? moment.utc(beginTime).endOf("month")
                         : moment(beginTime).endOf("month");
@@ -158,8 +145,8 @@ export default {
             case 3:
                 if (
                     !_.isNaN(parseInt(parts[0], 10)) &&
-                        !_.isNaN(parseInt(parts[1], 10)) &&
-                        !_.isNaN(parseInt(parts[2], 10))
+                    !_.isNaN(parseInt(parts[1], 10)) &&
+                    !_.isNaN(parseInt(parts[2], 10))
                 ) {
                     const year = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10);
@@ -176,16 +163,9 @@ export default {
             case 2:
                 const rangeRegex = /([0-9]+)([smhd])/;
                 const sizeParts = rangeRegex.exec(parts[0]);
-                if (
-                    sizeParts &&
-                        sizeParts.length >= 3 &&
-                        !_.isNaN(parseInt(parts[1], 10))
-                ) {
+                if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1], 10))) {
                     return index;
-                } else if (
-                    !_.isNaN(parseInt(parts[0], 10)) &&
-                        !_.isNaN(parseInt(parts[1], 10))
-                ) {
+                } else if (!_.isNaN(parseInt(parts[0], 10)) && !_.isNaN(parseInt(parts[1], 10))) {
                     const year = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10);
                     t = moment.utc([year, month - 1]);
@@ -285,9 +265,7 @@ export default {
         } else if (_.isArray(arg) && arg.length === 2) {
             return new TimeRange(arg);
         } else {
-            throw new Error(
-                `Unable to parse timerange. Should be a TimeRange. Got ${arg}.`
-            );
+            throw new Error(`Unable to parse timerange. Should be a TimeRange. Got ${arg}.`);
         }
     },
     indexFromArgs(arg1, arg2 = true) {
@@ -296,9 +274,7 @@ export default {
         } else if (arg1 instanceof Index) {
             return arg1;
         } else {
-            throw new Error(
-                `Unable to get index from ${arg1}. Should be a string or Index.`
-            );
+            throw new Error(`Unable to get index from ${arg1}. Should be a string or Index.`);
         }
     },
     dataFromArg(arg) {

@@ -14,10 +14,7 @@ import Index from "../index";
 
 it("can create a daily index", done => {
     const index = new Index("1d-12355");
-    expect(index.asTimerange().toJSON()).toEqual([
-        1067472000000,
-        1067558400000
-    ]);
+    expect(index.asTimerange().toJSON()).toEqual([1067472000000, 1067558400000]);
     expect(index.asTimerange().humanizeDuration()).toBe("a day");
     done();
 });

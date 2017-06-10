@@ -19,10 +19,9 @@ function isValid(v) {
 //
 const keepMissing = values => values;
 const ignoreMissing = values => values.filter(isValid);
-const zeroMissing = values => values.map(v => isValid(v) ? v : 0);
-const propagateMissing = values =>
-    ignoreMissing(values).length === values.length ? values : null;
-const noneIfEmpty = values => values.length === 0 ? null : values;
+const zeroMissing = values => values.map(v => (isValid(v) ? v : 0));
+const propagateMissing = values => (ignoreMissing(values).length === values.length ? values : null);
+const noneIfEmpty = values => (values.length === 0 ? null : values);
 
 export const filter = {
     keepMissing,
@@ -189,9 +188,7 @@ export function last(clean = filter.ignoreMissing) {
     return values => {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
-        return cleanValues.length
-            ? cleanValues[cleanValues.length - 1]
-            : undefined;
+        return cleanValues.length ? cleanValues[cleanValues.length - 1] : undefined;
     };
 }
 
@@ -237,7 +234,7 @@ export function stdev(clean = filter.ignoreMissing) {
         if (!cleanValues) return null;
         let sums = 0;
         const mean = avg(clean)(cleanValues);
-        cleanValues.forEach(v => sums += Math.pow(v - mean, 2));
+        cleanValues.forEach(v => (sums += Math.pow(v - mean, 2)));
         return Math.sqrt(sums / values.length);
     };
 }

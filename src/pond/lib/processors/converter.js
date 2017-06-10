@@ -37,15 +37,13 @@ export default class Converter extends Processor {
             this._alignment = other._alignment;
         } else if (isPipeline(arg1)) {
             if (!_.has(options, "type")) {
-                throw new Error(
-                    "Converter: constructor needs 'type' in options"
-                );
+                throw new Error("Converter: constructor needs 'type' in options");
             }
             if (isSubclass(TimeEvent, options.type)) {
                 this._convertTo = options.type;
             } else if (
                 isSubclass(TimeRangeEvent, options.type) ||
-                    isSubclass(IndexedEvent, options.type)
+                isSubclass(IndexedEvent, options.type)
             ) {
                 this._convertTo = options.type;
                 if (options.duration && _.isString(options.duration)) {
@@ -53,9 +51,7 @@ export default class Converter extends Processor {
                     this._durationString = options.duration;
                 }
             } else {
-                throw Error(
-                    "Unable to interpret type argument passed to Converter constructor"
-                );
+                throw Error("Unable to interpret type argument passed to Converter constructor");
             }
             this._alignment = options.alignment || "center";
         } else {
@@ -83,12 +79,8 @@ export default class Converter extends Processor {
                     end = new Date(+event.timestamp() + this._duration);
                     break;
                 case "center":
-                    begin = new Date(
-                        +event.timestamp() - parseInt(this._duration / 2, 10)
-                    );
-                    end = new Date(
-                        +event.timestamp() + parseInt(this._duration / 2, 10)
-                    );
+                    begin = new Date(+event.timestamp() - parseInt(this._duration / 2, 10));
+                    end = new Date(+event.timestamp() + parseInt(this._duration / 2, 10));
                     break;
                 case "behind":
                     end = event.timestamp();
@@ -101,10 +93,7 @@ export default class Converter extends Processor {
             return new T(timeRange, event.data());
         } else if (isSubclass(IndexedEvent, T)) {
             const timestamp = event.timestamp();
-            const indexString = Index.getIndexString(
-                this._durationString,
-                timestamp
-            );
+            const indexString = Index.getIndexString(this._durationString, timestamp);
             return new this._convertTo(indexString, event.data(), null);
         }
     }
@@ -125,10 +114,7 @@ export default class Converter extends Processor {
                     break;
                 case "center":
                     timestamp = new Date(
-                        parseInt(
-                            (beginTime.getTime() + endTime.getTime()) / 2,
-                            10
-                        )
+                        parseInt((beginTime.getTime() + endTime.getTime()) / 2, 10)
                     );
                     break;
                 case "lead":
@@ -158,10 +144,7 @@ export default class Converter extends Processor {
                     break;
                 case "center":
                     timestamp = new Date(
-                        parseInt(
-                            (beginTime.getTime() + endTime.getTime()) / 2,
-                            10
-                        )
+                        parseInt((beginTime.getTime() + endTime.getTime()) / 2, 10)
                     );
                     break;
                 case "lead":

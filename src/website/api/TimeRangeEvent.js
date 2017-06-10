@@ -15,7 +15,7 @@ import Highlighter from "./Highlighter";
 import text from "raw!../docs/TimeRangeEvent.md";
 
 export default React.createClass({
-    mixins: [ Highlighter ],
+    mixins: [Highlighter],
     getInitialState() {
         return { markdown: text };
     },
@@ -31,4 +31,3 @@ export default React.createClass({
         );
     }
 });
-
