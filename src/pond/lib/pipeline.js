@@ -575,9 +575,7 @@ class Pipeline {
         }
 
         if (!this.in()) {
-            throw new Error(
-                "Tried to eval pipeline without a In. Missing from() in chain?"
-            );
+            throw new Error("Tried to eval pipeline without a In. Missing from() in chain?");
         }
 
         const out = new Out(this, options, observer);
@@ -809,23 +807,27 @@ class Pipeline {
      */
     fill({ fieldSpec = null, method = "linear", limit = null }) {
         const prev = this._chainPrev();
-        return this._append(new Filler(this, {
-            fieldSpec,
-            method,
-            limit,
-            prev
-        }));
+        return this._append(
+            new Filler(this, {
+                fieldSpec,
+                method,
+                limit,
+                prev
+            })
+        );
     }
 
     align(fieldSpec, window, method, limit) {
         const prev = this._chainPrev();
-        return this._append(new Aligner(this, {
-            fieldSpec,
-            window,
-            method,
-            limit,
-            prev
-        }));
+        return this._append(
+            new Aligner(this, {
+                fieldSpec,
+                window,
+                method,
+                limit,
+                prev
+            })
+        );
     }
 
     rate(fieldSpec, allowNegative = true) {

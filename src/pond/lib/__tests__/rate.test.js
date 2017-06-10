@@ -82,9 +82,7 @@ it("can output nulls for negative values", done => {
     expect(rates1.at(1).get("value_rate")).toEqual(-0.5434782608695646);
     expect(rates1.at(2).get("value_rate")).toEqual(-0.5434782608695653);
 
-    const rates2 = ts
-        .align({ fieldSpec: "value", period: "30s" })
-        .rate({ allowNegative: false });
+    const rates2 = ts.align({ fieldSpec: "value", period: "30s" }).rate({ allowNegative: false });
 
     expect(rates2.size()).toEqual(3);
     expect(rates2.at(0).get("value_rate")).toBeNull();

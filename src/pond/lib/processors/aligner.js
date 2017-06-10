@@ -35,12 +35,7 @@ export default class Aligner extends Processor {
             this._method = other._method;
             this._limit = other._limit;
         } else if (isPipeline(arg1)) {
-            const {
-                fieldSpec,
-                window,
-                method = "hold",
-                limit = null
-            } = options;
+            const { fieldSpec, window, method = "hold", limit = null } = options;
 
             this._fieldSpec = fieldSpec;
             this._window = window;
@@ -62,9 +57,7 @@ export default class Aligner extends Processor {
 
         // check input of method
         if (!_.contains(["linear", "hold"], this._method)) {
-            throw new Error(
-                `Unknown method '${this._method}' passed to Aligner`
-            );
+            throw new Error(`Unknown method '${this._method}' passed to Aligner`);
         }
 
         // check limit
@@ -91,19 +84,10 @@ export default class Aligner extends Processor {
      * they are in the same window, return an empty list.
      */
     getBoundaries(event) {
-        const prevIndex = Index.getIndexString(
-            this._window,
-            this._previous.timestamp()
-        );
-        const currentIndex = Index.getIndexString(
-            this._window,
-            event.timestamp()
-        );
+        const prevIndex = Index.getIndexString(this._window, this._previous.timestamp());
+        const currentIndex = Index.getIndexString(this._window, event.timestamp());
         if (prevIndex !== currentIndex) {
-            const range = new TimeRange(
-                this._previous.timestamp(),
-                event.timestamp()
-            );
+            const range = new TimeRange(this._previous.timestamp(), event.timestamp());
             return Index.getIndexStringList(this._window, range).slice(1);
         } else {
             return [];
@@ -168,9 +152,7 @@ export default class Aligner extends Processor {
 
             let interpolatedVal = null;
             if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
-                console.warn(
-                    `Path ${fieldPath} contains a non-numeric value or does not exist`
-                );
+                console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
             } else {
                 interpolatedVal = previousVal + f * (currentVal - previousVal);
             }
@@ -185,9 +167,7 @@ export default class Aligner extends Processor {
      */
     addEvent(event) {
         if (event instanceof TimeRangeEvent || event instanceof IndexedEvent) {
-            throw new Error(
-                "TimeRangeEvent and IndexedEvent series can not be aligned."
-            );
+            throw new Error("TimeRangeEvent and IndexedEvent series can not be aligned.");
         }
 
         if (this.hasObservers()) {

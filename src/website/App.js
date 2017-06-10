@@ -112,16 +112,12 @@ class App extends Component {
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    href="http://software.es.net/react-timeseries-charts/"
-                                >
+                                <a href="http://software.es.net/react-timeseries-charts/">
                                     React Timeseries Charts
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    href="http://software.es.net/react-network-diagrams/"
-                                >
+                                <a href="http://software.es.net/react-network-diagrams/">
                                     React Network Diagrams
                                 </a>
                             </li>
@@ -141,9 +137,7 @@ class App extends Component {
                             <li><a href="https://www.es.net/">ESnet</a></li>
                         </ul>
                     </div>
-                    <div
-                        className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main"
-                    >
+                    <div className="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                         {this.props.children}
                     </div>
                 </div>

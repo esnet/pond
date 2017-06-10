@@ -121,9 +121,7 @@ export default class Filler extends Processor {
                 } else if (this._method === "pad") {
                     // set to previous value
                     if (!_.isNull(this._previousEvent)) {
-                        const prevVal = this._previousEvent
-                            .data()
-                            .getIn(fieldPath);
+                        const prevVal = this._previousEvent.data().getIn(fieldPath);
 
                         if (!util.isMissing(prevVal)) {
                             newData = newData.setIn(fieldPath, prevVal);
@@ -198,10 +196,7 @@ export default class Filler extends Processor {
             this._linearFillCache.push(event);
 
             // Check limit
-            if (
-                !_.isNull(this._limit) &&
-                    this._linearFillCache.length >= this._limit
-            ) {
+            if (!_.isNull(this._limit) && this._linearFillCache.length >= this._limit) {
                 // Flush the cache now because limit is reached
                 this._linearFillCache.forEach(e => {
                     this.emit(e);
@@ -220,11 +215,7 @@ export default class Filler extends Processor {
             events.push(event);
         } else if (isValidEvent && this._linearFillCache) {
             // Linear interpolation between last good and this event
-            const eventList = [
-                this._lastGoodLinear,
-                ...this._linearFillCache,
-                event
-            ];
+            const eventList = [this._lastGoodLinear, ...this._linearFillCache, event];
             const interpolatedEvents = this.interpolateEventList(eventList);
 
             //
@@ -282,13 +273,8 @@ export default class Filler extends Processor {
             }
 
             // Detect non-numeric value
-            if (
-                !util.isMissing(e.get(fieldPath)) &&
-                    !_.isNumber(e.get(fieldPath))
-            ) {
-                console.warn(
-                    `linear requires numeric values - skipping this field_spec`
-                );
+            if (!util.isMissing(e.get(fieldPath)) && !_.isNumber(e.get(fieldPath))) {
+                console.warn(`linear requires numeric values - skipping this field_spec`);
                 return events;
             }
 
@@ -316,10 +302,8 @@ export default class Filler extends Processor {
                         const newValue = (prevValue + nextValue) / 2;
                         newEvents.push(e.setData(newValue));
                     } else {
-                        const f = (currentTime - prevTime) /
-                            (nextTime - prevTime);
-                        const newValue = prevValue +
-                            f * (nextValue - prevValue);
+                        const f = (currentTime - prevTime) / (nextTime - prevTime);
+                        const newValue = prevValue + f * (nextValue - prevValue);
                         const d = e.data().setIn(fieldPath, newValue);
                         newEvents.push(e.setData(d));
                     }

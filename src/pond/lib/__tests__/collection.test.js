@@ -42,41 +42,29 @@ it("can create a Collection from an event list", () => {
     expect(collection).toBeDefined();
 });
 
-it(
-    "can compare a collection and a reference to a collection as being equal",
-    () => {
-        const collection = new Collection(EVENT_LIST);
-        const refCollection = collection;
-        expect(collection).toBe(refCollection);
-    }
-);
+it("can compare a collection and a reference to a collection as being equal", () => {
+    const collection = new Collection(EVENT_LIST);
+    const refCollection = collection;
+    expect(collection).toBe(refCollection);
+});
 
-it(
-    "can use the equals() comparator to compare a series and a copy of the series as true",
-    () => {
-        const collection = new Collection(EVENT_LIST);
-        const copy = new Collection(collection);
-        expect(Collection.equal(collection, copy)).toBeTruthy();
-    }
-);
+it("can use the equals() comparator to compare a series and a copy of the series as true", () => {
+    const collection = new Collection(EVENT_LIST);
+    const copy = new Collection(collection);
+    expect(Collection.equal(collection, copy)).toBeTruthy();
+});
 
-it(
-    "can use the equals() comparator to compare a collection and a value equivalent collection as false",
-    () => {
-        const collection = new Collection(EVENT_LIST);
-        const otherSeries = new Collection(EVENT_LIST);
-        expect(Collection.equal(collection, otherSeries)).toBeFalsy();
-    }
-);
+it("can use the equals() comparator to compare a collection and a value equivalent collection as false", () => {
+    const collection = new Collection(EVENT_LIST);
+    const otherSeries = new Collection(EVENT_LIST);
+    expect(Collection.equal(collection, otherSeries)).toBeFalsy();
+});
 
-it(
-    "can use the is() comparator to compare a Collection and a value equivalent Collection as true",
-    () => {
-        const collection = new Collection(EVENT_LIST);
-        const otherSeries = new Collection(EVENT_LIST);
-        expect(Collection.is(collection, otherSeries)).toBeTruthy();
-    }
-);
+it("can use the is() comparator to compare a Collection and a value equivalent Collection as true", () => {
+    const collection = new Collection(EVENT_LIST);
+    const otherSeries = new Collection(EVENT_LIST);
+    expect(Collection.is(collection, otherSeries)).toBeTruthy();
+});
 
 it("can use size() and at() to get to Collection items", () => {
     const collection = new Collection(EVENT_LIST);
@@ -121,8 +109,7 @@ it("can sort the collection by time", () => {
     const collection = new Collection(UNORDERED_EVENT_LIST);
     const sortedCollection = collection.sortByTime();
     expect(
-        sortedCollection.at(1).timestamp().getTime() >
-            sortedCollection.at(0).timestamp().getTime()
+        sortedCollection.at(1).timestamp().getTime() > sortedCollection.at(0).timestamp().getTime()
     ).toBeTruthy();
 });
 

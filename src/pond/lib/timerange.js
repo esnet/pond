@@ -54,23 +54,14 @@ class TimeRange {
             this._range = rangeList;
         } else if (_.isArray(arg1)) {
             const rangeArray = arg1;
-            this._range = new Immutable.List([
-                new Date(rangeArray[0]),
-                new Date(rangeArray[1])
-            ]);
+            this._range = new Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
         } else {
             const b = arg1;
             const e = arg2;
             if (_.isDate(b) && _.isDate(e)) {
-                this._range = new Immutable.List([
-                    new Date(b.getTime()),
-                    new Date(e.getTime())
-                ]);
+                this._range = new Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
             } else if (moment.isMoment(b) && moment.isMoment(e)) {
-                this._range = new Immutable.List([
-                    new Date(b.valueOf()),
-                    new Date(e.valueOf())
-                ]);
+                this._range = new Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
             } else if (_.isNumber(b) && _.isNumber(e)) {
                 this._range = new Immutable.List([new Date(b), new Date(e)]);
             }
@@ -203,8 +194,10 @@ class TimeRange {
      * @return {boolean} Result
      */
     equals(other) {
-        return this.begin().getTime() === other.begin().getTime() &&
-            this.end().getTime() === other.end().getTime();
+        return (
+            this.begin().getTime() === other.begin().getTime() &&
+            this.end().getTime() === other.end().getTime()
+        );
     }
 
     /**
@@ -241,8 +234,8 @@ class TimeRange {
      */
     overlaps(other) {
         if (
-            this.contains(other.begin()) && !this.contains(other.end()) ||
-                this.contains(other.end()) && !this.contains(other.begin())
+            (this.contains(other.begin()) && !this.contains(other.end())) ||
+            (this.contains(other.end()) && !this.contains(other.begin()))
         ) {
             return true;
         } else {

@@ -123,8 +123,10 @@ class Event {
      * @return {Boolean}       Result
      */
     static is(event1, event2) {
-        return event1.key() === event2.key() &&
-            Immutable.is(event1._d.get("data"), event2._d.get("data"));
+        return (
+            event1.key() === event2.key() &&
+            Immutable.is(event1._d.get("data"), event2._d.get("data"))
+        );
     }
 
     /**
@@ -140,8 +142,7 @@ class Event {
      */
     static isDuplicate(event1, event2, ignoreValues = true) {
         if (ignoreValues) {
-            return event1.type() === event2.type() &&
-                event1.key() === event2.key();
+            return event1.type() === event2.type() && event1.key() === event2.key();
         } else {
             return event1.type() === event2.type() && Event.is(event1, event2);
         }
@@ -206,8 +207,8 @@ class Event {
      */
     static merge(events, deep) {
         if (
-            events instanceof Immutable.List && events.size === 0 ||
-                _.isArray(events) && events.length === 0
+            (events instanceof Immutable.List && events.size === 0) ||
+            (_.isArray(events) && events.length === 0)
         ) {
             return [];
         }
@@ -233,9 +234,7 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(
-                        `Events for time ${key} are not homogeneous`
-                    );
+                    throw new Error(`Events for time ${key} are not homogeneous`);
                 }
             }
         });
@@ -249,9 +248,7 @@ class Event {
         _.each(eventMap, (events, key) => {
             let data = Immutable.Map();
             events.forEach(event => {
-                data = deep
-                    ? data.mergeDeep(event.data())
-                    : data.merge(event.data());
+                data = deep ? data.mergeDeep(event.data()) : data.merge(event.data());
             });
             const type = typeMap[key];
             outEvents.push(new type(key, data));
@@ -297,8 +294,8 @@ class Event {
      */
     static combine(events, reducer, fieldSpec) {
         if (
-            events instanceof Immutable.List && events.size === 0 ||
-                _.isArray(events) && events.length === 0
+            (events instanceof Immutable.List && events.size === 0) ||
+            (_.isArray(events) && events.length === 0)
         ) {
             return [];
         }
@@ -330,9 +327,7 @@ class Event {
                 typeMap[key] = type;
             } else {
                 if (typeMap[key] !== type) {
-                    throw new Error(
-                        `Events for time ${key} are not homogeneous`
-                    );
+                    throw new Error(`Events for time ${key} are not homogeneous`);
                 }
             }
         });
@@ -348,10 +343,7 @@ class Event {
             events.forEach(event => {
                 let fields = fieldNames;
                 if (!fieldNames) {
-                    fields = _.map(
-                        event.data().toJSON(),
-                        (value, fieldName) => fieldName
-                    );
+                    fields = _.map(event.data().toJSON(), (value, fieldName) => fieldName);
                 }
                 fields.forEach(fieldName => {
                     if (!mapEvent[fieldName]) {
@@ -432,9 +424,7 @@ class Event {
         } else if (_.isArray(evts)) {
             events = new Immutable.List(evts);
         } else {
-            throw new Error(
-                "Unknown event list type. Should be an array or Immutable List"
-            );
+            throw new Error("Unknown event list type. Should be an array or Immutable List");
         }
 
         if (_.isString(multiFieldSpec)) {

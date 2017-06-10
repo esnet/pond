@@ -123,9 +123,7 @@ class Index {
      */
     static getDailyIndexString(date, utc = false) {
         let day = util.leftPad(utc ? date.getUTCDate() : date.getDate());
-        let month = util.leftPad(
-            utc ? date.getUTCMonth() + 1 : date.getMonth() + 1
-        );
+        let month = util.leftPad(utc ? date.getUTCMonth() + 1 : date.getMonth() + 1);
         const year = utc ? date.getUTCFullYear() : date.getFullYear();
         return `${year}-${month}-${day}`;
     }
@@ -134,9 +132,7 @@ class Index {
      * Generate an index string with month granularity.
      */
     static getMonthlyIndexString(date, utc = false) {
-        let month = util.leftPad(
-            utc ? date.getUTCMonth() + 1 : date.getMonth() + 1
-        );
+        let month = util.leftPad(utc ? date.getUTCMonth() + 1 : date.getMonth() + 1);
         const year = utc ? date.getUTCFullYear() : date.getFullYear();
         return `${year}-${month}`;
     }

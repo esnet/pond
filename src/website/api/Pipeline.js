@@ -15,7 +15,7 @@ import Highlighter from "../components/Highlighter";
 import markdown from "raw!../docs/Pipeline.md";
 
 export default React.createClass({
-    mixins: [ Highlighter ],
+    mixins: [Highlighter],
     render() {
         return (
             <div>
@@ -28,4 +28,3 @@ export default React.createClass({
         );
     }
 });
-

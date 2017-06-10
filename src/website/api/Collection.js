@@ -14,7 +14,7 @@ import Highlighter from "../components/Highlighter";
 import text from "raw!../docs/Collection.md";
 
 export default React.createClass({
-    mixins: [ Highlighter ],
+    mixins: [Highlighter],
     render() {
         return (
             <div>
@@ -27,4 +27,3 @@ export default React.createClass({
         );
     }
 });
-

@@ -16,17 +16,7 @@ import Event from "./event";
 import TimeRange from "./timerange";
 
 import util from "./base/util";
-import {
-    sum,
-    avg,
-    max,
-    min,
-    first,
-    last,
-    median,
-    stdev,
-    percentile
-} from "./base/functions";
+import { sum, avg, max, min, first, last, median, stdev, percentile } from "./base/functions";
 
 /**
  * A collection is an abstraction for a bag of Events.
@@ -651,17 +641,10 @@ class Collection extends Bounded {
             // it will map all the columns.
             fpath = "value";
         } else {
-            throw new Error(
-                "Collection.aggregate() takes a string/array fieldPath"
-            );
+            throw new Error("Collection.aggregate() takes a string/array fieldPath");
         }
 
-        const result = Event.mapReduce(
-            this.eventListAsArray(),
-            fpath,
-            func,
-            options
-        );
+        const result = Event.mapReduce(this.eventListAsArray(), fpath, func, options);
         return result[fpath];
     }
 
@@ -753,8 +736,10 @@ class Collection extends Bounded {
       * @return {bool} result
       */
     static equal(collection1, collection2) {
-        return collection1._type === collection2._type &&
-            collection1._eventList === collection2._eventList;
+        return (
+            collection1._type === collection2._type &&
+            collection1._eventList === collection2._eventList
+        );
     }
 
     /**
@@ -767,8 +752,10 @@ class Collection extends Bounded {
       * @return {bool} result
       */
     static is(collection1, collection2) {
-        return collection1._type === collection2._type &&
-            Immutable.is(collection1._eventList, collection2._eventList);
+        return (
+            collection1._type === collection2._type &&
+            Immutable.is(collection1._eventList, collection2._eventList)
+        );
     }
 }
 

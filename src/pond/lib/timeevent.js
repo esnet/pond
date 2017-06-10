@@ -54,11 +54,7 @@ class TimeEvent extends Event {
             const other = arg1;
             this._d = other._d;
             return;
-        } else if (
-            arg1 instanceof Immutable.Map &&
-                arg1.has("time") &&
-                arg1.has("data")
-        ) {
+        } else if (arg1 instanceof Immutable.Map && arg1.has("time") && arg1.has("data")) {
             this._d = arg1;
             return;
         }

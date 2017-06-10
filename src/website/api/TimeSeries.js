@@ -14,7 +14,7 @@ import Highlighter from "./Highlighter";
 import text from "raw!../docs/TimeSeries.md";
 
 export default React.createClass({
-    mixins: [ Highlighter ],
+    mixins: [Highlighter],
     render() {
         return (
             <div>
@@ -27,4 +27,3 @@ export default React.createClass({
         );
     }
 });
-

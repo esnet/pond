@@ -277,38 +277,32 @@ it("can find the median of the series", () => {
     expect(series.median()).toBe(14);
 });
 
-it(
-    "can find the median of a series with deep data and even number of events",
-    () => {
-        const series = new TimeSeries({
-            name: "Map Traffic",
-            columns: ["time", "NASA_north", "NASA_south"],
-            points: [
-                [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
-                [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
-                [1400425953000, { in: 400, out: 600 }, { in: 147, out: 158 }],
-                [1400425954000, { in: 800, out: 800 }, { in: 155, out: 175 }]
-            ]
-        });
-        expect(series.median("NASA_north.in")).toBe(300);
-    }
-);
+it("can find the median of a series with deep data and even number of events", () => {
+    const series = new TimeSeries({
+        name: "Map Traffic",
+        columns: ["time", "NASA_north", "NASA_south"],
+        points: [
+            [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
+            [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
+            [1400425953000, { in: 400, out: 600 }, { in: 147, out: 158 }],
+            [1400425954000, { in: 800, out: 800 }, { in: 155, out: 175 }]
+        ]
+    });
+    expect(series.median("NASA_north.in")).toBe(300);
+});
 
-it(
-    "can find the median of a series with deep data and odd number of events",
-    () => {
-        const series = new TimeSeries({
-            name: "Map Traffic",
-            columns: ["time", "NASA_north", "NASA_south"],
-            points: [
-                [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
-                [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
-                [1400425953000, { in: 400, out: 600 }, { in: 147, out: 158 }]
-            ]
-        });
-        expect(series.median("NASA_north.out")).toBe(400);
-    }
-);
+it("can find the median of a series with deep data and odd number of events", () => {
+    const series = new TimeSeries({
+        name: "Map Traffic",
+        columns: ["time", "NASA_north", "NASA_south"],
+        points: [
+            [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
+            [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
+            [1400425953000, { in: 400, out: 600 }, { in: 147, out: 158 }]
+        ]
+    });
+    expect(series.median("NASA_north.out")).toBe(400);
+});
 
 it("can find the standard deviation of the series", () => {
     const series = new TimeSeries(STATS_DATA);
@@ -352,31 +346,11 @@ it("can find the quantiles of a TimeSeries", () => {
     });
 
     expect(series.quantile(4, "temperature")).toEqual([29.875, 50.05, 79.425]);
-    expect(series.quantile(4, "temperature", "linear")).toEqual([
-        29.875,
-        50.05,
-        79.425
-    ]);
-    expect(series.quantile(4, "temperature", "lower")).toEqual([
-        22.3,
-        45.5,
-        76.8
-    ]);
-    expect(series.quantile(4, "temperature", "higher")).toEqual([
-        32.4,
-        54.6,
-        87.3
-    ]);
-    expect(series.quantile(4, "temperature", "nearest")).toEqual([
-        32.4,
-        54.6,
-        76.8
-    ]);
-    expect(series.quantile(4, "temperature", "midpoint")).toEqual([
-        27.35,
-        50.05,
-        82.05
-    ]);
+    expect(series.quantile(4, "temperature", "linear")).toEqual([29.875, 50.05, 79.425]);
+    expect(series.quantile(4, "temperature", "lower")).toEqual([22.3, 45.5, 76.8]);
+    expect(series.quantile(4, "temperature", "higher")).toEqual([32.4, 54.6, 87.3]);
+    expect(series.quantile(4, "temperature", "nearest")).toEqual([32.4, 54.6, 76.8]);
+    expect(series.quantile(4, "temperature", "midpoint")).toEqual([27.35, 50.05, 82.05]);
     expect(series.quantile(1, "temperature", "linear")).toEqual([]);
 });
 
@@ -397,7 +371,7 @@ it("can find the percentiles of a TimeSeries", () => {
     });
 
     expect(series.percentile(50, "temperature")).toBe(50.05);
-    expect(series.percentile(95, "temperature")).toBeCloseTo(87.690, 3);
+    expect(series.percentile(95, "temperature")).toBeCloseTo(87.69, 3);
     expect(series.percentile(99, "temperature")).toBeCloseTo(87.858, 3);
 
     expect(series.percentile(99, "temperature", "lower")).toBe(87.3);

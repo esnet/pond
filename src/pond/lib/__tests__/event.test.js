@@ -38,10 +38,8 @@ const OUTAGE_EVENT_LIST = {
             start_time: "2015-04-22T03:30:00Z",
             end_time: "2015-04-22T16:50:00Z",
             title: "STAR-CR5 < 100 ge 06519 > ANL  - Outage",
-            description: (
-                `The listed circuit was unavailable due to
-bent pins in two clots of the optical node chassis.`
-            ),
+            description: `The listed circuit was unavailable due to
+bent pins in two clots of the optical node chassis.`,
             completed: true,
             external_ticket: "3576:144",
             esnet_ticket: "ESNET-20150421-013",
@@ -68,26 +66,34 @@ const DEEP_EVENT_DATA = {
 };
 
 const EVENT_LIST = [];
-EVENT_LIST.push(new TimeEvent(1445449170000, {
-    name: "source1",
-    in: 2,
-    out: 11
-}));
-EVENT_LIST.push(new TimeEvent(1445449200000, {
-    name: "source1",
-    in: 4,
-    out: 13
-}));
-EVENT_LIST.push(new TimeEvent(1445449230000, {
-    name: "source1",
-    in: 6,
-    out: 15
-}));
-EVENT_LIST.push(new TimeEvent(1445449260000, {
-    name: "source1",
-    in: 8,
-    out: 18
-}));
+EVENT_LIST.push(
+    new TimeEvent(1445449170000, {
+        name: "source1",
+        in: 2,
+        out: 11
+    })
+);
+EVENT_LIST.push(
+    new TimeEvent(1445449200000, {
+        name: "source1",
+        in: 4,
+        out: 13
+    })
+);
+EVENT_LIST.push(
+    new TimeEvent(1445449230000, {
+        name: "source1",
+        in: 6,
+        out: 15
+    })
+);
+EVENT_LIST.push(
+    new TimeEvent(1445449260000, {
+        name: "source1",
+        in: 8,
+        out: 18
+    })
+);
 
 //
 // TimeEvent creation
@@ -103,8 +109,8 @@ it("can create a regular TimeEvent, with deep data", () => {
 it("can't make an Event directly", () => {
     const timestamp = new Date("2015-04-22T03:30:00Z");
     expect(() => {
-      const event = new Event(timestamp, DEEP_EVENT_DATA);
-    }).toThrow();   
+        const event = new Event(timestamp, DEEP_EVENT_DATA);
+    }).toThrow();
 });
 
 it("can create an IndexedEvent using a string index and data", () => {
@@ -299,19 +305,16 @@ it("can detect duplicated event", () => {
 //
 // Deep data
 //
-it(
-    "can create an event with deep data and then get values back with dot notation",
-    () => {
-        const timestamp = new Date("2015-04-22T03:30:00Z");
-        const event = new TimeEvent(timestamp, DEEP_EVENT_DATA);
-        let eventValue;
-        for (let i = 0; i < 100000; i++) {
-            eventValue = event.get(["NorthRoute", "in"]); //1550ms
-        }
-
-        expect(eventValue).toBe(123);
+it("can create an event with deep data and then get values back with dot notation", () => {
+    const timestamp = new Date("2015-04-22T03:30:00Z");
+    const event = new TimeEvent(timestamp, DEEP_EVENT_DATA);
+    let eventValue;
+    for (let i = 0; i < 100000; i++) {
+        eventValue = event.get(["NorthRoute", "in"]); //1550ms
     }
-);
+
+    expect(eventValue).toBe(123);
+});
 
 //
 // Event map and reduce

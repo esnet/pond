@@ -46,8 +46,7 @@ export default class Collector {
         if (this._onTrigger) {
             _.each(collections, c => {
                 const { collection, windowKey, groupByKey } = c;
-                this._onTrigger &&
-                    this._onTrigger(collection, windowKey, groupByKey);
+                this._onTrigger && this._onTrigger(collection, windowKey, groupByKey);
             });
         }
     }
@@ -80,9 +79,7 @@ export default class Collector {
         //
         // Collection key
         //
-        const collectionKey = groupByKey
-            ? `${windowKey}::${groupByKey}`
-            : windowKey;
+        const collectionKey = groupByKey ? `${windowKey}::${groupByKey}` : windowKey;
 
         let discard = false;
         if (!_.has(this._collections, collectionKey)) {

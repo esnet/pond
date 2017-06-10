@@ -65,12 +65,8 @@ it("can rename columns on an Event series", done => {
     expect(renamed.at(1).get("new_in")).toEqual(ts.at(1).get("in"));
     expect(renamed.at(1).get("new_out")).toEqual(ts.at(1).get("out"));
 
-    expect(renamed.at(0).timestamp().getTime()).toEqual(
-        ts.at(0).timestamp().getTime()
-    );
-    expect(renamed.at(1).timestamp().getTime()).toEqual(
-        ts.at(1).timestamp().getTime()
-    );
+    expect(renamed.at(0).timestamp().getTime()).toEqual(ts.at(0).timestamp().getTime());
+    expect(renamed.at(1).timestamp().getTime()).toEqual(ts.at(1).timestamp().getTime());
 
     done();
 });
@@ -87,12 +83,8 @@ it("can rename a columns on a TimeRangeEvent series", done => {
     expect(renamed.at(1).get("event")).toEqual(ts.at(1).get("title"));
     expect(renamed.at(1).get("ticket")).toEqual(ts.at(1).get("esnet_ticket"));
 
-    expect(renamed.at(0).timestamp().getTime()).toEqual(
-        ts.at(0).timestamp().getTime()
-    );
-    expect(renamed.at(1).timestamp().getTime()).toEqual(
-        ts.at(1).timestamp().getTime()
-    );
+    expect(renamed.at(0).timestamp().getTime()).toEqual(ts.at(0).timestamp().getTime());
+    expect(renamed.at(1).timestamp().getTime()).toEqual(ts.at(1).timestamp().getTime());
 
     done();
 });
