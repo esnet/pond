@@ -17,12 +17,39 @@ function isValid(v) {
 //
 // Functions to process missing values out of a value list
 //
+
+/**
+ * Default filter, so default it does nothing at all to the values passed to it
+ * e.g. max(1, 2, null, 4) would be max(1, 2, null, 4)
+ */
 const keepMissing = values => values;
+
+/**
+ * Removes missing values (null, undefined or NaN) from the list of
+ * values passed into the aggregation function 
+ * e.g. avg(1, 2, null, 4) would be avg(1, 2, 4)
+ */
 const ignoreMissing = values => values.filter(isValid);
-const zeroMissing = values => values.map(v => isValid(v) ? v : 0);
-const propagateMissing = values =>
-    ignoreMissing(values).length === values.length ? values : null;
-const noneIfEmpty = values => values.length === 0 ? null : values;
+
+/**
+ * Replaces missing values (null, undefined or NaN) by 0.
+ * e.g. avg(1, 2, null, 4) would be avg(1, 2, 0, 4)
+ */
+const zeroMissing = values => values.map(v => (isValid(v) ? v : 0));
+
+/**
+ * If there are missing values in the list of values being
+ * aggregated then the result of the aggregation should be
+ * also undefined or null.
+ * e.g. avg(2, 4, null, 7) would be null.
+ */
+const propagateMissing = values => (ignoreMissing(values).length === values.length ? values : null);
+
+/**
+ * If there are no values in the list, the result of the aggregation
+ * is null 
+ */
+const noneIfEmpty = values => (values.length === 0 ? null : values);
 
 export const filter = {
     keepMissing,
@@ -189,9 +216,7 @@ export function last(clean = filter.ignoreMissing) {
     return values => {
         const cleanValues = clean(values);
         if (!cleanValues) return null;
-        return cleanValues.length
-            ? cleanValues[cleanValues.length - 1]
-            : undefined;
+        return cleanValues.length ? cleanValues[cleanValues.length - 1] : undefined;
     };
 }
 
@@ -237,7 +262,7 @@ export function stdev(clean = filter.ignoreMissing) {
         if (!cleanValues) return null;
         let sums = 0;
         const mean = avg(clean)(cleanValues);
-        cleanValues.forEach(v => sums += Math.pow(v - mean, 2));
+        cleanValues.forEach(v => (sums += Math.pow(v - mean, 2)));
         return Math.sqrt(sums / values.length);
     };
 }

@@ -207,9 +207,7 @@ class TimeSeries {
             }
 
             if (!this._collection.isChronological()) {
-                throw new Error(
-                    "TimeSeries was passed non-chronological events"
-                );
+                throw new Error("TimeSeries was passed non-chronological events");
             }
         }
     }
@@ -811,10 +809,7 @@ class TimeSeries {
      */
     select(options) {
         const { fieldSpec } = options;
-        const collections = this
-            .pipeline()
-            .select(fieldSpec)
-            .toKeyedCollections();
+        const collections = this.pipeline().select(fieldSpec).toKeyedCollections();
         return this.setCollection(collections["all"], true);
     }
 
@@ -848,8 +843,7 @@ class TimeSeries {
      */
     collapse(options) {
         const { fieldSpecList, name, reducer, append } = options;
-        const collections = this
-            .pipeline()
+        const collections = this.pipeline()
             .collapse(fieldSpecList, name, reducer, append)
             .toKeyedCollections();
         return this.setCollection(collections["all"], true);
@@ -985,14 +979,8 @@ class TimeSeries {
      * @return {TimeSeries}     The resulting aligned TimeSeries
      */
     align(options) {
-        const {
-            fieldSpec = "value",
-            period = "5m",
-            method = "linear",
-            limit = null
-        } = options;
-        const collection = this
-            .pipeline()
+        const { fieldSpec = "value", period = "5m", method = "linear", limit = null } = options;
+        const collection = this.pipeline()
             .align(fieldSpec, period, method, limit)
             .toKeyedCollections();
 
@@ -1017,10 +1005,7 @@ class TimeSeries {
      */
     rate(options = {}) {
         const { fieldSpec = "value", allowNegative = true } = options;
-        const collection = this
-            .pipeline()
-            .rate(fieldSpec, allowNegative)
-            .toKeyedCollections();
+        const collection = this.pipeline().rate(fieldSpec, allowNegative).toKeyedCollections();
 
         return this.setCollection(collection["all"], true);
     }
@@ -1038,10 +1023,17 @@ class TimeSeries {
      * `aggregation`. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * { in_avg: { in: avg() }, out_avg: { out: avg() } }
      * ```
      * will aggregate both "in" and "out" using the average aggregation
      * function and return the result as in_avg and out_avg.
+     * 
+     * Note that each aggregation function, such as `avg()` also can take a
+     * filter function to apply before the aggregation. A set of filter functions
+     * exists to do common data cleanup such as removing bad values. For example:
+     * ```
+     * { value_avg: { value: avg(filter.ignoreMissing) } }
+     * ```
      *
      * @example
      * ```
@@ -1072,8 +1064,7 @@ class TimeSeries {
             );
         }
 
-        const aggregatorPipeline = this
-            .pipeline()
+        const aggregatorPipeline = this.pipeline()
             .windowBy(windowSize)
             .emitOn("discard")
             .aggregate(aggregation);
@@ -1082,9 +1073,7 @@ class TimeSeries {
             ? aggregatorPipeline.asTimeEvents()
             : aggregatorPipeline;
 
-        const collections = eventTypePipeline
-            .clearWindow()
-            .toKeyedCollections();
+        const collections = eventTypePipeline.clearWindow().toKeyedCollections();
 
         return this.setCollection(collections["all"], true);
     }
@@ -1213,8 +1202,7 @@ class TimeSeries {
      * an aggregator Pipeline.
      */
     _rollup(type, aggregation, toTimeEvents = false) {
-        const aggregatorPipeline = this
-            .pipeline()
+        const aggregatorPipeline = this.pipeline()
             .windowBy(type)
             .emitOn("discard")
             .aggregate(aggregation);
@@ -1223,9 +1211,7 @@ class TimeSeries {
             ? aggregatorPipeline.asTimeEvents()
             : aggregatorPipeline;
 
-        const collections = eventTypePipeline
-            .clearWindow()
-            .toKeyedCollections();
+        const collections = eventTypePipeline.clearWindow().toKeyedCollections();
 
         return this.setCollection(collections["all"], true);
     }
@@ -1248,11 +1234,7 @@ class TimeSeries {
      * @return {map}    The result is a mapping from window index to a Collection.
      */
     collectByFixedWindow({ windowSize }) {
-        return this
-            .pipeline()
-            .windowBy(windowSize)
-            .emitOn("discard")
-            .toKeyedCollections();
+        return this.pipeline().windowBy(windowSize).emitOn("discard").toKeyedCollections();
     }
 
     /*
@@ -1286,8 +1268,7 @@ class TimeSeries {
       * @return {bool} result
       */
     static equal(series1, series2) {
-        return series1._data === series2._data &&
-            series1._collection === series2._collection;
+        return series1._data === series2._data && series1._collection === series2._collection;
     }
 
     /**
@@ -1298,8 +1279,10 @@ class TimeSeries {
       * @return {bool} result
       */
     static is(series1, series2) {
-        return Immutable.is(series1._data, series2._data) &&
-            Collection.is(series1._collection, series2._collection);
+        return (
+            Immutable.is(series1._data, series2._data) &&
+            Collection.is(series1._collection, series2._collection)
+        );
     }
 
     /**
@@ -1405,9 +1388,7 @@ class TimeSeries {
         }
 
         if (!reducer || !_.isFunction(reducer)) {
-            throw new Error(
-                "reducer function must be supplied, for example avg()"
-            );
+            throw new Error("reducer function must be supplied, for example avg()");
         }
 
         // for each series, make a map from timestamp to the
