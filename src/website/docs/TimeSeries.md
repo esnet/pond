@@ -810,10 +810,17 @@ Each window then has an aggregation specification applied as
 `aggregation`. This specification describes a mapping of output
 fieldNames to aggregation functions and their fieldPath. For example:
 ```
-{in_avg: {in: avg()}, out_avg: {out: avg()}}
+{ in_avg: { in: avg() }, out_avg: { out: avg() } }
 ```
 will aggregate both "in" and "out" using the average aggregation
 function and return the result as in_avg and out_avg.
+
+Note that each aggregation function, such as `avg()` also can take a
+filter function to apply before the aggregation. A set of filter functions
+exists to do common data cleanup such as removing bad values. For example:
+```
+{ value_avg: { value: avg(filter.ignoreMissing) } }
+```
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
 **Returns**: <code>[TimeSeries](#TimeSeries)</code> - The resulting rolled up `TimeSeries`  
