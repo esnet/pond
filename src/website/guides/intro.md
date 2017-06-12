@@ -71,6 +71,12 @@ And then high level processing via pipelines:
 
 * **Pipeline** - Stream or batch style processing of events to build more complex processing operations, either on fixed TimeSeries or incoming realtime data. Supports windowing, grouping and aggregation.
 
+# Typescript support
+
+As of version 0.8.6 Pond ships with Typescript declarations.
+
+In addition, the project is also being rewritten in Typescript, which will probably eventually lead to a v1.0 version as the API will have significant differences. You can track the progress of that work in [Issue #](https://github.com/esnet/pond/issues/65).
+
 # Contributing
 
 Read the [contribution guidelines](./CONTRIBUTING.md).

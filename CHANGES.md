@@ -1,6 +1,12 @@
 ## Changelog
 ---
 
+## 0.8.6
+> June 2017
+
+ * Typescript definitions
+ * Documentation improvements
+
 ## 0.8.4
 > February 2017
 
