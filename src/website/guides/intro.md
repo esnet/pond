@@ -9,7 +9,7 @@ For data structures it unifies the use of time ranges, events and collections an
 
 We are still developing Pond.js as it integrates further into our code, so it may change or be incomplete in parts. That said, it has a growing collection of tests and we will strive not to break those without careful consideration.
 
-## Rational
+## Rationale
 
 [ESnet](http://www.es.net) runs a large research network for the US Department of Energy. Our tools consume events and time series data throughout our network visualization applications and data processing chains. As our tool set grew, so did our need to build a Javascript library to work with this type of data that was consistent and dependable. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated. Not only do we need to deal with different formats at all layers of the system, we also repeat our processing code over and over. Pond.js was built to address these pain points.
 
@@ -75,7 +75,7 @@ And then high level processing via pipelines:
 
 As of version 0.8.6 Pond ships with Typescript declarations.
 
-In addition, the project is also being rewritten in Typescript, which will probably eventually lead to a v1.0 version as the API will have significant differences. You can track the progress of that work in [Issue #](https://github.com/esnet/pond/issues/65).
+In addition, the project is also being rewritten in Typescript, which will probably eventually lead to a v1.0 version as the API will have significant differences. You can track the progress of that work in [Issue #65](https://github.com/esnet/pond/issues/65).
 
 # Contributing
 
