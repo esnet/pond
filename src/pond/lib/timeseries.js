@@ -198,8 +198,16 @@ class TimeSeries {
                     const [t, ...eventValues] = point;
                     const d = _.object(eventFields, eventValues);
                     const options = utc;
-                    const Event = this.constructor.event(eventKey);
-                    return new Event(t, d, options);
+                    switch (eventKey) {
+                        case "time":
+                            return new TimeEvent(t, d, options);
+                        case "index":
+                            return new IndexedEvent(t, d, options);
+                        case "timerange":
+                            return new TimeRangeEvent(t, d, options);
+                        default:
+                            throw new Error("Unknown event type");
+                    }
                 });
 
                 this._collection = new Collection(events);

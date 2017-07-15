@@ -143,45 +143,25 @@ const BISECT_TEST_DATA = {
 const TRAFFIC_DATA_IN = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "in"],
-    points: [
-        [1400425947000, 52],
-        [1400425948000, 18],
-        [1400425949000, 26],
-        [1400425950000, 93]
-    ]
+    points: [[1400425947000, 52], [1400425948000, 18], [1400425949000, 26], [1400425950000, 93]]
 };
 
 const TRAFFIC_DATA_OUT = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "out"],
-    points: [
-        [1400425947000, 34],
-        [1400425948000, 13],
-        [1400425949000, 67],
-        [1400425950000, 91]
-    ]
+    points: [[1400425947000, 34], [1400425948000, 13], [1400425949000, 67], [1400425950000, 91]]
 };
 
 const PARTIAL_TRAFFIC_PART_A = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "value"],
-    points: [
-        [1400425947000, 34],
-        [1400425948000, 13],
-        [1400425949000, 67],
-        [1400425950000, 91]
-    ]
+    points: [[1400425947000, 34], [1400425948000, 13], [1400425949000, 67], [1400425950000, 91]]
 };
 
 const PARTIAL_TRAFFIC_PART_B = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "value"],
-    points: [
-        [1400425951000, 65],
-        [1400425952000, 86],
-        [1400425953000, 27],
-        [1400425954000, 72]
-    ]
+    points: [[1400425951000, 65], [1400425952000, 86], [1400425953000, 27], [1400425954000, 72]]
 };
 
 const OUTAGE_EVENT_LIST = [
@@ -474,22 +454,30 @@ it("can create a series with a nested object", () => {
 
 it("can create a series with nested events", () => {
     const events = [];
-    events.push(new TimeEvent(new Date(2015, 6, 1), {
-        NASA_north: { in: 100, out: 200 },
-        NASA_south: { in: 145, out: 135 }
-    }));
-    events.push(new TimeEvent(new Date(2015, 7, 1), {
-        NASA_north: { in: 200, out: 400 },
-        NASA_south: { in: 146, out: 142 }
-    }));
-    events.push(new TimeEvent(new Date(2015, 8, 1), {
-        NASA_north: { in: 300, out: 600 },
-        NASA_south: { in: 147, out: 158 }
-    }));
-    events.push(new TimeEvent(new Date(2015, 9, 1), {
-        NASA_north: { in: 400, out: 800 },
-        NASA_south: { in: 155, out: 175 }
-    }));
+    events.push(
+        new TimeEvent(new Date(2015, 6, 1), {
+            NASA_north: { in: 100, out: 200 },
+            NASA_south: { in: 145, out: 135 }
+        })
+    );
+    events.push(
+        new TimeEvent(new Date(2015, 7, 1), {
+            NASA_north: { in: 200, out: 400 },
+            NASA_south: { in: 146, out: 142 }
+        })
+    );
+    events.push(
+        new TimeEvent(new Date(2015, 8, 1), {
+            NASA_north: { in: 300, out: 600 },
+            NASA_south: { in: 147, out: 158 }
+        })
+    );
+    events.push(
+        new TimeEvent(new Date(2015, 9, 1), {
+            NASA_north: { in: 400, out: 800 },
+            NASA_south: { in: 155, out: 175 }
+        })
+    );
     const series = new TimeSeries({ name: "Map traffic", events });
     expect(series.at(0).get("NASA_north").in).toBe(100);
     expect(series.at(3).get("NASA_south").out).toBe(175);
@@ -505,32 +493,23 @@ it("can compare a series and a reference to a series as being equal", () => {
     expect(series).toBe(refSeries);
 });
 
-it(
-    "can use the equals() comparator to compare a series and a copy of the series as true",
-    () => {
-        const series = new TimeSeries(TIMESERIES_TEST_DATA);
-        const copyOfSeries = new TimeSeries(series);
-        expect(TimeSeries.equal(series, copyOfSeries)).toBeTruthy;
-    }
-);
+it("can use the equals() comparator to compare a series and a copy of the series as true", () => {
+    const series = new TimeSeries(TIMESERIES_TEST_DATA);
+    const copyOfSeries = new TimeSeries(series);
+    expect(TimeSeries.equal(series, copyOfSeries)).toBeTruthy;
+});
 
-it(
-    "can use the equals() comparator to compare a series and a value equivalent series as false",
-    () => {
-        const series = new TimeSeries(TIMESERIES_TEST_DATA);
-        const otherSeries = new TimeSeries(TIMESERIES_TEST_DATA);
-        expect(TimeSeries.equal(series, otherSeries)).toBeFalsy;
-    }
-);
+it("can use the equals() comparator to compare a series and a value equivalent series as false", () => {
+    const series = new TimeSeries(TIMESERIES_TEST_DATA);
+    const otherSeries = new TimeSeries(TIMESERIES_TEST_DATA);
+    expect(TimeSeries.equal(series, otherSeries)).toBeFalsy;
+});
 
-it(
-    "can use the is() comparator to compare a series and a value equivalent series as true",
-    () => {
-        const series = new TimeSeries(TIMESERIES_TEST_DATA);
-        const otherSeries = new TimeSeries(TIMESERIES_TEST_DATA);
-        expect(TimeSeries.is(series, otherSeries)).toBeTruthy;
-    }
-);
+it("can use the is() comparator to compare a series and a value equivalent series as true", () => {
+    const series = new TimeSeries(TIMESERIES_TEST_DATA);
+    const otherSeries = new TimeSeries(TIMESERIES_TEST_DATA);
+    expect(TimeSeries.is(series, otherSeries)).toBeTruthy;
+});
 
 //
 // Bisect
@@ -550,10 +529,7 @@ it("can find the bisect starting from an begin index", () => {
     expect(series.bisect(moment("2012-01-11 03:30", fmt).toDate(), 4)).toBe(3);
 
     const first = series.bisect(moment("2012-01-11 03:30", fmt).toDate());
-    const second = series.bisect(
-        moment("2012-01-11 04:30", fmt).toDate(),
-        first
-    );
+    const second = series.bisect(moment("2012-01-11 04:30", fmt).toDate(), first);
     expect(series.at(first).get()).toBe(44);
     expect(series.at(second).get()).toBe(55);
 });
@@ -578,17 +554,14 @@ it("can make a timeseries that can be serialized to a string", () => {
     expect(series.toString()).toBe(expected);
 });
 
-it(
-    "can make a timeseries that can be serialized to JSON and then used to construct a TimeSeries again",
-    () => {
-        const series = new TimeSeries({
-            name: "outages",
-            events: TIMERANGE_EVENT_LIST
-        });
-        const newSeries = new TimeSeries(series.toJSON());
-        expect(series.toString()).toBe(newSeries.toString());
-    }
-);
+it("can make a timeseries that can be serialized to JSON and then used to construct a TimeSeries again", () => {
+    const series = new TimeSeries({
+        name: "outages",
+        events: TIMERANGE_EVENT_LIST
+    });
+    const newSeries = new TimeSeries(series.toJSON());
+    expect(series.toString()).toBe(newSeries.toString());
+});
 
 //
 // IndexedEvents
@@ -674,15 +647,9 @@ it("can merge two series and preserve the correct time format", () => {
         name: "traffic",
         seriesList: [inTraffic, outTraffic]
     });
-    expect(trafficSeries.at(0).timestampAsUTCString()).toBe(
-        "Mon, 31 Aug 2015 20:12:30 GMT"
-    );
-    expect(trafficSeries.at(1).timestampAsUTCString()).toBe(
-        "Mon, 31 Aug 2015 20:13:00 GMT"
-    );
-    expect(trafficSeries.at(2).timestampAsUTCString()).toBe(
-        "Mon, 31 Aug 2015 20:13:30 GMT"
-    );
+    expect(trafficSeries.at(0).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:12:30 GMT");
+    expect(trafficSeries.at(1).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:13:00 GMT");
+    expect(trafficSeries.at(2).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:13:30 GMT");
 });
 
 //
@@ -770,56 +737,47 @@ it("can merge two timeseries into a new timeseries that is the sum", () => {
 //
 // Collapse down columns in a TimeSeries
 //
-it(
-    "can collapse a timeseries into a new timeseries that is the sum of two columns",
-    () => {
-        const ts = new TimeSeries(sumPart1);
+it("can collapse a timeseries into a new timeseries that is the sum of two columns", () => {
+    const ts = new TimeSeries(sumPart1);
 
-        const sums = ts.collapse({
-            name: "sum",
-            fieldSpecList: ["in", "out"],
-            reducer: sum(),
-            append: false
-        });
+    const sums = ts.collapse({
+        name: "sum",
+        fieldSpecList: ["in", "out"],
+        reducer: sum(),
+        append: false
+    });
 
-        expect(sums.at(0).get("sum")).toBe(7);
-        expect(sums.at(1).get("sum")).toBe(9);
-        expect(sums.at(2).get("sum")).toBe(11);
-        expect(sums.at(3).get("sum")).toBe(13);
-    }
-);
+    expect(sums.at(0).get("sum")).toBe(7);
+    expect(sums.at(1).get("sum")).toBe(9);
+    expect(sums.at(2).get("sum")).toBe(11);
+    expect(sums.at(3).get("sum")).toBe(13);
+});
 
-it(
-    "can collapse a timeseries into a new timeseries that is the max of two columns",
-    () => {
-        const timeseries = new TimeSeries(sumPart2);
-        const c = timeseries.collapse({
-            name: "max_in_out",
-            fieldSpecList: ["in", "out"],
-            reducer: max(),
-            append: true
-        });
+it("can collapse a timeseries into a new timeseries that is the max of two columns", () => {
+    const timeseries = new TimeSeries(sumPart2);
+    const c = timeseries.collapse({
+        name: "max_in_out",
+        fieldSpecList: ["in", "out"],
+        reducer: max(),
+        append: true
+    });
 
-        expect(c.at(0).get("max_in_out")).toBe(9);
-        expect(c.at(1).get("max_in_out")).toBe(7);
-        expect(c.at(2).get("max_in_out")).toBe(5);
-        expect(c.at(3).get("max_in_out")).toBe(4);
-    }
-);
+    expect(c.at(0).get("max_in_out")).toBe(9);
+    expect(c.at(1).get("max_in_out")).toBe(7);
+    expect(c.at(2).get("max_in_out")).toBe(5);
+    expect(c.at(3).get("max_in_out")).toBe(4);
+});
 
-it(
-    "can collapse a timeseries into a new timeseries that is the sum of two columns, then find the max",
-    () => {
-        const ts = new TimeSeries(sumPart1);
-        const sums = ts.collapse({
-            name: "value",
-            fieldSpecList: ["in", "out"],
-            reducer: sum(),
-            append: false
-        });
-        expect(sums.max()).toBe(13);
-    }
-);
+it("can collapse a timeseries into a new timeseries that is the sum of two columns, then find the max", () => {
+    const ts = new TimeSeries(sumPart1);
+    const sums = ts.collapse({
+        name: "value",
+        fieldSpecList: ["in", "out"],
+        reducer: sum(),
+        append: false
+    });
+    expect(sums.max()).toBe(13);
+});
 
 //
 // Select specific columns in a TimeSeries
@@ -850,8 +808,7 @@ it("can use re-mapping to reverse the values in a TimeSeries", () => {
 
     expect(timeseries.columns()).toEqual(["in", "out"]);
 
-    const ts = timeseries.map(e =>
-        e.setData({ in: e.get("out"), out: e.get("in") }));
+    const ts = timeseries.map(e => e.setData({ in: e.get("out"), out: e.get("in") }));
 
     expect(ts.at(0).get("in")).toBe(34);
     expect(ts.at(0).get("out")).toBe(52);
@@ -906,10 +863,7 @@ class StatusEvent extends TimeEvent {
     static dataSchema() {
         return {
             type: "record",
-            fields: [
-                { name: "value", type: "long" },
-                { name: "status", type: "string" }
-            ]
+            fields: [{ name: "value", type: "long" }, { name: "status", type: "string" }]
         };
     }
 }
