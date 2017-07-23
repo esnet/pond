@@ -23,7 +23,7 @@
         "build": "tsc",
         "watch": "tsc --watch",
         "docs": "typedoc --json ../website/src/doc.json --mode modules ./src/*.ts --ignoreCompilerErrors",
-        "test": "jest --config jestconfig.json --watch",
+        "test": "jest --watch",
         "lint": "tslint ./src/*.ts"
     },
     "jest": {
