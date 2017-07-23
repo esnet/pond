@@ -1,0 +1,40 @@
+{
+  "name": "pond-typescript",
+  "version": "1.0.0",
+  "description": "A TimeSeries library built on Immutable.js with Typescript",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "immutable": "4.0.0-rc.2",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.71",
+    "jest": "^20.0.4",
+    "prettier": "^1.5.3",
+    "ts-jest": "^20.0.7",
+    "tslint": "^5.5.0",
+    "typedoc": "^0.7.1",
+    "typescript": "^2.4.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "docs": "typedoc --json ../website/src/doc.json --mode modules ./src/*.ts --ignoreCompilerErrors",
+    "test": "jest --config jestconfig.json --watch",
+    "lint": "tslint ./src/*.ts"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/tests/.*)\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  }
+}
