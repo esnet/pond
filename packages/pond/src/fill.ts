@@ -146,9 +146,9 @@ export class Fill<T extends Key> extends Processor<T, T> {
      * This handles the linear filling. It returns a list of
      * zero or more `Event`'s to be emitted.
      *
-     * If an `Event` is valid 
-     * * it has valid values for all of the field paths 
-     * * it is cached as "last good" and returned to be emitted. 
+     * If an `Event` is valid:
+     *  * it has valid values for all of the field paths
+     *  * it is cached as "last good" and returned to be emitted.
      * The return value is then a list of one `Event`.
      *
      * If an `Event` has invalid values, it is cached to be

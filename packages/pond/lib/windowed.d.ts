@@ -1,16 +1,17 @@
 import * as Immutable from "immutable";
 import { Base } from "./base";
 import { Collection } from "./collection";
+import { Event } from "./event";
 import { GroupedCollection, GroupingFunction } from "./grouped";
 import { Index } from "./index";
 import { Key } from "./key";
-import { Period } from "./period";
-import { AggregationSpec, AlignmentOptions, Trigger } from "./types";
-export declare class WindowedCollection<T extends Key> extends Base<T> {
+import { KeyedCollection } from "./stream";
+import { AggregationSpec, WindowingOptions } from "./types";
+export declare class WindowedCollection<T extends Key> extends Base {
     protected collections: Immutable.Map<string, Collection<T>>;
-    protected windowPeriod: Period;
+    protected options: WindowingOptions;
     protected group: string | string[] | GroupingFunction<T>;
-    protected latest: number;
+    private triggerThreshold;
     /**
      * Builds a new grouping that is based on a window period. This is combined
      * with any groupBy to divide the events among multiple `Collection`s, one
@@ -35,14 +36,13 @@ export declare class WindowedCollection<T extends Key> extends Base<T> {
      * This is the case when calling `window()` on a `GroupedCollection`.
      */
     constructor(collectionMap: Immutable.Map<string, Collection<T>>);
-    constructor(window: Period, collectionMap: Immutable.Map<string, Collection<T>>);
-    constructor(window: Period, collection?: Collection<T>);
-    constructor(window: Period, group: string | string[], collection?: Collection<T>);
+    constructor(windowing: WindowingOptions, collectionMap: Immutable.Map<string, Collection<T>>);
+    constructor(windowing: WindowingOptions, collection?: Collection<T>);
+    constructor(windowing: WindowingOptions, group: string | string[], collection?: Collection<T>);
     /**
      * Fetch the Collection of events contained in the windowed grouping
      */
     get(key: string): Collection<T>;
-    triggeredCollection(trigger: Trigger): (string | Collection<T>)[];
     /**
      * @example
      * ```
@@ -56,11 +56,13 @@ export declare class WindowedCollection<T extends Key> extends Base<T> {
      * ```
      */
     aggregate(aggregationSpec: AggregationSpec<T>): GroupedCollection<Index>;
-    flatten(options: AlignmentOptions): Collection<T>;
-    align(options: AlignmentOptions): WindowedCollection<T>;
+    flatten(): Collection<T>;
+    ungroup(): Immutable.Map<string, Collection<T>>;
+    addEvent(event: Event<T>): Immutable.List<KeyedCollection<T>>;
+    private groupEvent(event);
 }
-declare function windowFactory<T extends Key>(collectionMap?: Immutable.Map<string, Collection<T>>): any;
-declare function windowFactory<T extends Key>(window: Period, collectionMap?: Immutable.Map<string, Collection<T>>): any;
-declare function windowFactory<T extends Key>(window: Period, initialCollection?: Collection<T>): any;
-declare function windowFactory<T extends Key>(window: Period, group?: string | string[], initialCollection?: Collection<T>): any;
+declare function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, Collection<T>>): any;
+declare function windowFactory<T extends Key>(windowOptions: WindowingOptions, collectionMap?: Immutable.Map<string, Collection<T>>): any;
+declare function windowFactory<T extends Key>(windowOptions: WindowingOptions, initialCollection?: Collection<T>): any;
+declare function windowFactory<T extends Key>(windowOptions: WindowingOptions, group: string | string[], initialCollection?: Collection<T>): any;
 export { windowFactory as windowed };

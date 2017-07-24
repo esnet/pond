@@ -8,11 +8,6 @@
         "inlineSourceMap": true,
         "listFiles": false
     },
-    "include": [
-        "src/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "lib"
-    ]
+    "include": ["src/*.ts"],
+    "exclude": ["node_modules", "lib"]
 }

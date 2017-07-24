@@ -54,7 +54,7 @@ export declare class Align<T extends Key> extends Processor<T, T> {
      */
     interpolateLinear(boundary: any, event: any): Event<Time>;
     /**
-     * Perform the fill operation on the event and emit.
+     * Perform the align operation on the event and emit.
      */
     addEvent(event: Event<T>): Immutable.List<Event<T>>;
 }

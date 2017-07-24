@@ -16,7 +16,7 @@ const processor_1 = require("./processor");
 const timerange_1 = require("./timerange");
 const util_1 = require("./util");
 /**
- * A processor to align the data into bins of regular time period.
+ * A `Processor` to align the data into bins of regular time period.
  */
 class Rate extends processor_1.Processor {
     constructor(options) {
@@ -29,7 +29,7 @@ class Rate extends processor_1.Processor {
         this._previous = null;
     }
     /**
-     * Generate a new TimeRangeEvent containing the rate per second
+     * Generate a new `TimeRangeEvent` containing the rate per second
      * between two events.
      */
     getRate(event) {
@@ -61,7 +61,7 @@ class Rate extends processor_1.Processor {
         return new event_1.Event(timerange_1.timerange(previousTime, currentTime), d);
     }
     /**
-     * Perform the fill operation on the event and emit.
+     * Perform the `fill` operation on the `Event` and emit.
      */
     addEvent(event) {
         const eventList = new Array();

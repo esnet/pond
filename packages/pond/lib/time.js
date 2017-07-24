@@ -14,12 +14,12 @@ const key_1 = require("./key");
 const timerange_1 = require("./timerange");
 const types_1 = require("./types");
 /**
- * Constructs a new Time object that can be used as
- * a key for Events. A Time object represents a
- * timestamp, and is stored as a Javascript Date
+ * Constructs a new `Time` object that can be used as
+ * a key for `Event`'s. A `Time` object represents a
+ * timestamp, and is stored as a Javascript `Date`
  * object. The difference with just a Date is that
  * is conforms to the interface required to be an
- * Event key.
+ * `Event` key.
  */
 class Time extends key_1.Key {
     static isTime(t) {
@@ -68,13 +68,13 @@ class Time extends key_1.Key {
         return +this._d;
     }
     /**
-     * The begin time of this Event, which will be just the timestamp
+     * The begin time of this `Event`, which will be just the timestamp
      */
     begin() {
         return this.timestamp();
     }
     /**
-     * The end time of this Event, which will be just the timestamp
+     * The end time of this `Event`, which will be just the timestamp
      */
     end() {
         return this.timestamp();

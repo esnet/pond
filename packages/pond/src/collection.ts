@@ -76,8 +76,8 @@ export class Collection<T extends Key> extends Base {
     /**
      * Rebuild the keyMap from scratch
      */
-    protected static buildKeyMap<T extends Key>(
-        events: Immutable.List<Event<T>>
+    protected static buildKeyMap<S extends Key>(
+        events: Immutable.List<Event<S>>
     ): Immutable.Map<string, Immutable.Set<number>> {
         let keyMap = Immutable.Map<string, Immutable.Set<number>>();
 
@@ -561,18 +561,18 @@ export class Collection<T extends Key> extends Base {
      * ealiest and latest time represented within it.
      */
     public timerange(): TimeRange {
-        let min;
-        let max;
+        let minimum;
+        let maximum;
         this.forEach(e => {
-            if (!min || e.begin() < min) {
-                min = e.begin();
+            if (!minimum || e.begin() < minimum) {
+                minimum = e.begin();
             }
-            if (!max || e.end() > max) {
-                max = e.end();
+            if (!maximum || e.end() > maximum) {
+                maximum = e.end();
             }
         });
-        if (min && max) {
-            return timerange(min, max);
+        if (minimum && maximum) {
+            return timerange(minimum, maximum);
         }
     }
 
@@ -654,15 +654,6 @@ export class Collection<T extends Key> extends Base {
     public min(fieldSpec: string[], filter?): { [s: string]: number[] };
     public min(fieldSpec: any, filter?) {
         return this.aggregate(min(filter), fieldSpec);
-    }
-
-    /**
-     * Returns the mean value of the `Event`'s in this `Collection`
-     */
-    public mean(fieldSpec: string, filter?): number;
-    public mean(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public mean(fieldSpec: any, filter?) {
-        return this.avg(filter, fieldSpec);
     }
 
     /**

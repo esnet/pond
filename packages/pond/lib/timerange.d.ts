@@ -4,11 +4,11 @@ import Moment = moment.Moment;
 import { Key } from "./key";
 import { Time } from "./time";
 /**
- * A TimeRange is a simple representation of a begin and end time, used
+ * A `TimeRange` is a simple representation of a begin and end time, used
  * to maintain consistency across an application.
  *
- * You can define a TimeRange with moments, Javascript Date objects
- * or ms since UNIX epoch. Here we construct one with two moments:
+ * You can define a `TimeRange` with `moments`, Javascript `Date objects
+ * or `ms` since UNIX epoch. Here we construct one with two moments:
  *
  * ```js
  * var fmt = "YYYY-MM-DD HH:mm";
@@ -29,12 +29,12 @@ export declare class TimeRange extends Key {
      */
     private _range;
     /**
-     * Builds a new TimeRange which may be of several different formats:
-     *   - Another TimeRange (copy constructor)
-     *   - An Immutable.List containing two Dates.
-     *   - A Javascript array containing two Date or ms timestamps
-     *   - Two arguments, begin and end, each of which may be a Data,
-     *     a Moment, or a ms timestamp.
+     * Builds a new `TimeRange` which may be of several different formats:
+     *   - Another `TimeRange` (copy constructor)
+     *   - An `Immutable.List` containing two Dates.
+     *   - A Javascript array containing two `Date` or `ms` timestamps
+     *   - Two arguments, begin and end, each of which may be a `Date`,
+     *     a `Moment`, or a `ms` timestamp.
      */
     constructor(arg: TimeRange | Immutable.List<Date>);
     constructor(begin: Date, end: Date);
@@ -43,104 +43,104 @@ export declare class TimeRange extends Key {
     constructor(begin: number, end: number);
     type(): string;
     /**
-     * Returns the internal range, which is an Immutable.List of two elements
-     * containing begin and end times as Dates.
+     * Returns the internal range, which is an `Immutable.List` of two elements
+     * containing begin and end times as `Date`'s.
      */
     internal(): Immutable.List<Date>;
     /**
-     * Returns the TimeRange as JSON, which will be a Javascript array
-     * of two ms timestamps.
+     * Returns the `TimeRange` as JSON, which will be a Javascript array
+     * of two `ms` timestamps.
      */
     toJSON(): {};
     /**
-     * Returns the TimeRange as a string, useful for serialization.
+     * Returns the `TimeRange` as a string, useful for serialization.
      *
      * @return {string} String representation of the TimeRange
      */
     toString(): string;
     /**
-     * Returns the TimeRange as a string expressed in local time
+     * Returns the `TimeRange` as a string expressed in local time
      */
     toLocalString(): string;
     /**
-     * Returns the TimeRange as a string expressed in UTC time
+     * Returns the `TimeRange` as a string expressed in UTC time
      */
     toUTCString(): string;
     /**
-     * Returns a human friendly version of the TimeRange, e.g.
+     * Returns a human friendly version of the `TimeRange`, e.g.
      * "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am"
      */
     humanize(): string;
     /**
-     * Returns a human friendly version of the TimeRange
+     * Returns a human friendly version of the `TimeRange`
      * @example
-     * "a few seconds ago to a month ago"
+     * Example: "a few seconds ago to a month ago"
      */
     relativeString(): string;
     /**
-     * Returns the begin time of the TimeRange.
+     * Returns the begin time of the `TimeRange`.
      */
     begin(): Date;
     /**
-     * Returns the end time of the TimeRange.
+     * Returns the end time of the `TimeRange`.
      */
     end(): Date;
     /**
-     * Returns the midpoint of the TimeRange
+     * Returns the midpoint of the `TimeRange`.
      */
     mid(): Date;
     /**
-     * Returns the midpoint of the TimeRange as the representitive
+     * Returns the midpoint of the `TimeRange` as the representitive
      * timestamp for the timerange.
      */
     timestamp(): Date;
     /**
-     * Sets a new begin time on the TimeRange. The result will be
-     * a new TimeRange.
+     * Sets a new begin time on the `TimeRange`. The result will be
+     * a new `TimeRange`.
      */
     setBegin(t: Date): TimeRange;
     /**
-     * Sets a new end time on the TimeRange. The result will be
-     * a new TimeRange.
+     * Sets a new end time on the `TimeRange`. The result will be
+     * a new `TimeRange`.
      */
     setEnd(t: Date): TimeRange;
     /**
-     * Returns if the two TimeRanges can be considered equal,
+     * Returns if the two `TimeRange`'s can be considered equal,
      * in that they have the same times.
      */
     equals(other: TimeRange): boolean;
     /**
-     * Determine if a Date or a TimeRange is contained entirely
-     * within this TimeRange
+     * Determine if a `Date` or a `TimeRange` is contained entirely
+     * within this `TimeRange`
      */
     contains(other: Date | TimeRange): boolean;
     /**
-     * Returns true if this TimeRange is completely within the supplied
-     * other TimeRange.
+     * Returns true if this `TimeRange` is completely within the supplied
+     * other `TimeRange`.
      */
     within(other: TimeRange): boolean;
     /**
-     * Returns true if the passed in other TimeRange overlaps
-     * this time Range.
+     * Returns true if the passed in other `TimeRange` overlaps
+     * this `TimeRange`.
      */
     overlaps(other: TimeRange): boolean;
     /**
-     * Returns true if the passed in other TimeRange in no way
-     * overlaps this TimeRange.
+     * Returns true if the passed in other `TimeRange` in no way
+     * overlaps this `TimeRange`.
      */
     disjoint(other: TimeRange): boolean;
     /**
-     * Returns a new Timerange which covers the extents of this and
+     * Returns a new `Timerange` which covers the extents of this and
      * other combined.
      */
     extents(other: TimeRange): TimeRange;
     /**
-     * Returns a new TimeRange which represents the intersection
+     * Returns a new `TimeRange` which represents the intersection
      * (overlapping) part of this and other.
      */
     intersection(other: TimeRange): TimeRange | void;
     /**
-     * Returns the duration of the TimeRange in milliseconds
+     * Returns the duration of the `TimeRange` in milliseconds
      */
     duration(): number;
     /**
@@ -149,7 +149,7 @@ export declare class TimeRange extends Key {
     humanizeDuration(): string;
 }
 /**
- * A timerange is a simple representation of a begin and end time, used
+ * A `Timerange` is a simple representation of a begin and end time, used
  * to maintain consistency across an application.
  */
 declare function timerange(arg: TimeRange | Immutable.List<Date>): any;

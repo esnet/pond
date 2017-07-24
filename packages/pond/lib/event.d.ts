@@ -22,7 +22,7 @@ import { ReducerFunction, ValueListMap, ValueMap } from "./types";
  *  - An Immutable.Map<string, any>
  *
  * Internally the Data object is, by default (since subclasses my
- * implement differently) a Immutable.Map.
+ * implement differently) a `Immutable.Map`.
  *
  * To get values out of the data, use `get()`. This method takes
  * what is called a field, which is a top level key of the Data
@@ -30,7 +30,7 @@ import { ReducerFunction, ValueListMap, ValueMap } from "./types";
  *
  * Fields can refer to deep data with either a path (as an array)
  * or dot notation. Not specifying  a field implies a field of
- * name "value".
+ * name `"value""`.
  *
  * @example
  *
@@ -38,13 +38,14 @@ import { ReducerFunction, ValueListMap, ValueMap } from "./types";
  * const timestamp = time(new Date("2015-04-22T03:30:00Z");
  * const e = new Event(timestamp, data({ temperature: 42 }));
  * ```
+ *
  */
-export declare class Event<T extends Key> extends Base<T> {
+export declare class Event<T extends Key = Time> extends Base {
     protected key: T;
     protected data: Immutable.Map<string, any>;
     /**
      * Do the two supplied events contain the same data, even if they are not
-     * the same instance? Uses Immutable.is() to compare the event data and
+     * the same instance? Uses `Immutable.is()` to compare the event data and
      * the key.
      */
     static is(event1: Event<Key>, event2: Event<Key>): boolean;
@@ -60,7 +61,7 @@ export declare class Event<T extends Key> extends Base<T> {
      */
     static isDuplicate(event1: Event<Key>, event2: Event<Key>, ignoreValues?: boolean): boolean;
     /**
-     * Merges multiple `events` together into a new array of events, one
+     * Merges multiple `Event`'s together into a new array of events, one
      * for each key of the source events. Merging is done on the data of
      * each event. Values from later events in the list overwrite
      * early values if fields conflict.
@@ -72,10 +73,15 @@ export declare class Event<T extends Key> extends Base<T> {
      *
      * Events in the supplied list need to be of homogeneous types
      *
-     * See also: TimeSeries.timeSeriesListMerge().
+     * See also: `TimeSeries.timeSeriesListMerge()`.
      */
-    static merge<T extends Key>(eventList: Array<Event<T>>, deep?: boolean): Array<Event<T>>;
-    static merge<T extends Key>(eventList: Immutable.List<Event<T>>, deep?: boolean): Immutable.List<Event<T>>;
+    static merge<K extends Key>(events: Immutable.List<Event<K>>, deep?: boolean): Immutable.List<Event<K>>;
+    /**
+     * Returns a function that will take a list of `event`'s and merge them
+     * together using the `fieldSpec` provided. This is used as a reducer for
+     * merging multiple `TimeSeries` together with `timeSeriesListMerge()`.
+     */
+    static merger<K extends Key>(deep: any): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>>;
     /**
      * Combines multiple `Event`s together into a new array of events, one
      * for each key of the source events. The list of Events may be specified
@@ -85,7 +91,7 @@ export declare class Event<T extends Key> extends Base<T> {
      * fields) and uses the reducer function supplied to take the multiple
      * values associated with the key and reduce them down to a single value.
      *
-     * The return result will be an Event of the same type as the input.
+     * The return result will be an `Event` of the same type as the input.
      *
      * This is the general version of `Event.sum()` and `Event.avg()`. If those
      * common use cases are what you want, just use those functions. If you
@@ -93,9 +99,16 @@ export declare class Event<T extends Key> extends Base<T> {
      *
      * See also: `TimeSeries.timeSeriesListSum()`
      */
-    static combine<T extends Key>(events: Immutable.List<Event<T>>, reducer: ReducerFunction, fieldSpec?: string | string[]): Immutable.List<Event<T>>;
+    static combine<K extends Key>(events: Immutable.List<Event<K>>, reducer: ReducerFunction, fieldSpec?: string | string[]): Immutable.List<Event<K>>;
     /**
-     * Takes a list of Events<T> and makes a map from the Event field names
+     * Returns a function that will take a list of `Event`'s and combine them
+     * together using the `fieldSpec` and reducer function provided. This is
+     * used as an event reducer for merging multiple `TimeSeries` together
+     * with `timeSeriesListReduce()`.
+     */
+    static combiner<K extends Key>(fieldSpec: any, reducer: any): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>>;
+    /**
+     * Takes a list of `Events<T>` and makes a map from the `Event` field names
      * to an array of values, one value for each Event.
      *
      * @example
@@ -104,12 +117,11 @@ export declare class Event<T extends Key> extends Base<T> {
      * // { in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] }
      * ```
      */
-    static map<T extends Key>(events: Immutable.List<Event<T>>, multiFieldSpec: string | string[]): ValueListMap;
+    static map<K extends Key>(events: Immutable.List<Event<K>>, multiFieldSpec: string | string[]): ValueListMap;
     /**
-     * Takes a Immutable.List of events and a reducer function and a
-     * fieldSpec (or list of fieldSpecs) and returns an aggregated
+     * Takes a `Immutable.List` of events and a reducer function and a
+     * `fieldSpec` (or list of fieldSpecs) and returns an aggregated
      * result in the form of a new Event, for each column.
-     *
      * The reducer is of the form:
      * ```
      * function sum(valueList) {
@@ -123,10 +135,13 @@ export declare class Event<T extends Key> extends Base<T> {
      * // result = { in: 5, out: 14.25 }
      * ```
      */
-    static aggregate<T extends Key>(events: Immutable.List<Event<T>>, reducer: ReducerFunction, multiFieldSpec: string | string[]): ValueMap;
+    static aggregate<K extends Key>(events: Immutable.List<Event<K>>, reducer: ReducerFunction, multiFieldSpec: string | string[]): ValueMap;
+    /**
+     * Constructor
+     */
     constructor(key: T, data: Immutable.Map<string, any>);
     /**
-     * Returns the key this Event was constructed with
+     * Returns the key this `Event` was constructed with
      */
     getKey(): T;
     /**
@@ -135,16 +150,16 @@ export declare class Event<T extends Key> extends Base<T> {
     keyType(): string;
     /**
      * Returns the data associated with this event, which be
-     * of type T.
+     * of type `T`.
      */
     getData(): Immutable.Map<string, any>;
     /**
      * Returns the data associated with this event, which be
-     * of type T.
+     * of type `T`.
      */
     setData(data: Immutable.Map<string, any>): Event<T>;
     /**
-     * Gets the value of a specific field within the Event.
+     * Gets the `value` of a specific field within the `Event`.
      *
      * You can refer to a fields with one of the following notations:
      *  * (undefined) -> "value"
@@ -152,9 +167,8 @@ export declare class Event<T extends Key> extends Base<T> {
      *  * "path.to.deep.data"
      *  * ["path", "to", "deep", "data"].
      *
-     * @return Object
      */
-    get(field: string | string[]): any;
+    get(field?: string | string[]): any;
     /**
      * Set a new `value` on the `Event` for the given `field`, and return a new `Event`.
      *
@@ -178,6 +192,11 @@ export declare class Event<T extends Key> extends Base<T> {
     timestamp(): Date;
     begin(): Date;
     end(): Date;
+    indexAsString(): string;
+    timerange(): TimeRange;
+    timerangeAsUTCString(): string;
+    timestampAsUTCString(): string;
+    toPoint(): any[];
     /**
      * Collapses multiple fields (specified in the `fieldSpecList`) into a single
      * field named `fieldName` using the supplied reducer. Optionally you can keep
@@ -192,6 +211,11 @@ export declare class Event<T extends Key> extends Base<T> {
      * ```
      */
     collapse(fieldSpecList: string[], fieldName: string, reducer: ReducerFunction, append?: boolean): Event<T>;
+    /**
+     * Selects specific fields of an `Event` using a `fields` and returns
+     * a new event with just those fields.
+     */
+    select(fields: string[]): Event<T>;
 }
 export interface TimeEventObject {
     time: number;

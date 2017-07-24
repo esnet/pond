@@ -1,12 +1,10 @@
 import * as Immutable from "immutable";
-import { Base } from "./base";
 import { Collection } from "./collection";
 import { Event } from "./event";
 import { Key } from "./key";
-import { Period } from "./period";
 import { TimeRange } from "./timerange";
 import { WindowedCollection } from "./windowed";
-import { Aggregation, AlignmentOptions, RateOptions } from "./types";
+import { Aggregation, AlignmentOptions, RateOptions, WindowingOptions } from "./types";
 /**
  * @example
  * ```
@@ -20,15 +18,15 @@ export interface AggregationSpec<T extends Key> {
     [dest: string]: Aggregation<T>;
 }
 export declare type GroupingFunction<T extends Key> = (e: Event<T>) => string;
-export declare class GroupedCollection<T extends Key> extends Base<T> {
+export declare class GroupedCollection<T extends Key> {
     protected collections: Immutable.Map<string, Collection<T>>;
     /**
-     * Builds a new Grouping from a fieldSpec and a Collection
+     * Builds a new Grouping from a `fieldSpec` and a `Collection`
      */
     constructor(collectionMap: Immutable.Map<string, Collection<T>>);
     constructor(fieldSpec: string | string[] | GroupingFunction<T>, collection: Collection<T>);
     /**
-     * Fetch the Collection of events contained in the grouping
+     * Fetch the `Collection` of `Event`'s contained in the grouping
      */
     get(grouping: string): Collection<T>;
     /**
@@ -45,7 +43,7 @@ export declare class GroupedCollection<T extends Key> extends Base<T> {
     aggregate(aggregationSpec: AggregationSpec<T>): Immutable.Map<string, Immutable.Map<string, any>>;
     ungroup(): GroupedCollection<T>;
     flatten(): Collection<T>;
-    window(period: Period): WindowedCollection<T>;
+    window(windowOptions: WindowingOptions): WindowedCollection<T>;
     align(options: AlignmentOptions): GroupedCollection<T>;
     rate(options: RateOptions): GroupedCollection<TimeRange>;
 }

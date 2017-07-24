@@ -11,16 +11,13 @@ import * as Immutable from "immutable";
 import { Event } from "./event";
 import { Key } from "./key";
 import { Processor } from "./processor";
-import { CollapseOptions } from "./types";
+import { SelectOptions } from "./types";
 /**
- * A processor which takes a fieldSpec and returns a new event
- * with a new column that is a collapsed result of the selected
- * columns. To collapse the columns it uses the supplied reducer
- * function. Optionally the new column can completely replace
- * the existing columns in the event.
+ * A `Processor` which takes a `fieldSpec` and returns a new `Event`
+ * with only those selected columns.
  */
-export declare class Collapse<T extends Key> extends Processor<T, T> {
+export declare class Select<T extends Key> extends Processor<T, T> {
     private options;
-    constructor(options: CollapseOptions);
+    constructor(options: SelectOptions);
     addEvent(event: Event<T>): Immutable.List<Event<T>>;
 }

@@ -15,11 +15,11 @@ const moment = require("moment");
 const key_1 = require("./key");
 const time_1 = require("./time");
 /**
- * A TimeRange is a simple representation of a begin and end time, used
+ * A `TimeRange` is a simple representation of a begin and end time, used
  * to maintain consistency across an application.
  *
- * You can define a TimeRange with moments, Javascript Date objects
- * or ms since UNIX epoch. Here we construct one with two moments:
+ * You can define a `TimeRange` with `moments`, Javascript `Date objects
+ * or `ms` since UNIX epoch. Here we construct one with two moments:
  *
  * ```js
  * var fmt = "YYYY-MM-DD HH:mm";
@@ -66,21 +66,21 @@ class TimeRange extends key_1.Key {
         return "timerange";
     }
     /**
-     * Returns the internal range, which is an Immutable.List of two elements
-     * containing begin and end times as Dates.
+     * Returns the internal range, which is an `Immutable.List` of two elements
+     * containing begin and end times as `Date`'s.
      */
     internal() {
         return this._range;
     }
     /**
-     * Returns the TimeRange as JSON, which will be a Javascript array
-     * of two ms timestamps.
+     * Returns the `TimeRange` as JSON, which will be a Javascript array
+     * of two `ms` timestamps.
      */
     toJSON() {
         return { timerange: [this.begin().getTime(), this.end().getTime()] };
     }
     /**
-     * Returns the TimeRange as a string, useful for serialization.
+     * Returns the `TimeRange` as a string, useful for serialization.
      *
      * @return {string} String representation of the TimeRange
      */
@@ -88,19 +88,19 @@ class TimeRange extends key_1.Key {
         return JSON.stringify(this.toJSON());
     }
     /**
-     * Returns the TimeRange as a string expressed in local time
+     * Returns the `TimeRange` as a string expressed in local time
      */
     toLocalString() {
         return `[${this.begin()}, ${this.end()}]`;
     }
     /**
-     * Returns the TimeRange as a string expressed in UTC time
+     * Returns the `TimeRange` as a string expressed in UTC time
      */
     toUTCString() {
         return `[${this.begin().toUTCString()}, ${this.end().toUTCString()}]`;
     }
     /**
-     * Returns a human friendly version of the TimeRange, e.g.
+     * Returns a human friendly version of the `TimeRange`, e.g.
      * "Aug 1, 2014 05:19:59 am to Aug 1, 2014 07:41:06 am"
      */
     humanize() {
@@ -111,9 +111,9 @@ class TimeRange extends key_1.Key {
         return `${beginStr} to ${endStr}`;
     }
     /**
-     * Returns a human friendly version of the TimeRange
+     * Returns a human friendly version of the `TimeRange`
      * @example
-     * "a few seconds ago to a month ago"
+     * Example: "a few seconds ago to a month ago"
      */
     relativeString() {
         const begin = moment(this.begin());
@@ -121,46 +121,46 @@ class TimeRange extends key_1.Key {
         return `${begin.fromNow()} to ${end.fromNow()}`;
     }
     /**
-     * Returns the begin time of the TimeRange.
+     * Returns the begin time of the `TimeRange`.
      */
     begin() {
         return this._range.get(0);
     }
     /**
-     * Returns the end time of the TimeRange.
+     * Returns the end time of the `TimeRange`.
      */
     end() {
         return this._range.get(1);
     }
     /**
-     * Returns the midpoint of the TimeRange
+     * Returns the midpoint of the `TimeRange`.
      */
     mid() {
         return new Date((+this.begin() + +this.end()) / 2);
     }
     /**
-     * Returns the midpoint of the TimeRange as the representitive
+     * Returns the midpoint of the `TimeRange` as the representitive
      * timestamp for the timerange.
      */
     timestamp() {
         return this.mid();
     }
     /**
-     * Sets a new begin time on the TimeRange. The result will be
-     * a new TimeRange.
+     * Sets a new begin time on the `TimeRange`. The result will be
+     * a new `TimeRange`.
      */
     setBegin(t) {
         return new TimeRange(this._range.set(0, t));
     }
     /**
-     * Sets a new end time on the TimeRange. The result will be
-     * a new TimeRange.
+     * Sets a new end time on the `TimeRange`. The result will be
+     * a new `TimeRange`.
      */
     setEnd(t) {
         return new TimeRange(this._range.set(1, t));
     }
     /**
-     * Returns if the two TimeRanges can be considered equal,
+     * Returns if the two `TimeRange`'s can be considered equal,
      * in that they have the same times.
      */
     equals(other) {
@@ -168,8 +168,8 @@ class TimeRange extends key_1.Key {
             this.end().getTime() === other.end().getTime());
     }
     /**
-     * Determine if a Date or a TimeRange is contained entirely
-     * within this TimeRange
+     * Determine if a `Date` or a `TimeRange` is contained entirely
+     * within this `TimeRange`
      */
     contains(other) {
         if (_.isDate(other)) {
@@ -180,15 +180,15 @@ class TimeRange extends key_1.Key {
         }
     }
     /**
-     * Returns true if this TimeRange is completely within the supplied
-     * other TimeRange.
+     * Returns true if this `TimeRange` is completely within the supplied
+     * other `TimeRange`.
      */
     within(other) {
         return this.begin() >= other.begin() && this.end() <= other.end();
     }
     /**
-     * Returns true if the passed in other TimeRange overlaps
-     * this time Range.
+     * Returns true if the passed in other `TimeRange` overlaps
+     * this `TimeRange`.
      */
     overlaps(other) {
         if ((this.contains(other.begin()) && !this.contains(other.end())) ||
@@ -200,14 +200,14 @@ class TimeRange extends key_1.Key {
         }
     }
     /**
-     * Returns true if the passed in other TimeRange in no way
-     * overlaps this TimeRange.
+     * Returns true if the passed in other `TimeRange` in no way
+     * overlaps this `TimeRange`.
      */
     disjoint(other) {
         return this.end() < other.begin() || this.begin() > other.end();
     }
     /**
-     * Returns a new Timerange which covers the extents of this and
+     * Returns a new `Timerange` which covers the extents of this and
      * other combined.
      */
     extents(other) {
@@ -216,7 +216,7 @@ class TimeRange extends key_1.Key {
         return new TimeRange(new Date(b.getTime()), new Date(e.getTime()));
     }
     /**
-     * Returns a new TimeRange which represents the intersection
+     * Returns a new `TimeRange` which represents the intersection
      * (overlapping) part of this and other.
      */
     intersection(other) {
@@ -228,7 +228,7 @@ class TimeRange extends key_1.Key {
         return new TimeRange(new Date(b.getTime()), new Date(e.getTime()));
     }
     /**
-     * Returns the duration of the TimeRange in milliseconds
+     * Returns the duration of the `TimeRange` in milliseconds
      */
     duration() {
         return this.end().getTime() - this.begin().getTime();

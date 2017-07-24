@@ -14,7 +14,7 @@ import { Processor } from "./processor";
 import { TimeRange } from "./timerange";
 import { RateOptions } from "./types";
 /**
- * A processor to align the data into bins of regular time period.
+ * A `Processor` to align the data into bins of regular time period.
  */
 export declare class Rate<T extends Key> extends Processor<T, TimeRange> {
     private _fieldSpec;
@@ -22,12 +22,12 @@ export declare class Rate<T extends Key> extends Processor<T, TimeRange> {
     private _previous;
     constructor(options: RateOptions);
     /**
-     * Generate a new TimeRangeEvent containing the rate per second
+     * Generate a new `TimeRangeEvent` containing the rate per second
      * between two events.
      */
     getRate(event: any): Event<TimeRange>;
     /**
-     * Perform the fill operation on the event and emit.
+     * Perform the `fill` operation on the `Event` and emit.
      */
     addEvent(event: Event<T>): Immutable.List<Event<TimeRange>>;
 }

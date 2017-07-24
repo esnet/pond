@@ -3,12 +3,12 @@ import { Period } from "./period";
 import { TimeRange } from "./timerange";
 import { TimeAlignment } from "./types";
 /**
- * Constructs a new Time object that can be used as
- * a key for Events. A Time object represents a
- * timestamp, and is stored as a Javascript Date
+ * Constructs a new `Time` object that can be used as
+ * a key for `Event`'s. A `Time` object represents a
+ * timestamp, and is stored as a Javascript `Date`
  * object. The difference with just a Date is that
  * is conforms to the interface required to be an
- * Event key.
+ * `Event` key.
  */
 export declare class Time extends Key {
     static isTime(t: Time): boolean;
@@ -31,11 +31,11 @@ export declare class Time extends Key {
     timestamp(): Date;
     valueOf(): number;
     /**
-     * The begin time of this Event, which will be just the timestamp
+     * The begin time of this `Event`, which will be just the timestamp
      */
     begin(): Date;
     /**
-     * The end time of this Event, which will be just the timestamp
+     * The end time of this `Event`, which will be just the timestamp
      */
     end(): Date;
     toTimeRange(period: Period, align: TimeAlignment): TimeRange;

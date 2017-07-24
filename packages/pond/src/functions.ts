@@ -26,7 +26,7 @@ const noneIfEmpty = (values: number[]) => (values.length === 0 ? null : values);
 /**
  * Like `first()` except it will return null if not all the values are
  * the same. This can be used to transfer a value when doing aggregation.
- * 
+ *
  * For instance you might `group by` the 'type', then `avg` the 'value', but
  * you want to results to include the type. So you would `'keep'` the type
  * and `'avg'` the value.
@@ -49,11 +49,12 @@ export function keep(clean = filter.ignoreMissing): ReducerFunction {
 
 /**
  * Returns a `sum()` function.
- * 
+ *
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the sum calculation. Other possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the values contain a missing value
+ * * `propergateMissing` - which will cause the min itself to be null if the
+ *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
 export function sum(clean = filter.ignoreMissing): ReducerFunction {
@@ -72,7 +73,8 @@ export function sum(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the average calculation. Other possibilities are:
- * * `propergateMissing` - which will cause the avg itself to be null if the values contain a missing value
+ * * `propergateMissing` - which will cause the avg itself to be null if the values
+ *                         contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
 export function avg(clean = filter.ignoreMissing): ReducerFunction {
@@ -98,7 +100,8 @@ export function avg(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the maximum search. Other possibilities are:
- * *`propergateMissing` - which will cause the max itself to be null if the values contain a missing value
+ * *`propergateMissing` - which will cause the max itself to be null if the values
+ *                        contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
 export function max(clean = filter.ignoreMissing): ReducerFunction {
@@ -120,7 +123,8 @@ export function max(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the minimum search. Other possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the values contain a missing value
+ * * `propergateMissing` - which will cause the min itself to be null if the
+ *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
 export function min(clean = filter.ignoreMissing): ReducerFunction {
@@ -142,7 +146,8 @@ export function min(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the count. Other possibilities are:
- * * `propergateMissing` - which will cause the count itself to be null if the values contain a missing value
+ * * `propergateMissing` - which will cause the count itself to be null if the
+ *                         values contain a missing value
  */
 export function count(clean = filter.ignoreMissing): ReducerFunction {
     return (values: number[]) => {
@@ -202,7 +207,8 @@ export function last(clean = filter.ignoreMissing): ReducerFunction {
  * are treated. The default is to exclude missing values from
  * the list, i.e to find the last non-missing value. Other
  * possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the values contain a missing value
+ * * `propergateMissing` - which will cause the min itself to be null if the
+ *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
 export function difference(clean = filter.ignoreMissing): ReducerFunction {
@@ -264,11 +270,11 @@ export enum InterpolationType {
 
 /**
  * Returns a `percentile` function within the a values list.
- * 
+ *
  * The parameters controlling the function:
  *  * q -      The percentile (should be between 0 and 100), e.g q=75 for 75th percentile.
  *  * interp - Specifies the interpolation method to use when the desired
- *             quantile lies between two data points.              
+ *             quantile lies between two data points.
  *             Options are:
  *              * linear: i + (j - i) * fraction, where fraction is
  *                the fractional part of the index surrounded by i and j.

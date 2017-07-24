@@ -623,13 +623,6 @@ export class TimeSeries<T extends Key> {
     }
 
     /**
-     * Aggregates the events in the `TimeSeries` down to their mean (same as avg)
-     */
-    mean(fieldPath: string = "value", filter?): number {
-        return this._collection.mean(fieldPath, filter);
-    }
-
-    /**
      * Aggregates the events down to their medium value
      */
     median(fieldPath: string = "value", filter?): number {

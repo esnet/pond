@@ -27,7 +27,7 @@ function isValid(v) {
     return !(_.isUndefined(v) || _.isNaN(v) || _.isNull(v));
 }
 /**
- * The last period of time until now, represented as a TimeRange
+ * The last period of time until now, represented as a `TimeRange`
  * ```
  * const lastDay = TimeRange.last(Period(24, "hours"))
  * ```
@@ -70,7 +70,7 @@ function windowPositionFromDate(period, date) {
     return Math.floor((dd /= duration));
 }
 /**
- * Given an index string, return the TimeRange that represents.
+ * Given an index string, return the `TimeRange` that represents.
  */
 function timeRangeFromIndexString(indexString, utc) {
     const isUTC = !_.isUndefined(utc) ? utc : true;
@@ -217,7 +217,7 @@ function timestampFromArg(arg) {
     }
 }
 /**
- * Function to turn a constructor args into a TimeRange
+ * Function to turn a constructor args into a `TimeRange`
  */
 function timeRangeFromArg(arg) {
     if (arg instanceof timerange_1.TimeRange) {
@@ -236,7 +236,7 @@ function timeRangeFromArg(arg) {
     }
 }
 /**
- * Function to turn a constructor of two args into an Index.
+ * Function to turn a constructor of two args into an `Index`.
  * The second arg defines the timezone (local or UTC)
  */
 function indexFromArgs(arg1, arg2 = true) {
@@ -251,7 +251,7 @@ function indexFromArgs(arg1, arg2 = true) {
     }
 }
 /**
- * Function to turn a constructor arg into an Immutable.Map
+ * Function to turn a constructor arg into an `Immutable.Map`
  * of data.
  */
 function dataFromArg(arg) {
@@ -275,7 +275,7 @@ function dataFromArg(arg) {
     return data;
 }
 /**
- * Convert the field spec into a list if it is not already.
+ * Convert the `field spec` into a list if it is not already.
  */
 function fieldAsArray(field) {
     if (_.isArray(field)) {

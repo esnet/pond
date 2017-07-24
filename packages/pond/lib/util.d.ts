@@ -12,7 +12,7 @@ import * as moment from "moment";
 import { Index } from "./index";
 import { Period } from "./period";
 import { TimeRange } from "./timerange";
-declare const _default: {
+declare var _default: {
     dataFromArg: (arg: string | number | {} | Immutable.Map<string, any>) => Immutable.Map<string, any>;
     fieldAsArray: (field: string | string[]) => string[];
     indexFromArgs: (arg1: string | Index, arg2?: boolean) => Index;

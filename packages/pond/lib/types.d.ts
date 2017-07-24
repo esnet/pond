@@ -3,6 +3,7 @@ import { Collection } from "./collection";
 import { Event } from "./event";
 import { Key } from "./key";
 import { Period } from "./period";
+import { TimeSeries } from "./timeseries";
 /**
  * A mapping from string to list of numbers
  */
@@ -46,7 +47,18 @@ export declare enum AlignmentMethod {
     Linear = 2,
 }
 /**
- * An enum which controls the WindowType for aggregation. This can
+ * Method of filling used by the `fill()` function:
+ *  * `Hold` - Fill with the previous value
+ *  * `Linear` - Fill between the last value and the next value linearly
+ *  * `Zero` - Fill with 0
+ */
+export declare enum FillMethod {
+    Zero = 1,
+    Pad = 2,
+    Linear = 3,
+}
+/**
+ * An enum which controls the `WindowType` for aggregation. This can
  * essentially be a Fixed window, which is a window for each `Period`
  * (e.g. every hour), or calendar style periods such as Day, Month
  * and Year.
@@ -61,6 +73,19 @@ export declare enum WindowType {
     Day = 3,
     Month = 4,
     Year = 5,
+}
+/**
+ * Options object expected by the `windowBy...()` functions. At this point,
+ * this just defines the fixed window (e.g. window: period("1d")) and the
+ * trigger for downstream notification, which can currently be either
+ * on every incoming event, or whenever a window is about to be discarded.
+ *  * `window` - the size of the window, expressed as a `Period`
+ *  * `trigger` - the output rate of the window, currently either
+ *                Trigger.perEvent or Trigger.onDiscardedWindow
+ */
+export interface WindowingOptions {
+    window: Period;
+    trigger?: Trigger;
 }
 /**
  * Options object expected by the `align()` function:
@@ -97,6 +122,62 @@ export interface CollapseOptions {
 export interface RateOptions {
     fieldSpec: string | string[];
     allowNegative?: boolean;
+}
+/**
+ * Options object expected by the `align()` function:
+ *  * `fieldSpec` - the field to align
+ *  * `method` - the interpolation method, one of
+ *    `FillMethod.Hold`, `FillMethod.Pad` or `FillMethod.Linear`
+ *  * `limit` - the number of missing values to fill before giving up
+ */
+export interface FillOptions {
+    fieldSpec: string | string[];
+    method?: FillMethod;
+    limit?: number;
+}
+/**
+ * Options object expected by the `fixedWindowRollup()` function:
+ *  * `windowSize` - the size of the window. e.g. "6h" or "5m"
+ *  * `aggregation` - the aggregation specification
+ *  * `toTimeEvents` - Convert the rollup events to `TimeEvent`s, otherwise it
+ *                     will be returned as a `TimeSeries` of `IndexedEvent`s
+ */
+export interface RollupOptions<T extends Key> {
+    windowSize?: Period;
+    aggregation?: AggregationSpec<T>;
+}
+/**
+ * Options object expected by the `select()` function:
+ *  * `fields` - the fields to select out of the Event
+ */
+export interface SelectOptions {
+    fields: string[];
+}
+/**
+ * Options object expected by the `select()` function:
+ *  * `fields` - the fields to select out of the Event
+ */
+export interface RenameColumnOptions {
+    renameMap: {
+        [key: string]: string;
+    };
+}
+/**
+ * Options object expected by the `TimeSeries` merge and reduce functions:
+ *  * `seriesList` - A list of `TimeSeries` (required)
+ *  * `reducer` - The reducer function e.g. `max()`
+ *  * `fieldSpec` - Column or columns to reduce. If you
+ *                  need to retrieve multiple deep
+ *                  nested values that ['can.be', 'done.with',
+ *                  'this.notation']. A single deep value with a
+ *                  string.like.this.
+ */
+export interface TimeSeriesOptions {
+    seriesList: Array<TimeSeries<Key>>;
+    reducer?: ReducerFunction;
+    fieldSpec?: string | string[];
+    deep?: boolean;
+    [propName: string]: any;
 }
 /**
  * A function that takes a list of `Event`s and returns a new `Event`.

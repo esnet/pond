@@ -54,7 +54,7 @@ import util from "./util";
  * const timestamp = time(new Date("2015-04-22T03:30:00Z");
  * const e = new Event(timestamp, data({ temperature: 42 }));
  * ```
- * 
+ *
  */
 export class Event<T extends Key = Time> extends Base {
     /**
@@ -109,11 +109,10 @@ export class Event<T extends Key = Time> extends Base {
      *
      * See also: `TimeSeries.timeSeriesListMerge()`.
      */
-    // tslint:disable:max-line-length
-    public static merge<T extends Key>(
-        events: Immutable.List<Event<T>>,
+    public static merge<K extends Key>(
+        events: Immutable.List<Event<K>>,
         deep?: boolean
-    ): Immutable.List<Event<T>> {
+    ): Immutable.List<Event<K>> {
         // Early exit
         if (events instanceof Immutable.List && events.size === 0) {
             return Immutable.List();
@@ -124,10 +123,10 @@ export class Event<T extends Key = Time> extends Base {
         //
 
         const mergeDeep = deep || false;
-        const eventList: Array<Event<T>> = [];
+        const eventList: Array<Event<K>> = [];
 
-        const eventMap: { [key: string]: Array<Event<T>> } = {};
-        const keyMap: { [key: string]: T } = {};
+        const eventMap: { [key: string]: Array<Event<K>> } = {};
+        const keyMap: { [key: string]: K } = {};
         events.forEach(e => {
             const key = e.getKey();
             const k = key.toString();
@@ -144,16 +143,16 @@ export class Event<T extends Key = Time> extends Base {
         // we are considering, we get all the values and reduce them (sum, avg, etc)
         // to a new data object d, which we then build a new Event from.
         //
-        const outEvents: Array<Event<T>> = [];
-        _.each(eventMap, (perKeyEvents: Event<T>, key: string) => {
-            let reduced: Event<T> = null;
+        const outEvents: Array<Event<K>> = [];
+        _.each(eventMap, (perKeyEvents: Event<K>, key: string) => {
+            let reduced: Event<K> = null;
             let d = null;
-            _.each(perKeyEvents, (event: Event<T>) => {
+            _.each(perKeyEvents, (e: Event<K>) => {
                 if (!reduced) {
-                    reduced = event;
+                    reduced = e;
                     d = reduced.getData();
                 } else {
-                    d = mergeDeep ? d.mergeDeep(event.getData()) : d.merge(event.getData());
+                    d = mergeDeep ? d.mergeDeep(e.getData()) : d.merge(e.getData());
                 }
                 reduced = reduced.setData(d);
             });
@@ -168,10 +167,10 @@ export class Event<T extends Key = Time> extends Base {
      * together using the `fieldSpec` provided. This is used as a reducer for
      * merging multiple `TimeSeries` together with `timeSeriesListMerge()`.
      */
-    static merger<T extends Key>(
+    static merger<K extends Key>(
         deep
-    ): (events: Immutable.List<Event<T>>) => Immutable.List<Event<Key>> {
-        return (events: Immutable.List<Event<T>>) => Event.merge(events, deep);
+    ): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>> {
+        return (events: Immutable.List<Event<K>>) => Event.merge(events, deep);
     }
 
     /**
@@ -192,11 +191,11 @@ export class Event<T extends Key = Time> extends Base {
      * See also: `TimeSeries.timeSeriesListSum()`
      */
     // tslint:disable:max-line-length
-    public static combine<T extends Key>(
-        events: Immutable.List<Event<T>>,
+    public static combine<K extends Key>(
+        events: Immutable.List<Event<K>>,
         reducer: ReducerFunction,
         fieldSpec?: string | string[]
-    ): Immutable.List<Event<T>> {
+    ): Immutable.List<Event<K>> {
         // Early exit
         if (events instanceof Immutable.List && events.size === 0) {
             return Immutable.List();
@@ -219,8 +218,8 @@ export class Event<T extends Key = Time> extends Base {
         //
         // Group events by event key
         //
-        const eventMap: { [key: string]: Array<Event<T>> } = {};
-        const keyMap: { [key: string]: T } = {};
+        const eventMap: { [key: string]: Array<Event<K>> } = {};
+        const keyMap: { [key: string]: K } = {};
         events.forEach(e => {
             const key = e.getKey();
             const k = key.toString();
@@ -237,21 +236,21 @@ export class Event<T extends Key = Time> extends Base {
         // each field we are considering, we get all the values and reduce
         // them (sum, avg, etc) to get a the new data for that key.
         //
-        const outEvents: Array<Event<T>> = [];
-        _.each(eventMap, (perKeyEvents: Event<T>, key: string) => {
+        const outEvents: Array<Event<K>> = [];
+        _.each(eventMap, (perKeyEvents: Event<K>, key: string) => {
             // tslint:disable-next-line
             const mapEvent: { [key: string]: number[] } = {};
-            _.each(perKeyEvents, (event: Event<T>) => {
+            _.each(perKeyEvents, (perKeyEvent: Event<K>) => {
                 let fields = fieldNames;
                 if (!fields) {
-                    const obj = event.getData().toJSON() as {};
+                    const obj = perKeyEvent.getData().toJSON() as {};
                     fields = _.map(obj, (v, fieldName) => `${fieldName}`);
                 }
                 fields.forEach(fieldName => {
                     if (!mapEvent[fieldName]) {
                         mapEvent[fieldName] = [];
                     }
-                    mapEvent[fieldName].push(event.getData().get(fieldName));
+                    mapEvent[fieldName].push(perKeyEvent.getData().get(fieldName));
                 });
             });
 
@@ -260,7 +259,7 @@ export class Event<T extends Key = Time> extends Base {
                 data[fieldName] = reducer(values);
             });
 
-            const e = new Event<T>(keyMap[key], eventTemplate.getData().merge(data));
+            const e = new Event<K>(keyMap[key], eventTemplate.getData().merge(data));
 
             outEvents.push(e);
         });
@@ -278,11 +277,11 @@ export class Event<T extends Key = Time> extends Base {
      * used as an event reducer for merging multiple `TimeSeries` together
      * with `timeSeriesListReduce()`.
      */
-    static combiner<T extends Key>(
+    static combiner<K extends Key>(
         fieldSpec,
         reducer
-    ): (events: Immutable.List<Event<T>>) => Immutable.List<Event<Key>> {
-        return (events: Immutable.List<Event<T>>) => Event.combine(events, reducer, fieldSpec);
+    ): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>> {
+        return (events: Immutable.List<Event<K>>) => Event.combine(events, reducer, fieldSpec);
     }
 
     /**
@@ -295,34 +294,34 @@ export class Event<T extends Key = Time> extends Base {
      * // { in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] }
      * ```
      */
-    public static map<T extends Key>(
-        events: Immutable.List<Event<T>>,
+    public static map<K extends Key>(
+        events: Immutable.List<Event<K>>,
         multiFieldSpec: string | string[]
     ): ValueListMap;
-    public static map<T extends Key>(events, multiFieldSpec: any = "value") {
+    public static map<K extends Key>(events, multiFieldSpec: any = "value") {
         const result = {};
         if (typeof multiFieldSpec === "string") {
             const fieldSpec = multiFieldSpec;
-            events.forEach(event => {
+            events.forEach(e => {
                 if (!_.has(result, fieldSpec)) {
                     result[fieldSpec] = [];
                 }
-                const value = event.get(fieldSpec);
+                const value = e.get(fieldSpec);
                 result[fieldSpec].push(value);
             });
         } else if (_.isArray(multiFieldSpec)) {
             const fieldSpecList = multiFieldSpec as string[];
             _.each(fieldSpecList, fieldSpec => {
-                events.forEach(event => {
+                events.forEach(e => {
                     if (!_.has(result, fieldSpec)) {
                         result[fieldSpec] = [];
                     }
-                    result[fieldSpec].push(event.get(fieldSpec));
+                    result[fieldSpec].push(e.get(fieldSpec));
                 });
             });
         } else {
-            events.forEach(event => {
-                _.each(event.data().toJSON(), (value, key) => {
+            events.forEach(e => {
+                _.each(e.data().toJSON(), (value, key) => {
                     if (!_.has(result, key)) {
                         result[key] = [];
                     }
@@ -350,8 +349,8 @@ export class Event<T extends Key = Time> extends Base {
      * // result = { in: 5, out: 14.25 }
      * ```
      */
-    public static aggregate<T extends Key>(
-        events: Immutable.List<Event<T>>,
+    public static aggregate<K extends Key>(
+        events: Immutable.List<Event<K>>,
         reducer: ReducerFunction,
         multiFieldSpec: string | string[]
     ): ValueMap {
@@ -365,6 +364,10 @@ export class Event<T extends Key = Time> extends Base {
 
         return reduce(this.map(events, multiFieldSpec), reducer);
     }
+
+    /**
+     * Constructor
+     */
 
     constructor(protected key: T, protected data: Immutable.Map<string, any>) {
         super();
@@ -492,7 +495,8 @@ export class Event<T extends Key = Time> extends Base {
         } else if (this.keyType() === "index") {
             return [this.indexAsString(), ..._.values(this.getData().toJSON())];
         } else if (this.keyType() === "timerange") {
-            return [this.timerange().toJSON().timerange, ..._.values(this.getData().toJSON())];
+            //XXX
+            //return [this.timerange().toJSON().timerange, ..._.values(this.getData().toJSON())];
         }
     }
 
@@ -540,8 +544,8 @@ export interface TimeEventObject {
     data: { [data: string]: any };
 }
 
-function timeEvent(arg: TimeEventObject): Event<Time>
-function timeEvent(t: Time, data: Immutable.Map<string, any>): Event<Time>
+function timeEvent(arg: TimeEventObject): Event<Time>;
+function timeEvent(t: Time, data: Immutable.Map<string, any>): Event<Time>;
 function timeEvent(arg1: any, arg2?: any): Event<Time> {
     if (arg1 instanceof Time && Immutable.Map.isMap(arg2)) {
         const data = arg2 as Immutable.Map<string, any>;
@@ -558,8 +562,8 @@ export interface IndexedEventObject {
     data: { [data: string]: any };
 }
 
-function indexedEvent(arg: IndexedEventObject): Event<Index>
-function indexedEvent(idx: Index, data: Immutable.Map<string, any>): Event<Index>
+function indexedEvent(arg: IndexedEventObject): Event<Index>;
+function indexedEvent(idx: Index, data: Immutable.Map<string, any>): Event<Index>;
 function indexedEvent(arg1: any, arg2?: any): Event<Index> {
     if (arg1 instanceof Index && Immutable.Map.isMap(arg2)) {
         const data = arg2 as Immutable.Map<string, any>;
@@ -576,8 +580,8 @@ export interface TimeRangeEventObject {
     data: { [data: string]: any };
 }
 
-function timeRangeEvent(arg: TimeRangeEventObject): Event<TimeRange>
-function timeRangeEvent(idx: Index, data: Immutable.Map<string, any>): Event<TimeRange>
+function timeRangeEvent(arg: TimeRangeEventObject): Event<TimeRange>;
+function timeRangeEvent(idx: Index, data: Immutable.Map<string, any>): Event<TimeRange>;
 function timeRangeEvent(arg1: any, arg2?: any): Event<TimeRange> {
     if (arg1 instanceof TimeRange && Immutable.Map.isMap(arg2)) {
         const data = arg2 as Immutable.Map<string, any>;
