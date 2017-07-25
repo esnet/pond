@@ -86,13 +86,6 @@ export class SortedCollection<T extends Key> extends Collection<T> {
      */
     // tslint:disable:member-ordering
     static is(collection1: SortedCollection<Key>, collection2: SortedCollection<Key>) {
-        /*
-            It seems that immutable.js doesn't do deep conversion, so if your value is object,
-            it stays to be object.
-            As you're creating different object in each update step, and those objects will be
-            treated different when you compare to each other, so you should also convert it to
-            Immutable.Map object, to make the compare be true.
-        */
         let result = true;
         collection1.forEach((e, k) => {
             result = result && Event.is(e, collection2.at(k));

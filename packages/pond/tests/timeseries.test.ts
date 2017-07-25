@@ -451,7 +451,6 @@ describe("Basic Query API", () => {
         expect(series.size()).toBe(4);
     });
 
-    // >>> The original test uses instance of TimeEvent. That doesn't work here
     it("can return an item in the series as an event", () => {
         const series = timeSeries(TIMESERIES_TEST_DATA);
         const event = series.at(1);
@@ -544,7 +543,6 @@ describe("Deep Event Data", () => {
     });
 });
 
-// >>> Should this be new TimeSeries or timeSeries()?
 describe("Comparing TimeSeries", () => {
     it("can compare a series and a reference to a series as being equal", () => {
         const series = timeSeries(TIMESERIES_TEST_DATA);

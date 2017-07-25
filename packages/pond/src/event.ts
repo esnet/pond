@@ -495,8 +495,10 @@ export class Event<T extends Key = Time> extends Base {
         } else if (this.keyType() === "index") {
             return [this.indexAsString(), ..._.values(this.getData().toJSON())];
         } else if (this.keyType() === "timerange") {
-            //XXX
-            //return [this.timerange().toJSON().timerange, ..._.values(this.getData().toJSON())];
+            return [
+                [this.timerange().begin().getTime(), this.timerange().end().getTime()],
+                ..._.values(this.getData().toJSON())
+            ];
         }
     }
 
