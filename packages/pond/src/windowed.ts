@@ -243,9 +243,10 @@ export class WindowedCollection<T extends Key> extends Base {
             let keep = Immutable.Map<string, Collection<T>>();
             let discard = Immutable.Map<string, Collection<T>>();
             this.collections.forEach((collection, collectionKey) => {
-                const [_, w] = collectionKey.split("::").length > 1
-                    ? collectionKey.split("::")
-                    : [null, collectionKey];
+                const [_, w] =
+                    collectionKey.split("::").length > 1
+                        ? collectionKey.split("::")
+                        : [null, collectionKey];
                 if (w === currentWindowKey) {
                     keep = keep.set(collectionKey, collection);
                 } else {
@@ -281,20 +282,20 @@ export class WindowedCollection<T extends Key> extends Base {
     }
 }
 
-function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, Collection<T>>)
+function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, Collection<T>>);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     collectionMap?: Immutable.Map<string, Collection<T>>
-)
+);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     initialCollection?: Collection<T> // tslint:disable-line:unified-signatures
-)
+);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     group: string | string[],
     initialCollection?: Collection<T>
-)
+);
 function windowFactory<T extends Key>(arg1: any, arg2?: any) {
     return new WindowedCollection<T>(arg1, arg2);
 }

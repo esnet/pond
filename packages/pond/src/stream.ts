@@ -301,9 +301,8 @@ class AggregationNode<T extends Key> extends Node<KeyedCollection<T>, Event<Inde
     process(keyedCollection: KeyedCollection<T>): Immutable.List<Event<Index>> {
         const [group, collection] = keyedCollection;
         const d = {};
-        const [groupKey, windowKey] = group.split("::").length === 2
-            ? group.split("::")
-            : [null, group];
+        const [groupKey, windowKey] =
+            group.split("::").length === 2 ? group.split("::") : [null, group];
         _.forEach(this.aggregationSpec, (src: AggregationTuple, dest: string) => {
             const [srcField, reducer] = src;
             d[dest] = collection.aggregate(reducer, srcField);

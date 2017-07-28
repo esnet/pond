@@ -100,9 +100,9 @@ export class Period {
     }
 }
 
-function periodFactory(d: number | string, arg2?: string)
-function periodFactory(arg1: number, arg2: string)
-function periodFactory(arg1: object | moment.Duration)
+function periodFactory(d: number | string, arg2?: string);
+function periodFactory(arg1: number, arg2: string);
+function periodFactory(arg1: object | moment.Duration);
 function periodFactory(arg1?: any, arg2?: any): Period {
     return new Period(arg1, arg2);
 }
