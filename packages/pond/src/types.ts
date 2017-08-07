@@ -17,6 +17,8 @@ import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
 
+export class Types {}
+
 //
 // General types
 //

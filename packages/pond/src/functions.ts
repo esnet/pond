@@ -13,6 +13,8 @@ import * as _ from "lodash";
 import { ReducerFunction } from "./types";
 import util from "./util";
 
+export class Functions {}
+
 //
 // Functions to process missing values out of a value list
 //

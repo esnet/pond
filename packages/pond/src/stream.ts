@@ -44,6 +44,8 @@ import {
     WindowingOptions
 } from "./types";
 
+export class Streaming {}
+
 /**
  * A Node is a transformation between type S and type T. Both S
  * and T much extend Base.
@@ -318,6 +320,9 @@ class AggregationNode<T extends Key> extends Node<KeyedCollection<T>, Event<Inde
 //
 
 /**
+ * 
+ * @private
+ * 
  * An `EventStream` is the interface to the stream provided for manipulation of
  * parts of the streaming pipeline that map a stream of Events of type <T>.
  *
@@ -532,6 +537,9 @@ export class EventStream<T extends Key, U extends Key> {
     }
 }
 
+/**
+ * @private
+ */
 // tslint:disable-next-line:max-classes-per-file
 export class KeyedCollectionStream<T extends Key, U extends Key> {
     constructor(private stream: Stream<U>) {}

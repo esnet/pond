@@ -11,7 +11,7 @@ import { Navbar, Jumbotron, Button, Grid, Row, Col } from 'react-bootstrap';
 
 const discussionStyle = {
   color: "#555",
-  fontSize: 20,
+  fontSize: 18,
   letterSpacing: ".25ch",
   lineHeight: "16px",
   margin: "1rem 0 .125rem",
@@ -36,7 +36,7 @@ const headingStyle = {
 const textStyle = {
   color: "#626466",
   fontFamily: "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
-  fontSize: 20,
+  fontSize: 18,
   lineHeight: 1.625,
   padding: "3px 0px 0px 0px"
 };
@@ -44,7 +44,7 @@ const textStyle = {
 const codeStyle = {
   color: "#333",
   fontFamily: "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
-  fontSize: 20,
+  fontSize: 18,
   lineHeight: 1.625
 }
 
@@ -65,7 +65,7 @@ const style = {
 const sidebarStyle = {
   color: "#626466",
   fontFamily: "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
-  fontSize: 20,
+  fontSize: 18,
   lineHeight: 2,
   marginLeft: '1vw'
 };
@@ -411,18 +411,54 @@ class APIFunction extends Component {
 }
 
 class APIInterface extends Component {
+  buildParamList(parameters) {
+    return parameters
+      ? parameters.map((param, i) => {
+          const paramType = param.type;
+          const paramName = param.name;
+          const paramTypeName = paramType.name;
+          const isArray = paramType.isArray;
+          const isOptional = param.flags.isOptional;
+          const typeArgs = this.buildTypeArguments(paramType.typeArguments);
+          return `${paramName}${isOptional ? "?" : ""}: ${paramTypeName ? paramTypeName : ""}${typeArgs}${isArray ? "[]" : ""}`;
+        })
+      : [];
+  }
+  buildReturnType(signature) {
+    console.log("buildReturnType APIFunction is ", signature);
+    if (signature.type) {
+      const typeName = this.buildType(signature.type);
+      const isArray = signature.type.isArray;
+      return `${typeName}${isArray ? "[]" : ""}`;
+    }
+    else {
+      return "";
+    }
+  }
   buildDeclarations(type, name) {
-    const { indexSignature } = type.declaration;
-    const mapIndex = indexSignature.map(index => {
-      const { parameters, type } = index;
-      const paramArray = parameters.map(param => {
-        const paramName = param.name;
-        const paramTypeName = param.type.name;
-        return `${paramName}: ${paramTypeName}`
+    console.log("declarations is ", type.declaration);
+    const { indexSignature, signatures } = type.declaration;
+    if (indexSignature) {
+      const mapIndex = indexSignature.map(index => {
+        const { parameters, type } = index;
+        const paramArray = parameters.map(param => {
+          const paramName = param.name;
+          const paramTypeName = param.type.name;
+          return `${paramName}: ${paramTypeName}`
+        });
+        return `${name}: { [${paramArray.join(" ")}]: ${type.name} };\n`
       });
-      return `${name}: { [${paramArray.join(" ")}]: ${type.name} };\n`
-    });
-    return `${mapIndex}`
+      return `${mapIndex}`
+    } else {
+      const methodSignatures = signatures.map(signature => {
+        const parameters = signature.parameters;
+        const paramList = this.buildParamList(parameters);
+        const returnType = this.buildReturnType(signature);
+        const output = `(${paramList.join(", ")}) => ${returnType};\n`;
+        return output;
+      });
+      return methodSignatures;
+    }
   }
   buildIndex(indexSignature) {
     const index = indexSignature.map(t => {
@@ -621,6 +657,18 @@ class APIType extends Component {
     });
     return `[${values.join(" , ")}]`;
   }
+  buildReference(type) {
+    const { typeArguments, name } = type;
+    const values = typeArguments.map(type => {
+      if(type.typeArguments) {
+        const typeArgs = this.buildTypeArguments(type.typeArguments);
+        return `${type.name}${typeArgs}`;
+      } else {
+        return type.name;
+      }
+    });
+    return `${name} < ${values.join(", ")} >`;
+  }
   buildSignature() {
     const { type } = this.props.type;
     switch(type.type) {
@@ -630,6 +678,8 @@ class APIType extends Component {
         return this.buildDeclarations(type);
       case "tuple":
         return this.buildTuple(type);
+      case "reference":
+        return this.buildReference(type);
     }
   }
   renderComment() {
@@ -739,18 +789,29 @@ class SignatureList extends Component {
         case "reference":
           return this.buildRType(signature);
         case "reflection":
-          const { indexSignature } = signature.type.declaration;
-          const mapIndex = indexSignature.map(index => {
-            const { parameters, type } = index;
-            const paramArray = parameters.map(param => {
-              const paramName = param.name;
-              const paramTypeName = param.type.name;
-              return `${paramName}: ${paramTypeName}`
+          const { indexSignature, signatures } = signature.type.declaration;
+          if (indexSignature) {
+            const mapIndex = indexSignature.map(index => {
+              const { parameters, type } = index;
+              const paramArray = parameters.map(param => {
+                const paramName = param.name;
+                const paramTypeName = param.type.name;
+                return `${paramName}: ${paramTypeName}`
+              });
+              const isArray = type.isArray ? true : false;
+              return `{ [${paramArray.join(" ")}]: ${type.name}${isArray ? "[]" : ""} };\n`
             });
-            const isArray = type.isArray ? true : false;
-            return `{ [${paramArray.join(" ")}]: ${type.name}${isArray ? "[]" : ""} };\n`
-          });
-          return `${mapIndex}`
+            return `${mapIndex}`
+          } else {
+            const methodSignatures = signatures.map(signature => {
+              const parameters = signature.parameters;
+              const paramList = this.buildParamList(parameters);
+              const returnType = this.buildReturnType(signature);
+              const output = `(${paramList.join(", ")}) => ${returnType}`;
+              return output;
+            });
+          return methodSignatures;
+          } 
         default:
           return this.buildRType(signature);
       }
@@ -913,8 +974,14 @@ class Module extends Component {
 }
 
 class SideBar extends Component {
-  renderChild(child,i,type) {
-    if (child.kindString === type) {
+  renderChild(child,i) {
+    if (child.flags.isPrivate === true) {
+      return <div />;
+    }
+    if (child.name.includes("Factory")) {
+      return <div />;
+    }
+    if (child.kindString === "Class") {
       return (
         <div style={sidebarStyle}>
           <ScrollToTop/>
@@ -922,17 +989,35 @@ class SideBar extends Component {
             exact
             to={`/${child.name}`} 
             activeStyle={activeLinkStyle}
-          >{type === "Function" ? `${child.name}()` : child.name}</NavLink>
+          >{child.name}</NavLink>
         </div>
+      );
+    } else {
+      return (
+        <ul style={{ listStyleType: "None" }}>
+          <li style={sidebarStyle}>
+            <ScrollToTop/>
+            <NavLink
+              exact
+              to={`/${child.name}`} 
+              activeStyle={activeLinkStyle}
+            >{child.kindString === "Function" ? `${child.name}()` : child.name}</NavLink>
+          </li>
+        </ul>
       );
     }
   }
   render() { 
-    const type = this.props.type;
     const { id, name, children } = this.props.sidebar;
     return (
       <div>
-        {children ? _.map(children, (child, i) => this.renderChild(child, i, type)) : <div />}
+        {children ? 
+          _.map(children, (child, i) =>
+            <div>
+              {this.renderChild(child, i)}
+            </div>
+          ) : <div />
+        }
       </div>
     )
   }
@@ -954,6 +1039,13 @@ class Doc extends Component {
           </Navbar>
           <Side>
             <div style={sidebarHeading}>Classes</div>
+            {children.map((child,i) =>
+                <div id={child.name}>
+                  <SideBar key={i} sidebar={child} />
+                </div>
+            )}
+
+            {/* <div style={sidebarHeading}>Classes</div>
             {children.map((child,i) => <SideBar key={i} sidebar={child} type="Class" />)}
             <div style={sidebarHeading}>Functions</div>
             {children.map((child,i) => <SideBar key={i} sidebar={child} type="Function" />)}
@@ -964,7 +1056,8 @@ class Doc extends Component {
             <div style={sidebarHeading}>Objects</div>
             {children.map((child,i) => <SideBar key={i} sidebar={child} type="Object literal" />)}
             <div style={sidebarHeading}>Types</div>
-            {children.map((child,i) => <SideBar key={i} sidebar={child} type="Type alias" />)}
+            {children.map((child,i) => <SideBar key={i} sidebar={child} type="Type alias" />)} */}
+
           </Side>
           <Main>
             <Route exact path="/" component={Home} />
