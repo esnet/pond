@@ -2,7 +2,8 @@
     "name": "pondjs",
     "version": "1.0.0",
     "description": "A TimeSeries library built on Immutable.js with Typescript",
-    "main": "index.js",
+    "main": "lib/exports.js",
+    "types": "lib/exports.d.ts",
     "author": "Software Engineering Group at ESnet",
     "license": "BSD-style",
     "dependencies": {

@@ -4,6 +4,8 @@ import { Event } from "./event";
 import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
+export declare class Types {
+}
 /**
  * A mapping from string to list of numbers
  */
