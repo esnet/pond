@@ -1,4 +1,6 @@
 import { ReducerFunction } from "./types";
+export declare class Functions {
+}
 /**
  * Like `first()` except it will return null if not all the values are
  * the same. This can be used to transfer a value when doing aggregation.

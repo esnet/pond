@@ -7,6 +7,8 @@ import { Key } from "./key";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
 import { AggregationSpec, AlignmentOptions, CollapseOptions, FillOptions, RateOptions, SelectOptions, WindowingOptions } from "./types";
+export declare class Streaming {
+}
 /**
  * A Node is a transformation between type S and type T. Both S
  * and T much extend Base.
@@ -34,6 +36,9 @@ export declare abstract class Node<S extends Base, T extends Base> {
     protected abstract process(input: S): Immutable.List<T>;
 }
 /**
+ *
+ * @private
+ *
  * An `EventStream` is the interface to the stream provided for manipulation of
  * parts of the streaming pipeline that map a stream of Events of type <T>.
  *
@@ -217,6 +222,9 @@ export declare class EventStream<T extends Key, U extends Key> {
      */
     groupByWindow(options: WindowingOptions): KeyedCollectionStream<T, U>;
 }
+/**
+ * @private
+ */
 export declare class KeyedCollectionStream<T extends Key, U extends Key> {
     private stream;
     constructor(stream: Stream<U>);
