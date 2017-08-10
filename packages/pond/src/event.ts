@@ -473,6 +473,10 @@ export class Event<T extends Key = Time> extends Base {
         return this.getKey().end();
     }
 
+    public index() {
+        return index(this.indexAsString());
+    }
+
     public indexAsString() {
         return this.key.toString();
     }
