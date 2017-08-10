@@ -18,7 +18,8 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 import { collection, Collection } from "../src/collection";
 import { event } from "../src/event";
-import { timeEvent, timeRangeEvent } from "../src/event";
+import { index, Index } from "../src/index";
+import { timeEvent, timeRangeEvent, indexedEvent } from "../src/event";
 import { avg, max, sum } from "../src/functions";
 import { period, Period } from "../src/period";
 import { time, Time } from "../src/time";
@@ -399,6 +400,54 @@ const TIMERANGE_EVENT_LIST = OUTAGE_EVENT_LIST.map(event => {
     return timeRangeEvent(timerange(b, e), Immutable.Map(other as {}));
 });
 
+const weather = Immutable.List([
+    {
+        "date": "2014-7-1",
+        "actual_mean_temp": 81,
+        "actual_min_temp": 72,
+        "actual_max_temp": 89,
+        "average_min_temp": 68,
+        "average_max_temp": 83,
+        "record_min_temp": 52,
+        "record_max_temp": 100,
+        "record_min_temp_year": 1943,
+        "record_max_temp_year": 1901,
+        "actual_precipitation": 0,
+        "average_precipitation": 0.12,
+        "record_precipitation": 2.17
+    },
+    {
+        "date": "2014-7-2",
+        "actual_mean_temp": 82,
+        "actual_min_temp": 72,
+        "actual_max_temp": 91,
+        "average_min_temp": 68,
+        "average_max_temp": 83,
+        "record_min_temp": 56,
+        "record_max_temp": 100,
+        "record_min_temp_year": 2001,
+        "record_max_temp_year": 1966,
+        "actual_precipitation": 0.96,
+        "average_precipitation": 0.13,
+        "record_precipitation": 1.79
+    },
+    {
+        "date": "2014-7-3",
+        "actual_mean_temp": 78,
+        "actual_min_temp": 69,
+        "actual_max_temp": 87,
+        "average_min_temp": 68,
+        "average_max_temp": 83,
+        "record_min_temp": 54,
+        "record_max_temp": 103,
+        "record_min_temp_year": 1933,
+        "record_max_temp_year": 1966,
+        "actual_precipitation": 1.78,
+        "average_precipitation": 0.12,
+        "record_precipitation": 2.8
+    }
+]);
+
 describe("Creation", () => {
     it("can create a series with a list of events", () => {
         const series = new TimeSeries(EVENT_DATA);
@@ -426,6 +475,33 @@ describe("Creation", () => {
         events.push(timeEvent(time(new Date(2015, 8, 1)), Immutable.Map({ value: 14 })));
         const series = new TimeSeries({ name: "events", events: Immutable.List(events) });
         expect(series.size()).toBe(2);
+    });
+
+    it("can create an series with a list of Indexed Events", () => {
+        const events = weather.map(item => {
+            const {
+                date,
+                actual_min_temp,
+                actual_max_temp,
+                record_min_temp,
+                record_max_temp
+            } = item;
+            return indexedEvent(
+                index(date),
+                Immutable.Map({
+                    temp: [
+                        +record_min_temp, //eslint-disable-line
+                        +actual_min_temp, //eslint-disable-line
+                        +actual_max_temp, //eslint-disable-line
+                        +record_max_temp //eslint-disable-line
+                    ]
+                })
+            );
+        });
+
+        const collection = new Collection(events);
+        const series = new TimeSeries({ name, collection });
+        expect(series.size()).toBe(3);
     });
 
     it("can create an series with no events", () => {
@@ -566,6 +642,12 @@ describe("Comparing TimeSeries", () => {
         const series = timeSeries(TIMESERIES_TEST_DATA);
         const otherSeries = timeSeries(TIMESERIES_TEST_DATA);
         expect(TimeSeries.is(series, otherSeries)).toBeTruthy();
+    });
+
+    it("can use the is() comparator to compare a series and a value different series as false", () => {
+        const series = timeSeries(sumPart1);
+        const otherSeries = timeSeries(sumPart2);
+        expect(TimeSeries.is(series, otherSeries)).toBeFalsy();
     });
 });
 
