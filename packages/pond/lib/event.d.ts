@@ -192,6 +192,7 @@ export declare class Event<T extends Key = Time> extends Base {
     timestamp(): Date;
     begin(): Date;
     end(): Date;
+    index(): Index;
     indexAsString(): string;
     timerange(): TimeRange;
     timerangeAsUTCString(): string;
