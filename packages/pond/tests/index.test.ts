@@ -53,7 +53,7 @@ it("can create a year index", done => {
     done();
 });
 
-it("can create a month index", done => {
+it("can create a month index and get its nice string", done => {
     const idx = index("2014-09");
     const expected = "[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]";
     expect(idx.asTimerange().toUTCString()).toBe(expected);
@@ -61,7 +61,7 @@ it("can create a month index", done => {
     done();
 });
 
-it("can create a day index", done => {
+it("can create a day index and get its nice string", done => {
     const idx = index("2014-09-17");
     const expected = "[Wed, 17 Sep 2014 00:00:00 GMT, Wed, 17 Sep 2014 23:59:59 GMT]";
     expect(idx.asTimerange().toUTCString()).toBe(expected);
@@ -69,7 +69,7 @@ it("can create a day index", done => {
     done();
 });
 
-it("can create a year index", done => {
+it("can create a day index and get its nice string in a custom format", done => {
     const idx = index("2014");
     const expected = "2014";
     expect(idx.toNiceString()).toBe(expected);

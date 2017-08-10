@@ -17,8 +17,6 @@ import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
 
-export class Types {}
-
 //
 // General types
 //
@@ -34,7 +32,7 @@ export interface ValueListMap {
  * A mapping from string to number
  */
 export interface ValueMap {
-    [s: string]: number[];
+    [s: string]: number;
 }
 
 //
@@ -97,11 +95,8 @@ export enum FillMethod {
  *  * Year
  */
 export enum WindowType {
-    Global = 1, // currently not used
     Fixed,
-    Day,
-    Month,
-    Year
+    Sliding
 }
 
 /**
@@ -109,11 +104,13 @@ export enum WindowType {
  * this just defines the fixed window (e.g. window: period("1d")) and the
  * trigger for downstream notification, which can currently be either
  * on every incoming event, or whenever a window is about to be discarded.
+ *  * `type` - the type of the window, currently either Fixed or Sliding
  *  * `window` - the size of the window, expressed as a `Period`
  *  * `trigger` - the output rate of the window, currently either
  *                Trigger.perEvent or Trigger.onDiscardedWindow
  */
 export interface WindowingOptions {
+    type: WindowType;
     window: Period;
     trigger?: Trigger;
 }
@@ -128,7 +125,7 @@ export interface WindowingOptions {
  */
 export interface AlignmentOptions {
     fieldSpec: string | string[];
-    window: Period;
+    period: Period;
     method?: AlignmentMethod;
     limit?: number;
 }
@@ -177,9 +174,10 @@ export interface FillOptions {
  *  * `toTimeEvents` - Convert the rollup events to `TimeEvent`s, otherwise it
  *                     will be returned as a `TimeSeries` of `IndexedEvent`s
  */
-export interface RollupOptions<T extends Key> {
-    windowSize?: Period;
-    aggregation?: AggregationSpec<T>;
+export interface RollupOptions {
+    windowSize?: string;
+    aggregation?: object;
+    toTimeEvents?: boolean;
 }
 
 /**
@@ -196,7 +194,8 @@ export interface SelectOptions {
  */
 export interface RenameColumnOptions {
     renameMap: {
-        [key: string]: string;
+        key: string;
+        value: string;
     };
 }
 
@@ -212,9 +211,8 @@ export interface RenameColumnOptions {
  */
 export interface TimeSeriesOptions {
     seriesList: Array<TimeSeries<Key>>;
-    reducer?: ReducerFunction;
+    reducer?: ReducerFunction | ArrayReducer | ListReducer;
     fieldSpec?: string | string[];
-    deep?: boolean;
     [propName: string]: any;
 }
 
@@ -236,6 +234,16 @@ export type DedupFunction<T extends Key> = (events: Immutable.List<Event<T>>) =>
  * A function which takes a list of numbers and returns a single number.
  */
 export type ReducerFunction = (values: number[]) => number;
+
+/**
+ * A function which combines an array of events into a new array of events
+ */
+export type ArrayReducer = (events: Array<Event<Key>>) => Array<Event<Key>>;
+
+/**
+ * A function which combines a list of events into a new list of events
+ */
+export type ListReducer = (events: Immutable.List<Event<Key>>) => Immutable.List<Event<Key>>;
 
 //
 // Aggregation specification

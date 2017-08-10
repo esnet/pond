@@ -1,5 +1,4 @@
 import * as Immutable from "immutable";
-import { Collection } from "./collection";
 import { Event } from "./event";
 import { Index } from "./index";
 import { Key } from "./key";
@@ -7,7 +6,17 @@ import { SortedCollection } from "./sorted";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
 import { InterpolationType } from "./functions";
-import { AlignmentOptions, CollapseOptions, FillOptions, RateOptions, ReducerFunction, RenameColumnOptions, RollupOptions, SelectOptions, TimeSeriesOptions } from "./types";
+import {
+    AlignmentOptions,
+    CollapseOptions,
+    FillOptions,
+    RateOptions,
+    ReducerFunction,
+    RenameColumnOptions,
+    RollupOptions,
+    SelectOptions,
+    TimeSeriesOptions
+} from "./types";
 export interface TimeSeriesWireFormat {
     name?: string;
     utc?: boolean;
@@ -47,7 +56,7 @@ export interface TimeSeriesListReducerOptions {
  * }
  * ```
  */
-declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>;
+declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>
 /**
  * Create an `Index` based `TimeSeries` using the wire format
  * ```
@@ -62,7 +71,7 @@ declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>;
  * }
  * ```
  */
-declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>;
+declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>
 /**
  * Create a `Timerange` based `TimeSeries` using the wire format
  * ```
@@ -77,7 +86,7 @@ declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>;
  * }
  * ```
  */
-declare function timeRangeSeries(arg: TimeSeriesWireFormat): TimeSeries<TimeRange>;
+declare function timeRangeSeries(arg: TimeSeriesWireFormat): TimeSeries<TimeRange>
 export { timeSeries, indexedSeries, timeRangeSeries };
 /**
  * A `TimeSeries` represents a series of `Event`'s, with each event being a combination of:
@@ -456,7 +465,7 @@ export declare class TimeSeries<T extends Key> {
      * });
      * ```
      */
-    align(options: AlignmentOptions): TimeSeries<T>;
+    align(options: AlignmentOptions): TimeSeries<Key>;
     /**
      * Returns the derivative of the `TimeSeries` for the given columns. The result will
      * be per second. Optionally you can substitute in `null` values if the rate
@@ -560,7 +569,7 @@ export declare class TimeSeries<T extends Key> {
      * Internal function to build the `TimeSeries` rollup functions using
      * an aggregator Pipeline.
      */
-    _rollup(options: RollupOptions<T>): TimeSeries<Index>;
+    _rollup(options: RollupOptions<T>): TimeSeries<Key>;
     /**
      * Builds multiple `Collection`s, each collects together
      * events within a window of size `windowSize`. Note that these
@@ -574,7 +583,7 @@ export declare class TimeSeries<T extends Key> {
      * ```
      *
      */
-    collectByFixedWindow(options: RollupOptions<T>): Immutable.Map<string, Collection<T>>;
+    collectByFixedWindow(options: RollupOptions<T>): any;
     /**
      * Static function to compare two `TimeSeries` to each other. If the `TimeSeries`
      * are of the same instance as each other then equals will return true.

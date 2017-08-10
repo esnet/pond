@@ -9,10 +9,9 @@
  */
 
 import * as _ from "lodash";
+import { Duration } from "./duration";
 import { Key } from "./key";
-import { Period } from "./period";
 import { TimeRange } from "./timerange";
-
 import { TimeAlignment } from "./types";
 
 /**
@@ -92,23 +91,35 @@ export class Time extends Key {
         return this.timestamp();
     }
 
-    toTimeRange(period: Period, align: TimeAlignment): TimeRange {
-        const duration = +period;
+    toTimeRange(duration: Duration, align: TimeAlignment): TimeRange {
+        const d = +duration;
         const timestamp = +this.timestamp();
         switch (align) {
             case TimeAlignment.Begin:
-                return new TimeRange(timestamp, timestamp + duration);
+                return new TimeRange(timestamp, timestamp + d);
             case TimeAlignment.Middle:
-                const half = Math.round(duration / 2);
-                return new TimeRange(timestamp - half, timestamp + duration - half);
+                const half = Math.round(d / 2);
+                return new TimeRange(timestamp - half, timestamp + d - half);
             case TimeAlignment.End:
-                return new TimeRange(timestamp - duration, timestamp);
+                return new TimeRange(timestamp - d, timestamp);
         }
     }
 }
 
+/**
+ * Constructs a new `Time` object. A `Time` object represents a timestamp,
+ * and is stored as a Javascript `Date` object. The difference with just a Date is that
+ * this conforms to the interface required to be an `Event` key.
+ */
 function timeFactory(d?: number | string | Date): Time {
     return new Time(d);
 }
 
-export { timeFactory as time };
+/**
+ * Returns the the current time as a `Time` object
+ */
+function now(): Time {
+    return new Time(new Date());
+}
+
+export { now, timeFactory as time };

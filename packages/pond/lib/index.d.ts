@@ -1,8 +1,12 @@
 import { Key } from "./key";
 import { TimeRange } from "./timerange";
 /**
- * An index is simply a string that represents a fixed range of time.
+ * An `Index` is a specific instance of a `Period`. For example
+ * a `Period` may represent "every day", then an `Index` could
+ * represent a specific day like last Tuesday.
+ *
  * There are two basic types:
+ *
  * * *Multiplier index* - the number of some unit of time
  *                       (hours, days etc) since the UNIX epoch.
  * * *Calendar index* - The second represents a calendar range,
@@ -26,16 +30,9 @@ import { TimeRange } from "./timerange";
  *     2015          // All of the year 2015
  * ```
  *
- * An `Index` is a nice representation of certain types of time intervals
- * because it can be cached with its string representation as a key.
- *
  * A specific period of time, and associated data can be looked up based
  * on that string. It also allows us to represent things like months,
  * which have variable length.
- *
- * An `Index` is also useful when collecting into specific time ranges,
- * for example generating all the 5 min ("5m") maximum rollups within a
- * specific day ("1d"). See the processing section within these docs.
  */
 export declare class Index extends Key {
     /**
@@ -123,5 +120,5 @@ export declare class Index extends Key {
  * * *Calendar index* - The second represents a calendar range,
  *    such as Oct 2014.
  */
-declare function indexFactory(s: any, utc?: boolean): Index;
+declare function indexFactory(s: any, utc?: boolean): Index
 export { indexFactory as index };

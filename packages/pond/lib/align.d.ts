@@ -14,11 +14,12 @@ import { Processor } from "./processor";
 import { Time } from "./time";
 import { AlignmentOptions } from "./types";
 /**
- * A processor to align the data into bins of regular time period.
+ * A processor to align the data into bins of regular time period, using a
+ * `Period` object.
  */
 export declare class Align<T extends Key> extends Processor<T, T> {
     private _fieldSpec;
-    private _window;
+    private _period;
     private _method;
     private _limit;
     private _previous;
@@ -32,14 +33,7 @@ export declare class Align<T extends Key> extends Processor<T, T> {
      * event and the previous event do not lie in the same window. If
      * they are in the same window, return an empty list.
      */
-    getBoundaries(event: Event<T>): string[];
-    /**
-     * We are dealing in UTC only with the Index because the events
-     * all have internal timestamps in UTC and that's what we're
-     * aligning. Let the user display in local time if that's
-     * what they want.
-     */
-    getBoundaryTime(boundaryIndex: string): number;
+    getBoundaries(event: Event<T>): Immutable.List<Time>;
     /**
      * Generate a new event on the requested boundary and carry over the
      * value from the previous event.
@@ -47,12 +41,12 @@ export declare class Align<T extends Key> extends Processor<T, T> {
      * A variation just sets the values to null, this is used when the
      * limit is hit.
      */
-    interpolateHold(boundaryIndex: string, setNone?: boolean): Event<Time>;
+    interpolateHold(boundaryTime: Time, setNone?: boolean): Event<Time>;
     /**
      * Generate a linear differential between two counter values that lie
      * on either side of a window boundary.
      */
-    interpolateLinear(boundary: any, event: any): Event<Time>;
+    interpolateLinear(boundaryTime: Time, event: Event<T>): Event<T>;
     /**
      * Perform the align operation on the event and emit.
      */

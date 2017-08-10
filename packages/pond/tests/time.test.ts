@@ -2,14 +2,15 @@ declare const describe: any;
 declare const it: any;
 declare const expect: any;
 
-import { period } from "../src/period";
-import { time } from "../src/time";
+import { duration } from "../src/duration";
+import { time, now } from "../src/time";
 
 import { TimeAlignment } from "../src/types";
 
 describe("Time", () => {
     it("can construct", () => {
         const t = time(new Date());
+        const a = time();
         expect(t).toBeDefined();
     });
 
@@ -69,15 +70,15 @@ describe("Time", () => {
     it("can create a TimeRange from the Time", () => {
         const t = time(1494272285137);
 
-        const tr1 = t.toTimeRange(period("1d"), TimeAlignment.Begin);
+        const tr1 = t.toTimeRange(duration("1d"), TimeAlignment.Begin);
         expect(tr1.toJSON()).toEqual({ timerange: [1494272285137, 1494358685137] });
         expect(tr1.duration()).toBe(86400000);
         expect(+tr1.begin()).toBe(+t.timestamp());
 
-        const tr2 = t.toTimeRange(period("1d"), TimeAlignment.Middle);
+        const tr2 = t.toTimeRange(duration("1d"), TimeAlignment.Middle);
         expect(tr2.toJSON()).toEqual({ timerange: [1494229085137, 1494315485137] });
 
-        const tr3 = t.toTimeRange(period("1d"), TimeAlignment.End);
+        const tr3 = t.toTimeRange(duration("1d"), TimeAlignment.End);
         expect(tr3.toJSON()).toEqual({ timerange: [1494185885137, 1494272285137] });
     });
 });

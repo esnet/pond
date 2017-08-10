@@ -4,8 +4,6 @@ import { Event } from "./event";
 import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
-export declare class Types {
-}
 /**
  * A mapping from string to list of numbers
  */
@@ -16,7 +14,7 @@ export interface ValueListMap {
  * A mapping from string to number
  */
 export interface ValueMap {
-    [s: string]: number[];
+    [s: string]: number;
 }
 /**
  * When relating a `TimeRange` to a `Time` this enum lets you specify where
@@ -28,7 +26,7 @@ export interface ValueMap {
 export declare enum TimeAlignment {
     Begin = 1,
     Middle = 2,
-    End = 3,
+    End = 3
 }
 /**
  * Rate of emit from within a stream:
@@ -37,7 +35,7 @@ export declare enum TimeAlignment {
  */
 export declare enum Trigger {
     perEvent = 1,
-    onDiscardedWindow = 2,
+    onDiscardedWindow = 2
 }
 /**
  * Method of interpolation used by the `align()` function:
@@ -46,7 +44,7 @@ export declare enum Trigger {
  */
 export declare enum AlignmentMethod {
     Hold = 1,
-    Linear = 2,
+    Linear = 2
 }
 /**
  * Method of filling used by the `fill()` function:
@@ -57,7 +55,7 @@ export declare enum AlignmentMethod {
 export declare enum FillMethod {
     Zero = 1,
     Pad = 2,
-    Linear = 3,
+    Linear = 3
 }
 /**
  * An enum which controls the `WindowType` for aggregation. This can
@@ -70,22 +68,21 @@ export declare enum FillMethod {
  *  * Year
  */
 export declare enum WindowType {
-    Global = 1,
-    Fixed = 2,
-    Day = 3,
-    Month = 4,
-    Year = 5,
+    Fixed = 0,
+    Sliding = 1
 }
 /**
  * Options object expected by the `windowBy...()` functions. At this point,
  * this just defines the fixed window (e.g. window: period("1d")) and the
  * trigger for downstream notification, which can currently be either
  * on every incoming event, or whenever a window is about to be discarded.
+ *  * `type` - the type of the window, currently either Fixed or Sliding
  *  * `window` - the size of the window, expressed as a `Period`
  *  * `trigger` - the output rate of the window, currently either
  *                Trigger.perEvent or Trigger.onDiscardedWindow
  */
 export interface WindowingOptions {
+    type: WindowType;
     window: Period;
     trigger?: Trigger;
 }
@@ -99,7 +96,7 @@ export interface WindowingOptions {
  */
 export interface AlignmentOptions {
     fieldSpec: string | string[];
-    window: Period;
+    period: Period;
     method?: AlignmentMethod;
     limit?: number;
 }
@@ -144,9 +141,10 @@ export interface FillOptions {
  *  * `toTimeEvents` - Convert the rollup events to `TimeEvent`s, otherwise it
  *                     will be returned as a `TimeSeries` of `IndexedEvent`s
  */
-export interface RollupOptions<T extends Key> {
-    windowSize?: Period;
-    aggregation?: AggregationSpec<T>;
+export interface RollupOptions {
+    windowSize?: string;
+    aggregation?: object;
+    toTimeEvents?: boolean;
 }
 /**
  * Options object expected by the `select()` function:
@@ -161,7 +159,8 @@ export interface SelectOptions {
  */
 export interface RenameColumnOptions {
     renameMap: {
-        [key: string]: string;
+        key: string;
+        value: string;
     };
 }
 /**
@@ -176,9 +175,8 @@ export interface RenameColumnOptions {
  */
 export interface TimeSeriesOptions {
     seriesList: Array<TimeSeries<Key>>;
-    reducer?: ReducerFunction;
+    reducer?: ReducerFunction | ArrayReducer | ListReducer;
     fieldSpec?: string | string[];
-    deep?: boolean;
     [propName: string]: any;
 }
 /**
@@ -194,6 +192,16 @@ export declare type DedupFunction<T extends Key> = (events: Immutable.List<Event
  * A function which takes a list of numbers and returns a single number.
  */
 export declare type ReducerFunction = (values: number[]) => number;
+/**
+ * A function which combines an array of events into a new array of events
+ */
+export declare type ArrayReducer = (events: Array<Event<Key>>) => Array<Event<Key>>;
+/**
+ * A function which combines a list of events into a new list of events
+ */
+export declare type ListReducer = (
+    events: Immutable.List<Event<Key>>
+) => Immutable.List<Event<Key>>;
 /**
  * Tuple mapping a string -> `ReducerFunction`
  * e.g. `["value", avg()]`

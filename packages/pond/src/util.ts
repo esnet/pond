@@ -12,15 +12,18 @@ import * as Immutable from "immutable";
 import * as _ from "lodash";
 import * as moment from "moment";
 import Moment = moment.Moment;
+import { Duration, duration } from "./duration";
 import { Index, index } from "./index";
-import { Period } from "./period";
 import { TimeRange, timerange } from "./timerange";
 
 const UNITS = {
-    s: { label: "seconds", length: 1 },
-    m: { label: "minutes", length: 60 },
-    h: { label: "hours", length: 60 * 60 },
-    d: { label: "days", length: 60 * 60 * 24 }
+    n: { label: "nanoseconds", length: 1 / 1000000 },
+    u: { label: "microseconds", length: 1 / 1000 },
+    l: { label: "milliseconds", length: 1 },
+    s: { label: "seconds", length: 1000 },
+    m: { label: "minutes", length: 60 * 1000 },
+    h: { label: "hours", length: 60 * 60 * 1000 },
+    d: { label: "days", length: 60 * 60 * 24 * 1000 }
 };
 
 /**
@@ -31,14 +34,11 @@ function isValid(v: number): boolean {
 }
 
 /**
- * The last period of time until now, represented as a `TimeRange`
- * ```
- * const lastDay = TimeRange.last(Period(24, "hours"))
- * ```
+ * The last duration of time until now, represented as a `TimeRange`
  */
-function untilNow(period: Period): TimeRange {
+function untilNow(d: Duration): TimeRange {
     const t = new Date();
-    const begin = new Date(+t - +period);
+    const begin = new Date(+t - +d);
     return new TimeRange(begin, t);
 }
 
@@ -77,6 +77,11 @@ function windowPositionFromDate(period: string, date: Date) {
     return Math.floor((dd /= duration));
 }
 
+function isIndexString(indexString: string): boolean {
+    const regex = /([0-9]+)([smhdlun])-([0-9]+)/;
+    return regex.test(indexString);
+}
+
 /**
  * Given an index string, return the `TimeRange` that represents.
  */
@@ -108,20 +113,19 @@ function timeRangeFromIndexString(indexString: string, utc: boolean): TimeRange 
             break;
 
         case 2:
-            // Size should be two parts, a number and a letter if it's a
-            // range based index, e.g 1h-23478
-            const rangeRegex = /([0-9]+)([smhd])/;
-            const sizeParts = rangeRegex.exec(parts[0]);
-            if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1], 10))) {
-                const pos = parseInt(parts[1], 10);
-                const num = parseInt(sizeParts[1], 10);
-                const unit = sizeParts[2];
-                const length = num * UNITS[unit].length * 1000;
+            if (isIndexString(indexString)) {
+                const [prefix, periodIndex] = parts;
+                const [frequency, length = frequency] = prefix.split(":");
+                const periodStride = +duration(frequency);
+                const periodLength = +duration(length);
+                const index = parseInt(periodIndex, 10);
 
-                beginTime = isUTC ? moment.utc(pos * length) : moment(pos * length);
-                endTime = isUTC ? moment.utc((pos + 1) * length) : moment((pos + 1) * length);
-                // A month and year e.g 2015-09
+                beginTime = isUTC ? moment.utc(index * periodStride) : moment(index * periodStride);
+                endTime = isUTC
+                    ? moment.utc(+beginTime + periodLength)
+                    : moment(+beginTime + periodLength);
             } else if (!_.isNaN(parseInt(parts[0], 10)) && !_.isNaN(parseInt(parts[1], 10))) {
+                // A month and year e.g 2015-09
                 const year = parseInt(parts[0], 10);
                 const month = parseInt(parts[1], 10);
                 beginTime = isUTC ? moment.utc([year, month - 1]) : moment([year, month - 1]);
@@ -177,9 +181,7 @@ function niceIndexString(indexString: string, format: string): string {
             }
             break;
         case 2:
-            const rangeRegex = /([0-9]+)([smhd])/;
-            const sizeParts = rangeRegex.exec(parts[0]);
-            if (sizeParts && sizeParts.length >= 3 && !_.isNaN(parseInt(parts[1], 10))) {
+            if (isIndexString(indexString)) {
                 return indexString;
             } else if (!_.isNaN(parseInt(parts[0], 10)) && !_.isNaN(parseInt(parts[1], 10))) {
                 const year = parseInt(parts[0], 10);
@@ -303,6 +305,7 @@ export default {
     isMissing,
     isValid,
     leftPad,
+    isIndexString,
     niceIndexString,
     timeRangeFromArg,
     timeRangeFromIndexString,

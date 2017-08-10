@@ -14,145 +14,104 @@ import * as moment from "moment";
 
 import { Duration, duration } from "./duration";
 import { Index } from "./index";
-import { Time } from "./time";
+import { Time, time } from "./time";
 import { TimeRange } from "./timerange";
 
-export enum PeriodType {
-    Day = 1,
-    Month,
-    Year,
-    Duration
-}
-
 /**
- * A period is a repeating unit of time which is typically
- * used in pond to describe an aggregation bucket. For example
- * a `period("1d")` would indicate buckets that are a day long.
+ * A period is a repeating time which is typically used in pond to
+ * either define the repeating nature of a bucket (used for windowing)
+ * or to describe alignment of fill positions when doing data cleaning
+ * on a `TimeSeries`.
+ * 
+ * Periods have a frequency and an offset. If there is no offset, it
+ * is aligned to Jan 1, 1970 00:00 UTC.
+ * 
+ * To create a repeating window, see `Bucket` creation.
  */
 export class Period {
-    private _type: PeriodType;
     private _frequency: Duration;
-    private _length: Duration;
     private _offset: number;
 
     /**
-     * A Period is a reoccuring duration of time, for example: "every day", or
-     * "1 hour, repeated every 5 minutes".
-     *
-     * A Period can be made in two ways. The first is a "Calendar" based `Period`.
-     * You construct one of these by providing the appropiate PeriodType:
-     *  * "Day"
-     *  * "Month"
-     *  * "Year"
-     *
-     * The second is a "Duration" based `Period`s. An example might be to repeat a
-     * 5 minute interval every 10 second, starting at some beginning time.
-     *
-     * To define an duration `Period`, you need to specify up to three parts:
+     * To define a `Period`, you need to the duration of the frequency that the
+     * period repeats. Optionally you can specify and offset for the period.
      *
      *  * the `stride` of the period which is how often the beginning of the
      *    duration of time repeats itself. This is a `Duration`, i.e. the duration
      *    of the length of the stride, or basically the length between the beginning
      *    of each period repeat. In the above example that would be `duration("10s")`.
-     *  * the `length` of the period, which is the range of time forward of the
-     *    repeating beginning time of the period, which defaults to the stride.
-     *    This is a `Duration`. In the above example that would be `duration("5m")`.
      *  * the `offset`, a point in time to calculate the period from, which defaults
      *    to Jan 1, 1970 UTC or timestamp 0. This is specified as a `Time`.
      *
-     * Repeats of the period are given an index to represent that specific repeat.
-     * That index is represented by an `Index` object and can also be represented
-     * by a string that encodes the specific repeat.
-     *
-     * Since an `Index` can be a key for a `TimeSeries`, a repeated period and
-     * associated data can be represented.
-     *
-     * ```
-     * |<- offset ->|<- length ----->|   |<-- stride
-     *              |                    |   |<-- stride
-     *              [----------------]       |   |
-     *                  [----------------]
-     *                      [----------------]  <-- each repeat has an Index
-     *                          [----------------]
-     *                                ...
-     * ```
-     *
      */
-    constructor(type: PeriodType, frequency?: Duration, length?: Duration, offset?: Time) {
-        this._type = type;
-        if (type === PeriodType.Duration) {
-            if (!frequency) {
-                throw new Error("Expected frequency to be supplied to Period constructor");
-            }
-            this._frequency = frequency;
-            this._length = length || frequency;
-            this._offset = offset ? offset.timestamp().getTime() : 0;
-        }
+    constructor(frequency?: Duration, offset?: Time) {
+        this._frequency = frequency;
+        this._offset = offset ? offset.timestamp().getTime() : 0;
+    }
+
+    frequency() {
+        return this._frequency;
+    }
+
+    offset() {
+        return this._offset;
+    }
+
+    every(frequency: Duration): Period {
+        return new Period(frequency, time(this._offset));
+    }
+
+    offsetBy(offset: Time): Period {
+        return new Period(this._frequency, offset);
     }
 
     /**
-     * Returns the period repeats that cover (in whole or in part)
-     * the time or timerange supplied. In this example, B, C, D and E
-     * will be returned. Each repeat is returned as an `Index`:
-     * ```
-     *                    t (Time)
-     *                    |
-     *  [----------------]|                    A
-     *      [-------------|--]                 B
-     *          [---------|------]             C
-     *              [-----|----------]         D
-     *                  [-|--------------]     E
-     *                    | [----------------] F
-     * ```
-     *
+     * Returns true if the `Time` supplied is aligned with this `Period`.
      */
-    getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index> {
-        let t1;
-        let t2;
-        if (t instanceof Time) {
-            t1 = t;
-            t2 = t;
-        } else if (t instanceof TimeRange) {
-            t1 = t.begin();
-            t2 = t.end();
-        }
-        console.log("t1, t2", t1, t2);
-        let result = Immutable.OrderedSet<Index>();
-        if (this._type === PeriodType.Duration) {
-            let prefix = `${this._frequency}`;
-            if (this._length && this._length !== this._frequency) {
-                prefix += `:${this._length}`;
-            }
-            if (this._offset) {
-                prefix += `+${this._offset}`;
-            }
-            console.log("prefix", prefix);
+    isAligned(time: Time) {
+        return (+time - +this._offset) / +this._frequency % 1 == 0;
+    }
 
-            const scanBegin = +t1 - +this._length;
-            let periodIndex = Math.ceil(scanBegin / +this._frequency);
-            const indexes = [];
-            console.log("X", this._length, +this._frequency, this._frequency);
-            while (periodIndex * +this._frequency < +t2) {
-                result = result.add(new Index(`${prefix}-${periodIndex}`));
-                periodIndex += 1;
-            }
+    /**
+     * Given a time, find the next time aligned to the period.
+     */
+    next(time: Time): Time {
+        const index = Math.ceil((+time - +this._offset) / +this._frequency);
+        const next = index * +this._frequency + this._offset;
+        return next === +time ? new Time(next + +this._frequency) : new Time(next);
+    }
+
+    /**
+     * Returns `Time`s within the given TimeRange that align with this
+     * `Period`.
+     * 
+     * @example
+     * ```
+     * const range = timerange(time("2017-07-21T09:30:00.000Z"), time("2017-07-21T09:45:00.000Z"))
+     * const everyFiveMinutes = period()
+     *     .every(duration("5m"))
+     *     .offsetBy(time("2017-07-21T09:38:00.000Z"));
+     * const result = everyFiveMinutes.within(range);  // 9:33am, 9:38am, 9:43am
+     * ```
+     */
+    within(timerange: TimeRange): Immutable.List<Time> {
+        let result = Immutable.List<Time>();
+
+        const t1 = time(timerange.begin());
+        const t2 = time(timerange.end());
+
+        let scan = this.isAligned(t1) ? t1 : this.next(t1);
+        while (+scan <= +t2) {
+            result = result.push(scan);
+            scan = this.next(scan);
         }
-        console.log("-->", result);
+
         return result;
     }
 }
 
-function period(frequency?: Duration, length?: Duration, offset?: Time): Period {
-    return new Period(PeriodType.Duration, frequency, length, offset);
-}
-function daily() {
-    return new Period(PeriodType.Day);
-}
-function monthly() {
-    return new Period(PeriodType.Month);
-}
-function yearly() {
-    return new Period(PeriodType.Year);
+function period(frequency?: Duration, offset?: Time): Period {
+    return new Period(frequency, offset);
 }
 
-export { period, daily, monthly, yearly };
+export { period };
