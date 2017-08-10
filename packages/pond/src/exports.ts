@@ -31,6 +31,7 @@ import { stream } from "./stream";
 import { time, Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
 import { timeSeries, indexedSeries, timeRangeSeries, TimeSeries } from "./timeseries";
+import { Trigger, WindowingOptions } from "./types";
 import util from "./util";
 import { windowed, WindowedCollection } from "./windowed";
 
@@ -67,5 +68,6 @@ export { stream };
 export { time, Time };
 export { timerange, TimeRange };
 export { timeSeries, indexedSeries, timeRangeSeries, TimeSeries };
+export { Trigger, WindowingOptions };
 export { util };
 export { windowed, WindowedCollection } from "./windowed";
