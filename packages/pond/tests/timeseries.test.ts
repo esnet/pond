@@ -644,7 +644,7 @@ describe("Comparing TimeSeries", () => {
         expect(TimeSeries.is(series, otherSeries)).toBeTruthy();
     });
 
-    it("can use the is() comparator to compare a series as as false", () => {
+    it("can use the is() comparator to compare a series and a value different series as false", () => {
         const series = timeSeries(sumPart1);
         const otherSeries = timeSeries(sumPart2);
         expect(TimeSeries.is(series, otherSeries)).toBeFalsy();
