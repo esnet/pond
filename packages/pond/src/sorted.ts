@@ -90,12 +90,15 @@ export class SortedCollection<T extends Key> extends Collection<T> {
         const size1 = collection1.size();
         const size2 = collection2.size();
 
-        if (size1 != size2 ) {
+        if (size1 != size2) {
             return false;
         } else {
-            collection1.forEach((e, k) => {
-                result = result && Event.is(e, collection2.at(k));
-            });
+            for (let i = 0; i < size1; i++) {
+                result = result && Event.is(collection1.at(i), collection2.at(i));
+            }
+            // collection1.forEach((e, k) => {
+            //     result = result && Event.is(e, collection2.at(k));
+            // });
             return result;
         }
     }

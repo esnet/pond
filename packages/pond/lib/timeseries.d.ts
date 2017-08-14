@@ -292,6 +292,10 @@ export declare class TimeSeries<T extends Key> {
      */
     columns(): string[];
     /**
+     * Returns the list of Events in the `Collection` of events for this `TimeSeries`
+     */
+    eventList(): Immutable.List<Event<T>>;
+    /**
      * Returns the internal `Collection` of events for this `TimeSeries`
      */
     collection(): SortedCollection<T>;

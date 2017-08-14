@@ -534,6 +534,13 @@ export class TimeSeries<T extends Key> {
     }
 
     /**
+     * Returns the list of Events in the `Collection` of events for this `TimeSeries`
+     */
+    eventList() {
+        return this.collection().eventList();
+    }
+
+    /**
      * Returns the internal `Collection` of events for this `TimeSeries`
      */
     collection(): SortedCollection<T> {
