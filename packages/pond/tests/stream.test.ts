@@ -8,6 +8,7 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import { collection, Collection } from "../src/collection";
+import { duration } from "../src/duration";
 import { event, Event } from "../src/event";
 import { avg, count, keep, sum } from "../src/functions";
 import { grouped, GroupedCollection } from "../src/grouped";
@@ -17,6 +18,7 @@ import { stream } from "../src/stream";
 import { time, Time } from "../src/time";
 import { TimeRange } from "../src/timerange";
 import { Trigger, WindowingOptions } from "../src/types";
+import { window } from "../src/window";
 
 import { AlignmentMethod, TimeAlignment } from "../src/types";
 
@@ -36,11 +38,11 @@ describe("Streaming", () => {
         });
 
         const result = [];
-
+        const everyMinute = period(duration("1m"));
         const s = stream()
             .align({
                 fieldSpec: "value",
-                window: period("1m"),
+                period: everyMinute,
                 method: AlignmentMethod.Linear
             })
             .rate({ fieldSpec: "value", allowNegative: false })
@@ -71,10 +73,11 @@ describe("Streaming", () => {
         ];
 
         const result: { [key: string]: Collection<Time> } = {};
+        const everyThirtyMinutes = window(duration("30m"));
         let calls = 0;
         const source = stream()
             .groupByWindow({
-                window: period("30m"),
+                window: everyThirtyMinutes,
                 trigger: Trigger.perEvent
             })
             .output((collection, key) => {
@@ -99,10 +102,11 @@ describe("Streaming", () => {
         ];
 
         const result: { [key: string]: Event<Index> } = {};
+        const everyThirtyMinutes = window(duration("30m"));
         let calls = 0;
         const source = stream<Time>()
             .groupByWindow({
-                window: period("30m"),
+                window: everyThirtyMinutes,
                 trigger: Trigger.perEvent
             })
             .aggregate({
@@ -136,9 +140,11 @@ describe("Streaming", () => {
 
         const result: { [key: string]: Event<Index> } = {};
         let outputCalls = 0;
+        const everyThirtyMinutes = window(duration("30m"));
+
         const source = stream<Time>()
             .groupByWindow({
-                window: period("30m"),
+                window: everyThirtyMinutes,
                 trigger: Trigger.onDiscardedWindow
             })
             .aggregate({

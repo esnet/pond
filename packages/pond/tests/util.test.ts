@@ -18,18 +18,47 @@ import * as moment from "moment";
 
 import Util from "../src/util";
 
-it("can check a string to make sure its a valid index string", () => {
-    expect(Util.isIndexString("5m-5002093")).toBe(true);
-    expect(Util.isIndexString("5m:1h-5002093")).toBe(true);
-    expect(Util.isIndexString("5002093")).toBe(false);
-    expect(Util.isIndexString("bob")).toBe(false);
-    expect(Util.isIndexString("5x-50020")).toBe(false);
-    expect(Util.isIndexString("5d")).toBe(false);
-    expect(Util.isIndexString("5d-")).toBe(false);
-    expect(Util.isIndexString("5d-xxx")).toBe(false);
-});
+describe("Util", () => {
+    it("can check a string to make sure its a valid index string", () => {
+        expect(Util.isIndexString("5m-5002093")).toBe(true);
+        expect(Util.isIndexString("1h@5m-5002093")).toBe(true);
+        expect(Util.isIndexString("1h@5m+123-5002093")).toBe(true);
+        expect(Util.isIndexString("5002093")).toBe(false);
+        expect(Util.isIndexString("bob")).toBe(false);
+        expect(Util.isIndexString("5x-50020")).toBe(false);
+        expect(Util.isIndexString("5d")).toBe(false);
+        expect(Util.isIndexString("5d-")).toBe(false);
+        expect(Util.isIndexString("5d-xxx")).toBe(false);
+        expect(Util.isIndexString("1h@5m+xxx-5002093")).toBe(false);
+    });
 
-it("can convert an index string into a timeseries", () => {
-    const timerange = Util.timeRangeFromIndexString("5m:1h-5002093", false);
-    expect(8).toBe(8);
+    it("can decode a period index string", () => {
+        const { decodedPeriod, decodedDuration, decodedIndex } = Util.decodeIndexString(
+            "5m-5002093"
+        );
+        expect(+decodedDuration).toBe(300000);
+        expect(+decodedPeriod.frequency()).toBe(300000);
+        expect(+decodedPeriod.offset()).toBe(0);
+        expect(+decodedIndex).toBe(5002093);
+    });
+
+    it("can decode a period index string with an offset", () => {
+        const { decodedPeriod, decodedDuration, decodedIndex } = Util.decodeIndexString(
+            "5m+1234-5002093"
+        );
+        expect(+decodedDuration).toBe(300000);
+        expect(+decodedPeriod.frequency()).toBe(300000);
+        expect(+decodedPeriod.offset()).toBe(1234);
+        expect(+decodedIndex).toBe(5002093);
+    });
+
+    it("can decode a period index string with a duration and frequency", () => {
+        const { decodedPeriod, decodedDuration, decodedIndex } = Util.decodeIndexString(
+            "1h@5m+1234-5002093"
+        );
+        expect(+decodedDuration).toBe(3600000);
+        expect(+decodedPeriod.frequency()).toBe(300000);
+        expect(+decodedPeriod.offset()).toBe(1234);
+        expect(+decodedIndex).toBe(5002093);
+    });
 });

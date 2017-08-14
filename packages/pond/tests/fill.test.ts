@@ -20,6 +20,7 @@ import { collection } from "../src/collection";
 import { event, Event } from "../src/event";
 import { stream } from "../src/stream";
 import { time } from "../src/time";
+import { timeSeries } from "../src/timeseries";
 
 import { FillMethod } from "../src/types";
 
@@ -60,7 +61,7 @@ const AVAILABILITY_DATA = {
 };
 
 it("can use the TimeSeries.fill() to fill missing values with zero", () => {
-    const ts = new TimeSeries({
+    const ts = timeSeries({
         name: "traffic",
         columns: ["time", "direction"],
         points: [
@@ -78,12 +79,11 @@ it("can use the TimeSeries.fill() to fill missing values with zero", () => {
     //
     const newTS = ts.fill({
         fieldSpec: ["direction.in", "direction.out"],
-        method: "zero",
+        method: FillMethod.Zero,
         limit: 3
     });
 
     expect(newTS.size()).toBe(6);
-
     expect(newTS.at(0).get("direction.out")).toBe(0);
     expect(newTS.at(2).get("direction.out")).toBe(0);
     expect(newTS.at(1).get("direction.in")).toBe(0);
@@ -93,7 +93,7 @@ it("can use the TimeSeries.fill() to fill missing values with zero", () => {
     //
     const newTS2 = ts.fill({
         fieldSpec: "direction.in",
-        method: "zero",
+        method: FillMethod.Zero,
         limit: 4
     });
 
@@ -104,7 +104,7 @@ it("can use the TimeSeries.fill() to fill missing values with zero", () => {
 });
 
 it("can use TimeSeries.fill() on a more complex example with nested paths", () => {
-    const ts = new TimeSeries({
+    const ts = timeSeries({
         name: "traffic",
         columns: ["time", "direction"],
         points: [
@@ -118,55 +118,51 @@ it("can use TimeSeries.fill() on a more complex example with nested paths", () =
     });
 
     const newTS = ts.fill({
+        method: FillMethod.Zero,
         fieldSpec: ["direction.out.tcp", "direction.in.udp"]
     });
 
     expect(newTS.at(0).get("direction.in.udp")).toBe(3);
-    expect(newTS.at(1).get("direction.in.udp")).toBe(0);
-    // fill
-    expect(newTS.at(2).get("direction.in.udp")).toBe(0);
-    // fill
-    expect(newTS.at(3).get("direction.in.udp")).toBe(0);
-    // fill
+
+    expect(newTS.at(1).get("direction.in.udp")).toBe(0); // fill
+    expect(newTS.at(2).get("direction.in.udp")).toBe(0); // fill
+    expect(newTS.at(3).get("direction.in.udp")).toBe(0); // fill
     expect(newTS.at(4).get("direction.in.udp")).toBe(4);
     expect(newTS.at(5).get("direction.in.udp")).toBe(5);
 
     expect(newTS.at(0).get("direction.out.tcp")).toBe(2);
     expect(newTS.at(1).get("direction.out.tcp")).toBe(4);
-    expect(newTS.at(2).get("direction.out.tcp")).toBe(0);
-    // fill
-    expect(newTS.at(3).get("direction.out.tcp")).toBe(0);
-    // fill
+    expect(newTS.at(2).get("direction.out.tcp")).toBe(0); // fill
+    expect(newTS.at(3).get("direction.out.tcp")).toBe(0); // fill
     expect(newTS.at(4).get("direction.out.tcp")).toBe(6);
     expect(newTS.at(5).get("direction.out.tcp")).toBe(8);
 
     //
-    // do it again, but only fill the out.tcp
+    // Do it again, but only fill the out.tcp
     //
-    const newTS2 = ts.fill({ fieldSpec: ["direction.out.tcp"] });
+
+    const newTS2 = ts.fill({
+        method: FillMethod.Zero,
+        fieldSpec: ["direction.out.tcp"]
+    });
 
     expect(newTS2.at(0).get("direction.out.tcp")).toBe(2);
     expect(newTS2.at(1).get("direction.out.tcp")).toBe(4);
-    expect(newTS2.at(2).get("direction.out.tcp")).toBe(0);
-    // fill
-    expect(newTS2.at(3).get("direction.out.tcp")).toBe(0);
-    // fill
+    expect(newTS2.at(2).get("direction.out.tcp")).toBe(0); // fill
+    expect(newTS2.at(3).get("direction.out.tcp")).toBe(0); // fill
     expect(newTS2.at(4).get("direction.out.tcp")).toBe(6);
     expect(newTS2.at(5).get("direction.out.tcp")).toBe(8);
 
     expect(newTS2.at(0).get("direction.in.udp")).toBe(3);
-    expect(newTS2.at(1).get("direction.in.udp")).toBeNull();
-    // no fill
-    expect(newTS2.at(2).get("direction.in.udp")).toBeNull();
-    // no fill
-    expect(newTS2.at(3).get("direction.in.udp")).toBeNull();
-    // no fill
+    expect(newTS2.at(1).get("direction.in.udp")).toBeNull(); // no fill
+    expect(newTS2.at(2).get("direction.in.udp")).toBeNull(); // no fill
+    expect(newTS2.at(3).get("direction.in.udp")).toBeNull(); // no fill
     expect(newTS2.at(4).get("direction.in.udp")).toBe(4);
     expect(newTS2.at(5).get("direction.in.udp")).toBe(5);
 });
 
 it("can use TimeSeries.fill() with limit pad and zero filling", () => {
-    const ts = new TimeSeries({
+    const ts = timeSeries({
         name: "traffic",
         columns: ["time", "direction"],
         points: [
@@ -187,7 +183,7 @@ it("can use TimeSeries.fill() with limit pad and zero filling", () => {
     // verify fill limit for zero fill
     const zeroTS = ts.fill({
         fieldSpec: ["direction.in", "direction.out"],
-        method: "zero",
+        method: FillMethod.Zero,
         limit: 2
     });
 
@@ -219,7 +215,7 @@ it("can use TimeSeries.fill() with limit pad and zero filling", () => {
     // verify fill limit for pad fill
     const padTS = ts.fill({
         fieldSpec: ["direction.in", "direction.out"],
-        method: "pad",
+        method: FillMethod.Pad,
         limit: 2
     });
 
@@ -249,7 +245,7 @@ it("can use TimeSeries.fill() with limit pad and zero filling", () => {
 });
 
 it("can do linear interpolation fill (test_linear)", () => {
-    const ts = new TimeSeries({
+    const ts = timeSeries({
         name: "traffic",
         columns: ["time", "direction"],
         points: [
@@ -265,7 +261,7 @@ it("can do linear interpolation fill (test_linear)", () => {
 
     const result = ts.fill({
         fieldSpec: ["direction.in", "direction.out"],
-        method: "linear"
+        method: FillMethod.Linear
     });
 
     expect(result.size()).toBe(7);
@@ -286,7 +282,7 @@ it("can do linear interpolation fill (test_linear)", () => {
 });
 
 it("can do linear interpolation fill with a pipeline (test_linear_list)", () => {
-    const ts = new TimeSeries({
+    const ts = timeSeries({
         name: "traffic",
         columns: ["time", "direction"],
         points: [
@@ -300,38 +296,29 @@ it("can do linear interpolation fill with a pipeline (test_linear_list)", () => 
         ]
     });
 
-    const result = Pipeline()
-        .from(ts)
-        .fill({ fieldSpec: "direction.in", method: "linear" })
-        .fill({ fieldSpec: "direction.out", method: "linear" })
-        .toEventList();
+    const result = ts
+        .fill({ fieldSpec: "direction.in", method: FillMethod.Linear })
+        .fill({ fieldSpec: "direction.out", method: FillMethod.Linear });
 
-    expect(result.length).toBe(7);
+    expect(result.size()).toBe(7);
 
-    expect(result[0].get("direction.in")).toBe(1);
-    expect(result[1].get("direction.in")).toBe(1.6666666666666665);
-    // filled
-    expect(result[2].get("direction.in")).toBe(2.333333333333333);
-    // filled
-    expect(result[3].get("direction.in")).toBe(3);
-    expect(result[4].get("direction.in")).toBe(4.0);
-    // filled
-    expect(result[5].get("direction.in")).toBe(5);
+    expect(result.at(0).get("direction.in")).toBe(1);
+    expect(result.at(1).get("direction.in")).toBe(1.6666666666666665); // filled
+    expect(result.at(2).get("direction.in")).toBe(2.333333333333333); // filled
+    expect(result.at(3).get("direction.in")).toBe(3);
+    expect(result.at(4).get("direction.in")).toBe(4.0); // filled
+    expect(result.at(5).get("direction.in")).toBe(5);
 
-    expect(result[0].get("direction.out")).toBe(2);
-    expect(result[1].get("direction.out")).toBe(2.4347826086956523);
-    // filled
-    expect(result[2].get("direction.out")).toBe(2.869565217391304);
-    // filled
-    expect(result[3].get("direction.out")).toBe(3.3043478260869565);
-    // filled
-    expect(result[4].get("direction.out")).toBe(7.652173913043478);
-    // filled
-    expect(result[5].get("direction.out")).toBe(12);
+    expect(result.at(0).get("direction.out")).toBe(2);
+    expect(result.at(1).get("direction.out")).toBe(2.4347826086956523); // filled
+    expect(result.at(2).get("direction.out")).toBe(2.869565217391304); // filled
+    expect(result.at(3).get("direction.out")).toBe(3.3043478260869565); // filled
+    expect(result.at(4).get("direction.out")).toBe(7.652173913043478); // filled
+    expect(result.at(5).get("direction.out")).toBe(12);
 });
 
 it("can do assymetric linear interpolation (test_assymetric_linear_fill)", () => {
-    const ts = new TimeSeries({
+    const ts = timeSeries({
         name: "traffic",
         columns: ["time", "direction"],
         points: [
@@ -347,7 +334,7 @@ it("can do assymetric linear interpolation (test_assymetric_linear_fill)", () =>
 
     const result = ts.fill({
         fieldSpec: ["direction.in", "direction.out"],
-        method: "linear"
+        method: FillMethod.Linear
     });
 
     expect(result.at(0).get("direction.in")).toBe(1);
@@ -376,7 +363,7 @@ const STREAM_EVENTS = [
     event(time(1400425954000), Immutable.Map({ value: null }))
 ];
 
-fit("can do streaming fill with limit (linear fill)", () => {
+it("can do streaming fill with limit (linear fill)", () => {
     const results: Event[] = [];
 
     const source = stream()
@@ -420,7 +407,7 @@ it("can do streaming fill with limit (pad fill)", () => {
     expect(results[7].get("value")).toBeNull(); // because of limit
 });
 
-fit("can do streaming fill with limit (zero fill)", () => {
+it("can do streaming fill with limit (zero fill)", () => {
     const results: Event[] = [];
 
     const source = stream()

@@ -13,6 +13,8 @@ declare const it: any;
 declare const expect: any;
 
 import { Index, index } from "../src/index";
+import { daily } from "../src/window";
+import { time } from "../src/time";
 
 it("can create a daily index", done => {
     const idx = index("1d-12355");
@@ -94,26 +96,5 @@ it("can create a day index", done => {
     const idx = index("2014-09-17");
     const expected = "17 Sep 2014";
     expect(idx.toNiceString("DD MMM YYYY")).toBe(expected);
-    done();
-});
-
-it("can create a day index for a date", done => {
-    const date = new Date(1429673400000);
-    const expected = "2015-04-21";
-    expect(Index.getDailyIndexString(date)).toBe(expected);
-    done();
-});
-
-it("can create a month index for a date", done => {
-    const date = new Date(1429673400000);
-    const expected = "2015-04";
-    expect(Index.getMonthlyIndexString(date)).toBe(expected);
-    done();
-});
-
-it("can create a year index for a date", done => {
-    const date = new Date(1429673400000);
-    const expected = "2015";
-    expect(Index.getYearlyIndexString(date)).toBe(expected);
     done();
 });

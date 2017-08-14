@@ -1,4 +1,5 @@
 import * as Immutable from "immutable";
+import { Collection } from "./collection";
 import { Event } from "./event";
 import { Index } from "./index";
 import { Key } from "./key";
@@ -19,7 +20,7 @@ import {
 } from "./types";
 export interface TimeSeriesWireFormat {
     name?: string;
-    utc?: boolean;
+    tz?: string;
     columns: string[];
     points: any[];
     [propName: string]: any;
@@ -364,6 +365,19 @@ export declare class TimeSeries<T extends Key> {
      */
     quantile(quantity: number, fieldPath?: string, interp?: InterpolationType): any[];
     /**
+     * Iterate over the events in this `TimeSeries`. Events are in the
+     * order that they were added, unless the underlying Collection has since been
+     * sorted.
+     *
+     * @example
+     * ```
+     * series.forEach((e, k) => {
+     *     console.log(e, k);
+     * })
+     * ```
+     */
+    forEach<M extends Key>(sideEffect: (value?: Event<T>, index?: number) => any): number;
+    /**
      * Takes an operator that is used to remap events from this `TimeSeries` to
      * a new set of `Event`'s.
      */
@@ -465,7 +479,7 @@ export declare class TimeSeries<T extends Key> {
      * });
      * ```
      */
-    align(options: AlignmentOptions): TimeSeries<Key>;
+    align(options: AlignmentOptions): TimeSeries<T>;
     /**
      * Returns the derivative of the `TimeSeries` for the given columns. The result will
      * be per second. Optionally you can substitute in `null` values if the rate
@@ -549,7 +563,6 @@ export declare class TimeSeries<T extends Key> {
      * ```
      *
      */
-    monthlyRollup(options: RollupOptions<T>): TimeSeries<Index>;
     /**
      * Builds a new `TimeSeries` by dividing events into years.
      *
@@ -562,14 +575,13 @@ export declare class TimeSeries<T extends Key> {
      * ```
      *
      */
-    yearlyRollup(options: RollupOptions<T>): TimeSeries<Index>;
     /**
      * @private
      *
      * Internal function to build the `TimeSeries` rollup functions using
      * an aggregator Pipeline.
      */
-    _rollup(options: RollupOptions<T>): TimeSeries<Key>;
+    _rollup(options: RollupOptions<T>): TimeSeries<Index>;
     /**
      * Builds multiple `Collection`s, each collects together
      * events within a window of size `windowSize`. Note that these
@@ -583,7 +595,7 @@ export declare class TimeSeries<T extends Key> {
      * ```
      *
      */
-    collectByFixedWindow(options: RollupOptions<T>): any;
+    collectByWindow(options: RollupOptions<T>): Immutable.Map<string, Collection<T>>;
     /**
      * Static function to compare two `TimeSeries` to each other. If the `TimeSeries`
      * are of the same instance as each other then equals will return true.

@@ -7,8 +7,21 @@ import { Period } from "./period";
 export declare enum WindowType {
     Day = 1,
     Month = 2,
-    Year = 3,
-    Duration = 4
+    Week = 3,
+    Year = 4
+}
+export abstract class WindowBase {
+    abstract getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
+}
+export declare class DayWindow extends WindowBase {
+    private _tz;
+    constructor(tz?: string);
+    /**
+     * Given an index string representing a day (e.g. "2015-08-22"), and optionally
+     * the timezone (default is UTC), return the corresponding `TimeRange`.
+     */
+    static timeRangeOf(indexString: string, tz?: string): void;
+    getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
 /**
  * A `Window` is a specification for repeating range of time range which is
@@ -25,8 +38,7 @@ export declare enum WindowType {
  * Window(period("5m"), duration("1h"))
  * ```
  */
-export declare class Window {
-    private _type;
+export declare class Window extends WindowBase {
     private _period;
     private _duration;
     /**
@@ -61,7 +73,8 @@ export declare class Window {
      * ```
      *
      */
-    constructor(type: WindowType, duration: Duration, period?: Period);
+    constructor(duration: Duration, period?: Period);
+    toString(): string;
     /**
      * Returns the underlying period of the Window
      */
@@ -98,7 +111,5 @@ export declare class Window {
     getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
 declare function window(duration: Duration, period?: Period): Window
-declare function daily(): any
-declare function monthly(): any
-declare function yearly(): any
-export { window, daily, monthly, yearly };
+declare function daily(tz?: string): DayWindow
+export { window, daily };

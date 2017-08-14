@@ -10,11 +10,13 @@
 
 import * as Immutable from "immutable";
 import * as _ from "lodash";
-import * as moment from "moment";
+import * as moment from "moment-timezone";
 import Moment = moment.Moment;
 import { Duration, duration } from "./duration";
 import { Index, index } from "./index";
+import { time } from "./time";
 import { TimeRange, timerange } from "./timerange";
+import { period, Period } from "./period";
 
 const UNITS = {
     n: { label: "nanoseconds", length: 1 / 1000000 },
@@ -49,6 +51,8 @@ function leftPad(value: number): string {
     return `${value < 10 ? "0" : ""}${value}`;
 }
 
+const indexStringRegex = /^((([0-9]+)([smhdlun]))@)*(([0-9]+)([smhdlun]))(\+([0-9]+))*-([0-9]+)$/;
+
 /**
  * Returns a duration in milliseconds given a window period.
  * For example "30s" (30 seconds) should return 30000ms. Accepts
@@ -58,13 +62,40 @@ function leftPad(value: number): string {
 function windowDuration(period): number {
     // window should be two parts, a number and a letter if it's a
     // range based index, e.g "1h".
-    const regex = /([0-9]+)([smhd])/;
-    const parts = regex.exec(period);
+
+    const parts = indexStringRegex.exec(period);
     if (parts && parts.length >= 3) {
         const num = parseInt(parts[1], 10);
         const unit = parts[2];
         return num * UNITS[unit].length * 1000;
     }
+}
+
+export interface DecodedIndexString {
+    decodedPeriod: Period;
+    decodedDuration: Duration;
+    decodedIndex: number;
+}
+
+/**
+ * Decodes a period based index string. The result is a structure containing:
+ *  - decodedPeriod
+ *  - decodedDuration
+ *  - decodedIndex
+ */
+function decodeIndexString(indexString: string): DecodedIndexString {
+    const parts = indexStringRegex.exec(indexString);
+    const [g1, d, g2, g3, g4, frequency, g6, g7, g8, offset, index] = parts;
+
+    const decodedPeriod = period(duration(frequency), offset ? time(parseInt(offset, 10)) : null);
+    const decodedDuration = d ? duration(d) : decodedPeriod.frequency();
+    const decodedIndex = parseInt(index, 10);
+
+    return { decodedPeriod, decodedDuration, decodedIndex };
+}
+
+function isIndexString(indexString: string): boolean {
+    return indexStringRegex.test(indexString);
 }
 
 /**
@@ -77,16 +108,14 @@ function windowPositionFromDate(period: string, date: Date) {
     return Math.floor((dd /= duration));
 }
 
-function isIndexString(indexString: string): boolean {
-    const regex = /([0-9]+)([smhdlun])-([0-9]+)/;
-    return regex.test(indexString);
-}
-
 /**
- * Given an index string, return the `TimeRange` that represents.
+ * Given an index string, return the `TimeRange` that represents. This is the
+ * main parsing function as far as taking an index string and decoding it into
+ * the timerange that it represents. For example, this is how the Index
+ * constructor is able to take a string and represent a timerange. It is also
+ * used when windowing to determine trigger times.
  */
-function timeRangeFromIndexString(indexString: string, utc: boolean): TimeRange {
-    const isUTC = !_.isUndefined(utc) ? utc : true;
+function timeRangeFromIndexString(indexString: string, tz: string = "Etc/UTC"): TimeRange {
     const parts = indexString.split("-");
 
     let beginTime: Moment;
@@ -103,43 +132,35 @@ function timeRangeFromIndexString(indexString: string, utc: boolean): TimeRange 
                 const year = parseInt(parts[0], 10);
                 const month = parseInt(parts[1], 10);
                 const day = parseInt(parts[2], 10);
-                beginTime = isUTC
-                    ? moment.utc([year, month - 1, day])
-                    : moment([year, month - 1, day]);
-                endTime = isUTC
-                    ? moment.utc(beginTime).endOf("day")
-                    : moment(beginTime).endOf("day");
+                beginTime = moment.tz([year, month - 1, day], tz);
+                endTime = moment.tz([year, month - 1, day], tz).endOf("day");
             }
             break;
 
         case 2:
             if (isIndexString(indexString)) {
-                const [prefix, periodIndex] = parts;
-                const [frequency, length = frequency] = prefix.split(":");
-                const periodStride = +duration(frequency);
-                const periodLength = +duration(length);
-                const index = parseInt(periodIndex, 10);
-
-                beginTime = isUTC ? moment.utc(index * periodStride) : moment(index * periodStride);
-                endTime = isUTC
-                    ? moment.utc(+beginTime + periodLength)
-                    : moment(+beginTime + periodLength);
+                // Period index string e.g. 1d-1234
+                const { decodedPeriod, decodedDuration, decodedIndex } = decodeIndexString(
+                    indexString
+                );
+                const beginTimestamp = decodedIndex * +decodedPeriod.frequency();
+                const endTimestamp = beginTimestamp + +decodedDuration;
+                beginTime = moment(beginTimestamp).tz(tz);
+                endTime = moment(endTimestamp).tz(tz);
             } else if (!_.isNaN(parseInt(parts[0], 10)) && !_.isNaN(parseInt(parts[1], 10))) {
                 // A month and year e.g 2015-09
                 const year = parseInt(parts[0], 10);
                 const month = parseInt(parts[1], 10);
-                beginTime = isUTC ? moment.utc([year, month - 1]) : moment([year, month - 1]);
-                endTime = isUTC
-                    ? moment.utc(beginTime).endOf("month")
-                    : moment(beginTime).endOf("month");
+                beginTime = moment.tz([year, month - 1], tz);
+                endTime = moment.tz([year, month - 1], tz).endOf("month");
             }
             break;
 
         // A year e.g. 2015
         case 1:
-            const year = parts[0];
-            beginTime = isUTC ? moment.utc([year]) : moment([year]);
-            endTime = isUTC ? moment.utc(beginTime).endOf("year") : moment(beginTime).endOf("year");
+            const year = parseInt(parts[0], 10);
+            beginTime = moment.tz([year], tz);
+            endTime = moment.tz([year], tz).endOf("year");
             break;
     }
 
@@ -253,7 +274,7 @@ function timeRangeFromArg(arg: TimeRange | string | Date[]): TimeRange {
  * Function to turn a constructor of two args into an `Index`.
  * The second arg defines the timezone (local or UTC)
  */
-function indexFromArgs(arg1: string | Index, arg2: boolean = true): Index {
+function indexFromArgs(arg1: string | Index, arg2: string = "Etc/UTC"): Index {
     if (_.isString(arg1)) {
         return index(arg1, arg2);
     } else if (arg1 instanceof Index) {
@@ -306,6 +327,7 @@ export default {
     isValid,
     leftPad,
     isIndexString,
+    decodeIndexString,
     niceIndexString,
     timeRangeFromArg,
     timeRangeFromIndexString,

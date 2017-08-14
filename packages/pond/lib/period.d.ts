@@ -29,6 +29,7 @@ export declare class Period {
      *
      */
     constructor(frequency?: Duration, offset?: Time);
+    toString(): string;
     frequency(): Duration;
     offset(): number;
     every(frequency: Duration): Period;

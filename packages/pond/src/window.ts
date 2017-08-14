@@ -10,19 +10,73 @@
 
 import * as Immutable from "immutable";
 import * as _ from "lodash";
-import * as moment from "moment";
+import * as moment from "moment-timezone";
 
 import { Duration, duration } from "./duration";
-import { Index } from "./index";
-import { Time } from "./time";
+import { Index, index } from "./index";
+import { Time, time } from "./time";
 import { TimeRange } from "./timerange";
 import { Period } from "./period";
 
 export enum WindowType {
     Day = 1,
     Month,
-    Year,
-    Duration
+    Week,
+    Year
+}
+
+export abstract class WindowBase {
+    public abstract getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
+}
+
+export class DayWindow extends WindowBase {
+    private _tz: string;
+
+    constructor(tz: string = "Etc/UTC") {
+        super();
+        this._tz = tz;
+    }
+
+    /**
+     * Given an index string representing a day (e.g. "2015-08-22"), and optionally
+     * the timezone (default is UTC), return the corresponding `TimeRange`.
+     */
+    public static timeRangeOf(indexString: string, tz: string = "Etc/UTC") {
+        const parts = indexString.split("-");
+        if (parts.length !== 3) throw new Error("Index string for day is badly formatted");
+
+        let beginTime: moment;
+        let endTime: moment;
+        if (
+            !_.isNaN(parseInt(parts[0], 10)) &&
+            !_.isNaN(parseInt(parts[1], 10)) &&
+            !_.isNaN(parseInt(parts[2], 10))
+        ) {
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const day = parseInt(parts[2], 10);
+            beginTime = moment.tz([year, month - 1, day], tz);
+            endTime = moment.tz([year, month - 1, day], tz).endOf("day");
+        }
+    }
+    public getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index> {
+        let results = Immutable.OrderedSet<Index>();
+        let t1: moment;
+        let t2: moment;
+        if (t instanceof Time) {
+            t1 = moment(+t).tz(this._tz);
+            t2 = moment(+t).tz(this._tz);
+        } else if (t instanceof TimeRange) {
+            t1 = moment(+t.begin()).tz(this._tz);
+            t2 = moment(+t.end()).tz(this._tz);
+        }
+        let tt = t1;
+        while (tt.isSameOrBefore(t2)) {
+            results = results.add(index(t1.format("YYYY-MM-DD"), this._tz));
+            tt = tt.add(1, "d");
+        }
+        return results;
+    }
 }
 
 /**
@@ -40,8 +94,7 @@ export enum WindowType {
  * Window(period("5m"), duration("1h"))
  * ```
  */
-export class Window {
-    private _type: WindowType;
+export class Window extends WindowBase {
     private _period: Period;
     private _duration: Duration;
 
@@ -77,13 +130,21 @@ export class Window {
      * ```
      *
      */
-    constructor(type: WindowType, duration: Duration, period?: Period) {
-        this._type = type;
+    constructor(duration: Duration, period?: Period) {
+        super();
         this._duration = duration;
         if (period) {
             this._period = period;
         } else {
             this._period = new Period(duration);
+        }
+    }
+
+    toString() {
+        if (+this._period.frequency() === +this.duration()) {
+            return this._period.toString();
+        } else {
+            return `${this._duration}@${this._period}`;
         }
     }
 
@@ -105,14 +166,14 @@ export class Window {
      * Specify how often the underlying period repeats
      */
     every(frequency: Duration): Window {
-        return new Window(this._type, this._duration, this._period.every(frequency));
+        return new Window(this._duration, this._period.every(frequency));
     }
 
     /**
      * Specify an offset for the underlying period
      */
     offsetBy(time: Time): Window {
-        return new Window(this._type, this._duration, this._period.offsetBy(time));
+        return new Window(this._duration, this._period.offsetBy(time));
     }
 
     /**
@@ -142,31 +203,25 @@ export class Window {
             t1 = t.begin();
             t2 = t.end();
         }
-        console.log("t1, t2", t1, t2);
         let result = Immutable.OrderedSet<Index>();
-        if (this._type === WindowType.Duration) {
-            let prefix = `${this._period.frequency()}`;
-            if (this._duration && this._duration !== this._period.frequency()) {
-                prefix += `:${this._duration}`;
-            }
-            if (this._period.offset()) {
-                prefix += `+${this._period.offset()}`;
-            }
-            const scanBegin = +t1 - +this._duration;
-            let periodIndex = Math.ceil(scanBegin / +this._period.frequency());
-            const indexes = [];
-            while (periodIndex * +this._period.frequency() < +t2) {
-                result = result.add(new Index(`${prefix}-${periodIndex}`));
-                periodIndex += 1;
-            }
+        const prefix = this._period.toString();
+        const scanBegin = this._period.next(time(+t1 - +this._duration));
+        let periodIndex = Math.ceil(+scanBegin / +this._period.frequency());
+        const indexes = [];
+        while (periodIndex * +this._period.frequency() <= +t2) {
+            result = result.add(new Index(`${prefix}-${periodIndex}`));
+            periodIndex += 1;
         }
+
         return result;
     }
 }
 
 function window(duration: Duration, period?: Period): Window {
-    return new Window(WindowType.Duration, duration, period);
+    return new Window(duration, period);
 }
+
+/*
 function daily() {
     return new Window(WindowType.Day);
 }
@@ -176,5 +231,10 @@ function monthly() {
 function yearly() {
     return new Window(WindowType.Year);
 }
+*/
 
-export { window, daily, monthly, yearly };
+function daily(tz: string = "Etc/UTC"): DayWindow {
+    return new DayWindow(tz);
+}
+
+export { window, daily /*, monthly, yearly*/ };

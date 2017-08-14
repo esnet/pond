@@ -16,6 +16,7 @@ import { Event } from "./event";
 import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
+import { Window } from "./window";
 
 //
 // General types
@@ -85,21 +86,6 @@ export enum FillMethod {
 }
 
 /**
- * An enum which controls the `WindowType` for aggregation. This can
- * essentially be a Fixed window, which is a window for each `Period`
- * (e.g. every hour), or calendar style periods such as Day, Month
- * and Year.
- *  * Fixed
- *  * Day
- *  * Month
- *  * Year
- */
-export enum WindowType {
-    Fixed,
-    Sliding
-}
-
-/**
  * Options object expected by the `windowBy...()` functions. At this point,
  * this just defines the fixed window (e.g. window: period("1d")) and the
  * trigger for downstream notification, which can currently be either
@@ -110,8 +96,7 @@ export enum WindowType {
  *                Trigger.perEvent or Trigger.onDiscardedWindow
  */
 export interface WindowingOptions {
-    type: WindowType;
-    window: Period;
+    window: Window;
     trigger?: Trigger;
 }
 
@@ -169,14 +154,15 @@ export interface FillOptions {
 
 /**
  * Options object expected by the `fixedWindowRollup()` function:
- *  * `windowSize` - the size of the window. e.g. "6h" or "5m"
+ *  * `window` - the window specification. e.g. window(duration("6h"))
  *  * `aggregation` - the aggregation specification
  *  * `toTimeEvents` - Convert the rollup events to `TimeEvent`s, otherwise it
  *                     will be returned as a `TimeSeries` of `IndexedEvent`s
  */
-export interface RollupOptions {
-    windowSize?: string;
-    aggregation?: object;
+export interface RollupOptions<T extends Key> {
+    window: WindowBase;
+    timezone?: string;
+    aggregation?: AggregationSpec<T>;
     toTimeEvents?: boolean;
 }
 

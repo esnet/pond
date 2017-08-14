@@ -189,6 +189,8 @@ export declare class Collection<T extends Key> extends Base {
      * order that they were added, unless the Collection has since been
      * sorted.
      *
+     * Returns the number of items iterated.
+     *
      * @example
      * ```
      * collection.forEach((e, k) => {

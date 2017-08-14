@@ -8,24 +8,30 @@
  *  LICENSE file in the root directory of this source tree.
  */
 import * as Immutable from "immutable";
-import * as moment from "moment";
 import { Duration } from "./duration";
 import { Index } from "./index";
 import { TimeRange } from "./timerange";
+import { Period } from "./period";
+export interface DecodedIndexString {
+    decodedPeriod: Period;
+    decodedDuration: Duration;
+    decodedIndex: number;
+}
 declare var _default: {
     dataFromArg: (
         arg: string | number | {} | Immutable.Map<string, any>
     ) => Immutable.Map<string, any>;
     fieldAsArray: (field: string | string[]) => string[];
-    indexFromArgs: (arg1: string | Index, arg2?: boolean) => Index;
+    indexFromArgs: (arg1: string | Index, arg2?: string) => Index;
     isMissing: (val: any) => boolean;
     isValid: (v: number) => boolean;
     leftPad: (value: number) => string;
     isIndexString: (indexString: string) => boolean;
+    decodeIndexString: (indexString: string) => DecodedIndexString;
     niceIndexString: (indexString: string, format: string) => string;
     timeRangeFromArg: (arg: string | TimeRange | Date[]) => TimeRange;
-    timeRangeFromIndexString: (indexString: string, utc: boolean) => TimeRange;
-    timestampFromArg: (arg: string | number | Date | moment.Moment) => Date;
+    timeRangeFromIndexString: (indexString: string, tz?: string) => TimeRange;
+    timestampFromArg: (arg: any) => Date;
     untilNow: (d: Duration) => TimeRange;
     windowDuration: (period: any) => number;
     windowPositionFromDate: (period: string, date: Date) => number;

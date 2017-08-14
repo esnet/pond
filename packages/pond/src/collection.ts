@@ -378,7 +378,7 @@ export class Collection<T extends Key> extends Base {
      * }
      * ```
      */
-    public entries() {
+    public entries(): IterableIterator<[number, Event<T>]> {
         return this._events.entries();
     }
 
@@ -386,6 +386,8 @@ export class Collection<T extends Key> extends Base {
      * Iterate over the events in this `Collection`. Events are in the
      * order that they were added, unless the Collection has since been
      * sorted.
+     * 
+     * Returns the number of items iterated.
      *
      * @example
      * ```
@@ -394,7 +396,7 @@ export class Collection<T extends Key> extends Base {
      * })
      * ```
      */
-    public forEach(sideEffect: (value?: Event<T>, index?: number) => any) {
+    public forEach(sideEffect: (value?: Event<T>, index?: number) => any): number {
         return this._events.forEach(sideEffect);
     }
 

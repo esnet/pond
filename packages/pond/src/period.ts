@@ -46,7 +46,11 @@ export class Period {
      */
     constructor(frequency?: Duration, offset?: Time) {
         this._frequency = frequency;
-        this._offset = offset ? offset.timestamp().getTime() : 0;
+        this._offset = offset && !_.isNaN(offset) ? offset.timestamp().getTime() : 0;
+    }
+
+    toString() {
+        return this._offset ? `${this._frequency}+${this._offset}` : `${this._frequency}`;
     }
 
     frequency() {

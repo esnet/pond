@@ -1,16 +1,16 @@
 import { Key } from "./key";
 import { TimeRange } from "./timerange";
 /**
- * An `Index` is a specific instance of a `Period`. For example
- * a `Period` may represent "every day", then an `Index` could
+ * An `Index` is a specific instance of a `Window`. For example
+ * a `Window` may represent "every day", then an `Index` could
  * represent a specific day like last Tuesday.
  *
  * There are two basic types:
  *
- * * *Multiplier index* - the number of some unit of time
- *                       (hours, days etc) since the UNIX epoch.
- * * *Calendar index* - The second represents a calendar range,
- *                     such as Oct 2014.
+ * * *Duration index* - the number of some unit of time
+ *                       (e.g. 5 minutes) since the UNIX epoch.
+ * * *Calendar index* - a calendar range (e.g. Oct 2014) that
+ *                      maybe and uneven amount of time.
  *
  * For the first type, a multiplier index, an example might be:
  *
@@ -33,45 +33,16 @@ import { TimeRange } from "./timerange";
  * A specific period of time, and associated data can be looked up based
  * on that string. It also allows us to represent things like months,
  * which have variable length.
+ *
+ * Indexes also contain a timezone, which defaults to UTC. For instance if
+ * you have a day 2017-08-11, then the `TimeRange` representation depends
+ * on the timezone of that day.
  */
 export declare class Index extends Key {
-    /**
-     * Return the `index` string given an time period (e.g. 1 hour) and a `Date`.
-     * The resulting string represents the 1 hour period that `Date` is in.
-     *
-     * This lets you find the index string (e.g "1h-412715") given that you
-     * want a 1 hour index and you have a Date. For example:
-     * ```
-     *     import { Index } from "pondjs";
-     *     const d = new Date("2017-01-30T11:58:38.741Z");
-     *     const index = Index.getIndexString("1h", d);   // '1h-412715'
-     * ```
-     */
-    static getIndexString(period: string, date: Date): string;
-    /**
-     * Given a `TimeRange`, return a list of strings of index values,
-     * assuming a period, e.g. "1h".
-     *
-     * This is like `Index.getIndexString()` except it returns a sequence of
-     * index strings.
-     */
-    static getIndexStringList(period: string, timerange: TimeRange): string[];
-    /**
-     * Generate an `Index` string with day granularity.
-     */
-    static getDailyIndexString(date: Date, utc?: boolean): string;
-    /**
-     * Generate an `Index` string with month granularity.
-     */
-    static getMonthlyIndexString(date: Date, utc?: boolean): string;
-    /**
-     * Generate an `Index` string with year granularity.
-     */
-    static getYearlyIndexString(date: Date, utc?: boolean): string;
-    private _utc;
+    private _tz;
     private _string;
     private _timerange;
-    constructor(s: any, utc?: boolean);
+    constructor(s: any, tz?: string);
     type(): string;
     /**
      * Returns the timestamp to represent this `Index`
@@ -112,13 +83,5 @@ export declare class Index extends Key {
      */
     end(): Date;
 }
-/**
- * An `Index` is simply a string that represents a fixed range of time.
- * There are two basic types:
- * * *Multiplier index* - the number of some unit of time
- *    (hours, days etc) since the UNIX epoch.
- * * *Calendar index* - The second represents a calendar range,
- *    such as Oct 2014.
- */
-declare function indexFactory(s: any, utc?: boolean): Index
+declare function indexFactory(s: any, tz?: string): Index
 export { indexFactory as index };
