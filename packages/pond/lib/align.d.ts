@@ -46,7 +46,7 @@ export declare class Align<T extends Key> extends Processor<T, T> {
      * Generate a linear differential between two counter values that lie
      * on either side of a window boundary.
      */
-    interpolateLinear(boundaryTime: Time, event: Event<T>): Event<T>;
+    interpolateLinear(boundaryTime: Time, event: Event<T>): Event<Time>;
     /**
      * Perform the align operation on the event and emit.
      */

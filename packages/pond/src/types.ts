@@ -16,7 +16,7 @@ import { Event } from "./event";
 import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
-import { Window } from "./window";
+import { Window, WindowBase } from "./window";
 
 //
 // General types
@@ -96,7 +96,7 @@ export enum FillMethod {
  *                Trigger.perEvent or Trigger.onDiscardedWindow
  */
 export interface WindowingOptions {
-    window: Window;
+    window: WindowBase;
     trigger?: Trigger;
 }
 

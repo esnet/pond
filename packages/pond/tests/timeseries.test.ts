@@ -558,7 +558,7 @@ describe("Meta Data", () => {
 });
 
 describe("Deep Event Data", () => {
-    fit("can create a series with a nested object", () => {
+    it("can create a series with a nested object", () => {
         const series = timeSeries({
             name: "Map Traffic",
             columns: ["time", "NASA_north", "NASA_south"],

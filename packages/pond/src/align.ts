@@ -84,7 +84,7 @@ export class Align<T extends Key> extends Processor<T, T> {
      * Generate a linear differential between two counter values that lie
      * on either side of a window boundary.
      */
-    interpolateLinear(boundaryTime: Time, event: Event<T>): Event<T> {
+    interpolateLinear(boundaryTime: Time, event: Event<T>): Event<Time> {
         let d = Immutable.Map<string, any>();
 
         const previousTime = this._previous.timestamp().getTime();
@@ -112,7 +112,7 @@ export class Align<T extends Key> extends Processor<T, T> {
                 : d.setIn(fieldPath, interpolatedVal);
         });
 
-        return new Event(boundaryTime, d);
+        return new Event<Time>(boundaryTime, d);
     }
 
     /**

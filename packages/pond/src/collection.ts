@@ -40,7 +40,7 @@ import {
 
 import util from "./util";
 
-import { DedupFunction, ReducerFunction, ValueMap, WindowType } from "./types";
+import { DedupFunction, ReducerFunction, ValueMap } from "./types";
 
 import {
     avg,
