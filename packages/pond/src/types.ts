@@ -16,8 +16,7 @@ import { Event } from "./event";
 import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
-
-export class Types {}
+import { Window, WindowBase } from "./window";
 
 //
 // General types
@@ -34,7 +33,7 @@ export interface ValueListMap {
  * A mapping from string to number
  */
 export interface ValueMap {
-    [s: string]: number[];
+    [s: string]: number;
 }
 
 //
@@ -87,34 +86,17 @@ export enum FillMethod {
 }
 
 /**
- * An enum which controls the `WindowType` for aggregation. This can
- * essentially be a Fixed window, which is a window for each `Period`
- * (e.g. every hour), or calendar style periods such as Day, Month
- * and Year.
- *  * Fixed
- *  * Day
- *  * Month
- *  * Year
- */
-export enum WindowType {
-    Global = 1, // currently not used
-    Fixed,
-    Day,
-    Month,
-    Year
-}
-
-/**
  * Options object expected by the `windowBy...()` functions. At this point,
  * this just defines the fixed window (e.g. window: period("1d")) and the
  * trigger for downstream notification, which can currently be either
  * on every incoming event, or whenever a window is about to be discarded.
+ *  * `type` - the type of the window, currently either Fixed or Sliding
  *  * `window` - the size of the window, expressed as a `Period`
  *  * `trigger` - the output rate of the window, currently either
  *                Trigger.perEvent or Trigger.onDiscardedWindow
  */
 export interface WindowingOptions {
-    window: Period;
+    window: WindowBase;
     trigger?: Trigger;
 }
 
@@ -128,7 +110,7 @@ export interface WindowingOptions {
  */
 export interface AlignmentOptions {
     fieldSpec: string | string[];
-    window: Period;
+    period: Period;
     method?: AlignmentMethod;
     limit?: number;
 }
@@ -172,14 +154,16 @@ export interface FillOptions {
 
 /**
  * Options object expected by the `fixedWindowRollup()` function:
- *  * `windowSize` - the size of the window. e.g. "6h" or "5m"
+ *  * `window` - the window specification. e.g. window(duration("6h"))
  *  * `aggregation` - the aggregation specification
  *  * `toTimeEvents` - Convert the rollup events to `TimeEvent`s, otherwise it
  *                     will be returned as a `TimeSeries` of `IndexedEvent`s
  */
 export interface RollupOptions<T extends Key> {
-    windowSize?: Period;
+    window: WindowBase;
+    timezone?: string;
     aggregation?: AggregationSpec<T>;
+    toTimeEvents?: boolean;
 }
 
 /**
@@ -196,7 +180,8 @@ export interface SelectOptions {
  */
 export interface RenameColumnOptions {
     renameMap: {
-        [key: string]: string;
+        key: string;
+        value: string;
     };
 }
 
@@ -212,9 +197,8 @@ export interface RenameColumnOptions {
  */
 export interface TimeSeriesOptions {
     seriesList: Array<TimeSeries<Key>>;
-    reducer?: ReducerFunction;
+    reducer?: ReducerFunction | ArrayReducer | ListReducer;
     fieldSpec?: string | string[];
-    deep?: boolean;
     [propName: string]: any;
 }
 
@@ -236,6 +220,16 @@ export type DedupFunction<T extends Key> = (events: Immutable.List<Event<T>>) =>
  * A function which takes a list of numbers and returns a single number.
  */
 export type ReducerFunction = (values: number[]) => number;
+
+/**
+ * A function which combines an array of events into a new array of events
+ */
+export type ArrayReducer = (events: Array<Event<Key>>) => Array<Event<Key>>;
+
+/**
+ * A function which combines a list of events into a new list of events
+ */
+export type ListReducer = (events: Immutable.List<Event<Key>>) => Immutable.List<Event<Key>>;
 
 //
 // Aggregation specification

@@ -8,103 +8,114 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+import * as Immutable from "immutable";
 import * as _ from "lodash";
 import * as moment from "moment";
 
-const UNITS: { [key: string]: number } = {
-    milliseconds: 1,
-    seconds: 1000,
-    minutes: 1000 * 60,
-    hours: 1000 * 60 * 60,
-    days: 1000 * 60 * 60 * 24,
-    weeks: 1000 * 60 * 60 * 24 * 7
-};
-
-const SHORT_UNITS: { [key: string]: number } = {
-    s: 1000,
-    m: 1000 * 60,
-    h: 1000 * 60 * 60,
-    d: 1000 * 60 * 60 * 24,
-    w: 1000 * 60 * 60 * 24 * 7
-};
+import { Duration, duration } from "./duration";
+import { Index } from "./index";
+import { Time, time } from "./time";
+import { TimeRange } from "./timerange";
 
 /**
- * A period is a repeating unit of time which is typically
- * used in pond to describe an aggregation bucket. For example
- * a `period("1d")` would indicate buckets that are a day long.
+ * A period is a repeating time which is typically used in pond to
+ * either define the repeating nature of a bucket (used for windowing)
+ * or to describe alignment of fill positions when doing data cleaning
+ * on a `TimeSeries`.
+ * 
+ * Periods have a frequency and an offset. If there is no offset, it
+ * is aligned to Jan 1, 1970 00:00 UTC.
+ * 
+ * To create a repeating window, see `Bucket` creation.
  */
 export class Period {
-    private _duration: number;
-    private _string: string;
+    private _frequency: Duration;
+    private _offset: number;
 
     /**
-     * * Passing a number to the constructor will
-     * be considered as a `ms` duration.
-     * * Passing a string to the constuctor will
-     * be considered a duration string, with a
-     * format of `%d[s|m|h|d]`
-     * * Passing a number and a string will be considered
-     * a quantity and a unit. The string should be one of:
-     *   * milliseconds
-     *   * seconds
-     *   * minutes
-     *   * hours
-     *   * days
-     *   * weeks
-     * * Finally, you can pass either a `moment.Duration` or a
-     * `Moment.Duration-like` object to the constructor
+     * To define a `Period`, you need to the duration of the frequency that the
+     * period repeats. Optionally you can specify and offset for the period.
+     *
+     *  * the `stride` of the period which is how often the beginning of the
+     *    duration of time repeats itself. This is a `Duration`, i.e. the duration
+     *    of the length of the stride, or basically the length between the beginning
+     *    of each period repeat. In the above example that would be `duration("10s")`.
+     *  * the `offset`, a point in time to calculate the period from, which defaults
+     *    to Jan 1, 1970 UTC or timestamp 0. This is specified as a `Time`.
+     *
      */
-    constructor(arg1: number | string, arg2?: string) {
-        if (_.isNumber(arg1)) {
-            if (!arg2) {
-                this._duration = arg1;
-            } else if (_.isString(arg2) && _.has(UNITS, arg2)) {
-                const multiplier = arg1;
-                this._duration = multiplier * UNITS[arg2];
-            } else {
-                throw new Error("Unknown arguments pssed to Period constructor");
-            }
-        } else if (_.isString(arg1)) {
-            this._string = arg1;
-            let multiplier: number;
-            let unit: string;
-            const regex = /([0-9]+)([smhdw])/;
-            const parts = regex.exec(arg1);
-            if (parts && parts.length >= 3) {
-                multiplier = parseInt(parts[1], 10);
-                unit = parts[2];
-                this._duration = multiplier * SHORT_UNITS[unit];
-            }
-        } else if (moment.isDuration(arg1)) {
-            const d = arg1 as moment.Duration;
-            this._string = d.toISOString();
-            this._duration = d.asMilliseconds();
-        } else if (_.isObject(arg1)) {
-            const d = moment.duration(arg1);
-            this._string = d.toISOString();
-            this._duration = d.asMilliseconds();
-        } else {
-            throw new Error("Unknown arguments pssed to Period constructor");
-        }
+    constructor(frequency?: Duration, offset?: Time) {
+        this._frequency = frequency;
+        this._offset = offset && !_.isNaN(offset) ? offset.timestamp().getTime() : 0;
     }
 
-    toString(): string {
-        if (this._string) {
-            return this._string;
-        }
-        return `${this._duration}ms`;
+    toString() {
+        return this._offset ? `${this._frequency}+${this._offset}` : `${this._frequency}`;
     }
 
-    valueOf(): number {
-        return this._duration;
+    frequency() {
+        return this._frequency;
+    }
+
+    offset() {
+        return this._offset;
+    }
+
+    every(frequency: Duration): Period {
+        return new Period(frequency, time(this._offset));
+    }
+
+    offsetBy(offset: Time): Period {
+        return new Period(this._frequency, offset);
+    }
+
+    /**
+     * Returns true if the `Time` supplied is aligned with this `Period`.
+     */
+    isAligned(time: Time) {
+        return (+time - +this._offset) / +this._frequency % 1 == 0;
+    }
+
+    /**
+     * Given a time, find the next time aligned to the period.
+     */
+    next(time: Time): Time {
+        const index = Math.ceil((+time - +this._offset) / +this._frequency);
+        const next = index * +this._frequency + this._offset;
+        return next === +time ? new Time(next + +this._frequency) : new Time(next);
+    }
+
+    /**
+     * Returns `Time`s within the given TimeRange that align with this
+     * `Period`.
+     * 
+     * @example
+     * ```
+     * const range = timerange(time("2017-07-21T09:30:00.000Z"), time("2017-07-21T09:45:00.000Z"))
+     * const everyFiveMinutes = period()
+     *     .every(duration("5m"))
+     *     .offsetBy(time("2017-07-21T09:38:00.000Z"));
+     * const result = everyFiveMinutes.within(range);  // 9:33am, 9:38am, 9:43am
+     * ```
+     */
+    within(timerange: TimeRange): Immutable.List<Time> {
+        let result = Immutable.List<Time>();
+
+        const t1 = time(timerange.begin());
+        const t2 = time(timerange.end());
+
+        let scan = this.isAligned(t1) ? t1 : this.next(t1);
+        while (+scan <= +t2) {
+            result = result.push(scan);
+            scan = this.next(scan);
+        }
+
+        return result;
     }
 }
 
-function periodFactory(d: number | string, arg2?: string)
-function periodFactory(arg1: number, arg2: string)
-function periodFactory(arg1: object | moment.Duration)
-function periodFactory(arg1?: any, arg2?: any): Period {
-    return new Period(arg1, arg2);
+function period(frequency?: Duration, offset?: Time): Period {
+    return new Period(frequency, offset);
 }
 
-export { periodFactory as period };
+export { period };

@@ -1,5 +1,5 @@
+import { Duration } from "./duration";
 import { Key } from "./key";
-import { Period } from "./period";
 import { TimeRange } from "./timerange";
 import { TimeAlignment } from "./types";
 /**
@@ -38,7 +38,16 @@ export declare class Time extends Key {
      * The end time of this `Event`, which will be just the timestamp
      */
     end(): Date;
-    toTimeRange(period: Period, align: TimeAlignment): TimeRange;
+    toTimeRange(duration: Duration, align: TimeAlignment): TimeRange;
 }
-declare function timeFactory(d?: number | string | Date): Time;
-export { timeFactory as time };
+/**
+ * Constructs a new `Time` object. A `Time` object represents a timestamp,
+ * and is stored as a Javascript `Date` object. The difference with just a Date is that
+ * this conforms to the interface required to be an `Event` key.
+ */
+declare function timeFactory(d?: number | string | Date): Time
+/**
+ * Returns the the current time as a `Time` object
+ */
+declare function now(): Time
+export { now, timeFactory as time };

@@ -75,13 +75,18 @@ export declare class Event<T extends Key = Time> extends Base {
      *
      * See also: `TimeSeries.timeSeriesListMerge()`.
      */
-    static merge<K extends Key>(events: Immutable.List<Event<K>>, deep?: boolean): Immutable.List<Event<K>>;
+    static merge<K extends Key>(
+        events: Immutable.List<Event<K>>,
+        deep?: boolean
+    ): Immutable.List<Event<K>>;
     /**
      * Returns a function that will take a list of `event`'s and merge them
      * together using the `fieldSpec` provided. This is used as a reducer for
      * merging multiple `TimeSeries` together with `timeSeriesListMerge()`.
      */
-    static merger<K extends Key>(deep: any): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>>;
+    static merger<K extends Key>(
+        deep: any
+    ): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>>;
     /**
      * Combines multiple `Event`s together into a new array of events, one
      * for each key of the source events. The list of Events may be specified
@@ -99,14 +104,21 @@ export declare class Event<T extends Key = Time> extends Base {
      *
      * See also: `TimeSeries.timeSeriesListSum()`
      */
-    static combine<K extends Key>(events: Immutable.List<Event<K>>, reducer: ReducerFunction, fieldSpec?: string | string[]): Immutable.List<Event<K>>;
+    static combine<K extends Key>(
+        events: Immutable.List<Event<K>>,
+        reducer: ReducerFunction,
+        fieldSpec?: string | string[]
+    ): Immutable.List<Event<K>>;
     /**
      * Returns a function that will take a list of `Event`'s and combine them
      * together using the `fieldSpec` and reducer function provided. This is
      * used as an event reducer for merging multiple `TimeSeries` together
      * with `timeSeriesListReduce()`.
      */
-    static combiner<K extends Key>(fieldSpec: any, reducer: any): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>>;
+    static combiner<K extends Key>(
+        fieldSpec: any,
+        reducer: any
+    ): (events: Immutable.List<Event<K>>) => Immutable.List<Event<Key>>;
     /**
      * Takes a list of `Events<T>` and makes a map from the `Event` field names
      * to an array of values, one value for each Event.
@@ -117,7 +129,10 @@ export declare class Event<T extends Key = Time> extends Base {
      * // { in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] }
      * ```
      */
-    static map<K extends Key>(events: Immutable.List<Event<K>>, multiFieldSpec: string | string[]): ValueListMap;
+    static map<K extends Key>(
+        events: Immutable.List<Event<K>>,
+        multiFieldSpec: string | string[]
+    ): ValueListMap;
     /**
      * Takes a `Immutable.List` of events and a reducer function and a
      * `fieldSpec` (or list of fieldSpecs) and returns an aggregated
@@ -135,7 +150,11 @@ export declare class Event<T extends Key = Time> extends Base {
      * // result = { in: 5, out: 14.25 }
      * ```
      */
-    static aggregate<K extends Key>(events: Immutable.List<Event<K>>, reducer: ReducerFunction, multiFieldSpec: string | string[]): ValueMap;
+    static aggregate<K extends Key>(
+        events: Immutable.List<Event<K>>,
+        reducer: ReducerFunction,
+        multiFieldSpec: string | string[]
+    ): ValueMap;
     /**
      * Constructor
      */
@@ -211,7 +230,12 @@ export declare class Event<T extends Key = Time> extends Base {
      * // result: data: { "in": 5, "out": 6, "status": "ok", "total": 11 } }
      * ```
      */
-    collapse(fieldSpecList: string[], fieldName: string, reducer: ReducerFunction, append?: boolean): Event<T>;
+    collapse(
+        fieldSpecList: string[],
+        fieldName: string,
+        reducer: ReducerFunction,
+        append?: boolean
+    ): Event<T>;
     /**
      * Selects specific fields of an `Event` using a `fields` and returns
      * a new event with just those fields.
@@ -224,23 +248,23 @@ export interface TimeEventObject {
         [data: string]: any;
     };
 }
-declare function timeEvent(arg: TimeEventObject): Event<Time>;
-declare function timeEvent(t: Time, data: Immutable.Map<string, any>): Event<Time>;
+declare function timeEvent(arg: TimeEventObject): Event<Time>
+declare function timeEvent(t: Time, data: Immutable.Map<string, any>): Event<Time>
 export interface IndexedEventObject {
     index: string;
     data: {
         [data: string]: any;
     };
 }
-declare function indexedEvent(arg: IndexedEventObject): Event<Index>;
-declare function indexedEvent(idx: Index, data: Immutable.Map<string, any>): Event<Index>;
+declare function indexedEvent(arg: IndexedEventObject): Event<Index>
+declare function indexedEvent(idx: Index, data: Immutable.Map<string, any>): Event<Index>
 export interface TimeRangeEventObject {
     timerange: number[];
     data: {
         [data: string]: any;
     };
 }
-declare function timeRangeEvent(arg: TimeRangeEventObject): Event<TimeRange>;
-declare function timeRangeEvent(idx: Index, data: Immutable.Map<string, any>): Event<TimeRange>;
-declare function event<T extends Key>(key: T, data: Immutable.Map<string, any>): Event<T>;
+declare function timeRangeEvent(arg: TimeRangeEventObject): Event<TimeRange>
+declare function timeRangeEvent(idx: Index, data: Immutable.Map<string, any>): Event<TimeRange>
+declare function event<T extends Key>(key: T, data: Immutable.Map<string, any>): Event<T>
 export { event, timeEvent, timeRangeEvent, indexedEvent };

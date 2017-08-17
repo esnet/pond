@@ -93,7 +93,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
         if (size1 != size2) {
             return false;
         } else {
-            for (let i=0; i<size1; i++) {
+            for (let i = 0; i < size1; i++) {
                 result = result && Event.is(collection1.at(i), collection2.at(i));
             }
             // collection1.forEach((e, k) => {

@@ -5,7 +5,14 @@ import { GroupedCollection, GroupingFunction } from "./grouped";
 import { Key } from "./key";
 import { TimeRange } from "./timerange";
 import { WindowedCollection } from "./windowed";
-import { AlignmentOptions, CollapseOptions, FillOptions, RateOptions, SelectOptions, WindowingOptions } from "./types";
+import {
+    AlignmentOptions,
+    CollapseOptions,
+    FillOptions,
+    RateOptions,
+    SelectOptions,
+    WindowingOptions
+} from "./types";
 import { DedupFunction, ReducerFunction } from "./types";
 import { InterpolationType } from "./functions";
 /**
@@ -18,7 +25,9 @@ export declare class Collection<T extends Key> extends Base {
     /**
      * Rebuild the keyMap from scratch
      */
-    protected static buildKeyMap<S extends Key>(events: Immutable.List<Event<S>>): Immutable.Map<string, Immutable.Set<number>>;
+    protected static buildKeyMap<S extends Key>(
+        events: Immutable.List<Event<S>>
+    ): Immutable.Map<string, Immutable.Set<number>>;
     protected _events: Immutable.List<Event<T>>;
     protected _keyMap: Immutable.Map<string, Immutable.Set<number>>;
     /**
@@ -180,6 +189,8 @@ export declare class Collection<T extends Key> extends Base {
      * order that they were added, unless the Collection has since been
      * sorted.
      *
+     * Returns the number of items iterated.
+     *
      * @example
      * ```
      * collection.forEach((e, k) => {
@@ -209,13 +220,13 @@ export declare class Collection<T extends Key> extends Base {
      *
      * @example
      *
-     * Here we remap Time keys to `TimeRange` keys using the `Time.toTimeRange()`
-     * method to center new `TimeRange`s around each `Time` with duration given
-     * by the `Period`, in this case 1 hour.
+     * In this example we remap `Time` keys to `TimeRange` keys using the `Time.toTimeRange()`
+     * method, centering the new `TimeRange`s around each `Time` with duration given
+     * by the `Duration` object supplied, in this case representing one hour.
      *
      * ```
      * const remapped = myCollection.mapKeys<TimeRange>((t) =>
-     *     t.toTimeRange(period("1h"), TimeAlignment.Middle));
+     *     t.toTimeRange(duration("1h"), TimeAlignment.Middle));
      * ```
      *
      */
@@ -225,7 +236,9 @@ export declare class Collection<T extends Key> extends Base {
      * passed to your callback function you should map that to
      * zero, one or many Events, returned as an `Immutable.List`.
      */
-    flatMap<U extends Key>(mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<U>>): Collection<U>;
+    flatMap<U extends Key>(
+        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<U>>
+    ): Collection<U>;
     /**
      * Sorts the `Collection` by the `Event` key `T`.
      *
@@ -314,14 +327,20 @@ export declare class Collection<T extends Key> extends Base {
      * Returns the first value in the `Collection` for the `fieldspec`
      */
     first(fieldSpec: string, filter?: any): number;
-    first(fieldSpec: string[], filter?: any): {
+    first(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
      * Returns the last value in the `Collection` for the `fieldspec`
      */
     last(fieldSpec: string, filter?: any): number;
-    last(fieldSpec: string[], filter?: any): {
+    last(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
@@ -329,7 +348,10 @@ export declare class Collection<T extends Key> extends Base {
      * for the `fieldspec`
      */
     sum(fieldSpec: string, filter?: any): number;
-    sum(fieldSpec: string[], filter?: any): {
+    sum(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
@@ -337,7 +359,10 @@ export declare class Collection<T extends Key> extends Base {
      * to their average(s)
      */
     avg(fieldSpec: string, filter?: any): number;
-    avg(fieldSpec: string[], filter?: any): {
+    avg(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
@@ -345,7 +370,10 @@ export declare class Collection<T extends Key> extends Base {
      * their maximum value(s)
      */
     max(fieldSpec: string, filter?: any): number;
-    max(fieldSpec: string[], filter?: any): {
+    max(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
@@ -353,21 +381,30 @@ export declare class Collection<T extends Key> extends Base {
      * their minimum value(s)
      */
     min(fieldSpec: string, filter?: any): number;
-    min(fieldSpec: string[], filter?: any): {
+    min(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
      * Aggregates the events down to their median value
      */
     median(fieldSpec: string, filter?: any): number;
-    median(fieldSpec: string[], filter?: any): {
+    median(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
      * Aggregates the events down to their standard deviation
      */
     stdev(fieldSpec: string, filter?: any): number;
-    stdev(fieldSpec: string[], filter?: any): {
+    stdev(
+        fieldSpec: string[],
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
@@ -391,7 +428,12 @@ export declare class Collection<T extends Key> extends Base {
      *
      */
     percentile(q: number, fieldSpec: string, interp?: InterpolationType, filter?: any): number;
-    percentile(q: number, fieldSpec: string[], interp?: InterpolationType, filter?: any): {
+    percentile(
+        q: number,
+        fieldSpec: string[],
+        interp?: InterpolationType,
+        filter?: any
+    ): {
         [s: string]: number[];
     };
     /**
@@ -440,5 +482,7 @@ export declare class Collection<T extends Key> extends Base {
     protected clone(events: any, keyMap: any): Base;
     protected onEventAdded(events: Immutable.List<Event<T>>): Immutable.List<Event<T>>;
 }
-declare function collectionFactory<T extends Key>(arg1?: Immutable.List<Event<T>> | Collection<T>): Collection<T>;
+declare function collectionFactory<T extends Key>(
+    arg1?: Immutable.List<Event<T>> | Collection<T>
+): Collection<T>
 export { collectionFactory as collection };
