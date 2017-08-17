@@ -12,7 +12,7 @@ import { event } from "../src/event";
 import { avg, sum } from "../src/functions";
 import { AggregationSpec } from "../src/grouped";
 import { index, Index } from "../src/index";
-import { period } from "../src/period";
+import { duration } from "../src/duration";
 import { time, Time } from "../src/time";
 import { TimeRange } from "../src/timerange";
 
@@ -29,7 +29,7 @@ describe("Collection", () => {
             );
 
             const c2 = c1.mapKeys<TimeRange>(t =>
-                t.toTimeRange(period("1h"), TimeAlignment.Middle)
+                t.toTimeRange(duration("1h"), TimeAlignment.Middle)
             );
 
             expect(c2.at(0).getKey().toUTCString()).toBe(

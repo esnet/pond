@@ -13,12 +13,10 @@ import { Key } from "./key";
 import { Processor } from "./processor";
 import { FillOptions } from "./types";
 /**
- * A `Processor` that fills missing/invalid values in the `Event` with
+ * A processor that fills missing/invalid values in the `Event` with
  * new values (zero, interpolated or padded).
  *
  * When doing a linear fill, Filler instances should be chained.
- *
- * If no `fieldSpec` is supplied, the default field "value" will be used.
  */
 export declare class Fill<T extends Key> extends Processor<T, T> {
     private _fieldSpec;

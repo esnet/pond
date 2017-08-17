@@ -87,10 +87,20 @@ export class SortedCollection<T extends Key> extends Collection<T> {
     // tslint:disable:member-ordering
     static is(collection1: SortedCollection<Key>, collection2: SortedCollection<Key>) {
         let result = true;
-        collection1.forEach((e, k) => {
-            result = result && Event.is(e, collection2.at(k));
-        });
-        return result;
+        const size1 = collection1.size();
+        const size2 = collection2.size();
+
+        if (size1 != size2) {
+            return false;
+        } else {
+            for (let i = 0; i < size1; i++) {
+                result = result && Event.is(collection1.at(i), collection2.at(i));
+            }
+            // collection1.forEach((e, k) => {
+            //     result = result && Event.is(e, collection2.at(k));
+            // });
+            return result;
+        }
     }
 
     protected clone(events, keyMap): Collection<T> {

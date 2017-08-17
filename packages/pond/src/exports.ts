@@ -1,6 +1,6 @@
 import { Align } from "./align";
 import { Base } from "./base";
-import { Collapse } from  "./collapse";
+import { Collapse } from "./collapse";
 import { collection, Collection } from "./collection";
 import { event, Event, timeEvent, timeRangeEvent, indexedEvent } from "./event";
 import { Fill } from "./fill";
@@ -8,6 +8,7 @@ import {
     avg,
     count,
     difference,
+    filter,
     first,
     keep,
     last,
@@ -30,6 +31,7 @@ import { stream } from "./stream";
 import { time, Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
 import { timeSeries, indexedSeries, timeRangeSeries, TimeSeries } from "./timeseries";
+import { Trigger, WindowingOptions } from "./types";
 import util from "./util";
 import { windowed, WindowedCollection } from "./windowed";
 
@@ -43,6 +45,7 @@ export {
     avg,
     count,
     difference,
+    filter,
     first,
     keep,
     last,
@@ -65,5 +68,6 @@ export { stream };
 export { time, Time };
 export { timerange, TimeRange };
 export { timeSeries, indexedSeries, timeRangeSeries, TimeSeries };
+export { Trigger, WindowingOptions };
 export { util };
 export { windowed, WindowedCollection } from "./windowed";

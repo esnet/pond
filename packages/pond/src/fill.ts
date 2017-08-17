@@ -8,24 +8,21 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-/*eslint no-console: 0 */
-
 import * as Immutable from "immutable";
 import * as _ from "lodash";
 
 import { Event } from "./event";
 import { Key } from "./key";
 import { Processor } from "./processor";
-import { FillMethod, FillOptions } from "./types";
 import util from "./util";
 
+import { FillMethod, FillOptions } from "./types";
+
 /**
- * A `Processor` that fills missing/invalid values in the `Event` with
+ * A processor that fills missing/invalid values in the `Event` with
  * new values (zero, interpolated or padded).
  *
  * When doing a linear fill, Filler instances should be chained.
- *
- * If no `fieldSpec` is supplied, the default field "value" will be used.
  */
 export class Fill<T extends Key> extends Processor<T, T> {
     // Options

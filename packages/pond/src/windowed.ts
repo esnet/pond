@@ -22,7 +22,7 @@ import { Key } from "./key";
 import { Period } from "./period";
 import { Processor } from "./processor";
 import { Rate } from "./rate";
-import { Time } from "./time";
+import { Time, time } from "./time";
 import { timerange, TimeRange } from "./timerange";
 
 import { KeyedCollection } from "./stream";
@@ -93,18 +93,31 @@ export class WindowedCollection<T extends Key> extends Base {
             this.collections = arg1;
         } else {
             this.options = arg1 as WindowingOptions;
+
             if (Immutable.Map.isMap(arg2)) {
                 const collections = arg2 as Immutable.Map<string, Collection<T>>;
-                this.collections = collections.flatMap((collection, groupKey) => {
-                    return collection
-                        .eventList()
-                        .groupBy(e =>
-                            Index.getIndexString(this.options.window.toString(), e.timestamp())
-                        )
-                        .toMap()
-                        .map(events => new Collection(events.toList()))
-                        .mapEntries(([key, _]) => [groupKey ? `${groupKey}::${key}` : `${key}`, _]);
+
+                // Rekey all the events in the collections with a new key that
+                // combines their existing group with the windows they fall in.
+                // An event could fall into 0, 1 or many windows, depending on the
+                // window's period and duration, as supplied in the WindowOptions.
+                let remapped = Immutable.List();
+                collections.forEach((c, k) => {
+                    c.forEach(e => {
+                        const groups = this.options.window
+                            .getIndexSet(time(e.timestamp()))
+                            .toList();
+                        groups.forEach(g => {
+                            remapped = remapped.push([`${k}::${g.asString()}`, e]);
+                        });
+                    });
                 });
+
+                this.collections = remapped
+                    .groupBy(e => e[0])
+                    .map(eventList => eventList.map(kv => kv[1]))
+                    .map(eventList => new Collection<T>(eventList.toList()))
+                    .toMap();
             } else {
                 let collection;
                 if (_.isString(arg2) || _.isArray(arg2)) {
@@ -115,6 +128,9 @@ export class WindowedCollection<T extends Key> extends Base {
                 }
 
                 if (collection) {
+                    //TODO: This code needs fixing (do we use this code path?)
+                    throw new Error("Unimplemented");
+                    /*
                     this.collections = collection
                         .eventList()
                         .groupBy(e =>
@@ -126,22 +142,12 @@ export class WindowedCollection<T extends Key> extends Base {
                             this.group ? `${e.get(this.group)}::${window}` : `all::${window}`,
                             e
                         ]);
+                    */
                 } else {
                     this.collections = Immutable.Map<string, Collection<T>>();
                 }
             }
         }
-
-        // Find the latest timestamp in the collections. The result of this will be a timestamp
-        // on the end boundary of the latest collection produced above
-        this.collections.forEach(c => {
-            const end = c.timerange().end();
-            if (!this.triggerThreshold) {
-                this.triggerThreshold = end;
-            } else if (this.triggerThreshold.getTime() < end.getTime()) {
-                this.triggerThreshold = end;
-            }
-        });
     }
 
     /**
@@ -201,70 +207,60 @@ export class WindowedCollection<T extends Key> extends Base {
     }
 
     addEvent(event: Event<T>): Immutable.List<KeyedCollection<T>> {
-        let keyedCollections = Immutable.List<KeyedCollection<T>>();
+        let toBeEmitted = Immutable.List<KeyedCollection<T>>();
 
         const discardWindows = true;
         const emitOnDiscard = this.options.trigger === Trigger.onDiscardedWindow;
         const emitEveryEvent = this.options.trigger === Trigger.perEvent;
 
-        const key = this.groupEvent(event);
+        const keys: Immutable.List<string> = this.getEventGroups(event);
 
-        // Add event to an existing collection or a new collection
-        let targetCollection: Collection<T>;
-        let createdCollection = false;
-        if (this.collections.has(key)) {
-            targetCollection = this.collections.get(key);
-        } else {
-            targetCollection = new Collection<T>(Immutable.List());
-            createdCollection = true;
-        }
-        this.collections = this.collections.set(key, targetCollection.addEvent(event));
-
-        // Emit
-        if (emitEveryEvent) {
-            keyedCollections = keyedCollections.push([key, this.collections.get(key)]);
-        }
-
-        let trigger = false;
-        if (!this.triggerThreshold || +event.timestamp() >= +this.triggerThreshold) {
-            if (this.triggerThreshold) {
-                trigger = true;
+        // Add event to an existing collection(s) or a new collection(s)
+        keys.forEach(key => {
+            // Add event to collection referenced by this key
+            let targetCollection: Collection<T>;
+            let createdCollection = false;
+            if (this.collections.has(key)) {
+                targetCollection = this.collections.get(key);
+            } else {
+                targetCollection = new Collection<T>(Immutable.List());
+                createdCollection = true;
             }
-            const newTriggerThreshold = util.timeRangeFromIndexString(key, true).end();
-            this.triggerThreshold = newTriggerThreshold;
-        }
+            this.collections = this.collections.set(key, targetCollection.addEvent(event));
 
-        const currentWindowKey = Index.getIndexString(
-            this.options.window.toString(),
-            event.timestamp()
-        );
+            // Push onto the emit list
+            if (emitEveryEvent) {
+                toBeEmitted = toBeEmitted.push([key, this.collections.get(key)]);
+            }
+        });
 
-        if (trigger) {
-            let keep = Immutable.Map<string, Collection<T>>();
-            let discard = Immutable.Map<string, Collection<T>>();
-            this.collections.forEach((collection, collectionKey) => {
-                const [_, w] = collectionKey.split("::").length > 1
+        // Discard past collections
+        let keep = Immutable.Map<string, Collection<T>>();
+        let discard = Immutable.Map<string, Collection<T>>();
+        this.collections.forEach((collection, collectionKey) => {
+            const [_, windowKey] =
+                collectionKey.split("::").length > 1
                     ? collectionKey.split("::")
                     : [null, collectionKey];
-                if (w === currentWindowKey) {
-                    keep = keep.set(collectionKey, collection);
-                } else {
-                    discard = discard.set(collectionKey, collection);
-                }
-            });
-            if (emitOnDiscard) {
-                discard.forEach((collection, collectionKey) => {
-                    keyedCollections = keyedCollections.push([collectionKey, collection]);
-                });
+            if (+event.timestamp() < +util.timeRangeFromIndexString(windowKey).end()) {
+                keep = keep.set(collectionKey, collection);
+            } else {
+                discard = discard.set(collectionKey, collection);
             }
-            this.collections = keep;
+        });
+        if (emitOnDiscard) {
+            discard.forEach((collection, collectionKey) => {
+                toBeEmitted = toBeEmitted.push([collectionKey, collection]);
+            });
         }
-        return keyedCollections;
+        this.collections = keep;
+
+        return toBeEmitted;
     }
 
-    private groupEvent(event) {
+    private getEventGroups(event: Event<T>): Immutable.List<string> {
         // Window the data
-        const windowKey = Index.getIndexString(this.options.window.toString(), event.timestamp());
+        const windowKeyList = this.options.window.getIndexSet(time(event.timestamp())).toList();
         let fn;
         // Group the data
         if (this.group) {
@@ -277,24 +273,26 @@ export class WindowedCollection<T extends Key> extends Base {
             }
         }
         const groupKey = fn ? fn(event) : null;
-        return groupKey ? `${groupKey}::${windowKey}` : `${windowKey}`;
+        return windowKeyList.map(
+            windowKey => (groupKey ? `${groupKey}::${windowKey}` : `${windowKey}`)
+        );
     }
 }
 
-function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, Collection<T>>)
+function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, Collection<T>>);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     collectionMap?: Immutable.Map<string, Collection<T>>
-)
+);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     initialCollection?: Collection<T> // tslint:disable-line:unified-signatures
-)
+);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     group: string | string[],
     initialCollection?: Collection<T>
-)
+);
 function windowFactory<T extends Key>(arg1: any, arg2?: any) {
     return new WindowedCollection<T>(arg1, arg2);
 }

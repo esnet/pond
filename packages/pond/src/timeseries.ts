@@ -10,8 +10,10 @@
 
 import * as Immutable from "immutable";
 import * as _ from "lodash";
+
 import { Base } from "./base";
 import { Collection } from "./collection";
+import { duration } from "./duration";
 import { event, Event, indexedEvent, timeEvent, timeRangeEvent } from "./event";
 import { Index, index } from "./index";
 import { Key } from "./key";
@@ -20,6 +22,7 @@ import { Select } from "./select";
 import { SortedCollection } from "./sorted";
 import { time, Time } from "./time";
 import { TimeRange, timerange } from "./timerange";
+import { window, daily } from "./window";
 
 import {
     avg,
@@ -48,8 +51,7 @@ import {
     SelectOptions,
     TimeSeriesOptions,
     Trigger,
-    ValueMap,
-    WindowType
+    ValueMap
 } from "./types";
 
 function buildMetaData(meta) {
@@ -67,10 +69,10 @@ function buildMetaData(meta) {
         }
     }
 
-    // UTC or Local time
-    d.utc = true;
-    if (_.isBoolean(meta.utc)) {
-        d.utc = meta.utc;
+    // Timezone
+    d.tz = "Etc/UTC";
+    if (_.isString(meta.tz)) {
+        d.tz = meta.tz;
     }
 
     return Immutable.Map(d);
@@ -93,7 +95,7 @@ function buildMetaData(meta) {
  */
 export interface TimeSeriesWireFormat {
     name?: string;
-    utc?: boolean;
+    tz?: string;
     columns: string[];
     points: any[];
     [propName: string]: any;
@@ -135,12 +137,12 @@ export interface TimeSeriesListReducerOptions {
  */
 function timeSeries(arg: TimeSeriesWireFormat) {
     const wireFormat = arg as TimeSeriesWireFormat;
-    const { columns, points, utc = true, ...meta2 } = wireFormat;
+    const { columns, points, tz = "Etc/UTC", ...meta2 } = wireFormat;
     const [eventKey, ...eventFields] = columns;
     const events = points.map(point => {
         const [key, ...eventValues] = point;
         const d = _.zipObject(eventFields, eventValues);
-        return new Event<Time>(time(key), Immutable.Map(d as { [key: string]: {} }));
+        return new Event<Time>(time(key), Immutable.fromJS(d as { [key: string]: {} }));
     });
     return new TimeSeries({ events: Immutable.List(events), ...meta2 });
 }
@@ -161,12 +163,12 @@ function timeSeries(arg: TimeSeriesWireFormat) {
  */
 function indexedSeries(arg: TimeSeriesWireFormat) {
     const wireFormat = arg as TimeSeriesWireFormat;
-    const { columns, points, utc = true, ...meta2 } = wireFormat;
+    const { columns, points, tz = "Etc/UTC", ...meta2 } = wireFormat;
     const [eventKey, ...eventFields] = columns;
     const events = points.map(point => {
         const [key, ...eventValues] = point;
         const d = _.zipObject(eventFields, eventValues);
-        return new Event<Index>(index(key), Immutable.Map(d as { [key: string]: {} }));
+        return new Event<Index>(index(key), Immutable.fromJS(d as { [key: string]: {} }));
     });
     return new TimeSeries({ events: Immutable.List(events), ...meta2 });
 }
@@ -187,14 +189,14 @@ function indexedSeries(arg: TimeSeriesWireFormat) {
  */
 function timeRangeSeries(arg: TimeSeriesWireFormat) {
     const wireFormat = arg as TimeSeriesWireFormat;
-    const { columns, points, utc = true, ...meta2 } = wireFormat;
+    const { columns, points, tz = "Etc/UTC", ...meta2 } = wireFormat;
     const [eventKey, ...eventFields] = columns;
     const events = points.map(point => {
         const [key, ...eventValues] = point;
         const d = _.zipObject(eventFields, eventValues);
         return new Event<TimeRange>(
             timerange(key[0], key[1]),
-            Immutable.Map(d as { [key: string]: {} })
+            Immutable.fromJS(d as { [key: string]: {} })
         );
     });
     return new TimeSeries({ events: Immutable.List(events), ...meta2 });
@@ -532,6 +534,13 @@ export class TimeSeries<T extends Key> {
     }
 
     /**
+     * Returns the list of Events in the `Collection` of events for this `TimeSeries`
+     */
+    eventList() {
+        return this.collection().eventList();
+    }
+
+    /**
      * Returns the internal `Collection` of events for this `TimeSeries`
      */
     collection(): SortedCollection<T> {
@@ -670,6 +679,22 @@ export class TimeSeries<T extends Key> {
     }
 
     /**
+     * Iterate over the events in this `TimeSeries`. Events are in the
+     * order that they were added, unless the underlying Collection has since been
+     * sorted.
+     *
+     * @example
+     * ```
+     * series.forEach((e, k) => {
+     *     console.log(e, k);
+     * })
+     * ```
+     */
+    forEach<M extends Key>(sideEffect: (value?: Event<T>, index?: number) => any) {
+        return this._collection.forEach(sideEffect);
+    }
+
+    /**
      * Takes an operator that is used to remap events from this `TimeSeries` to
      * a new set of `Event`'s.
      */
@@ -773,16 +798,29 @@ export class TimeSeries<T extends Key> {
 
         let filledCollection: Collection<T>;
         if (method === FillMethod.Zero || method === FillMethod.Pad) {
-            filledCollection = this._collection.fill(options);
-        } else if (method === FillMethod.Linear && _.isArray(fieldSpec)) {
-            fieldSpec.forEach(fieldPath => {
-                const args: FillOptions = {
-                    fieldSpec: fieldPath,
+            filledCollection = this._collection.fill({
+                fieldSpec,
+                method,
+                limit
+            });
+        } else if (method === FillMethod.Linear) {
+            if (_.isArray(fieldSpec)) {
+                filledCollection = this._collection;
+                fieldSpec.forEach(fieldPath => {
+                    const args: FillOptions = {
+                        fieldSpec: fieldPath,
+                        method,
+                        limit
+                    };
+                    filledCollection = filledCollection.fill(args);
+                });
+            } else {
+                filledCollection = this._collection.fill({
+                    fieldSpec,
                     method,
                     limit
-                };
-                filledCollection = filledCollection.fill(args);
-            });
+                });
+            }
         } else {
             throw new Error(`Invalid fill method: ${method}`);
         }
@@ -822,15 +860,7 @@ export class TimeSeries<T extends Key> {
      * ```
      */
     align(options: AlignmentOptions) {
-        const {
-            fieldSpec = "value",
-            window = period("5m"),
-            method = AlignmentMethod.Linear,
-            limit = null
-        } = options;
-        const collection = new SortedCollection(
-            this._collection.align({ fieldSpec, window, method, limit })
-        );
+        const collection = new SortedCollection(this._collection.align(options));
         return this.setCollection(collection);
     }
 
@@ -840,10 +870,7 @@ export class TimeSeries<T extends Key> {
      * is negative. This is useful when a negative rate would be considered invalid.
      */
     rate(options: RateOptions) {
-        const { fieldSpec = "value", allowNegative = true } = options;
-        const collection = new SortedCollection(
-            this._collection.rate({ fieldSpec, allowNegative })
-        );
+        const collection = new SortedCollection(this._collection.rate(options));
         return this.setCollection(collection);
     }
 
@@ -889,11 +916,9 @@ export class TimeSeries<T extends Key> {
      *
      */
     fixedWindowRollup(options: RollupOptions<T>): TimeSeries<Index> {
-        const { windowSize, aggregation } = options;
-        if (!windowSize) {
-            throw new Error(
-                "windowSize must be supplied, for example '5m' for five minute rollups"
-            );
+        const { window, aggregation } = options;
+        if (!window) {
+            throw new Error("window must be supplied");
         }
 
         if (!aggregation || !_.isObject(aggregation)) {
@@ -903,7 +928,7 @@ export class TimeSeries<T extends Key> {
         }
 
         const aggregatorPipeline = this._collection
-            .window({ window: windowSize, trigger: Trigger.onDiscardedWindow })
+            .window({ window, trigger: Trigger.onDiscardedWindow })
             .aggregate(aggregation)
             .flatten();
 
@@ -932,7 +957,7 @@ export class TimeSeries<T extends Key> {
             );
         }
 
-        return this.fixedWindowRollup({ windowSize: period("1h"), aggregation });
+        return this.fixedWindowRollup({ window: window(duration("1h")), aggregation });
     }
 
     /**
@@ -947,15 +972,15 @@ export class TimeSeries<T extends Key> {
      *
      */
     dailyRollup(options: RollupOptions<T>): TimeSeries<Index> {
-        const { aggregation } = options;
+        const { aggregation, timezone = "Etc/UTC" } = options;
 
         if (!aggregation || !_.isObject(aggregation)) {
             throw new Error(
-                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+                "aggregation object must be supplied, for example: {avg_value: {value: avg()}}"
             );
         }
 
-        return this._rollup({ windowSize: period("daily"), aggregation });
+        return this._rollup({ window: daily(timezone), aggregation });
     }
 
     /**
@@ -969,6 +994,7 @@ export class TimeSeries<T extends Key> {
      * ```
      *
      */
+    /*
     monthlyRollup(options: RollupOptions<T>): TimeSeries<Index> {
         const { aggregation } = options;
 
@@ -980,6 +1006,7 @@ export class TimeSeries<T extends Key> {
 
         return this._rollup({ windowSize: period("monthly"), aggregation });
     }
+    */
 
     /**
      * Builds a new `TimeSeries` by dividing events into years.
@@ -993,6 +1020,7 @@ export class TimeSeries<T extends Key> {
      * ```
      *
      */
+    /*
     yearlyRollup(options: RollupOptions<T>): TimeSeries<Index> {
         const { aggregation } = options;
 
@@ -1004,6 +1032,7 @@ export class TimeSeries<T extends Key> {
 
         return this._rollup({ windowSize: period("yearly"), aggregation });
     }
+    */
 
     /**
      * @private
@@ -1012,9 +1041,9 @@ export class TimeSeries<T extends Key> {
      * an aggregator Pipeline.
      */
     _rollup(options: RollupOptions<T>) {
-        const { windowSize, aggregation } = options;
+        const { window, aggregation } = options;
         const aggregatorPipeline = this._collection
-            .window({ window: windowSize, trigger: Trigger.onDiscardedWindow })
+            .window({ window, trigger: Trigger.onDiscardedWindow })
             .aggregate(aggregation)
             .flatten();
 
@@ -1036,10 +1065,8 @@ export class TimeSeries<T extends Key> {
      * ```
      *
      */
-    collectByFixedWindow(options: RollupOptions<T>) {
-        return this._collection
-            .window({ window: options.windowSize, trigger: Trigger.onDiscardedWindow })
-            .ungroup();
+    collectByWindow(options: RollupOptions<T>) {
+        return this._collection.window({ window: options.window }).ungroup();
     }
 
     /*
