@@ -9,6 +9,7 @@
  */
 
 import * as Immutable from "immutable";
+import { OrderedSet } from "immutable";
 import * as _ from "lodash";
 import * as moment from "moment-timezone";
 
@@ -204,7 +205,7 @@ export class Window extends WindowBase {
             t2 = t.end();
         }
         let result = Immutable.OrderedSet<Index>();
-        const prefix = this._period.toString();
+        const prefix = this.toString();
         const scanBegin = this._period.next(time(+t1 - +this._duration));
         let periodIndex = Math.ceil(+scanBegin / +this._period.frequency());
         const indexes = [];

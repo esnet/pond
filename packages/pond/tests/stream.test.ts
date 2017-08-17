@@ -6,6 +6,7 @@ declare const beforeEach: any;
 import * as Immutable from "immutable";
 import * as moment from "moment";
 import Moment = moment.Moment;
+import * as _ from "lodash";
 
 import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
@@ -285,6 +286,60 @@ describe("Streaming", () => {
         expect(result[0].get("ab")).toBe(3);
         expect(result[1].get("ab")).toBe(9);
         expect(result[2].get("ab")).toBe(15);
+    });
+    fit("can process a sliding window", () => {
+        const eventsIn = [
+            event(time(Date.UTC(2015, 2, 14, 1, 15, 0)), Immutable.Map({ in: 1, out: 6 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 16, 0)), Immutable.Map({ in: 2, out: 7 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 17, 0)), Immutable.Map({ in: 3, out: 8 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 18, 0)), Immutable.Map({ in: 4, out: 9 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ in: 5, out: 10 }))
+        ];
+
+        const result: { [key: string]: Collection<Time> } = {};
+        const slidingWindow = window(duration("3m"), period(duration("1m")));
+        const fixedHourlyWindow = window(duration("1h"));
+        let calls = 0;
+        const source = stream()
+            .groupByWindow({
+                window: slidingWindow,
+                trigger: Trigger.onDiscardedWindow
+            })
+            .aggregate({
+                in_avg: ["in", avg()],
+                out_avg: ["out", avg()],
+                count: ["in", count()]
+            })
+            .map(e => new Event<Time>(time(e.timerange().end()), e.getData()))
+            .groupByWindow({
+                window: fixedHourlyWindow,
+                trigger: Trigger.perEvent
+            })
+            .output((collection, key) => {
+                result[key] = collection as Collection<Time>;
+                calls += 1;
+            });
+
+        eventsIn.forEach(e => source.addEvent(e));
+
+        const collection = result["1h-396193"];
+        expect(collection.size()).toBe(4);
+
+        expect(+collection.at(0).timestamp()).toBe(1426295760000);
+        expect(collection.at(0).get("in_avg")).toBe(1);
+        expect(collection.at(0).get("count")).toBe(1);
+
+        expect(+collection.at(1).timestamp()).toBe(1426295820000);
+        expect(collection.at(1).get("in_avg")).toBe(1.5);
+        expect(collection.at(1).get("count")).toBe(2);
+
+        expect(+collection.at(2).timestamp()).toBe(1426295880000);
+        expect(collection.at(2).get("in_avg")).toBe(2);
+        expect(collection.at(2).get("count")).toBe(3);
+
+        expect(+collection.at(3).timestamp()).toBe(1426295940000);
+        expect(collection.at(3).get("in_avg")).toBe(3);
+        expect(collection.at(3).get("count")).toBe(3);
     });
 });
 
