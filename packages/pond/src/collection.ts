@@ -40,7 +40,7 @@ import {
 
 import util from "./util";
 
-import { DedupFunction, ReducerFunction, ValueMap, WindowType } from "./types";
+import { DedupFunction, ReducerFunction, ValueMap } from "./types";
 
 import {
     avg,
@@ -378,7 +378,7 @@ export class Collection<T extends Key> extends Base {
      * }
      * ```
      */
-    public entries() {
+    public entries(): IterableIterator<[number, Event<T>]> {
         return this._events.entries();
     }
 
@@ -386,6 +386,8 @@ export class Collection<T extends Key> extends Base {
      * Iterate over the events in this `Collection`. Events are in the
      * order that they were added, unless the Collection has since been
      * sorted.
+     * 
+     * Returns the number of items iterated.
      *
      * @example
      * ```
@@ -394,7 +396,7 @@ export class Collection<T extends Key> extends Base {
      * })
      * ```
      */
-    public forEach(sideEffect: (value?: Event<T>, index?: number) => any) {
+    public forEach(sideEffect: (value?: Event<T>, index?: number) => any): number {
         return this._events.forEach(sideEffect);
     }
 
@@ -425,13 +427,13 @@ export class Collection<T extends Key> extends Base {
      *
      * @example
      *
-     * Here we remap Time keys to `TimeRange` keys using the `Time.toTimeRange()`
-     * method to center new `TimeRange`s around each `Time` with duration given
-     * by the `Period`, in this case 1 hour.
+     * In this example we remap `Time` keys to `TimeRange` keys using the `Time.toTimeRange()`
+     * method, centering the new `TimeRange`s around each `Time` with duration given
+     * by the `Duration` object supplied, in this case representing one hour.
      *
      * ```
      * const remapped = myCollection.mapKeys<TimeRange>((t) =>
-     *     t.toTimeRange(period("1h"), TimeAlignment.Middle));
+     *     t.toTimeRange(duration("1h"), TimeAlignment.Middle));
      * ```
      *
      */

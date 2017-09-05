@@ -3,55 +3,82 @@ declare const it: any;
 declare const expect: any;
 
 import * as moment from "moment";
-import { period } from "../src/period";
+import { duration } from "../src/duration";
+import { period, Period } from "../src/period";
+import { time } from "../src/time";
+import { timerange } from "../src/timerange";
+
+import Util from "../src/util";
 
 describe("Period", () => {
-    it("can construct one with a string", () => {
-        const p = period("1d");
-        expect(+p).toBe(86400000);
+    it("can construct a period", () => {
+        const p = period().every(duration("5m")).offsetBy(time(0));
     });
 
-    it("can construct one with just a number of ms", () => {
-        const p = period(3600);
-        expect(+p).toBe(3600);
+    it("can determine if a time is aligned to a period", () => {
+        const p = period().every(duration("5m"));
+        const isAligned = p.isAligned(time("2017-07-21T09:35:00.000Z"));
+        const isNotAligned = p.isAligned(time("2017-07-21T09:33:00.000Z"));
+        expect(isAligned).toBeTruthy();
+        expect(isNotAligned).toBeFalsy();
     });
 
-    it("can construct one with a number and the units", () => {
-        const period1 = period(1234);
-        expect(+period1).toBe(1234);
-
-        const period2 = period(30, "seconds");
-        expect(+period2).toBe(30000);
-
-        const period3 = period(5, "minutes");
-        expect(+period3).toBe(300000);
-
-        const period5 = period(24, "hours");
-        expect(+period5).toBe(86400000);
-
-        const period6 = period(2, "days");
-        expect(+period6).toBe(172800000);
-
-        const period7 = period(4, "weeks");
-        expect(+period7).toBe(2419200000);
+    it("can determine if a time is aligned to a period that has an offset", () => {
+        const p = period().every(duration("5m")).offsetBy(time("2017-07-21T09:38:00.000Z"));
+        const isAligned = p.isAligned(time("2017-07-21T09:43:00.000Z"));
+        expect(isAligned).toBeTruthy();
     });
 
-    it("can construct one with a moment", () => {
-        const m = moment.duration(24, "hours");
-        const p = period(m);
-        expect(+p).toBe(86400000);
+    it("can find the next time on the period", () => {
+        const p = period().every(duration("5m")).offsetBy(time("2017-07-21T09:38:00.000Z"));
+        const t = p.next(time("2017-07-21T09:49:00.000Z"));
+        expect(+t).toBe(1500630780000); //2017-07-21T09:53:00.000Z
+        const t2 = p.next(t);
+        expect(+t2).toBe(1500631080000); // 2017-07-21T09:58:00.000Z
     });
 
-    it("can construct one with a moment style object", () => {
-        const p = period({
-            seconds: 2,
-            minutes: 2,
-            hours: 2,
-            days: 2,
-            weeks: 2,
-            months: 2,
-            years: 2
-        });
-        expect(+p).toBe(69732122000);
+    it("can find the list of times aligned to a period within a timerange", () => {
+        const everyFiveMinutes = period().every(duration("5m"));
+        const range = timerange(time("2017-07-21T09:30:00.000Z"), time("2017-07-21T09:45:00.000Z"));
+        const result = everyFiveMinutes.within(range);
+
+        expect(+result.get(0)).toBe(1500629400000); // 2017-07-21 9:30am
+        expect(+result.get(1)).toBe(1500629700000); // 2017-07-21 9:35am
+        expect(+result.get(2)).toBe(1500630000000); // 2017-07-21 9:40am
+        expect(+result.get(3)).toBe(1500630300000); // 2017-07-21 9:45am
+    });
+
+    it("can find the list of times aligned to a period with offset within a timerange", () => {
+        const everyFiveMinutes = period()
+            .every(duration("5m"))
+            .offsetBy(time("2017-07-21T09:38:00.000Z"));
+        const result = everyFiveMinutes.within(
+            timerange(time("2017-07-21T09:30:00.000Z"), time("2017-07-21T09:45:00.000Z"))
+        );
+        expect(+result.get(0)).toBe(1500629580000); // 2017-07-21 9:33am
+        expect(+result.get(1)).toBe(1500629880000); // 2017-07-21 9:38am
+        expect(+result.get(2)).toBe(1500630180000); // 2017-07-21 9:43am
+    });
+
+    it("can find the list of times aligned to a period within a timerange (begin aligned)", () => {
+        const everyFiveMinutes = period()
+            .every(duration("5m"))
+            .offsetBy(time("2017-07-21T09:38:00.000Z"));
+        const result = everyFiveMinutes.within(
+            timerange(time("2017-07-21T09:38:00.000Z"), time("2017-07-21T09:45:00.000Z"))
+        );
+        expect(+result.get(0)).toBe(1500629880000); // 2017-07-21 9:38am
+        expect(+result.get(1)).toBe(1500630180000); // 2017-07-21 9:43am
+    });
+
+    it("can find the list of times aligned to a period within a timerange (end aligned)", () => {
+        const everyFiveMinutes = period()
+            .every(duration("5m"))
+            .offsetBy(time("2017-07-21T09:38:00.000Z"));
+        const result = everyFiveMinutes.within(
+            timerange(time("2017-07-21T09:38:00.000Z"), time("2017-07-21T09:43:00.000Z"))
+        );
+        expect(+result.get(0)).toBe(1500629880000); // 2017-07-21 9:38am
+        expect(+result.get(1)).toBe(1500630180000); // 2017-07-21 9:43am
     });
 });

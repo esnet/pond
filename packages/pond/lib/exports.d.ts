@@ -4,7 +4,21 @@ import { Collapse } from "./collapse";
 import { collection, Collection } from "./collection";
 import { event, Event, timeEvent, timeRangeEvent, indexedEvent } from "./event";
 import { Fill } from "./fill";
-import { avg, count, difference, filter, first, keep, last, max, median, min, percentile, stdev, sum } from "./functions";
+import {
+    avg,
+    count,
+    difference,
+    filter,
+    first,
+    keep,
+    last,
+    max,
+    median,
+    min,
+    percentile,
+    stdev,
+    sum
+} from "./functions";
 import { grouped, GroupedCollection } from "./grouped";
 import { index, Index } from "./index";
 import { Key } from "./key";
@@ -25,7 +39,21 @@ export { Collapse };
 export { collection, Collection };
 export { event, Event, timeEvent, timeRangeEvent, indexedEvent };
 export { Fill };
-export { avg, count, difference, filter, first, keep, last, max, median, min, percentile, stdev, sum };
+export {
+    avg,
+    count,
+    difference,
+    filter,
+    first,
+    keep,
+    last,
+    max,
+    median,
+    min,
+    percentile,
+    stdev,
+    sum
+};
 export { grouped, GroupedCollection };
 export { index, Index };
 export { Key };

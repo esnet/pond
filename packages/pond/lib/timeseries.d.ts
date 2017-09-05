@@ -7,10 +7,20 @@ import { SortedCollection } from "./sorted";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
 import { InterpolationType } from "./functions";
-import { AlignmentOptions, CollapseOptions, FillOptions, RateOptions, ReducerFunction, RenameColumnOptions, RollupOptions, SelectOptions, TimeSeriesOptions } from "./types";
+import {
+    AlignmentOptions,
+    CollapseOptions,
+    FillOptions,
+    RateOptions,
+    ReducerFunction,
+    RenameColumnOptions,
+    RollupOptions,
+    SelectOptions,
+    TimeSeriesOptions
+} from "./types";
 export interface TimeSeriesWireFormat {
     name?: string;
-    utc?: boolean;
+    tz?: string;
     columns: string[];
     points: any[];
     [propName: string]: any;
@@ -47,7 +57,7 @@ export interface TimeSeriesListReducerOptions {
  * }
  * ```
  */
-declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>;
+declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>
 /**
  * Create an `Index` based `TimeSeries` using the wire format
  * ```
@@ -62,7 +72,7 @@ declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>;
  * }
  * ```
  */
-declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>;
+declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>
 /**
  * Create a `Timerange` based `TimeSeries` using the wire format
  * ```
@@ -77,7 +87,7 @@ declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>;
  * }
  * ```
  */
-declare function timeRangeSeries(arg: TimeSeriesWireFormat): TimeSeries<TimeRange>;
+declare function timeRangeSeries(arg: TimeSeriesWireFormat): TimeSeries<TimeRange>
 export { timeSeries, indexedSeries, timeRangeSeries };
 /**
  * A `TimeSeries` represents a series of `Event`'s, with each event being a combination of:
@@ -282,6 +292,10 @@ export declare class TimeSeries<T extends Key> {
      */
     columns(): string[];
     /**
+     * Returns the list of Events in the `Collection` of events for this `TimeSeries`
+     */
+    eventList(): Immutable.List<Event<T>>;
+    /**
      * Returns the internal `Collection` of events for this `TimeSeries`
      */
     collection(): SortedCollection<T>;
@@ -354,6 +368,19 @@ export declare class TimeSeries<T extends Key> {
      * with q = 0.25, 0.5 and 0.75.
      */
     quantile(quantity: number, fieldPath?: string, interp?: InterpolationType): any[];
+    /**
+     * Iterate over the events in this `TimeSeries`. Events are in the
+     * order that they were added, unless the underlying Collection has since been
+     * sorted.
+     *
+     * @example
+     * ```
+     * series.forEach((e, k) => {
+     *     console.log(e, k);
+     * })
+     * ```
+     */
+    forEach<M extends Key>(sideEffect: (value?: Event<T>, index?: number) => any): number;
     /**
      * Takes an operator that is used to remap events from this `TimeSeries` to
      * a new set of `Event`'s.
@@ -540,7 +567,6 @@ export declare class TimeSeries<T extends Key> {
      * ```
      *
      */
-    monthlyRollup(options: RollupOptions<T>): TimeSeries<Index>;
     /**
      * Builds a new `TimeSeries` by dividing events into years.
      *
@@ -553,7 +579,6 @@ export declare class TimeSeries<T extends Key> {
      * ```
      *
      */
-    yearlyRollup(options: RollupOptions<T>): TimeSeries<Index>;
     /**
      * @private
      *
@@ -574,7 +599,7 @@ export declare class TimeSeries<T extends Key> {
      * ```
      *
      */
-    collectByFixedWindow(options: RollupOptions<T>): Immutable.Map<string, Collection<T>>;
+    collectByWindow(options: RollupOptions<T>): Immutable.Map<string, Collection<T>>;
     /**
      * Static function to compare two `TimeSeries` to each other. If the `TimeSeries`
      * are of the same instance as each other then equals will return true.

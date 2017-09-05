@@ -286,11 +286,11 @@ export class TimeRange extends Key {
  * A `Timerange` is a simple representation of a begin and end time, used
  * to maintain consistency across an application.
  */
-function timerange(arg: TimeRange | Immutable.List<Date>)
-function timerange(begin: Date, end: Date)
-function timerange(begin: Time, end: Time)
-function timerange(begin: Moment, end: Moment)
-function timerange(begin: number, end: number)
+function timerange(arg: TimeRange | Immutable.List<Date>);
+function timerange(begin: Date, end: Date);
+function timerange(begin: Time, end: Time);
+function timerange(begin: Moment, end: Moment);
+function timerange(begin: number, end: number);
 function timerange(arg1: any, arg2?: any) {
     return new TimeRange(arg1, arg2);
 }

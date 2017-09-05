@@ -13,7 +13,7 @@ declare const it: any;
 declare const expect: any;
 
 import * as moment from "moment";
-import { period } from "../src/period";
+import { duration } from "../src/duration";
 import { timerange, TimeRange } from "../src/timerange";
 import util from "../src/util";
 
@@ -79,31 +79,31 @@ it("can display a range as a human friendly string", () => {
 });
 
 it("can display last day as a human friendly string", () => {
-    const range = util.untilNow(period("1d"));
+    const range = util.untilNow(duration("1d"));
     const expected = "a day ago to a few seconds ago";
     expect(range.relativeString()).toBe(expected);
 });
 
 it("can display last 7 days as a human friendly string", () => {
-    const range = util.untilNow(period("7d"));
+    const range = util.untilNow(duration("7d"));
     const expected = "7 days ago to a few seconds ago";
     expect(range.relativeString()).toBe(expected);
 });
 
 it("can display last 30 days as a human friendly string", () => {
-    const range = util.untilNow(period("30d"));
+    const range = util.untilNow(duration("30d"));
     const expected = "a month ago to a few seconds ago";
     expect(range.relativeString()).toBe(expected);
 });
 
 // it("can display last month as a human friendly string", () => {
-//     const range = util.untilNow(period(1, "month"));
+//     const range = util.untilNow(duration(1, "month"));
 //     const expected = "a month ago to a few seconds ago";
 //     expect(range.relativeString()).toBe(expected);
 // });
 
 it("can display last 90 days as a human friendly string", () => {
-    const range = util.untilNow(period("90d"));
+    const range = util.untilNow(duration("90d"));
     const expected = "3 months ago to a few seconds ago";
     expect(range.relativeString()).toBe(expected);
 });

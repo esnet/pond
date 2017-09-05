@@ -1,6 +1,6 @@
 import { Align } from "./align";
 import { Base } from "./base";
-import { Collapse } from  "./collapse";
+import { Collapse } from "./collapse";
 import { collection, Collection } from "./collection";
 import { event, Event, timeEvent, timeRangeEvent, indexedEvent } from "./event";
 import { Fill } from "./fill";

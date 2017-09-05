@@ -18,6 +18,7 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import { collection } from "../src/collection";
+import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { period } from "../src/period";
 import { time } from "../src/time";
@@ -50,7 +51,7 @@ it("can do basic alignment using TimeSeries.align()", () => {
     const c = collection(Immutable.List(list));
     const aligned = c.align({
         fieldSpec: "value",
-        window: period("1m"),
+        period: period().every(duration("1m")),
         method: AlignmentMethod.Linear
     });
 
@@ -73,7 +74,7 @@ it("can do basic hold alignment", () => {
     const c = collection(Immutable.List(list));
     const aligned = c.align({
         fieldSpec: ["value"],
-        window: period("1m"),
+        period: period(duration("1m")),
         method: AlignmentMethod.Hold
     });
 

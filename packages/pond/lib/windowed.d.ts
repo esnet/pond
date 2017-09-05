@@ -59,10 +59,22 @@ export declare class WindowedCollection<T extends Key> extends Base {
     flatten(): Collection<T>;
     ungroup(): Immutable.Map<string, Collection<T>>;
     addEvent(event: Event<T>): Immutable.List<KeyedCollection<T>>;
-    private groupEvent(event);
+    private getEventGroups(event);
 }
-declare function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, Collection<T>>): any;
-declare function windowFactory<T extends Key>(windowOptions: WindowingOptions, collectionMap?: Immutable.Map<string, Collection<T>>): any;
-declare function windowFactory<T extends Key>(windowOptions: WindowingOptions, initialCollection?: Collection<T>): any;
-declare function windowFactory<T extends Key>(windowOptions: WindowingOptions, group: string | string[], initialCollection?: Collection<T>): any;
+declare function windowFactory<T extends Key>(
+    collectionMap: Immutable.Map<string, Collection<T>>
+): any
+declare function windowFactory<T extends Key>(
+    windowOptions: WindowingOptions,
+    collectionMap?: Immutable.Map<string, Collection<T>>
+): any
+declare function windowFactory<T extends Key>(
+    windowOptions: WindowingOptions,
+    initialCollection?: Collection<T>
+): any
+declare function windowFactory<T extends Key>(
+    windowOptions: WindowingOptions,
+    group: string | string[],
+    initialCollection?: Collection<T>
+): any
 export { windowFactory as windowed };

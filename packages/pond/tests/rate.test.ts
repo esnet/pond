@@ -8,6 +8,7 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import { collection } from "../src/collection";
+import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { period } from "../src/period";
 import { time } from "../src/time";
@@ -53,7 +54,7 @@ it("can do basic rate using Collection.rate()", () => {
     const rates = c
         .align({
             fieldSpec: "value",
-            window: period("30s"),
+            period: period(duration("30s")),
             method: AlignmentMethod.Linear
         })
         .rate({
@@ -77,7 +78,7 @@ it("can output nulls for negative values", () => {
     const rates1 = c
         .align({
             fieldSpec: "value",
-            window: period("30s"),
+            period: period(duration("30s")),
             method: AlignmentMethod.Linear
         })
         .rate({
@@ -93,7 +94,7 @@ it("can output nulls for negative values", () => {
     const rates2 = c
         .align({
             fieldSpec: "value",
-            window: period("30s"),
+            period: period(duration("30s")),
             method: AlignmentMethod.Linear
         })
         .rate({

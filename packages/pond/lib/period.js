@@ -9,98 +9,94 @@
  *  LICENSE file in the root directory of this source tree.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+const Immutable = require("immutable");
 const _ = require("lodash");
-const moment = require("moment");
-const UNITS = {
-    milliseconds: 1,
-    seconds: 1000,
-    minutes: 1000 * 60,
-    hours: 1000 * 60 * 60,
-    days: 1000 * 60 * 60 * 24,
-    weeks: 1000 * 60 * 60 * 24 * 7
-};
-const SHORT_UNITS = {
-    s: 1000,
-    m: 1000 * 60,
-    h: 1000 * 60 * 60,
-    d: 1000 * 60 * 60 * 24,
-    w: 1000 * 60 * 60 * 24 * 7
-};
+const time_1 = require("./time");
 /**
- * A period is a repeating unit of time which is typically
- * used in pond to describe an aggregation bucket. For example
- * a `period("1d")` would indicate buckets that are a day long.
+ * A period is a repeating time which is typically used in pond to
+ * either define the repeating nature of a bucket (used for windowing)
+ * or to describe alignment of fill positions when doing data cleaning
+ * on a `TimeSeries`.
+ *
+ * Periods have a frequency and an offset. If there is no offset, it
+ * is aligned to Jan 1, 1970 00:00 UTC.
+ *
+ * To create a repeating window, see `Bucket` creation.
  */
 class Period {
     /**
-     * * Passing a number to the constructor will
-     * be considered as a `ms` duration.
-     * * Passing a string to the constuctor will
-     * be considered a duration string, with a
-     * format of `%d[s|m|h|d]`
-     * * Passing a number and a string will be considered
-     * a quantity and a unit. The string should be one of:
-     *   * milliseconds
-     *   * seconds
-     *   * minutes
-     *   * hours
-     *   * days
-     *   * weeks
-     * * Finally, you can pass either a `moment.Duration` or a
-     * `Moment.Duration-like` object to the constructor
+     * To define a `Period`, you need to the duration of the frequency that the
+     * period repeats. Optionally you can specify and offset for the period.
+     *
+     *  * the `stride` of the period which is how often the beginning of the
+     *    duration of time repeats itself. This is a `Duration`, i.e. the duration
+     *    of the length of the stride, or basically the length between the beginning
+     *    of each period repeat. In the above example that would be `duration("10s")`.
+     *  * the `offset`, a point in time to calculate the period from, which defaults
+     *    to Jan 1, 1970 UTC or timestamp 0. This is specified as a `Time`.
+     *
      */
-    constructor(arg1, arg2) {
-        if (_.isNumber(arg1)) {
-            if (!arg2) {
-                this._duration = arg1;
-            }
-            else if (_.isString(arg2) && _.has(UNITS, arg2)) {
-                const multiplier = arg1;
-                this._duration = multiplier * UNITS[arg2];
-            }
-            else {
-                throw new Error("Unknown arguments pssed to Period constructor");
-            }
-        }
-        else if (_.isString(arg1)) {
-            this._string = arg1;
-            let multiplier;
-            let unit;
-            const regex = /([0-9]+)([smhdw])/;
-            const parts = regex.exec(arg1);
-            if (parts && parts.length >= 3) {
-                multiplier = parseInt(parts[1], 10);
-                unit = parts[2];
-                this._duration = multiplier * SHORT_UNITS[unit];
-            }
-        }
-        else if (moment.isDuration(arg1)) {
-            const d = arg1;
-            this._string = d.toISOString();
-            this._duration = d.asMilliseconds();
-        }
-        else if (_.isObject(arg1)) {
-            const d = moment.duration(arg1);
-            this._string = d.toISOString();
-            this._duration = d.asMilliseconds();
-        }
-        else {
-            throw new Error("Unknown arguments pssed to Period constructor");
-        }
+    constructor(frequency, offset) {
+        this._frequency = frequency;
+        this._offset = offset && !_.isNaN(offset) ? offset.timestamp().getTime() : 0;
     }
     toString() {
-        if (this._string) {
-            return this._string;
-        }
-        return `${this._duration}ms`;
+        return this._offset ? `${this._frequency}+${this._offset}` : `${this._frequency}`;
     }
-    valueOf() {
-        return this._duration;
+    frequency() {
+        return this._frequency;
+    }
+    offset() {
+        return this._offset;
+    }
+    every(frequency) {
+        return new Period(frequency, time_1.time(this._offset));
+    }
+    offsetBy(offset) {
+        return new Period(this._frequency, offset);
+    }
+    /**
+     * Returns true if the `Time` supplied is aligned with this `Period`.
+     */
+    isAligned(time) {
+        return (+time - +this._offset) / +this._frequency % 1 == 0;
+    }
+    /**
+     * Given a time, find the next time aligned to the period.
+     */
+    next(time) {
+        const index = Math.ceil((+time - +this._offset) / +this._frequency);
+        const next = index * +this._frequency + this._offset;
+        return next === +time ? new time_1.Time(next + +this._frequency) : new time_1.Time(next);
+    }
+    /**
+     * Returns `Time`s within the given TimeRange that align with this
+     * `Period`.
+     *
+     * @example
+     * ```
+     * const range = timerange(time("2017-07-21T09:30:00.000Z"), time("2017-07-21T09:45:00.000Z"))
+     * const everyFiveMinutes = period()
+     *     .every(duration("5m"))
+     *     .offsetBy(time("2017-07-21T09:38:00.000Z"));
+     * const result = everyFiveMinutes.within(range);  // 9:33am, 9:38am, 9:43am
+     * ```
+     */
+    within(timerange) {
+        let result = Immutable.List();
+        const t1 = time_1.time(timerange.begin());
+        const t2 = time_1.time(timerange.end());
+        let scan = this.isAligned(t1) ? t1 : this.next(t1);
+        while (+scan <= +t2) {
+            result = result.push(scan);
+            scan = this.next(scan);
+        }
+        return result;
     }
 }
 exports.Period = Period;
-function periodFactory(arg1, arg2) {
-    return new Period(arg1, arg2);
+function period(frequency, offset) {
+    return new Period(frequency, offset);
 }
-exports.period = periodFactory;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGVyaW9kLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vc3JjL3BlcmlvZC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7O0dBUUc7O0FBRUgsNEJBQTRCO0FBQzVCLGlDQUFpQztBQUVqQyxNQUFNLEtBQUssR0FBOEI7SUFDckMsWUFBWSxFQUFFLENBQUM7SUFDZixPQUFPLEVBQUUsSUFBSTtJQUNiLE9BQU8sRUFBRSxJQUFJLEdBQUcsRUFBRTtJQUNsQixLQUFLLEVBQUUsSUFBSSxHQUFHLEVBQUUsR0FBRyxFQUFFO0lBQ3JCLElBQUksRUFBRSxJQUFJLEdBQUcsRUFBRSxHQUFHLEVBQUUsR0FBRyxFQUFFO0lBQ3pCLEtBQUssRUFBRSxJQUFJLEdBQUcsRUFBRSxHQUFHLEVBQUUsR0FBRyxFQUFFLEdBQUcsQ0FBQztDQUNqQyxDQUFDO0FBRUYsTUFBTSxXQUFXLEdBQThCO0lBQzNDLENBQUMsRUFBRSxJQUFJO0lBQ1AsQ0FBQyxFQUFFLElBQUksR0FBRyxFQUFFO0lBQ1osQ0FBQyxFQUFFLElBQUksR0FBRyxFQUFFLEdBQUcsRUFBRTtJQUNqQixDQUFDLEVBQUUsSUFBSSxHQUFHLEVBQUUsR0FBRyxFQUFFLEdBQUcsRUFBRTtJQUN0QixDQUFDLEVBQUUsSUFBSSxHQUFHLEVBQUUsR0FBRyxFQUFFLEdBQUcsRUFBRSxHQUFHLENBQUM7Q0FDN0IsQ0FBQztBQUVGOzs7O0dBSUc7QUFDSDtJQUlJOzs7Ozs7Ozs7Ozs7Ozs7O09BZ0JHO0lBQ0gsWUFBWSxJQUFxQixFQUFFLElBQWE7UUFDNUMsRUFBRSxDQUFDLENBQUMsQ0FBQyxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQyxDQUFDLENBQUM7WUFDbkIsRUFBRSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsQ0FBQyxDQUFDO2dCQUNSLElBQUksQ0FBQyxTQUFTLEdBQUcsSUFBSSxDQUFDO1lBQzFCLENBQUM7WUFBQyxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FB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
+exports.period = period;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGVyaW9kLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vc3JjL3BlcmlvZC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7O0dBUUc7O0FBRUgsdUNBQXVDO0FBQ3ZDLDRCQUE0QjtBQUs1QixpQ0FBb0M7QUFHcEM7Ozs7Ozs7Ozs7R0FVRztBQUNIO0lBSUk7Ozs7Ozs7Ozs7O09BV0c7SUFDSCxZQUFZLFNBQW9CLEVBQUUsTUFBYTtRQUMzQyxJQUFJLENBQUMsVUFBVSxHQUFHLFNBQVMsQ0FBQztRQUM1QixJQUFJLENBQUMsT0FBTyxHQUFHLE1BQU0sSUFBSSxDQUFDLENBQUMsQ0FBQyxLQUFLLENBQUMsTUFBTSxDQUFDLEdBQUcsTUFBTSxDQUFDLFNBQVMsRUFBRSxDQUFDLE9BQU8sRUFBRSxHQUFHLENBQUMsQ0FBQztJQUNqRixDQUFDO0lBRUQsUUFBUTtRQUNKLE1BQU0sQ0FBQyxJQUFJLENBQUMsT0FBTyxHQUFHLEdBQUcsSUFBSSxDQUFDLFVBQVUsSUFBSSxJQUFJLENBQUMsT0FBTyxFQUFFLEdBQUcsR0FBRyxJQUFJLENBQUMsVUFBVSxFQUFFLENBQUM7SUFDdEYsQ0FBQztJQUVELFNBQVM7UUFDTCxNQUFNLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQztJQUMzQixDQUFDO0lBRUQsTUFBTTtRQUNGLE1BQU0sQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDO0lBQ3hCLENBQUM7SUFFRCxLQUFLLENBQUMsU0FBbUI7UUFDckIsTUFBTSxDQUFDLElBQUksTUFBTSxDQUFDLFNBQVMsRUFBRSxXQUFJLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDLENBQUM7SUFDckQsQ0FBQztJQUVELFFBQVEsQ0FBQyxNQUFZO1FBQ2pCLE1BQU0sQ0FBQyxJQUFJLE1BQU0sQ0FBQyxJQUFJLENBQUMsVUFBVSxFQUFFLE1BQU0sQ0FBQyxDQUFDO0lBQy9DLENBQUM7SUFFRDs7T0FFRztJQUNILFNBQVMsQ0FBQyxJQUFVO1FBQ2hCLE1BQU0sQ0FBQyxDQUFDLENBQUMsSUFBSSxHQUFHLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLFVBQVUsR0FBRyxDQUFDLElBQUksQ0FBQyxDQUFDO0lBQy9ELENBQUM7SUFFRDs7T0FFRztJQUNILElBQUksQ0FBQyxJQUFVO1FBQ1gsTUFBTSxLQUFLLEdBQUcsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsSUFBSSxHQUFHLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxDQUFDO1FBQ3BFLE1BQU0sSUFBSSxHQUFHLEtBQUssR0FBRyxDQUFDLElBQUksQ0FBQyxVQUFVLEdBQUcsSUFBSSxDQUFDLE9BQU8sQ0FBQztRQUNyRCxNQUFNLENBQUMsSUFBSSxLQUFLLENBQUMsSUFBSSxHQUFHLElBQUksV0FBSSxDQUFDLElBQUksR0FBRyxDQUFDLElBQUksQ0FBQyxVQUFVLENBQUMsR0FBRyxJQUFJLFdBQUksQ0FBQyxJQUFJLENBQUMsQ0FBQztJQUMvRSxDQUFDO0lBRUQ7Ozs7Ozs7Ozs7OztPQVlHO0lBQ0gsTUFBTSxDQUFDLFNBQW9CO1FBQ3ZCLElBQUksTUFBTSxHQUFHLFNBQVMsQ0FBQyxJQUFJLEVBQVEsQ0FBQztRQUVwQyxNQUFNLEVBQUUsR0FBRyxXQUFJLENBQUMsU0FBUyxDQUFDLEtBQUssRUFBRSxDQUFDLENBQUM7UUFDbkMsTUFBTSxFQUFFLEdBQUcsV0FBSSxDQUFDLFNBQVMsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxDQUFDO1FBRWpDLElBQUksSUFBSSxHQUFHLElBQUksQ0FBQyxTQUFTLENBQUMsRUFBRSxDQUFDLEdBQUcsRUFBRSxHQUFHLElBQUksQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUM7UUFDbkQsT0FBTyxDQUFDLElBQUksSUFBSSxDQUFDLEVBQUUsRUFBRSxDQUFDO1lBQ2xCLE1BQU0sR0FBRyxNQUFNLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDO1lBQzNCLElBQUksR0FBRyxJQUFJLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDO1FBQzNCLENBQUM7UUFFRCxNQUFNLENBQUMsTUFBTSxDQUFDO0lBQ2xCLENBQUM7Q0FDSjtBQXBGRCx3QkFvRkM7QUFFRCxnQkFBZ0IsU0FBb0IsRUFBRSxNQUFhO0lBQy9DLE1BQU0sQ0FBQyxJQUFJLE1BQU0sQ0FBQyxTQUFTLEVBQUUsTUFBTSxDQUFDLENBQUM7QUFDekMsQ0FBQztBQUVRLHdCQUFNIn0=
