@@ -5,7 +5,7 @@
 	"flags": {},
 	"children": [
 		{
-			"id": 1797,
+			"id": 1799,
 			"name": "\"align\"",
 			"kind": 1,
 			"kindString": "External module",
@@ -15,7 +15,7 @@
 			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/align.ts",
 			"children": [
 				{
-					"id": 1798,
+					"id": 1800,
 					"name": "Align",
 					"kind": 128,
 					"kindString": "Class",
@@ -27,7 +27,7 @@
 					},
 					"typeParameter": [
 						{
-							"id": 1799,
+							"id": 1801,
 							"name": "T",
 							"kind": 131072,
 							"kindString": "Type parameter",
@@ -41,7 +41,7 @@
 					],
 					"children": [
 						{
-							"id": 1805,
+							"id": 1807,
 							"name": "constructor",
 							"kind": 512,
 							"kindString": "Constructor",
@@ -50,14 +50,14 @@
 							},
 							"signatures": [
 								{
-									"id": 1806,
+									"id": 1808,
 									"name": "new Align",
 									"kind": 16384,
 									"kindString": "Constructor signature",
 									"flags": {},
 									"parameters": [
 										{
-											"id": 1807,
+											"id": 1809,
 											"name": "options",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -72,7 +72,7 @@
 									"type": {
 										"type": "reference",
 										"name": "Align",
-										"id": 1798
+										"id": 1800
 									}
 								}
 							],
@@ -85,7 +85,7 @@
 							]
 						},
 						{
-							"id": 1800,
+							"id": 1802,
 							"name": "_fieldSpec",
 							"kind": 1024,
 							"kindString": "Property",
@@ -109,7 +109,7 @@
 							}
 						},
 						{
-							"id": 1803,
+							"id": 1805,
 							"name": "_limit",
 							"kind": 1024,
 							"kindString": "Property",
@@ -139,7 +139,7 @@
 							}
 						},
 						{
-							"id": 1802,
+							"id": 1804,
 							"name": "_method",
 							"kind": 1024,
 							"kindString": "Property",
@@ -161,7 +161,7 @@
 							}
 						},
 						{
-							"id": 1804,
+							"id": 1806,
 							"name": "_previous",
 							"kind": 1024,
 							"kindString": "Property",
@@ -194,7 +194,7 @@
 							}
 						},
 						{
-							"id": 1801,
+							"id": 1803,
 							"name": "_window",
 							"kind": 1024,
 							"kindString": "Property",
@@ -216,7 +216,7 @@
 							}
 						},
 						{
-							"id": 1825,
+							"id": 1827,
 							"name": "addEvent",
 							"kind": 2048,
 							"kindString": "Method",
@@ -225,7 +225,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1826,
+									"id": 1828,
 									"name": "addEvent",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -235,7 +235,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1827,
+											"id": 1829,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -301,7 +301,7 @@
 							}
 						},
 						{
-							"id": 1811,
+							"id": 1813,
 							"name": "getBoundaries",
 							"kind": 2048,
 							"kindString": "Method",
@@ -310,7 +310,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1812,
+									"id": 1814,
 									"name": "getBoundaries",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -320,7 +320,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1813,
+											"id": 1815,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -361,7 +361,7 @@
 							]
 						},
 						{
-							"id": 1814,
+							"id": 1816,
 							"name": "getBoundaryTime",
 							"kind": 2048,
 							"kindString": "Method",
@@ -370,7 +370,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1815,
+									"id": 1817,
 									"name": "getBoundaryTime",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -380,7 +380,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1816,
+											"id": 1818,
 											"name": "boundaryIndex",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -406,7 +406,7 @@
 							]
 						},
 						{
-							"id": 1817,
+							"id": 1819,
 							"name": "interpolateHold",
 							"kind": 2048,
 							"kindString": "Method",
@@ -415,7 +415,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1818,
+									"id": 1820,
 									"name": "interpolateHold",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -426,7 +426,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1819,
+											"id": 1821,
 											"name": "boundaryIndex",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -437,7 +437,7 @@
 											}
 										},
 										{
-											"id": 1820,
+											"id": 1822,
 											"name": "setNone",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -472,7 +472,7 @@
 							]
 						},
 						{
-							"id": 1821,
+							"id": 1823,
 							"name": "interpolateLinear",
 							"kind": 2048,
 							"kindString": "Method",
@@ -481,7 +481,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1822,
+									"id": 1824,
 									"name": "interpolateLinear",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -491,7 +491,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1823,
+											"id": 1825,
 											"name": "boundary",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -502,7 +502,7 @@
 											}
 										},
 										{
-											"id": 1824,
+											"id": 1826,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -536,7 +536,7 @@
 							]
 						},
 						{
-							"id": 1808,
+							"id": 1810,
 							"name": "isAligned",
 							"kind": 2048,
 							"kindString": "Method",
@@ -545,7 +545,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1809,
+									"id": 1811,
 									"name": "isAligned",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -555,7 +555,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1810,
+											"id": 1812,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -598,30 +598,30 @@
 							"title": "Constructors",
 							"kind": 512,
 							"children": [
-								1805
+								1807
 							]
 						},
 						{
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1800,
-								1803,
 								1802,
+								1805,
 								1804,
-								1801
+								1806,
+								1803
 							]
 						},
 						{
 							"title": "Methods",
 							"kind": 2048,
 							"children": [
-								1825,
-								1811,
-								1814,
-								1817,
-								1821,
-								1808
+								1827,
+								1813,
+								1816,
+								1819,
+								1823,
+								1810
 							]
 						}
 					],
@@ -666,7 +666,7 @@
 					"title": "Classes",
 					"kind": 128,
 					"children": [
-						1798
+						1800
 					]
 				}
 			],
@@ -5647,7 +5647,7 @@
 							]
 						},
 						{
-							"id": 1747,
+							"id": 1749,
 							"name": "collapse",
 							"kind": 2048,
 							"kindString": "Method",
@@ -5657,7 +5657,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1748,
+									"id": 1750,
 									"name": "collapse",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -5673,7 +5673,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1749,
+											"id": 1751,
 											"name": "fieldSpecList",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -5687,7 +5687,7 @@
 											}
 										},
 										{
-											"id": 1750,
+											"id": 1752,
 											"name": "fieldName",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -5698,7 +5698,7 @@
 											}
 										},
 										{
-											"id": 1751,
+											"id": 1753,
 											"name": "reducer",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -5710,7 +5710,7 @@
 											}
 										},
 										{
-											"id": 1752,
+											"id": 1754,
 											"name": "append",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -5743,7 +5743,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 518,
+									"line": 522,
 									"character": 19
 								}
 							]
@@ -5921,7 +5921,7 @@
 						},
 						{
 							"id": 1737,
-							"name": "indexAsString",
+							"name": "index",
 							"kind": 2048,
 							"kindString": "Method",
 							"flags": {
@@ -5931,6 +5931,37 @@
 							"signatures": [
 								{
 									"id": 1738,
+									"name": "index",
+									"kind": 4096,
+									"kindString": "Call signature",
+									"flags": {},
+									"type": {
+										"type": "reference",
+										"name": "Index",
+										"id": 850
+									}
+								}
+							],
+							"sources": [
+								{
+									"fileName": "event.ts",
+									"line": 476,
+									"character": 16
+								}
+							]
+						},
+						{
+							"id": 1739,
+							"name": "indexAsString",
+							"kind": 2048,
+							"kindString": "Method",
+							"flags": {
+								"isExported": true,
+								"isPublic": true
+							},
+							"signatures": [
+								{
+									"id": 1740,
 									"name": "indexAsString",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -5944,7 +5975,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 476,
+									"line": 480,
 									"character": 24
 								}
 							]
@@ -6043,7 +6074,7 @@
 							]
 						},
 						{
-							"id": 1753,
+							"id": 1755,
 							"name": "select",
 							"kind": 2048,
 							"kindString": "Method",
@@ -6053,7 +6084,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1754,
+									"id": 1756,
 									"name": "select",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -6063,7 +6094,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1755,
+											"id": 1757,
 											"name": "fields",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -6098,7 +6129,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 534,
+									"line": 538,
 									"character": 17
 								}
 							]
@@ -6255,7 +6286,7 @@
 							]
 						},
 						{
-							"id": 1739,
+							"id": 1741,
 							"name": "timerange",
 							"kind": 2048,
 							"kindString": "Method",
@@ -6265,7 +6296,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1740,
+									"id": 1742,
 									"name": "timerange",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -6280,13 +6311,13 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 480,
+									"line": 484,
 									"character": 20
 								}
 							]
 						},
 						{
-							"id": 1741,
+							"id": 1743,
 							"name": "timerangeAsUTCString",
 							"kind": 2048,
 							"kindString": "Method",
@@ -6296,7 +6327,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1742,
+									"id": 1744,
 									"name": "timerangeAsUTCString",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -6310,7 +6341,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 484,
+									"line": 488,
 									"character": 31
 								}
 							]
@@ -6346,7 +6377,7 @@
 							]
 						},
 						{
-							"id": 1743,
+							"id": 1745,
 							"name": "timestampAsUTCString",
 							"kind": 2048,
 							"kindString": "Method",
@@ -6356,7 +6387,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1744,
+									"id": 1746,
 									"name": "timestampAsUTCString",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -6370,7 +6401,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 488,
+									"line": 492,
 									"character": 31
 								}
 							]
@@ -6406,7 +6437,7 @@
 							]
 						},
 						{
-							"id": 1745,
+							"id": 1747,
 							"name": "toPoint",
 							"kind": 2048,
 							"kindString": "Method",
@@ -6416,7 +6447,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1746,
+									"id": 1748,
 									"name": "toPoint",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -6433,7 +6464,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 492,
+									"line": 496,
 									"character": 18
 								}
 							]
@@ -7405,23 +7436,24 @@
 							"kind": 2048,
 							"children": [
 								1733,
-								1747,
+								1749,
 								1735,
 								1717,
 								1712,
 								1708,
 								1737,
+								1739,
 								1724,
 								1710,
-								1753,
+								1755,
 								1720,
 								1714,
-								1739,
 								1741,
-								1731,
 								1743,
-								1727,
+								1731,
 								1745,
+								1727,
+								1747,
 								1729,
 								1696,
 								1677,
@@ -7450,7 +7482,7 @@
 					]
 				},
 				{
-					"id": 1762,
+					"id": 1764,
 					"name": "IndexedEventObject",
 					"kind": 256,
 					"kindString": "Interface",
@@ -7459,7 +7491,7 @@
 					},
 					"children": [
 						{
-							"id": 1764,
+							"id": 1766,
 							"name": "data",
 							"kind": 1024,
 							"kindString": "Property",
@@ -7469,28 +7501,28 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 564,
+									"line": 568,
 									"character": 8
 								}
 							],
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 1765,
+									"id": 1767,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"indexSignature": [
 										{
-											"id": 1766,
+											"id": 1768,
 											"name": "__index",
 											"kind": 8192,
 											"kindString": "Index signature",
 											"flags": {},
 											"parameters": [
 												{
-													"id": 1767,
+													"id": 1769,
 													"name": "data",
 													"kind": 32768,
 													"kindString": "Parameter",
@@ -7510,7 +7542,7 @@
 									"sources": [
 										{
 											"fileName": "event.ts",
-											"line": 564,
+											"line": 568,
 											"character": 9
 										}
 									]
@@ -7518,7 +7550,7 @@
 							}
 						},
 						{
-							"id": 1763,
+							"id": 1765,
 							"name": "index",
 							"kind": 1024,
 							"kindString": "Property",
@@ -7528,7 +7560,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 563,
+									"line": 567,
 									"character": 9
 								}
 							],
@@ -7543,21 +7575,21 @@
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1764,
-								1763
+								1766,
+								1765
 							]
 						}
 					],
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 562,
+							"line": 566,
 							"character": 35
 						}
 					]
 				},
 				{
-					"id": 1756,
+					"id": 1758,
 					"name": "TimeEventObject",
 					"kind": 256,
 					"kindString": "Interface",
@@ -7566,7 +7598,7 @@
 					},
 					"children": [
 						{
-							"id": 1758,
+							"id": 1760,
 							"name": "data",
 							"kind": 1024,
 							"kindString": "Property",
@@ -7576,28 +7608,28 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 546,
+									"line": 550,
 									"character": 8
 								}
 							],
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 1759,
+									"id": 1761,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"indexSignature": [
 										{
-											"id": 1760,
+											"id": 1762,
 											"name": "__index",
 											"kind": 8192,
 											"kindString": "Index signature",
 											"flags": {},
 											"parameters": [
 												{
-													"id": 1761,
+													"id": 1763,
 													"name": "data",
 													"kind": 32768,
 													"kindString": "Parameter",
@@ -7617,7 +7649,7 @@
 									"sources": [
 										{
 											"fileName": "event.ts",
-											"line": 546,
+											"line": 550,
 											"character": 9
 										}
 									]
@@ -7625,7 +7657,7 @@
 							}
 						},
 						{
-							"id": 1757,
+							"id": 1759,
 							"name": "time",
 							"kind": 1024,
 							"kindString": "Property",
@@ -7635,7 +7667,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 545,
+									"line": 549,
 									"character": 8
 								}
 							],
@@ -7650,21 +7682,21 @@
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1758,
-								1757
+								1760,
+								1759
 							]
 						}
 					],
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 544,
+							"line": 548,
 							"character": 32
 						}
 					]
 				},
 				{
-					"id": 1768,
+					"id": 1770,
 					"name": "TimeRangeEventObject",
 					"kind": 256,
 					"kindString": "Interface",
@@ -7673,7 +7705,7 @@
 					},
 					"children": [
 						{
-							"id": 1770,
+							"id": 1772,
 							"name": "data",
 							"kind": 1024,
 							"kindString": "Property",
@@ -7683,28 +7715,28 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 582,
+									"line": 586,
 									"character": 8
 								}
 							],
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 1771,
+									"id": 1773,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"indexSignature": [
 										{
-											"id": 1772,
+											"id": 1774,
 											"name": "__index",
 											"kind": 8192,
 											"kindString": "Index signature",
 											"flags": {},
 											"parameters": [
 												{
-													"id": 1773,
+													"id": 1775,
 													"name": "data",
 													"kind": 32768,
 													"kindString": "Parameter",
@@ -7724,7 +7756,7 @@
 									"sources": [
 										{
 											"fileName": "event.ts",
-											"line": 582,
+											"line": 586,
 											"character": 9
 										}
 									]
@@ -7732,7 +7764,7 @@
 							}
 						},
 						{
-							"id": 1769,
+							"id": 1771,
 							"name": "timerange",
 							"kind": 1024,
 							"kindString": "Property",
@@ -7742,7 +7774,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 581,
+									"line": 585,
 									"character": 13
 								}
 							],
@@ -7760,35 +7792,35 @@
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1770,
-								1769
+								1772,
+								1771
 							]
 						}
 					],
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 580,
+							"line": 584,
 							"character": 37
 						}
 					]
 				},
 				{
-					"id": 1792,
+					"id": 1794,
 					"name": "event",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1793,
+							"id": 1795,
 							"name": "event",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"typeParameter": [
 								{
-									"id": 1794,
+									"id": 1796,
 									"name": "T",
 									"kind": 131072,
 									"kindString": "Type parameter",
@@ -7802,7 +7834,7 @@
 							],
 							"parameters": [
 								{
-									"id": 1795,
+									"id": 1797,
 									"name": "key",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7818,7 +7850,7 @@
 									}
 								},
 								{
-									"id": 1796,
+									"id": 1798,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7855,27 +7887,27 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 598,
+							"line": 602,
 							"character": 14
 						}
 					]
 				},
 				{
-					"id": 1780,
+					"id": 1782,
 					"name": "indexedEvent",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1781,
+							"id": 1783,
 							"name": "indexedEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1782,
+									"id": 1784,
 									"name": "arg",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7883,7 +7915,7 @@
 									"type": {
 										"type": "reference",
 										"name": "IndexedEventObject",
-										"id": 1762
+										"id": 1764
 									}
 								}
 							],
@@ -7901,14 +7933,14 @@
 							}
 						},
 						{
-							"id": 1783,
+							"id": 1785,
 							"name": "indexedEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1784,
+									"id": 1786,
 									"name": "idx",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7920,7 +7952,7 @@
 									}
 								},
 								{
-									"id": 1785,
+									"id": 1787,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7958,37 +7990,37 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 567,
+							"line": 571,
 							"character": 21
 						},
 						{
 							"fileName": "event.ts",
-							"line": 568,
+							"line": 572,
 							"character": 21
 						},
 						{
 							"fileName": "event.ts",
-							"line": 569,
+							"line": 573,
 							"character": 21
 						}
 					]
 				},
 				{
-					"id": 1774,
+					"id": 1776,
 					"name": "timeEvent",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1775,
+							"id": 1777,
 							"name": "timeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1776,
+									"id": 1778,
 									"name": "arg",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7996,7 +8028,7 @@
 									"type": {
 										"type": "reference",
 										"name": "TimeEventObject",
-										"id": 1756
+										"id": 1758
 									}
 								}
 							],
@@ -8014,14 +8046,14 @@
 							}
 						},
 						{
-							"id": 1777,
+							"id": 1779,
 							"name": "timeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1778,
+									"id": 1780,
 									"name": "t",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8033,7 +8065,7 @@
 									}
 								},
 								{
-									"id": 1779,
+									"id": 1781,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8071,37 +8103,37 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 549,
+							"line": 553,
 							"character": 18
 						},
 						{
 							"fileName": "event.ts",
-							"line": 550,
+							"line": 554,
 							"character": 18
 						},
 						{
 							"fileName": "event.ts",
-							"line": 551,
+							"line": 555,
 							"character": 18
 						}
 					]
 				},
 				{
-					"id": 1786,
+					"id": 1788,
 					"name": "timeRangeEvent",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1787,
+							"id": 1789,
 							"name": "timeRangeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1788,
+									"id": 1790,
 									"name": "arg",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8109,7 +8141,7 @@
 									"type": {
 										"type": "reference",
 										"name": "TimeRangeEventObject",
-										"id": 1768
+										"id": 1770
 									}
 								}
 							],
@@ -8127,14 +8159,14 @@
 							}
 						},
 						{
-							"id": 1789,
+							"id": 1791,
 							"name": "timeRangeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1790,
+									"id": 1792,
 									"name": "idx",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8146,7 +8178,7 @@
 									}
 								},
 								{
-									"id": 1791,
+									"id": 1793,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8184,17 +8216,17 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 585,
+							"line": 589,
 							"character": 23
 						},
 						{
 							"fileName": "event.ts",
-							"line": 586,
+							"line": 590,
 							"character": 23
 						},
 						{
 							"fileName": "event.ts",
-							"line": 587,
+							"line": 591,
 							"character": 23
 						}
 					]
@@ -8212,19 +8244,19 @@
 					"title": "Interfaces",
 					"kind": 256,
 					"children": [
-						1762,
-						1756,
-						1768
+						1764,
+						1758,
+						1770
 					]
 				},
 				{
 					"title": "Functions",
 					"kind": 64,
 					"children": [
-						1792,
-						1780,
-						1774,
-						1786
+						1794,
+						1782,
+						1776,
+						1788
 					]
 				}
 			],
@@ -8237,7 +8269,7 @@
 			]
 		},
 		{
-			"id": 1828,
+			"id": 1830,
 			"name": "\"exports\"",
 			"kind": 1,
 			"kindString": "External module",
@@ -13147,7 +13179,7 @@
 						{
 							"type": "reference",
 							"name": "Align",
-							"id": 1798
+							"id": 1800
 						}
 					]
 				}
@@ -14748,7 +14780,7 @@
 							"sources": [
 								{
 									"fileName": "sorted.ts",
-									"line": 96,
+									"line": 106,
 									"character": 19
 								}
 							],
@@ -16864,7 +16896,7 @@
 							"sources": [
 								{
 									"fileName": "sorted.ts",
-									"line": 107,
+									"line": 117,
 									"character": 26
 								}
 							],
@@ -18823,7 +18855,7 @@
 					"sources": [
 						{
 							"fileName": "sorted.ts",
-							"line": 116,
+							"line": 126,
 							"character": 32
 						}
 					]
@@ -19482,7 +19514,7 @@
 							"type": {
 								"type": "reference",
 								"name": "Align",
-								"id": 1798,
+								"id": 1800,
 								"typeArguments": [
 									{
 										"type": "typeParameter",
@@ -38273,12 +38305,12 @@
 			"title": "External modules",
 			"kind": 1,
 			"children": [
-				1797,
+				1799,
 				1651,
 				916,
 				1374,
 				1653,
-				1828,
+				1830,
 				926,
 				364,
 				1609,
