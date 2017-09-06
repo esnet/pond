@@ -81,8 +81,8 @@ describe("Streaming", () => {
                 window: everyThirtyMinutes,
                 trigger: Trigger.perEvent
             })
-            .output((collection, key) => {
-                result[key] = collection as Collection<Time>;
+            .output((c, key) => {
+                result[key] = c as Collection<Time>;
                 calls += 1;
             });
 
@@ -114,8 +114,8 @@ describe("Streaming", () => {
                 in_avg: ["in", avg()],
                 out_avg: ["out", avg()]
             })
-            .output(event => {
-                const e = event as Event<Index>;
+            .output(evt => {
+                const e = evt as Event<Index>;
                 result[e.getKey().toString()] = e;
                 calls += 1;
             });
@@ -152,8 +152,8 @@ describe("Streaming", () => {
                 in_avg: ["in", avg()],
                 out_avg: ["out", avg()]
             })
-            .output(event => {
-                const e = event as Event<Index>;
+            .output(evt => {
+                const e = evt as Event<Index>;
                 result[e.getKey().toString()] = e;
                 outputCalls += 1;
             });
@@ -177,8 +177,8 @@ describe("Streaming", () => {
 
         const source = stream<Time>()
             .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })))
-            .output(event => {
-                const e = event as Event<Time>;
+            .output(evt => {
+                const e = evt as Event<Time>;
                 result.push(e);
             });
 
@@ -208,8 +208,8 @@ describe("Streaming", () => {
                 }
                 return eventList;
             })
-            .output(event => {
-                const e = event as Event<Time>;
+            .output(evt => {
+                const e = evt as Event<Time>;
                 result.push(e);
             });
 
@@ -287,7 +287,7 @@ describe("Streaming", () => {
         expect(result[1].get("ab")).toBe(9);
         expect(result[2].get("ab")).toBe(15);
     });
-    fit("can process a sliding window", () => {
+    it("can process a sliding window", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 1, 15, 0)), Immutable.Map({ in: 1, out: 6 })),
             event(time(Date.UTC(2015, 2, 14, 1, 16, 0)), Immutable.Map({ in: 2, out: 7 })),
@@ -315,31 +315,31 @@ describe("Streaming", () => {
                 window: fixedHourlyWindow,
                 trigger: Trigger.perEvent
             })
-            .output((collection, key) => {
-                result[key] = collection as Collection<Time>;
+            .output((col, key) => {
+                result[key] = col as Collection<Time>;
                 calls += 1;
             });
 
         eventsIn.forEach(e => source.addEvent(e));
 
-        const collection = result["1h-396193"];
-        expect(collection.size()).toBe(4);
+        const c = result["1h-396193"];
+        expect(c.size()).toBe(4);
 
-        expect(+collection.at(0).timestamp()).toBe(1426295760000);
-        expect(collection.at(0).get("in_avg")).toBe(1);
-        expect(collection.at(0).get("count")).toBe(1);
+        expect(+c.at(0).timestamp()).toBe(1426295760000);
+        expect(c.at(0).get("in_avg")).toBe(1);
+        expect(c.at(0).get("count")).toBe(1);
 
-        expect(+collection.at(1).timestamp()).toBe(1426295820000);
-        expect(collection.at(1).get("in_avg")).toBe(1.5);
-        expect(collection.at(1).get("count")).toBe(2);
+        expect(+c.at(1).timestamp()).toBe(1426295820000);
+        expect(c.at(1).get("in_avg")).toBe(1.5);
+        expect(c.at(1).get("count")).toBe(2);
 
-        expect(+collection.at(2).timestamp()).toBe(1426295880000);
-        expect(collection.at(2).get("in_avg")).toBe(2);
-        expect(collection.at(2).get("count")).toBe(3);
+        expect(+c.at(2).timestamp()).toBe(1426295880000);
+        expect(c.at(2).get("in_avg")).toBe(2);
+        expect(c.at(2).get("count")).toBe(3);
 
-        expect(+collection.at(3).timestamp()).toBe(1426295940000);
-        expect(collection.at(3).get("in_avg")).toBe(3);
-        expect(collection.at(3).get("count")).toBe(3);
+        expect(+c.at(3).timestamp()).toBe(1426295940000);
+        expect(c.at(3).get("in_avg")).toBe(3);
+        expect(c.at(3).get("count")).toBe(3);
     });
 });
 

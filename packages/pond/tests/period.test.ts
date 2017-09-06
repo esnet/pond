@@ -12,7 +12,9 @@ import Util from "../src/util";
 
 describe("Period", () => {
     it("can construct a period", () => {
-        const p = period().every(duration("5m")).offsetBy(time(0));
+        const p = period()
+            .every(duration("5m"))
+            .offsetBy(time(0));
     });
 
     it("can determine if a time is aligned to a period", () => {
@@ -24,15 +26,19 @@ describe("Period", () => {
     });
 
     it("can determine if a time is aligned to a period that has an offset", () => {
-        const p = period().every(duration("5m")).offsetBy(time("2017-07-21T09:38:00.000Z"));
+        const p = period()
+            .every(duration("5m"))
+            .offsetBy(time("2017-07-21T09:38:00.000Z"));
         const isAligned = p.isAligned(time("2017-07-21T09:43:00.000Z"));
         expect(isAligned).toBeTruthy();
     });
 
     it("can find the next time on the period", () => {
-        const p = period().every(duration("5m")).offsetBy(time("2017-07-21T09:38:00.000Z"));
+        const p = period()
+            .every(duration("5m"))
+            .offsetBy(time("2017-07-21T09:38:00.000Z"));
         const t = p.next(time("2017-07-21T09:49:00.000Z"));
-        expect(+t).toBe(1500630780000); //2017-07-21T09:53:00.000Z
+        expect(+t).toBe(1500630780000); // 2017-07-21T09:53:00.000Z
         const t2 = p.next(t);
         expect(+t2).toBe(1500631080000); // 2017-07-21T09:58:00.000Z
     });

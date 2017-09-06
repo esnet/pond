@@ -3,7 +3,7 @@ declare const it: any;
 declare const expect: any;
 
 import { duration } from "../src/duration";
-import { time, now } from "../src/time";
+import { now, time } from "../src/time";
 
 import { TimeAlignment } from "../src/types";
 

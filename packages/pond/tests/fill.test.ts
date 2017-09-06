@@ -367,8 +367,8 @@ it("can do streaming fill with limit (linear fill)", () => {
 
     const source = stream()
         .fill({ method: FillMethod.Linear, fieldSpec: "value", limit: 3 })
-        .output(event => {
-            const e = event as Event;
+        .output(evt => {
+            const e = evt as Event;
             results.push(e);
         });
     STREAM_EVENTS.forEach(e => source.addEvent(e));
@@ -389,8 +389,8 @@ it("can do streaming fill with limit (pad fill)", () => {
 
     const source = stream()
         .fill({ method: FillMethod.Pad, fieldSpec: "value", limit: 3 })
-        .output(event => {
-            const e = event as Event;
+        .output(evt => {
+            const e = evt as Event;
             results.push(e);
         });
     STREAM_EVENTS.forEach(e => source.addEvent(e));
@@ -411,8 +411,8 @@ it("can do streaming fill with limit (zero fill)", () => {
 
     const source = stream()
         .fill({ method: FillMethod.Zero, fieldSpec: "value", limit: 2 })
-        .output(event => {
-            const e = event as Event;
+        .output(evt => {
+            const e = evt as Event;
             results.push(e);
         });
     STREAM_EVENTS.forEach(e => source.addEvent(e));

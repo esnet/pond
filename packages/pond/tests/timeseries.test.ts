@@ -19,9 +19,9 @@ import Moment = moment.Moment;
 import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
-import { index, Index } from "../src/index";
-import { timeEvent, timeRangeEvent, indexedEvent } from "../src/event";
+import { indexedEvent, timeEvent, timeRangeEvent } from "../src/event";
 import { avg, max, sum } from "../src/functions";
+import { index, Index } from "../src/index";
 import { period, Period } from "../src/period";
 import { time, Time } from "../src/time";
 import { timerange, TimeRange } from "../src/timerange";
@@ -373,8 +373,8 @@ const OUTAGE_EVENT_LIST = Immutable.List([
     }
 ]);
 
-const TIMERANGE_EVENT_LIST = OUTAGE_EVENT_LIST.map(event => {
-    const { startTime, endTime, ...other } = event;
+const TIMERANGE_EVENT_LIST = OUTAGE_EVENT_LIST.map(evt => {
+    const { startTime, endTime, ...other } = evt;
     const b = new Date(startTime);
     const e = new Date(endTime);
     return timeRangeEvent(timerange(b, e), Immutable.Map(other as {}));
@@ -470,17 +470,17 @@ describe("Creation", () => {
                 index(date),
                 Immutable.Map({
                     temp: [
-                        +record_min_temp, //eslint-disable-line
-                        +actual_min_temp, //eslint-disable-line
-                        +actual_max_temp, //eslint-disable-line
-                        +record_max_temp //eslint-disable-line
+                        +record_min_temp, // tslint-disable-line
+                        +actual_min_temp, // tslint-disable-line
+                        +actual_max_temp, // tslint-disable-line
+                        +record_max_temp // tslint-disable-line
                     ]
                 })
             );
         });
 
-        const collection = new Collection(events);
-        const series = new TimeSeries({ name, collection });
+        const c = new Collection(events);
+        const series = new TimeSeries({ name, c });
         expect(series.size()).toBe(3);
     });
 
@@ -508,15 +508,15 @@ describe("Basic Query API", () => {
 
     it("can return an item in the series as an event", () => {
         const series = timeSeries(TIMESERIES_TEST_DATA);
-        const event = series.at(1);
-        expect(event.keyType()).toBe("time");
+        const e = series.at(1);
+        expect(e.keyType()).toBe("time");
     });
 
     it("can return an item in the series with the correct data", () => {
         const series = timeSeries(TIMESERIES_TEST_DATA);
-        const event = series.at(1);
-        expect(JSON.stringify(event.getData())).toBe(`{"value":18,"status":"ok"}`);
-        expect(event.timestamp().getTime()).toBe(1400425948000);
+        const e = series.at(1);
+        expect(JSON.stringify(e.getData())).toBe(`{"value":18,"status":"ok"}`);
+        expect(e.timestamp().getTime()).toBe(1400425948000);
     });
 
     it("can serialize to a string", () => {
@@ -569,8 +569,18 @@ describe("Deep Event Data", () => {
                 [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175 }]
             ]
         });
-        expect(series.at(0).get("NASA_north").get("in")).toBe(100);
-        expect(series.at(0).get("NASA_north").get("out")).toBe(200);
+        expect(
+            series
+                .at(0)
+                .get("NASA_north")
+                .get("in")
+        ).toBe(100);
+        expect(
+            series
+                .at(0)
+                .get("NASA_north")
+                .get("out")
+        ).toBe(200);
 
         expect(series.at(0).get("NASA_north.in")).toBe(100);
         expect(series.at(0).get(["NASA_north", "in"])).toBe(100);
@@ -718,12 +728,22 @@ describe("Indexed Events", () => {
 
     it("can create an series with indexed data (in UTC time)", () => {
         const series = indexedSeries(AVAILABILITY_DATA);
-        const event = series.at(2);
-        expect(event.timerangeAsUTCString()).toBe(
+        const e = series.at(2);
+        expect(e.timerangeAsUTCString()).toBe(
             "[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]"
         );
-        expect(series.range().begin().getTime()).toBe(1404172800000);
-        expect(series.range().end().getTime()).toBe(1435708799999);
+        expect(
+            series
+                .range()
+                .begin()
+                .getTime()
+        ).toBe(1404172800000);
+        expect(
+            series
+                .range()
+                .end()
+                .getTime()
+        ).toBe(1435708799999);
     });
 });
 
@@ -991,11 +1011,11 @@ describe("Rollups", () => {
     it("can correctly use atTime()", () => {
         const t = new Date(1476803711641);
 
-        let collection = new Collection();
-        collection = collection.addEvent(event(time(t), Immutable.Map({ value: 2 })));
+        let c = new Collection();
+        c = c.addEvent(event(time(t), Immutable.Map({ value: 2 })));
 
         // Test bisect to get element 0
-        const ts = new TimeSeries({ name: "coll", collection });
+        const ts = new TimeSeries({ name: "coll", c });
         const bisect = ts.bisect(t);
         expect(bisect).toEqual(0);
         expect(ts.at(bisect).get()).toEqual(2);

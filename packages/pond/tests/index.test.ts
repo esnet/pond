@@ -13,8 +13,8 @@ declare const it: any;
 declare const expect: any;
 
 import { Index, index } from "../src/index";
-import { daily } from "../src/window";
 import { time } from "../src/time";
+import { daily } from "../src/window";
 
 it("can create a daily index", done => {
     const idx = index("1d-12355");
