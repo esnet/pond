@@ -63,18 +63,18 @@ export declare class WindowedCollection<T extends Key> extends Base {
 }
 declare function windowFactory<T extends Key>(
     collectionMap: Immutable.Map<string, Collection<T>>
-): any
+): any;
 declare function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     collectionMap?: Immutable.Map<string, Collection<T>>
-): any
+): any;
 declare function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     initialCollection?: Collection<T>
-): any
+): any;
 declare function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     group: string | string[],
     initialCollection?: Collection<T>
-): any
+): any;
 export { windowFactory as windowed };

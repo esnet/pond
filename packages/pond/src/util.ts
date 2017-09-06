@@ -14,9 +14,9 @@ import * as moment from "moment-timezone";
 import Moment = moment.Moment;
 import { Duration, duration } from "./duration";
 import { Index, index } from "./index";
+import { period, Period } from "./period";
 import { time } from "./time";
 import { TimeRange, timerange } from "./timerange";
-import { period, Period } from "./period";
 
 const UNITS = {
     n: { label: "nanoseconds", length: 1 / 1000000 },
@@ -59,11 +59,11 @@ const indexStringRegex = /^((([0-9]+)([smhdlun]))@)*(([0-9]+)([smhdlun]))(\+([0-
  * seconds (e.g. "30s"), minutes (e.g. "5m"), hours (e.g. "6h") and
  * days (e.g. "30d") as the period.
  */
-function windowDuration(period): number {
+function windowDuration(p: string): number {
     // window should be two parts, a number and a letter if it's a
     // range based index, e.g "1h".
 
-    const parts = indexStringRegex.exec(period);
+    const parts = indexStringRegex.exec(p);
     if (parts && parts.length >= 3) {
         const num = parseInt(parts[1], 10);
         const unit = parts[2];
@@ -85,11 +85,11 @@ export interface DecodedIndexString {
  */
 function decodeIndexString(indexString: string): DecodedIndexString {
     const parts = indexStringRegex.exec(indexString);
-    const [g1, d, g2, g3, g4, frequency, g6, g7, g8, offset, index] = parts;
+    const [g1, d, g2, g3, g4, frequency, g6, g7, g8, offset, i] = parts;
 
     const decodedPeriod = period(duration(frequency), offset ? time(parseInt(offset, 10)) : null);
     const decodedDuration = d ? duration(d) : decodedPeriod.frequency();
-    const decodedIndex = parseInt(index, 10);
+    const decodedIndex = parseInt(i, 10);
 
     return { decodedPeriod, decodedDuration, decodedIndex };
 }
@@ -102,10 +102,10 @@ function isIndexString(indexString: string): boolean {
  * Helper function to get the window position relative
  * to Jan 1, 1970.
  */
-function windowPositionFromDate(period: string, date: Date) {
-    const duration = this.windowDuration(period);
+function windowPositionFromDate(p: string, date: Date) {
+    const d = this.windowDuration(p);
     let dd = moment.utc(date).valueOf();
-    return Math.floor((dd /= duration));
+    return Math.floor((dd /= d));
 }
 
 /**
@@ -129,11 +129,11 @@ function timeRangeFromIndexString(indexString: string, tz: string = "Etc/UTC"): 
                 !_.isNaN(parseInt(parts[1], 10)) &&
                 !_.isNaN(parseInt(parts[2], 10))
             ) {
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10);
-                const day = parseInt(parts[2], 10);
-                beginTime = moment.tz([year, month - 1, day], tz);
-                endTime = moment.tz([year, month - 1, day], tz).endOf("day");
+                const parsedYear = parseInt(parts[0], 10);
+                const parsedMonth = parseInt(parts[1], 10);
+                const parsedDay = parseInt(parts[2], 10);
+                beginTime = moment.tz([parsedYear, parsedMonth - 1, parsedDay], tz);
+                endTime = moment.tz([parsedYear, parsedMonth - 1, parsedDay], tz).endOf("day");
             }
             break;
 
@@ -149,10 +149,10 @@ function timeRangeFromIndexString(indexString: string, tz: string = "Etc/UTC"): 
                 endTime = moment(endTimestamp).tz(tz);
             } else if (!_.isNaN(parseInt(parts[0], 10)) && !_.isNaN(parseInt(parts[1], 10))) {
                 // A month and year e.g 2015-09
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10);
-                beginTime = moment.tz([year, month - 1], tz);
-                endTime = moment.tz([year, month - 1], tz).endOf("month");
+                const parsedYear = parseInt(parts[0], 10);
+                const parsedMonth = parseInt(parts[1], 10);
+                beginTime = moment.tz([parsedYear, parsedMonth - 1], tz);
+                endTime = moment.tz([parsedYear, parsedMonth - 1], tz).endOf("month");
             }
             break;
 
@@ -190,10 +190,10 @@ function niceIndexString(indexString: string, format: string): string {
                 !_.isNaN(parseInt(parts[1], 10)) &&
                 !_.isNaN(parseInt(parts[2], 10))
             ) {
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10);
-                const day = parseInt(parts[2], 10);
-                t = moment.utc([year, month - 1, day]);
+                const parsedYear = parseInt(parts[0], 10);
+                const parsedMonth = parseInt(parts[1], 10);
+                const parsedDay = parseInt(parts[2], 10);
+                t = moment.utc([parsedYear, parsedMonth - 1, parsedDay]);
                 if (format) {
                     return t.format(format);
                 } else {
@@ -205,9 +205,9 @@ function niceIndexString(indexString: string, format: string): string {
             if (isIndexString(indexString)) {
                 return indexString;
             } else if (!_.isNaN(parseInt(parts[0], 10)) && !_.isNaN(parseInt(parts[1], 10))) {
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10);
-                t = moment.utc([year, month - 1]);
+                const parsedYear = parseInt(parts[0], 10);
+                const parsedMonth = parseInt(parts[1], 10);
+                t = moment.utc([parsedYear, parsedMonth - 1]);
                 if (format) {
                     return t.format(format);
                 } else {

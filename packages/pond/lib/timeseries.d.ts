@@ -57,7 +57,7 @@ export interface TimeSeriesListReducerOptions {
  * }
  * ```
  */
-declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>
+declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>;
 /**
  * Create an `Index` based `TimeSeries` using the wire format
  * ```
@@ -72,7 +72,7 @@ declare function timeSeries(arg: TimeSeriesWireFormat): TimeSeries<Time>
  * }
  * ```
  */
-declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>
+declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>;
 /**
  * Create a `Timerange` based `TimeSeries` using the wire format
  * ```
@@ -87,7 +87,7 @@ declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>
  * }
  * ```
  */
-declare function timeRangeSeries(arg: TimeSeriesWireFormat): TimeSeries<TimeRange>
+declare function timeRangeSeries(arg: TimeSeriesWireFormat): TimeSeries<TimeRange>;
 export { timeSeries, indexedSeries, timeRangeSeries };
 /**
  * A `TimeSeries` represents a series of `Event`'s, with each event being a combination of:
@@ -228,7 +228,7 @@ export declare class TimeSeries<T extends Key> {
      * Returns an event in the series by its time. This is the same
      * as calling `bisect()` first and then using `at()` with the index.
      */
-    atTime(time: Date): Event<T>;
+    atTime(t: Date): Event<T>;
     /**
      * Returns the first `Event` in the series.
      */
@@ -255,7 +255,7 @@ export declare class TimeSeries<T extends Key> {
      * Crop the `TimeSeries` to the specified `TimeRange` and
      * return a new `TimeSeries`.
      */
-    crop(timerange: TimeRange): TimeSeries<T>;
+    crop(tr: TimeRange): TimeSeries<T>;
     /**
      * Fetch the `TimeSeries` name
      */

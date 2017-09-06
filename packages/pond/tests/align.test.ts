@@ -55,7 +55,7 @@ it("can do basic alignment using TimeSeries.align()", () => {
         method: AlignmentMethod.Linear
     });
 
-    expect(aligned.size()).toBe(8);
+    expect(aligned.size()).toBe(9);
     expect(aligned.at(0).get("value")).toBe(1.25);
     expect(aligned.at(1).get("value")).toBe(1.8571428571428572);
     expect(aligned.at(2).get("value")).toBe(1.2857142857142856);

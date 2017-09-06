@@ -3,12 +3,11 @@ import { Key } from "./key";
 import { TimeRange } from "./timerange";
 import { TimeAlignment } from "./types";
 /**
- * Constructs a new `Time` object that can be used as
- * a key for `Event`'s. A `Time` object represents a
- * timestamp, and is stored as a Javascript `Date`
- * object. The difference with just a Date is that
- * is conforms to the interface required to be an
- * `Event` key.
+ * Constructs a new `Time` object that can be used as a key for `Event`'s.
+ *
+ * A `Time` object represents a timestamp, and is stored as a Javascript `Date`
+ * object. The difference with just a `Date` is that is conforms to the interface
+ * required to be an `Event` key.
  */
 export declare class Time extends Key {
     static isTime(t: Time): boolean;
@@ -45,9 +44,9 @@ export declare class Time extends Key {
  * and is stored as a Javascript `Date` object. The difference with just a Date is that
  * this conforms to the interface required to be an `Event` key.
  */
-declare function timeFactory(d?: number | string | Date): Time
+declare function timeFactory(d?: number | string | Date): Time;
 /**
  * Returns the the current time as a `Time` object
  */
-declare function now(): Time
+declare function now(): Time;
 export { now, timeFactory as time };

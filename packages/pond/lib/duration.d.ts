@@ -27,7 +27,7 @@ export declare class Duration {
     toString(): string;
     valueOf(): number;
 }
-declare function durationFactory(d: number | string, arg2?: string): any
-declare function durationFactory(arg1: number, arg2: string): any
-declare function durationFactory(arg1: object | moment.Duration): any
+declare function durationFactory(d: number | string, arg2?: string): any;
+declare function durationFactory(arg1: number, arg2: string): any;
+declare function durationFactory(arg1: object | moment.Duration): any;
 export { durationFactory as duration };

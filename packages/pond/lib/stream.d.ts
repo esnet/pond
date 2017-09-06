@@ -6,9 +6,16 @@ import { Index } from "./index";
 import { Key } from "./key";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
-import { AggregationSpec, AlignmentOptions, CollapseOptions, FillOptions, RateOptions, SelectOptions, WindowingOptions } from "./types";
-export declare class Streaming {
-}
+import {
+    AggregationSpec,
+    AlignmentOptions,
+    CollapseOptions,
+    FillOptions,
+    RateOptions,
+    SelectOptions,
+    WindowingOptions
+} from "./types";
+export declare class Streaming {}
 /**
  * A Node is a transformation between type S and type T. Both S
  * and T much extend Base.
@@ -22,13 +29,16 @@ export declare class Streaming {
  * the passed onto other downstream Nodes, by calling their `set()` methods.
  */
 export declare type EventCallback = (event: Event<Key>) => void;
-export declare type KeyedCollectionCallback<T extends Key> = (collection: Collection<T>, key: string) => void;
+export declare type KeyedCollectionCallback<T extends Key> = (
+    collection: Collection<T>,
+    key: string
+) => void;
 export declare type KeyedCollection<T extends Key> = [string, Collection<T>];
 /**
  * @private
  *
  */
-export declare abstract class Node<S extends Base, T extends Base> {
+export abstract class Node<S extends Base, T extends Base> {
     protected observers: Immutable.List<Node<T, Base>>;
     addObserver(node: Node<T, Base>): void;
     set(input: S): void;
@@ -68,7 +78,9 @@ export declare class EventStream<T extends Key, U extends Key> {
     /**
      * Remaps each Event<T> in the stream to 0, 1 or many Event<M>s.
      */
-    flatMap<M extends Key>(mapper: (event: Event<T>) => Immutable.List<Event<M>>): EventStream<M, U>;
+    flatMap<M extends Key>(
+        mapper: (event: Event<T>) => Immutable.List<Event<M>>
+    ): EventStream<M, U>;
     /**
      * Fill missing values in stream events.
      *
@@ -137,7 +149,7 @@ export declare class EventStream<T extends Key, U extends Key> {
     rate(options: RateOptions): EventStream<TimeRange, U>;
     /**
      * Convert incoming events to new events with on the specified
-     * fields selected out of the soure.
+     * fields selected out of the source.
      *
      * @example
      *
@@ -283,9 +295,18 @@ export declare class KeyedCollectionStream<T extends Key, U extends Key> {
      */
     aggregate(spec: AggregationSpec<T>): EventStream<Index, U>;
 }
-export declare type EventToKeyedCollection<S extends Key, T extends Key> = Node<Event<S>, KeyedCollection<T>>;
-export declare type KeyedCollectionToEvent<S extends Key, T extends Key> = Node<KeyedCollection<S>, Event<T>>;
-export declare type KeyedCollectionMap<S extends Key, T extends Key> = Node<KeyedCollection<S>, KeyedCollection<T>>;
+export declare type EventToKeyedCollection<S extends Key, T extends Key> = Node<
+    Event<S>,
+    KeyedCollection<T>
+>;
+export declare type KeyedCollectionToEvent<S extends Key, T extends Key> = Node<
+    KeyedCollection<S>,
+    Event<T>
+>;
+export declare type KeyedCollectionMap<S extends Key, T extends Key> = Node<
+    KeyedCollection<S>,
+    KeyedCollection<T>
+>;
 export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
 /**
  * @private
@@ -307,9 +328,15 @@ export declare class Stream<U extends Key = Time> {
     private head;
     private tail;
     addEventMappingNode<S extends Key, T extends Key>(node: EventMap<S, T>): EventStream<T, U>;
-    addEventToCollectorNode<S extends Key, T extends Key>(node: EventToKeyedCollection<S, T>): KeyedCollectionStream<T, U>;
-    addCollectorMappingNode<S extends Key, T extends Key>(node: KeyedCollectionMap<S, T>): KeyedCollectionStream<T, U>;
-    addCollectionToEventNode<S extends Key, T extends Key>(node: KeyedCollectionToEvent<S, T>): EventStream<T, U>;
+    addEventToCollectorNode<S extends Key, T extends Key>(
+        node: EventToKeyedCollection<S, T>
+    ): KeyedCollectionStream<T, U>;
+    addCollectorMappingNode<S extends Key, T extends Key>(
+        node: KeyedCollectionMap<S, T>
+    ): KeyedCollectionStream<T, U>;
+    addCollectionToEventNode<S extends Key, T extends Key>(
+        node: KeyedCollectionToEvent<S, T>
+    ): EventStream<T, U>;
     addEvent<T extends Key>(e: Event<U>): void;
     protected addNode(node: any): void;
 }

@@ -15,9 +15,9 @@ import * as moment from "moment-timezone";
 
 import { Duration, duration } from "./duration";
 import { Index, index } from "./index";
+import { Period } from "./period";
 import { Time, time } from "./time";
 import { TimeRange } from "./timerange";
-import { Period } from "./period";
 
 export enum WindowType {
     Day = 1,
@@ -30,21 +30,17 @@ export abstract class WindowBase {
     public abstract getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
 
+// tslint:disable-next-line:max-classes-per-file
 export class DayWindow extends WindowBase {
-    private _tz: string;
-
-    constructor(tz: string = "Etc/UTC") {
-        super();
-        this._tz = tz;
-    }
-
     /**
      * Given an index string representing a day (e.g. "2015-08-22"), and optionally
      * the timezone (default is UTC), return the corresponding `TimeRange`.
      */
     public static timeRangeOf(indexString: string, tz: string = "Etc/UTC") {
         const parts = indexString.split("-");
-        if (parts.length !== 3) throw new Error("Index string for day is badly formatted");
+        if (parts.length !== 3) {
+            throw new Error("Index string for day is badly formatted");
+        }
 
         let beginTime: moment;
         let endTime: moment;
@@ -60,6 +56,14 @@ export class DayWindow extends WindowBase {
             endTime = moment.tz([year, month - 1, day], tz).endOf("day");
         }
     }
+
+    private _tz: string;
+
+    constructor(tz: string = "Etc/UTC") {
+        super();
+        this._tz = tz;
+    }
+
     public getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index> {
         let results = Immutable.OrderedSet<Index>();
         let t1: moment;
@@ -87,7 +91,7 @@ export class DayWindow extends WindowBase {
  * Windows have a `Period` (which defines a frequency and offset of window
  * placement) combined with a `Duration` (which is the size of the window
  * itself).
- * 
+ *
  * If a window is defined with only a `Duration` then the freqency of the
  * window is equal to the duration of the window (i.e. a fixed window).
  * If the period is smaller than the duration we have a sliding window.
@@ -100,11 +104,11 @@ export class Window extends WindowBase {
     private _duration: Duration;
 
     /**
-     * A Window is a reoccuring duration of time, for example: "every day", or
-     * "1 hour, repeated every 5 minutes". 
+     * A Window is a reoccurring duration of time, for example: "every day", or
+     * "1 hour, repeated every 5 minutes".
      *
      * A Window can be made in two ways. The first is a "Calendar" Window.
-     * You construct one of these by providing the appropiate type:
+     * You construct one of these by providing the appropriate type:
      *  * "Day"
      *  * "Month"
      *  * "Year"
@@ -123,7 +127,7 @@ export class Window extends WindowBase {
      *
      * ```
      *              |<- duration ---------->|
-     * |<- offset ->|<- freq ->|                  (<- period )       
+     * |<- offset ->|<- freq ->|                  (<- period )
      *              [-----------------------]
      *                         [-----------------------]
      *                                    [-----------------------]
@@ -131,13 +135,14 @@ export class Window extends WindowBase {
      * ```
      *
      */
-    constructor(duration: Duration, period?: Period) {
+    // tslint:disable-next-line:max-classes-per-file
+    constructor(d: Duration, period?: Period) {
         super();
-        this._duration = duration;
+        this._duration = d;
         if (period) {
             this._period = period;
         } else {
-            this._period = new Period(duration);
+            this._period = new Period(d);
         }
     }
 
@@ -173,8 +178,8 @@ export class Window extends WindowBase {
     /**
      * Specify an offset for the underlying period
      */
-    offsetBy(time: Time): Window {
-        return new Window(this._duration, this._period.offsetBy(time));
+    offsetBy(t: Time): Window {
+        return new Window(this._duration, this._period.offsetBy(t));
     }
 
     /**
@@ -218,8 +223,8 @@ export class Window extends WindowBase {
     }
 }
 
-function window(duration: Duration, period?: Period): Window {
-    return new Window(duration, period);
+function window(d: Duration, period?: Period): Window {
+    return new Window(d, period);
 }
 
 /*

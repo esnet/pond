@@ -248,23 +248,23 @@ export interface TimeEventObject {
         [data: string]: any;
     };
 }
-declare function timeEvent(arg: TimeEventObject): Event<Time>
-declare function timeEvent(t: Time, data: Immutable.Map<string, any>): Event<Time>
+declare function timeEvent(arg: TimeEventObject): Event<Time>;
+declare function timeEvent(t: Time, data: Immutable.Map<string, any>): Event<Time>;
 export interface IndexedEventObject {
     index: string;
     data: {
         [data: string]: any;
     };
 }
-declare function indexedEvent(arg: IndexedEventObject): Event<Index>
-declare function indexedEvent(idx: Index, data: Immutable.Map<string, any>): Event<Index>
+declare function indexedEvent(arg: IndexedEventObject): Event<Index>;
+declare function indexedEvent(idx: Index, data: Immutable.Map<string, any>): Event<Index>;
 export interface TimeRangeEventObject {
     timerange: number[];
     data: {
         [data: string]: any;
     };
 }
-declare function timeRangeEvent(arg: TimeRangeEventObject): Event<TimeRange>
-declare function timeRangeEvent(idx: Index, data: Immutable.Map<string, any>): Event<TimeRange>
-declare function event<T extends Key>(key: T, data: Immutable.Map<string, any>): Event<T>
+declare function timeRangeEvent(arg: TimeRangeEventObject): Event<TimeRange>;
+declare function timeRangeEvent(idx: Index, data: Immutable.Map<string, any>): Event<TimeRange>;
+declare function event<T extends Key>(key: T, data: Immutable.Map<string, any>): Event<T>;
 export { event, timeEvent, timeRangeEvent, indexedEvent };

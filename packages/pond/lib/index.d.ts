@@ -83,5 +83,5 @@ export declare class Index extends Key {
      */
     end(): Date;
 }
-declare function indexFactory(s: any, tz?: string): Index
+declare function indexFactory(s: any, tz?: string): Index;
 export { indexFactory as index };

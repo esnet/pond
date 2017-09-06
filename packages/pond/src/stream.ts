@@ -67,10 +67,6 @@ export type KeyedCollectionCallback<T extends Key> = (
 
 export type KeyedCollection<T extends Key> = [string, Collection<T>];
 
-//
-// Node baseclass
-//
-
 /**
  * @private
  *
@@ -116,7 +112,7 @@ class EventInputNode<T extends Key> extends Node<Event<T>, Event<T>> {
         super();
         // pass
     }
-    process(e: Event<T>) {
+    process(e: Event<T>): Immutable.List<Event<T>> {
         return Immutable.List([e]);
     }
 }
@@ -167,7 +163,7 @@ class MapNode<T extends Key, M extends Key> extends Node<Event<T>, Event<M>> {
         super();
     }
 
-    process(e: Event<T>) {
+    process(e: Event<T>): Immutable.List<Event<M>> {
         return Immutable.List([this.mapper(e)]);
     }
 }
@@ -319,9 +315,9 @@ class AggregationNode<T extends Key> extends Node<KeyedCollection<T>, Event<Inde
 //
 
 /**
- * 
+ *
  * @private
- * 
+ *
  * An `EventStream` is the interface to the stream provided for manipulation of
  * parts of the streaming pipeline that map a stream of Events of type <T>.
  *
@@ -439,7 +435,7 @@ export class EventStream<T extends Key, U extends Key> {
 
     /**
      * Convert incoming events to new events with on the specified
-     * fields selected out of the soure.
+     * fields selected out of the source.
      *
      * @example
      *

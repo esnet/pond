@@ -242,7 +242,7 @@ class Collection extends base_1.Base {
      *
      * If you wish to scan the whole set of Events, use an
      * iterator (see `forEach()` and `map()`). For direct access
-     * the `Collection` is optimised for returning results via
+     * the `Collection` is optimized for returning results via
      * the `Event`'s key (see `atKey()`).
      */
     at(pos) {

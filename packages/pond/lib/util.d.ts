@@ -10,14 +10,14 @@
 import * as Immutable from "immutable";
 import { Duration } from "./duration";
 import { Index } from "./index";
-import { TimeRange } from "./timerange";
 import { Period } from "./period";
+import { TimeRange } from "./timerange";
 export interface DecodedIndexString {
     decodedPeriod: Period;
     decodedDuration: Duration;
     decodedIndex: number;
 }
-declare var _default: {
+declare const _default: {
     dataFromArg: (
         arg: string | number | {} | Immutable.Map<string, any>
     ) => Immutable.Map<string, any>;
@@ -33,7 +33,7 @@ declare var _default: {
     timeRangeFromIndexString: (indexString: string, tz?: string) => TimeRange;
     timestampFromArg: (arg: any) => Date;
     untilNow: (d: Duration) => TimeRange;
-    windowDuration: (period: any) => number;
-    windowPositionFromDate: (period: string, date: Date) => number;
+    windowDuration: (p: string) => number;
+    windowPositionFromDate: (p: string, date: Date) => number;
 };
 export default _default;

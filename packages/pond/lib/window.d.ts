@@ -1,10 +1,10 @@
 import * as Immutable from "immutable";
 import { Duration } from "./duration";
 import { Index } from "./index";
+import { Period } from "./period";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
-import { Period } from "./period";
-export declare enum WindowType {
+export enum WindowType {
     Day = 1,
     Month = 2,
     Week = 3,
@@ -14,13 +14,13 @@ export abstract class WindowBase {
     abstract getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
 export declare class DayWindow extends WindowBase {
-    private _tz;
-    constructor(tz?: string);
     /**
      * Given an index string representing a day (e.g. "2015-08-22"), and optionally
      * the timezone (default is UTC), return the corresponding `TimeRange`.
      */
     static timeRangeOf(indexString: string, tz?: string): void;
+    private _tz;
+    constructor(tz?: string);
     getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
 /**
@@ -42,11 +42,11 @@ export declare class Window extends WindowBase {
     private _period;
     private _duration;
     /**
-     * A Window is a reoccuring duration of time, for example: "every day", or
+     * A Window is a reoccurring duration of time, for example: "every day", or
      * "1 hour, repeated every 5 minutes".
      *
      * A Window can be made in two ways. The first is a "Calendar" Window.
-     * You construct one of these by providing the appropiate type:
+     * You construct one of these by providing the appropriate type:
      *  * "Day"
      *  * "Month"
      *  * "Year"
@@ -73,7 +73,7 @@ export declare class Window extends WindowBase {
      * ```
      *
      */
-    constructor(duration: Duration, period?: Period);
+    constructor(d: Duration, period?: Period);
     toString(): string;
     /**
      * Returns the underlying period of the Window
@@ -90,7 +90,7 @@ export declare class Window extends WindowBase {
     /**
      * Specify an offset for the underlying period
      */
-    offsetBy(time: Time): Window;
+    offsetBy(t: Time): Window;
     /**
      * Returns the Window repeats as an `Immutable.Set<Index>` that covers
      * (in whole or in part) the time or timerange supplied. In this example,
@@ -110,6 +110,6 @@ export declare class Window extends WindowBase {
      */
     getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
-declare function window(duration: Duration, period?: Period): Window
-declare function daily(tz?: string): DayWindow
+declare function window(d: Duration, period?: Period): Window;
+declare function daily(tz?: string): DayWindow;
 export { window, daily };

@@ -128,7 +128,7 @@ export class WindowedCollection<T extends Key> extends Base {
                 }
 
                 if (collection) {
-                    //TODO: This code needs fixing (do we use this code path?)
+                    // TODO: This code needs fixing (do we use this code path?)
                     throw new Error("Unimplemented");
                     /*
                     this.collections = collection
@@ -238,7 +238,7 @@ export class WindowedCollection<T extends Key> extends Base {
         let keep = Immutable.Map<string, Collection<T>>();
         let discard = Immutable.Map<string, Collection<T>>();
         this.collections.forEach((collection, collectionKey) => {
-            const [_, windowKey] =
+            const [__, windowKey] =
                 collectionKey.split("::").length > 1
                     ? collectionKey.split("::")
                     : [null, collectionKey];

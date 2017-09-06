@@ -55,7 +55,7 @@ export function keep(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the sum calculation. Other possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the
+ * * `propagateMissing` - which will cause the min itself to be null if the
  *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -75,7 +75,7 @@ export function sum(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the average calculation. Other possibilities are:
- * * `propergateMissing` - which will cause the avg itself to be null if the values
+ * * `propagateMissing` - which will cause the avg itself to be null if the values
  *                         contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -85,14 +85,14 @@ export function avg(clean = filter.ignoreMissing): ReducerFunction {
         if (!cleanValues) {
             return null;
         }
-        const sum = _.reduce(
+        const total = _.reduce(
             cleanValues,
             (a: number, b: number) => {
                 return a + b;
             },
             0
         );
-        return sum / cleanValues.length;
+        return total / cleanValues.length;
     };
 }
 
@@ -102,7 +102,7 @@ export function avg(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the maximum search. Other possibilities are:
- * *`propergateMissing` - which will cause the max itself to be null if the values
+ * * `propagateMissing` - which will cause the max itself to be null if the values
  *                        contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -112,9 +112,9 @@ export function max(clean = filter.ignoreMissing): ReducerFunction {
         if (!cleanValues) {
             return null;
         }
-        const max = _.max(cleanValues);
-        if (_.isFinite(max)) {
-            return max;
+        const result = _.max(cleanValues);
+        if (_.isFinite(result)) {
+            return result;
         }
     };
 }
@@ -125,7 +125,7 @@ export function max(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the minimum search. Other possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the
+ * * `propagateMissing` - which will cause the min itself to be null if the
  *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -135,9 +135,9 @@ export function min(clean = filter.ignoreMissing): ReducerFunction {
         if (!cleanValues) {
             return null;
         }
-        const min = _.min(cleanValues);
-        if (_.isFinite(min)) {
-            return min;
+        const result = _.min(cleanValues);
+        if (_.isFinite(result)) {
+            return result;
         }
     };
 }
@@ -148,7 +148,7 @@ export function min(clean = filter.ignoreMissing): ReducerFunction {
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the count. Other possibilities are:
- * * `propergateMissing` - which will cause the count itself to be null if the
+ * * `propagateMissing` - which will cause the count itself to be null if the
  *                         values contain a missing value
  */
 export function count(clean = filter.ignoreMissing): ReducerFunction {
@@ -209,7 +209,7 @@ export function last(clean = filter.ignoreMissing): ReducerFunction {
  * are treated. The default is to exclude missing values from
  * the list, i.e to find the last non-missing value. Other
  * possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the
+ * * `propagateMissing` - which will cause the min itself to be null if the
  *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -285,7 +285,7 @@ export enum InterpolationType {
  *              * nearest: i or j whichever is nearest.
  *              * midpoint: (i + j) / 2.
  *  * clean    Strategy to use when encountering missing data:
- *              * `propergateMissing` - which will cause the min
+ *              * `propagateMissing` - which will cause the min
  *                 itself to be null if the values contain a
  *                 missing value
  *              * `zeroMissing` - will replace missing values

@@ -126,6 +126,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
 
         // Detect path that doesn't exist
         if (!event.getData().hasIn(fieldPath)) {
+            // tslint:disable-next-line
             console.warn(`path does not exist: ${fieldPath}`);
             return valid;
         }
@@ -248,6 +249,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
 
             // Detect non-numeric value
             if (!util.isMissing(e.get(fieldPath)) && !_.isNumber(e.get(fieldPath))) {
+                // tslint:disable-next-line
                 console.warn(`linear requires numeric values - skipping this field_spec`);
                 return events;
             }

@@ -15,12 +15,11 @@ import { TimeRange } from "./timerange";
 import { TimeAlignment } from "./types";
 
 /**
- * Constructs a new `Time` object that can be used as
- * a key for `Event`'s. A `Time` object represents a
- * timestamp, and is stored as a Javascript `Date`
- * object. The difference with just a Date is that
- * is conforms to the interface required to be an
- * `Event` key.
+ * Constructs a new `Time` object that can be used as a key for `Event`'s.
+ *
+ * A `Time` object represents a timestamp, and is stored as a Javascript `Date`
+ * object. The difference with just a `Date` is that is conforms to the interface
+ * required to be an `Event` key.
  */
 export class Time extends Key {
     static isTime(t: Time) {

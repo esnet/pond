@@ -48,7 +48,7 @@ import util from "./util";
  * A specific period of time, and associated data can be looked up based
  * on that string. It also allows us to represent things like months,
  * which have variable length.
- * 
+ *
  * Indexes also contain a timezone, which defaults to UTC. For instance if
  * you have a day 2017-08-11, then the `TimeRange` representation depends
  * on the timezone of that day.

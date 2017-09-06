@@ -6,7 +6,8 @@
         "module": "commonjs",
         "declaration": true,
         "inlineSourceMap": true,
-        "listFiles": false
+        "listFiles": false,
+        "noStrictGenericChecks": true
     },
     "include": ["src/*.ts"],
     "exclude": ["node_modules", "lib"]

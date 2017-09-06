@@ -65,6 +65,7 @@ export class Rate<T extends Key> extends Processor<T, TimeRange> {
 
             let rate = null;
             if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
+                // tslint:disable-next-line
                 console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
             } else {
                 rate = (currentVal - previousVal) / deltaTime;

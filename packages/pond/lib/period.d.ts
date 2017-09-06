@@ -3,7 +3,7 @@ import { Duration } from "./duration";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
 /**
- * A period is a repeating time which is typically used in pond to
+ * A `period` is a repeating time which is typically used in Pond to
  * either define the repeating nature of a bucket (used for windowing)
  * or to describe alignment of fill positions when doing data cleaning
  * on a `TimeSeries`.
@@ -17,16 +17,8 @@ export declare class Period {
     private _frequency;
     private _offset;
     /**
-     * To define a `Period`, you need to the duration of the frequency that the
-     * period repeats. Optionally you can specify and offset for the period.
-     *
-     *  * the `stride` of the period which is how often the beginning of the
-     *    duration of time repeats itself. This is a `Duration`, i.e. the duration
-     *    of the length of the stride, or basically the length between the beginning
-     *    of each period repeat. In the above example that would be `duration("10s")`.
-     *  * the `offset`, a point in time to calculate the period from, which defaults
-     *    to Jan 1, 1970 UTC or timestamp 0. This is specified as a `Time`.
-     *
+     * To define a `Period`, you need to supply the `duration` of the frequency that the
+     * period repeats on. Optionally you can specify an `offset` for the period.
      */
     constructor(frequency?: Duration, offset?: Time);
     toString(): string;
@@ -37,11 +29,11 @@ export declare class Period {
     /**
      * Returns true if the `Time` supplied is aligned with this `Period`.
      */
-    isAligned(time: Time): boolean;
+    isAligned(t: Time): boolean;
     /**
      * Given a time, find the next time aligned to the period.
      */
-    next(time: Time): Time;
+    next(t: Time): Time;
     /**
      * Returns `Time`s within the given TimeRange that align with this
      * `Period`.
@@ -57,5 +49,14 @@ export declare class Period {
      */
     within(timerange: TimeRange): Immutable.List<Time>;
 }
-declare function period(frequency?: Duration, offset?: Time): Period
+/**
+ * A `period` is a repeating time which is typically used in Pond to
+ * either define the repeating nature of a bucket (used for windowing)
+ * or to describe alignment of fill positions when doing data cleaning
+ * on a `TimeSeries`.
+ *
+ * To define a `Period`, you need to supply the `duration` of the frequency that the
+ * period repeats on. Optionally you can specify an `offset` for the period.
+ */
+declare function period(frequency?: Duration, offset?: Time): Period;
 export { period };

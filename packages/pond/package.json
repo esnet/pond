@@ -19,10 +19,10 @@
         "ts-jest": "^20.0.7",
         "tslint": "^5.5.0",
         "typedoc": "^0.7.1",
-        "typescript": "2.3"
+        "typescript": "2.5"
     },
     "scripts": {
-        "build": "tsc",
+        "build": "tsc --version && tsc",
         "watch": "tsc --watch",
         "docs": "typedoc --json ../website/src/doc.json --mode modules ./src/*.ts --ignoreCompilerErrors",
         "test": "jest --watch",

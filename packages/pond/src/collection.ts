@@ -302,7 +302,7 @@ export class Collection<T extends Key> extends Base {
      *
      * If you wish to scan the whole set of Events, use an
      * iterator (see `forEach()` and `map()`). For direct access
-     * the `Collection` is optimised for returning results via
+     * the `Collection` is optimized for returning results via
      * the `Event`'s key (see `atKey()`).
      */
     public at(pos: number): Event<T> {
@@ -349,7 +349,7 @@ export class Collection<T extends Key> extends Base {
     /**
      * Returns all the `Event<T>`s as an `Immutable.List`.
      */
-    public eventList() {
+    public eventList(): Immutable.List<Event<T>> {
         return this._events.toList();
     }
 
@@ -386,7 +386,7 @@ export class Collection<T extends Key> extends Base {
      * Iterate over the events in this `Collection`. Events are in the
      * order that they were added, unless the Collection has since been
      * sorted.
-     * 
+     *
      * Returns the number of items iterated.
      *
      * @example

@@ -130,7 +130,7 @@ export declare class Collection<T extends Key> extends Base {
      *
      * If you wish to scan the whole set of Events, use an
      * iterator (see `forEach()` and `map()`). For direct access
-     * the `Collection` is optimised for returning results via
+     * the `Collection` is optimized for returning results via
      * the `Event`'s key (see `atKey()`).
      */
     at(pos: number): Event<T>;
@@ -484,5 +484,5 @@ export declare class Collection<T extends Key> extends Base {
 }
 declare function collectionFactory<T extends Key>(
     arg1?: Immutable.List<Event<T>> | Collection<T>
-): Collection<T>
+): Collection<T>;
 export { collectionFactory as collection };

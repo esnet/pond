@@ -22,7 +22,7 @@ import { Select } from "./select";
 import { SortedCollection } from "./sorted";
 import { time, Time } from "./time";
 import { TimeRange, timerange } from "./timerange";
-import { window, daily } from "./window";
+import { daily, window } from "./window";
 
 import {
     avg,
@@ -353,8 +353,8 @@ export class TimeSeries<T extends Key> {
         const columns = [e.keyType(), ...this.columns()];
 
         const points = [];
-        for (const event of this._collection.eventList()) {
-            points.push(event.toPoint());
+        for (const evt of this._collection.eventList()) {
+            points.push(evt.toPoint());
         }
 
         return _.extend(this._data.toJSON(), { columns, points });
@@ -406,8 +406,8 @@ export class TimeSeries<T extends Key> {
      * Returns an event in the series by its time. This is the same
      * as calling `bisect()` first and then using `at()` with the index.
      */
-    atTime(time: Date): Event<T> {
-        const pos = this.bisect(time);
+    atTime(t: Date): Event<T> {
+        const pos = this.bisect(t);
         if (pos >= 0 && pos < this.size()) {
             return this.at(pos);
         }
@@ -461,9 +461,9 @@ export class TimeSeries<T extends Key> {
      * Crop the `TimeSeries` to the specified `TimeRange` and
      * return a new `TimeSeries`.
      */
-    crop(timerange: TimeRange): TimeSeries<T> {
-        const beginPos = this.bisect(timerange.begin());
-        const endPos = this.bisect(timerange.end(), beginPos);
+    crop(tr: TimeRange): TimeSeries<T> {
+        const beginPos = this.bisect(tr.begin());
+        const endPos = this.bisect(tr.end(), beginPos);
         return this.slice(beginPos, endPos);
     }
 
@@ -761,16 +761,16 @@ export class TimeSeries<T extends Key> {
      */
     renameColumns(options: RenameColumnOptions): TimeSeries<Key> {
         const { renameMap } = options;
-        return this.map(event => {
-            const eventType = event.keyType();
-            const d = event.getData().mapKeys(key => renameMap[key] || key);
+        return this.map(e => {
+            const eventType = e.keyType();
+            const d = e.getData().mapKeys(key => renameMap[key] || key);
             switch (eventType) {
                 case "time":
-                    return new Event(time(event.toPoint()[0]), d);
+                    return new Event(time(e.toPoint()[0]), d);
                 case "index":
-                    return new Event(index(event.toPoint()[0]), d);
+                    return new Event(index(e.toPoint()[0]), d);
                 case "timerange":
-                    const timeArray = event.toPoint()[0];
+                    const timeArray = e.toPoint()[0];
                     return new Event(timerange(timeArray[0], timeArray[1]), d);
             }
         });
@@ -916,20 +916,19 @@ export class TimeSeries<T extends Key> {
      *
      */
     fixedWindowRollup(options: RollupOptions<T>): TimeSeries<Index> {
-        const { window, aggregation } = options;
-        if (!window) {
+        if (!options.window) {
             throw new Error("window must be supplied");
         }
 
-        if (!aggregation || !_.isObject(aggregation)) {
+        if (!options.aggregation || !_.isObject(options.aggregation)) {
             throw new Error(
                 "aggregation object must be supplied, for example: {value: {value: avg()}}"
             );
         }
 
         const aggregatorPipeline = this._collection
-            .window({ window, trigger: Trigger.onDiscardedWindow })
-            .aggregate(aggregation)
+            .window({ window: options.window, trigger: Trigger.onDiscardedWindow })
+            .aggregate(options.aggregation)
             .flatten();
 
         const collections = new SortedCollection(aggregatorPipeline);
@@ -1041,14 +1040,12 @@ export class TimeSeries<T extends Key> {
      * an aggregator Pipeline.
      */
     _rollup(options: RollupOptions<T>) {
-        const { window, aggregation } = options;
         const aggregatorPipeline = this._collection
-            .window({ window, trigger: Trigger.onDiscardedWindow })
-            .aggregate(aggregation)
+            .window({ window: options.window, trigger: Trigger.onDiscardedWindow })
+            .aggregate(options.aggregation)
             .flatten();
 
         const collections = new SortedCollection(aggregatorPipeline);
-
         return this.setCollection(collections);
     }
 
@@ -1178,8 +1175,8 @@ export class TimeSeries<T extends Key> {
         // list of events with that timestamp
         const eventList = [];
         seriesList.forEach(series => {
-            for (const event of series._collection.eventList()) {
-                eventList.push(event);
+            for (const e of series._collection.eventList()) {
+                eventList.push(e);
             }
         });
 

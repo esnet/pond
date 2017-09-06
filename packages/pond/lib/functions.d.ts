@@ -1,6 +1,5 @@
 import { ReducerFunction } from "./types";
-export declare class Functions {
-}
+export declare class Functions {}
 /**
  * Like `first()` except it will return null if not all the values are
  * the same. This can be used to transfer a value when doing aggregation.
@@ -16,7 +15,7 @@ export declare function keep(clean?: (values: number[]) => number[]): ReducerFun
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the sum calculation. Other possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the
+ * * `propagateMissing` - which will cause the min itself to be null if the
  *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -27,7 +26,7 @@ export declare function sum(clean?: (values: number[]) => number[]): ReducerFunc
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the average calculation. Other possibilities are:
- * * `propergateMissing` - which will cause the avg itself to be null if the values
+ * * `propagateMissing` - which will cause the avg itself to be null if the values
  *                         contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -38,7 +37,7 @@ export declare function avg(clean?: (values: number[]) => number[]): ReducerFunc
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the maximum search. Other possibilities are:
- * *`propergateMissing` - which will cause the max itself to be null if the values
+ * * `propagateMissing` - which will cause the max itself to be null if the values
  *                        contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -49,7 +48,7 @@ export declare function max(clean?: (values: number[]) => number[]): ReducerFunc
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the minimum search. Other possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the
+ * * `propagateMissing` - which will cause the min itself to be null if the
  *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -60,7 +59,7 @@ export declare function min(clean?: (values: number[]) => number[]): ReducerFunc
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the count. Other possibilities are:
- * * `propergateMissing` - which will cause the count itself to be null if the
+ * * `propagateMissing` - which will cause the count itself to be null if the
  *                         values contain a missing value
  */
 export declare function count(clean?: (values: number[]) => number[]): ReducerFunction;
@@ -94,7 +93,7 @@ export declare function last(clean?: (values: number[]) => number[]): ReducerFun
  * are treated. The default is to exclude missing values from
  * the list, i.e to find the last non-missing value. Other
  * possibilities are:
- * * `propergateMissing` - which will cause the min itself to be null if the
+ * * `propagateMissing` - which will cause the min itself to be null if the
  *                         values contain a missing value
  * * `zeroMissing` - will replace missing values with a zero
  */
@@ -109,12 +108,12 @@ export declare function median(clean?: (values: number[]) => number[]): ReducerF
  * that returns the standard deviation of the values supplied to it.
  */
 export declare function stdev(clean?: (values: number[]) => number[]): ReducerFunction;
-export declare enum InterpolationType {
+export enum InterpolationType {
     linear = 1,
     lower = 2,
     higher = 3,
     nearest = 4,
-    midpoint = 5,
+    midpoint = 5
 }
 /**
  * Returns a `percentile` function within the a values list.
@@ -131,13 +130,17 @@ export declare enum InterpolationType {
  *              * nearest: i or j whichever is nearest.
  *              * midpoint: (i + j) / 2.
  *  * clean    Strategy to use when encountering missing data:
- *              * `propergateMissing` - which will cause the min
+ *              * `propagateMissing` - which will cause the min
  *                 itself to be null if the values contain a
  *                 missing value
  *              * `zeroMissing` - will replace missing values
  *                 with a zero
  */
-export declare function percentile(q: number, interp?: InterpolationType, clean?: (values: number[]) => number[]): ReducerFunction;
+export declare function percentile(
+    q: number,
+    interp?: InterpolationType,
+    clean?: (values: number[]) => number[]
+): ReducerFunction;
 export declare const filter: {
     keepMissing: (values: number[]) => number[];
     ignoreMissing: (values: number[]) => number[];

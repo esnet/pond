@@ -70,7 +70,9 @@ export class SortedCollection<T extends Key> extends Collection<T> {
         }
 
         for (; i < size; i++) {
-            const ts = this.at(i).timestamp().getTime();
+            const ts = this.at(i)
+                .timestamp()
+                .getTime();
             if (ts > tms) {
                 return i - 1 >= 0 ? i - 1 : 0;
             } else if (ts === tms) {
@@ -90,7 +92,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
         const size1 = collection1.size();
         const size2 = collection2.size();
 
-        if (size1 != size2) {
+        if (size1 !== size2) {
             return false;
         } else {
             for (let i = 0; i < size1; i++) {

@@ -103,6 +103,7 @@ export class Align<T extends Key> extends Processor<T, T> {
 
             let interpolatedVal = null;
             if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
+                // tslint:disable-next-line
                 console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
             } else {
                 interpolatedVal = previousVal + f * (currentVal - previousVal);
