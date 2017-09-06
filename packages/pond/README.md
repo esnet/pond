@@ -75,14 +75,13 @@ Here is the high level overview of the data structures provided:
 * **Time** - a timestamp
 * **TimeRange** - a begin and end time, packaged together
 * **Index** - A time range denoted by a string, for example "5m-1234" is a specific 5 minute time range, or "2014-09" is September 2014
+
 * **Duration** - A length of time, with no particular anchor
 * **Period** - A reoccurring time, for example "hourly"
-* **Window** - A reoccurring duration of time, such as a one hour window, incrementing forward in time every 5 min.
-* **Event<Time>** - A timestamp and a data object packaged together
-* **Event<Index>** - An Index and a data object packaged together. e.g. 1hr max value
-* **Events<TimeRange>** - A TimeRange and a data object packaged together. e.g. outage event occurred from 9:10am until 10:15am
-* **Collection** - A bag of events, with a helpful set of methods for operating on those events. You can chain Collection operations together
-* **TimeSeries** - An ordered Collection of Events and associated meta data, along with operations to roll-up, aggregate, break apart and recombine TimeSeries in many ways
+* **Window** - A reoccurring duration of time, such as a one hour window, incrementing forward in time every 5 min
+* **Event\<K\>** - A key of type T, which could be Time, TimeRange or Index, and a data object packaged together
+* **Collection\<K\>** - A bag of events `Event<K>`, with a comprehensive set of methods for operating on those events
+* **TimeSeries\<K\>** - A sorted `Collection<K>` of events `Event<K>` and associated meta data
 
 And then high level processing can be achieved either by chaining together `Collection` or `TimeSeries` operations, or with the experimental `Stream` API:
 
