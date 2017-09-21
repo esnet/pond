@@ -480,7 +480,7 @@ describe("Creation", () => {
         });
 
         const c = new Collection(events);
-        const series = new TimeSeries({ name, c });
+        const series = new TimeSeries({ name, collection: c });
         expect(series.size()).toBe(3);
     });
 
@@ -1015,7 +1015,7 @@ describe("Rollups", () => {
         c = c.addEvent(event(time(t), Immutable.Map({ value: 2 })));
 
         // Test bisect to get element 0
-        const ts = new TimeSeries({ name: "coll", c });
+        const ts = new TimeSeries({ name: "coll", collection: c });
         const bisect = ts.bisect(t);
         expect(bisect).toEqual(0);
         expect(ts.at(bisect).get()).toEqual(2);

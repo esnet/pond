@@ -24,7 +24,7 @@ export interface ValueMap {
  *  * `Middle`
  *  * `End`
  */
-export enum TimeAlignment {
+export declare enum TimeAlignment {
     Begin = 1,
     Middle = 2,
     End = 3
@@ -34,7 +34,7 @@ export enum TimeAlignment {
  *  * `perEvent` - an updated `Collection` is emitted on each new `Event`
  *  * `onDiscardedWindow` - an updated `Collection` is emitted whenever a window is no longer used
  */
-export enum Trigger {
+export declare enum Trigger {
     perEvent = 1,
     onDiscardedWindow = 2
 }
@@ -43,7 +43,7 @@ export enum Trigger {
  *  * `Hold` - Emits the last known good value at alignment boundaries
  *  * `Linear` - Emits linearly interpolated values at alignment boundaries
  */
-export enum AlignmentMethod {
+export declare enum AlignmentMethod {
     Hold = 1,
     Linear = 2
 }
@@ -53,7 +53,7 @@ export enum AlignmentMethod {
  *  * `Linear` - Fill between the last value and the next value linearly
  *  * `Zero` - Fill with 0
  */
-export enum FillMethod {
+export declare enum FillMethod {
     Zero = 1,
     Pad = 2,
     Linear = 3

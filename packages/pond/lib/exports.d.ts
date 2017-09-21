@@ -2,7 +2,7 @@ import { Align } from "./align";
 import { Base } from "./base";
 import { Collapse } from "./collapse";
 import { collection, Collection } from "./collection";
-import { event, Event, timeEvent, timeRangeEvent, indexedEvent } from "./event";
+import { event, Event, indexedEvent, timeEvent, timeRangeEvent } from "./event";
 import { Fill } from "./fill";
 import {
     avg,
@@ -30,7 +30,7 @@ import { sortedCollection, SortedCollection } from "./sorted";
 import { stream } from "./stream";
 import { time, Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
-import { timeSeries, indexedSeries, timeRangeSeries, TimeSeries } from "./timeseries";
+import { indexedSeries, timeRangeSeries, timeSeries, TimeSeries } from "./timeseries";
 import { Trigger, WindowingOptions } from "./types";
 import util from "./util";
 export { Align };

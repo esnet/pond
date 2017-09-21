@@ -108,7 +108,7 @@ export declare function median(clean?: (values: number[]) => number[]): ReducerF
  * that returns the standard deviation of the values supplied to it.
  */
 export declare function stdev(clean?: (values: number[]) => number[]): ReducerFunction;
-export enum InterpolationType {
+export declare enum InterpolationType {
     linear = 1,
     lower = 2,
     higher = 3,

@@ -4,7 +4,7 @@ import { Index } from "./index";
 import { Period } from "./period";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
-export enum WindowType {
+export declare enum WindowType {
     Day = 1,
     Month = 2,
     Week = 3,
