@@ -136,7 +136,7 @@ series.avg("NASA_north", d => d.in);  // 250
         * [.sizeValid()](#TimeSeries+sizeValid) ⇒ <code>number</code>
         * [.count()](#TimeSeries+count) ⇒ <code>number</code>
         * [.sum(fieldPath, filter)](#TimeSeries+sum) ⇒ <code>number</code>
-        * [.max(fieldPath)](#TimeSeries+max) ⇒ <code>number</code>
+        * [.max(fieldPath, filter)](#TimeSeries+max) ⇒ <code>number</code>
         * [.min(fieldPath, filter)](#TimeSeries+min) ⇒ <code>number</code>
         * [.avg(fieldPath, filter)](#TimeSeries+avg) ⇒ <code>number</code>
         * [.mean(fieldPath, filter)](#TimeSeries+mean) ⇒ <code>number</code>
@@ -454,7 +454,7 @@ Returns the sum for the fieldspec
 
 <a name="TimeSeries+max"></a>
 
-### timeSeries.max(fieldPath) ⇒ <code>number</code>
+### timeSeries.max(fieldPath, filter) ⇒ <code>number</code>
 Aggregates the events down to their maximum value
 
 **Kind**: instance method of <code>[TimeSeries](#TimeSeries)</code>  
@@ -464,6 +464,7 @@ Aggregates the events down to their maximum value
 - fieldPath <code>string</code> - Column to find the max of. A deep value can
                            be referenced with a string.like.this.  If not supplied
                            the `value` column will be aggregated.
+- filter <code>function</code> - Optional filter function used to clean data before aggregating
 
 <a name="TimeSeries+min"></a>
 
