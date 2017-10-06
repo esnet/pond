@@ -173,7 +173,6 @@ class APIClass extends Component {
     );
   }
   renderDiscussion() {
-    console.log("render Discussion ", this.props.class);
     const { comment } = this.props.class;
     if (comment && comment.text) {
       const { text } = comment;
@@ -191,7 +190,6 @@ class APIClass extends Component {
   }
   renderGroups() {
     const entityMap = {};
-    console.log("render groups ", this.props.class);
     if (this.props.class.children) {
       this.props.class.children.forEach(child => {
         entityMap[child.id] = child;
@@ -232,7 +230,6 @@ class APIClass extends Component {
     return <div>{entity.name}</div>;
   }
   render() {
-    console.log("this.props is ", this.props);
     const { id, name, children } = this.props.class;
     return (
       <div style={{ marginBottom: 20 }}>
@@ -271,7 +268,6 @@ class APIEnum extends Component {
     return `${params.join(", \n")}`;
   }
   render() {
-    console.log("enum is ", this.props.enum);
     const { name, flags, children } = this.props.enum;
     if (children) {
       return (
@@ -292,7 +288,6 @@ class APIEnum extends Component {
 class APIFunction extends Component {
   buildType(type) {
     if(type) {
-      console.log("type is ", type);
       const typeArgs = this.buildTypeArguments(type.typeArguments);
       return `${type.name}${typeArgs}`;
     }
@@ -339,7 +334,6 @@ class APIFunction extends Component {
       : [];
   }
   buildReturnType(signature) {
-    console.log("buildReturnType APIFunction is ", signature);
     if (signature.type) {
       const typeName = this.buildType(signature.type);
       const isArray = signature.type.isArray;
@@ -354,7 +348,6 @@ class APIFunction extends Component {
       const parameters = signature.parameters;
       const paramList = this.buildParamList(parameters);
       const returnType = this.buildReturnType(signature);
-      console.log("APIFunction ", paramList, returnType);
       const output = `${signature.name}(${paramList.join(", ")}): ${returnType}`;
       return (
         <div>
@@ -388,7 +381,6 @@ class APIFunction extends Component {
     }
   }
   render() {
-    console.log("signature list this.props.function ", this.props.function);
     const { id, name, kindString, signatures } = this.props.function;
     const methodSignatures = this.buildSignatures(signatures);
     return (
@@ -425,7 +417,6 @@ class APIInterface extends Component {
       : [];
   }
   buildReturnType(signature) {
-    console.log("buildReturnType APIFunction is ", signature);
     if (signature.type) {
       const typeName = this.buildType(signature.type);
       const isArray = signature.type.isArray;
@@ -436,7 +427,6 @@ class APIInterface extends Component {
     }
   }
   buildDeclarations(type, name) {
-    console.log("declarations is ", type.declaration);
     const { indexSignature, signatures } = type.declaration;
     if (indexSignature) {
       const mapIndex = indexSignature.map(index => {
@@ -516,7 +506,6 @@ class APIInterface extends Component {
     return mapChildren
   }
   render() {
-    console.log("APIInterface is ", this.props.interface);
     const { id, name, kindString, children, comment, indexSignature, typeParameter } = this.props.interface;
     let shortText, mapChildren, longText;
     if (children) {
@@ -573,7 +562,6 @@ class APIObject extends Component {
     return;
   }
   render() {
-    console.log("object literal is ", this.props.object);
     const { name, flags, children } = this.props.object;
     const params = this.buildTypeArguments(children);
     return (
@@ -602,7 +590,6 @@ class APIType extends Component {
       : [];
   }
   buildReturnType(signature) {
-    console.log("buildReturnType APIFunction is ", signature);
     if (signature.type) {
       const typeName = this.buildType(signature.type);
       const isArray = signature.type.isArray;
@@ -692,7 +679,6 @@ class APIType extends Component {
     );
   }
   render() {
-    console.log("type alias is ", this.props.type);
     const { name, type } = this.props.type;
     return (
       <div style={{ marginBottom: 20 }}>
@@ -711,7 +697,6 @@ class APIType extends Component {
 class SignatureList extends Component {
   buildType(type) {
     if(type) {
-      console.log("type is ", type);
       const typeArgs = this.buildTypeArguments(type.typeArguments, type.types);
       return `${type.name ? type.name : ""}${typeArgs}`;
     }
@@ -747,7 +732,6 @@ class SignatureList extends Component {
   buildParamList(parameters) {
     return parameters
       ? parameters.map((param, i) => {
-          console.log("buildParamList is ", param);
           const paramType = param.type;
           const paramName = param.name;
           const paramTypeName = paramType.name;
@@ -777,11 +761,9 @@ class SignatureList extends Component {
     const typeName = this.buildType(signature.type);
     const typeArgs = this.buildTypeArguments(signature.typeParameter);
     const isArray = signature.type.isArray;
-    console.log("buildReturnType ->", signature.name, signature, typeName, typeArgs, isArray);
     return `${typeName}${typeArgs}${isArray ? "[]" : ""}`;
   }
   buildReturnType(signature) {
-    console.log("buildReturnType is ", signature);
     if (signature.type) {
       switch (signature.type.type) {
         case "instrinct":
@@ -821,7 +803,6 @@ class SignatureList extends Component {
     }
   }
   render() {
-    console.log("signature list this.props.signatures ", this.props.signatures);
     const { signatures } = this.props;
     const methodSignatures = signatures.map(signature => {
       const parameters = signature.parameters;
@@ -853,7 +834,6 @@ class SignatureList extends Component {
 
 class Method extends Component {
   renderComment(signature) {
-    console.log("signature is ", signature);
     if (signature.comment) {
       const { shortText, returns, tags, text } = signature.comment;
       let additionalText;
@@ -892,13 +872,11 @@ class Method extends Component {
 class Property extends Component {
   buildType(type) {
     if(type) {
-      console.log("type is ", type);
       const typeArgs = this.buildTypeArguments(type.typeArguments);
       return `${type.name}${typeArgs}`;
     }
   }
   buildTypeArguments(typeArguments) {
-    console.log("property typeArguments", typeArguments);
     if (typeArguments) {
       const typeArgs = typeArguments.map(t => {
         return this.buildType(t);
@@ -908,7 +886,6 @@ class Property extends Component {
     return "";
   }
   render() {
-    console.log("Property type", this.props.entity);
     const { id, children, name, type } = this.props.entity;
     const { typeArguments, types, isArray } = type;
     if (typeArguments) {
@@ -939,7 +916,6 @@ class Property extends Component {
 
 class Module extends Component {
   renderChild(child, i) {
-    console.log("render child ", child, i);
     switch(child.kindString) {
       case "Class":
         return <Route path={`/${child.name}`} render={()=> <APIClass key={i} class={child} />}/>;
@@ -1026,7 +1002,6 @@ class SideBar extends Component {
 class Doc extends Component {
   render() {
     const { id, name, children } = this.props.doc;
-    console.log(">>> doc ", children);
     return (
       <Router>
         <Root>
