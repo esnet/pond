@@ -96,8 +96,8 @@ it("can use the TimeSeries.fill() to fill missing values with zero", () => {
         limit: 4
     });
 
-    expect(newTS2.at(1).get("direction.in"), 0);
-    expect(newTS2.at(3).get("direction.in"), 0);
+    expect(newTS2.at(1).get("direction.in")).toBe(0);
+    expect(newTS2.at(3).get("direction.in")).toBe(0);
     expect(newTS2.at(0).get("direction.out")).toBeNull();
     expect(newTS2.at(2).get("direction.out")).toBeNull();
 });
