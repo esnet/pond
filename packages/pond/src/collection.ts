@@ -67,10 +67,21 @@ function fieldAsArray(field: string | string[]): string[] {
 }
 
 /**
- * A Collection holds a ordered (but not sorted) list of Events.
+ * A `Collection` holds a ordered (but not sorted) list of `Event`s and provides the
+ * underlying functionality for manipulating those `Event`s.
  *
- * In Typescript, you can give a `Collection<T>` a type T, which is
- * the `Event` type accepted into the Collection (e.g. `Collection<Time>`).
+ * In Typescript, `Collection` is a generic of type `T`, which is the homogeneous
+ * `Event` type of the `Collection`. `T` is likely one of:
+ *  * `Collection<Time>`
+ *  * `Collection<TimeRange>`
+ *  * `Collection<Index>`
+ *
+ * A `Collection` has several sub-classes, including a `SortedCollection`, which maintains
+ * `Events` in chronological order.
+ *
+ * A `TimeSeries` wraps a `SortedCollection` by attaching meta data to the series of
+ * chronological `Event`s. This provides the most common structure to use for dealing with
+ * sequences of `Event`s.
  */
 export class Collection<T extends Key> extends Base {
     /**
@@ -97,18 +108,23 @@ export class Collection<T extends Key> extends Base {
     protected _keyMap: Immutable.Map<string, Immutable.Set<number>>;
 
     /**
-     * Construct a new Collection
+     * Construct a new `Collection`.
      *
-     * @example
-     * ```
-     * const e1 = new Event(time("2015-04-22T03:30:00Z"), { a: 5, b: 6 });
-     * const e2 = new Event(time("2015-04-22T02:30:00Z"), { a: 4, b: 2 });
+     * You can construct a new empty `Collection` with `new`:
      *
-     * let collection = new Collection<Time>();
-     * collection = collection
-     *     .addEvent(e1)
-     *     .addEvent(e2);
      * ```
+     * const myCollection = new Collection<Time>();
+     * ```
+     *
+     * Alternatively, you can use the factory function:
+     *
+     * ```
+     * const myCollection = collection<Time>();
+     * ```
+     *
+     * A `Collection` may also be constructed with an initial list of `Events`
+     * by supplying an `Immutable.List<Event<T>>`, or from another `Collection`
+     * to make a copy.
      */
     constructor(arg1?: Immutable.List<Event<T>> | Collection<T>) {
         super();
@@ -126,13 +142,7 @@ export class Collection<T extends Key> extends Base {
     }
 
     /**
-     * Returns the `Collection` as a regular JSON object. This
-     * is implementation specific, in that different types of
-     * `Collections` will likely implement this in their own way.
-     *
-     * In the case of our `OrderedMap`, this code simply called
-     * `internalOrderedMap.toJS()` and lets `Immutable.js` do its
-     * thing.
+     * Returns the `Collection` as a regular JSON object.
      */
     public toJSON(): any {
         return this._events.toJS();
@@ -148,31 +158,32 @@ export class Collection<T extends Key> extends Base {
 
     /**
      * Adds a new `Event` into the `Collection`, returning a new `Collection`
-     * containing that `Event`. Optionally the Events may be de-duplicated.
+     * containing that `Event`. Optionally the `Event`s may be de-duplicated.
      *
-     * The dedup arg may either be a boolean (in which case any existing
-     * Events with the same key will be replaced by this new Event), or
-     * with a function. If dedup is a function that function will be
-     * passed a list of all `Event`'s with that key and will be expected
-     * to return a single `Event` to replace them with.
+     * The dedup arg may `true` (in which case any existing `Event`s with the
+     * same key will be replaced by this new Event), or with a function. If
+     * dedup is a user function that function will be passed a list of all `Event`s
+     * with that duplicated key and will be expected to return a single `Event`
+     * to replace them with, thus shifting de-duplication logic to the user.
      *
-     * @example
+     * Example 1:
+     *
      * ```
-     * let collection = pond.collection<Time>()
+     * let myCollection = collection<Time>()
      *     .addEvent(e1)
      *     .addEvent(e2);
      * ```
-     * @example
+     *
+     * Example 2:
      * ```
      * // dedup with the sum of the duplicated events
-     * const collection = pond.collection<Time>()
+     * const myCollection = collection<Time>()
      *     .addEvent(e1)
      *     .addEvent(e2)
      *     .addEvent(e3, (events) => {
      *         const a = events.reduce((sum, e) => sum + e.get("a"), 0);
-     *         return new Event<Time>(timestamp2, { a });
+     *         return new Event<Time>(t, { a });
      *     });
-     *
      * ```
      */
     public addEvent(event: Event<T>, dedup?: DedupFunction<T> | boolean): Collection<T> {
