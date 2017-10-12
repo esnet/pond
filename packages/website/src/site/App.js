@@ -11,9 +11,9 @@
 import "./App.css";
 import _ from "lodash";
 import React, { Component } from "react";
-import { BrowserRouter as Router, Route, Switch, NavLink } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-import Prism from "prismjs";
+import Prism from "prismjs"; // eslint-disable-line
 import "prismjs/components/prism-typescript";
 import "prismjs/themes/prism.css";
 
@@ -30,29 +30,9 @@ import TsFunction from "./api/Function";
 import TsInterface from "./api/Interface";
 import TsMethod from "./api/Method";
 
-import { activeLinkStyle } from "./api/styles";
-
 // Generated pond.js code and documentation as a JSON file. This is what we are
 // parsing here to generate the API documentation
 import docsJSON from "../doc.json";
-
-// #region styles
-const sidebarStyle = {
-    color: "#626466",
-    fontFamily: "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
-    fontSize: 18,
-    lineHeight: 2,
-    marginLeft: "1vw"
-};
-
-const sidebarHeading = {
-    paddingLeft: 5,
-    paddingTop: 5,
-    textTransform: "uppercase",
-    fontWeight: 800,
-    fontSize: 24
-};
-// #endregion
 
 const docs = {
     modules: {},
@@ -110,85 +90,21 @@ function buildTypes(root) {
 
 buildTypes(docsJSON.children);
 
-console.log(docs);
-
 class ScrollToTop extends Component {
-    componentDidMount(prevProps) {
-        window.scrollTo(0, 0);
+    componentDidUpdate(prevProps) {
+        if (this.props.location !== prevProps.location) {
+            window.scrollTo(0, 0);
+        }
     }
-    render() {
-        return null;
-    }
-}
 
-// const classLinks = [
-//     "Align",
-//     "Base",
-//     "Collapse",
-//     "Collection",
-//     "Event",
-//     "Fill",
-//     "GroupedCollection",
-//     "Index",
-//     "Key",
-//     "Period",
-//     "Processor",
-//     "Rate",
-//     "SortedCollection",
-//     "Time",
-//     "TimeRange",
-//     "TimeSeries",
-//     "WindowedCollection",
-//     "AlignmentOptions"
-// ];
-
-class SideBarItem extends Component {
-    renderChild(child, i) {
-        if (child.flags.isPrivate === true) {
-            return <div />;
-        }
-        if (child.name.includes("Factory")) {
-            return <div />;
-        }
-        if (child.kindString === "Class") {
-            return (
-                <div style={sidebarStyle}>
-                    <ScrollToTop />
-                    <NavLink exact to={`/${child.name}`} activeStyle={activeLinkStyle}>
-                        {child.name}
-                    </NavLink>
-                </div>
-            );
-        } else {
-            return (
-                <ul style={{ listStyleType: "None" }}>
-                    <li style={sidebarStyle}>
-                        <ScrollToTop />
-                        <NavLink exact to={`/${child.name}`} activeStyle={activeLinkStyle}>
-                            {child.kindString === "Function" ? `${child.name}()` : child.name}
-                        </NavLink>
-                    </li>
-                </ul>
-            );
-        }
-    }
     render() {
-        const { id, children } = this.props.sidebar;
-        return (
-            <div>
-                {children ? (
-                    _.map(children, (child, i) => <div key={id}>{this.renderChild(child, i)}</div>)
-                ) : (
-                    <div />
-                )}
-            </div>
-        );
+        return this.props.children;
     }
 }
 
 export default class extends Component {
     render() {
-        const { name, children } = docs;
+        const { name } = docs;
         return (
             <Router>
                 <Root>
@@ -204,10 +120,12 @@ export default class extends Component {
                             <Route
                                 path={`/class/:name`}
                                 render={props => (
-                                    <TsClass
-                                        class={docs.classes[props.match.params.name]}
-                                        lookups={docs}
-                                    />
+                                    <ScrollToTop key={props.match.params.name}>
+                                        <TsClass
+                                            class={docs.classes[props.match.params.name]}
+                                            lookups={docs}
+                                        />
+                                    </ScrollToTop>
                                 )}
                             />
                             <Route

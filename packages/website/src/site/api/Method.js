@@ -14,7 +14,7 @@ import Markdown from "react-markdown";
 import SignatureList from "./Signature";
 
 import { codeRenderer, codeBlockRenderer } from "./renderers";
-import { textStyle, linkStyle, methodHeadingStyle } from "./styles";
+import { textStyle, methodHeadingStyle } from "./styles";
 
 export default class TsMethod extends Component {
     renderComment(signature) {

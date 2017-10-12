@@ -18,8 +18,6 @@ import Property from "./Property";
 import { codeRenderer, codeBlockRenderer } from "./renderers";
 import { codeStyle, headingStyle, textStyle, groupStyle } from "./styles";
 
-const style = {}; // TODO
-
 export default class TsClass extends Component {
     static defaultProps = {
         showExtends: false
@@ -115,7 +113,6 @@ export default class TsClass extends Component {
                     const factoryLookup = `${this.props.class.name}Factory`.toLocaleLowerCase();
                     const factory = this.props.lookups.functions[factoryLookup];
                     if (factory) {
-                        console.log(factory, factory.name.replace("Factory", ""));
                         return (
                             <div key={i}>
                                 <hr />
@@ -168,7 +165,6 @@ export default class TsClass extends Component {
     }
 
     render() {
-        console.log(">> CLASS", this.props);
         const { name } = this.props.class;
         return (
             <div style={{ marginBottom: 20 }}>

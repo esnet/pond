@@ -33,7 +33,7 @@ export default class extends Component {
             >
                 <div style={sidebarTitleStyle}>CLASSES</div>
                 {_.map(classes, c => (
-                    <div style={sidebarItemStyle}>
+                    <div key={c.name} style={sidebarItemStyle}>
                         <NavLink
                             exact
                             to={`/class/${c.name.toLowerCase()}`}
@@ -45,7 +45,7 @@ export default class extends Component {
                 ))}
                 <div style={sidebarTitleStyle}>INTERFACES</div>
                 {_.map(interfaces, c => (
-                    <div style={sidebarItemStyle}>
+                    <div key={c.name} style={sidebarItemStyle}>
                         <NavLink
                             exact
                             to={`/interface/${c.name.toLowerCase()}`}

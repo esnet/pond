@@ -10,7 +10,7 @@
 
 import React, { Component } from "react";
 
-import { codeStyle, sigStyle } from "./styles";
+import { sigStyle } from "./styles";
 
 export default class TsSignatureList extends Component {
     buildType(type) {
@@ -120,15 +120,14 @@ export default class TsSignatureList extends Component {
 
     render() {
         const { signatures } = this.props;
-        const methodSignatures = signatures.map(signature => {
-            console.log(">>", signature);
+        const methodSignatures = signatures.map((signature, k) => {
             const parameters = signature.parameters;
             const paramList = this.buildParamList(parameters);
             const returnType = this.buildReturnType(signature);
 
             const output = `${signature.name}(${paramList.join(", ")}): ${returnType}`;
             return (
-                <div style={{ marginTop: 15 }}>
+                <div key={k} style={{ marginTop: 15 }}>
                     <pre style={sigStyle}>
                         <code className="language-typescript">{output}</code>
                     </pre>

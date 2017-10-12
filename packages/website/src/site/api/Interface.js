@@ -11,7 +11,7 @@
 import React, { Component } from "react";
 import Markdown from "react-markdown";
 
-import { codeStyle, headingStyle, textStyle } from "./styles";
+import { headingStyle, textStyle, sigStyle } from "./styles";
 import { codeRenderer } from "./renderers";
 
 export default class TsInterface extends Component {
@@ -152,7 +152,11 @@ export default class TsInterface extends Component {
                 <div style={textStyle}>
                     <Markdown source={shortText} renderers={{ Code: codeRenderer }} />
                 </div>
-                <code style={codeStyle}>{mapChildren}</code>
+                <div style={{ marginTop: 15 }}>
+                    <pre style={sigStyle}>
+                        <code className="language-typescript">{mapChildren}</code>
+                    </pre>
+                </div>
             </div>
         );
     }
