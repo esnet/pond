@@ -140,8 +140,8 @@ export interface RateOptions {
 }
 
 /**
- * Options object expected by the `align()` function:
- *  * `fieldSpec` - the field to align
+ * Options object expected by the `fill()` function:
+ *  * `fieldSpec` - the field to fill
  *  * `method` - the interpolation method, one of
  *    `FillMethod.Hold`, `FillMethod.Pad` or `FillMethod.Linear`
  *  * `limit` - the number of missing values to fill before giving up

@@ -52,7 +52,7 @@ export class Align<T extends Key> extends Processor<T, T> {
      *     method: AlignmentMethod.Linear
      * });
      * ```
-     *
+     * Options:
      *  * `fieldSpec` is the `Event` field or fields that should be aligned
      *  * `period` is the `Period` of the alignment (see `Period`)
      *  * `method` maybe `AlignmentMethod.Linear` or `AlignmentMethod.Hold`

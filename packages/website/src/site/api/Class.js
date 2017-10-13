@@ -169,7 +169,7 @@ export default class TsClass extends Component {
         return (
             <div style={{ marginBottom: 20 }}>
                 <h2 style={headingStyle}>{name}</h2>
-                {this.renderShortComment()}
+
                 <pre
                     style={{
                         marginTop: 15,
@@ -185,6 +185,7 @@ export default class TsClass extends Component {
                 >
                     {this.renderClassSignature()}
                 </pre>
+                {this.renderShortComment()}
                 {this.renderDiscussion()}
                 {this.renderGroups()}
             </div>

@@ -60,8 +60,9 @@ export default class TsMethod extends Component {
                 <a style={methodHeadingStyle} href={`#${name}`}>
                     {title}
                 </a>
-                {this.renderComment(first)}
                 {this.renderMethodSignatures()}
+                <div style={{ padding: 10 }} />
+                {this.renderComment(first)}
             </div>
         );
     }

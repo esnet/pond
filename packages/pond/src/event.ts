@@ -24,21 +24,14 @@ import util from "./util";
 /**
  * An Event is a mapping from a time based key to a Data object.
  *
- * The key needs to be a sub-class of the `Key`, which typically
+ * The key needs to be a sub-class of the base class `Key`, which typically
  * would be one of the following:
  *
  *  * `Time` - a single timestamp
  *  * `TimeRange` - a timerange over which the Event took place
  *  * `Index` - a different representation of a TimeRange
  *
- * The data needs to be a sub-class of the `Data` type. That
- * type lets you construct it as either:
- *  - A string or number
- *  - A JS object
- *  - An Immutable.Map<string, any>
- *
- * Internally the Data object is, by default (since subclasses my
- * implement differently) a `Immutable.Map`.
+ * The data needs to be an Immutable.Map<string, any>.
  *
  * To get values out of the data, use `get()`. This method takes
  * what is called a field, which is a top level key of the Data
@@ -48,11 +41,11 @@ import util from "./util";
  * or dot notation. Not specifying  a field implies a field of
  * name `"value""`.
  *
- * @example
+ * Example:
  *
  * ```
  * const timestamp = time(new Date("2015-04-22T03:30:00Z");
- * const e = new Event(timestamp, data({ temperature: 42 }));
+ * const e = event(t, Immutable.Map({ humidity: 84.2 }));
  * ```
  *
  */
@@ -366,7 +359,45 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Constructor
+     * Construct a new `Event`.
+     *
+     * Construction of an `Event` requires both a time-based key and an
+     * `Immutable.Map` of (`string` -> data) mappings.
+     *
+     * The time-based key should be either a `Time`, a `TimeRange` or an `Index`,
+     * though it would be possible to subclass `Key` with another type so long
+     * as it implements that abstract interface.
+     *
+     * The data portion maybe deep data. Using `Immutable.toJS()` is helpful in
+     * that case.
+     *
+     * You can use `new Event<T>()` to create a new `Event`, but it's easier to use
+     * one of the factory functions: `event()`, `timeEvent()`, `timeRangeEvent()` and
+     * `indexedEvent()`
+     *
+     * Example 1:
+     * ```
+     * const e = event(time(new Date(1487983075328)), Immutable.Map({ name: "bob" }));
+     * ```
+     *
+     * Example 2:
+     * ```
+     * // An event for a particular day with indexed key
+     * const e = event(index("1d-12355"), Immutable.Map({ value: 42 }));
+     * ```
+     *
+     * Example 3:
+     * ```
+     * // Outage event spans a timerange
+     * const e = event(timerange(beginTime, endTime), Immutable.Map({ ticket: "A1787383" }));
+     * ```
+     *
+     * Example 4:
+     * ```
+     * const e = timeEvent({
+     *     time: 1487983075328,
+     *     data: { a: 2, b: 3 }
+     * });
      */
 
     constructor(protected key: T, protected data: Immutable.Map<string, any>) {
@@ -388,16 +419,18 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Returns the data associated with this event, which be
-     * of type `T`.
+     * Returns the data associated with this event in the form
+     * of an `Immutable.Map`. This is infact an accessor for the internal
+     * representation of data in this `Event`.
      */
     public getData(): Immutable.Map<string, any> {
         return this.data;
     }
 
     /**
-     * Returns the data associated with this event, which be
-     * of type `T`.
+     * Sets new `data` associated with this event. The new `data` is supplied
+     * in the form of an `Immutable.Map`. A new `Event<T>` will be returned
+     * containing this new data, but having the same key.
      */
     public setData(data: Immutable.Map<string, any>): Event<T> {
         return new Event<T>(this.key, data);
@@ -412,6 +445,20 @@ export class Event<T extends Key = Time> extends Base {
      *  * "path.to.deep.data"
      *  * ["path", "to", "deep", "data"].
      *
+     * Example 1:
+     * ```
+     * const e = event(index("1d-12355"), Immutable.Map({ value: 42 }));
+     * e.get("value"); // 42
+     * ```
+     *
+     * Example 2:
+     * ```
+     * const t = time(new Date("2015-04-22T03:30:00Z"));
+     * const e = event(t, Immutable.fromJS({ a: 5, b: { c: 6 } }));
+     * e.get("b.c"); // 6
+     * ```
+     *
+     * Note: the default `field` is "value".
      */
     public get(field: string | string[] = "value"): any {
         const f = util.fieldAsArray(field);
@@ -421,13 +468,20 @@ export class Event<T extends Key = Time> extends Base {
     /**
      * Set a new `value` on the `Event` for the given `field`, and return a new `Event`.
      *
-     * You can refer to a `field`s with one of the following notations:
+     * You can refer to a `field` with one of the following notations:
      *  * (undefined) -> "value"
      *  * "temperature"
      *  * "path.to.deep.data"
      *  * ["path", "to", "deep", "data"].
      *
      * `value` is the new value to set on for the given `field` on the `Event`.
+     *
+     * ```
+     * const t = time(new Date(1487983075328));
+     * const initial = event(t, Immutable.Map({ name: "bob" }));
+     * const modified = e.set("name", "fred");
+     * modified.toString() // {"time": 1487983075328, "data": {"name":"fred"} }
+     * ```
      */
     public set(field: string | string[] = "value", value: any): Event<T> {
         const f = util.fieldAsArray(field);
@@ -435,9 +489,10 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Will return false if the value in this `Event` is either `undefined`, `NaN` or
-     * `null` for the given field or fields. This serves as a determination of a "missing"
-     * value within a `TimeSeries` or `Collection`.
+     * Will return false if the value for the specified `fields` in this `Event` is
+     * either `undefined`, `NaN` or `null` for the given field or fields. This
+     * serves as a determination of a "missing" value within a `TimeSeries` or
+     * `Collection`.
      */
     public isValid(fields?: string | string[]): boolean {
         let invalid = false;
@@ -465,10 +520,20 @@ export class Event<T extends Key = Time> extends Base {
         return this.getKey().timestamp();
     }
 
+    /**
+     * The begin time of the `Event`. If the key of the `Event` is a `Time` then
+     * the begin and end time of the `Event` will be the same as the `Event`
+     * timestamp.
+     */
     public begin(): Date {
         return this.getKey().begin();
     }
 
+    /**
+     * The end time of the `Event`. If the key of the `Event` is a `Time` then
+     * the begin and end time of the `Event` will be the same as the `Event`
+     * timestamp.
+     */
     public end(): Date {
         return this.getKey().end();
     }
@@ -514,16 +579,16 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Collapses multiple fields (specified in the `fieldSpecList`) into a single
-     * field named `fieldName` using the supplied reducer. Optionally you can keep
-     * all existing fields by supplying the `append` argument as true.
+     * Collapses an array of fields, specified in the `fieldSpecList`, into a single
+     * field named `fieldName` using the supplied reducer function. Optionally you can keep
+     * all existing fields by supplying the `append` argument as `true`.
      *
-     * @example:
+     * Example:
      * ```
      * const t = time(new Date("2015-04-22T03:30:00Z"));
      * const e = event(t, Immutable.Map({ in: 5, out: 6, status: "ok" }));
      * const result = e.collapse(["in", "out"], "total", sum(), true);
-     * // result: data: { "in": 5, "out": 6, "status": "ok", "total": 11 } }
+     * // { "in": 5, "out": 6, "status": "ok", "total": 11 } }
      * ```
      */
     public collapse(
