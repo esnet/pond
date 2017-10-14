@@ -5,7 +5,7 @@
 	"flags": {},
 	"children": [
 		{
-			"id": 1910,
+			"id": 1908,
 			"name": "\"align\"",
 			"kind": 1,
 			"kindString": "External module",
@@ -15,7 +15,7 @@
 			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/align.ts",
 			"children": [
 				{
-					"id": 1911,
+					"id": 1909,
 					"name": "Align",
 					"kind": 128,
 					"kindString": "Class",
@@ -28,7 +28,7 @@
 					},
 					"typeParameter": [
 						{
-							"id": 1912,
+							"id": 1910,
 							"name": "T",
 							"kind": 131072,
 							"kindString": "Type parameter",
@@ -42,7 +42,7 @@
 					],
 					"children": [
 						{
-							"id": 1918,
+							"id": 1916,
 							"name": "constructor",
 							"kind": 512,
 							"kindString": "Constructor",
@@ -54,7 +54,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1919,
+									"id": 1917,
 									"name": "new Align",
 									"kind": 16384,
 									"kindString": "Constructor signature",
@@ -64,7 +64,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1920,
+											"id": 1918,
 											"name": "options",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -79,7 +79,7 @@
 									"type": {
 										"type": "reference",
 										"name": "Align",
-										"id": 1911
+										"id": 1909
 									}
 								}
 							],
@@ -92,7 +92,7 @@
 							]
 						},
 						{
-							"id": 1913,
+							"id": 1911,
 							"name": "_fieldSpec",
 							"kind": 1024,
 							"kindString": "Property",
@@ -116,7 +116,7 @@
 							}
 						},
 						{
-							"id": 1916,
+							"id": 1914,
 							"name": "_limit",
 							"kind": 1024,
 							"kindString": "Property",
@@ -146,7 +146,7 @@
 							}
 						},
 						{
-							"id": 1915,
+							"id": 1913,
 							"name": "_method",
 							"kind": 1024,
 							"kindString": "Property",
@@ -168,7 +168,7 @@
 							}
 						},
 						{
-							"id": 1914,
+							"id": 1912,
 							"name": "_period",
 							"kind": 1024,
 							"kindString": "Property",
@@ -190,7 +190,7 @@
 							}
 						},
 						{
-							"id": 1917,
+							"id": 1915,
 							"name": "_previous",
 							"kind": 1024,
 							"kindString": "Property",
@@ -223,7 +223,7 @@
 							}
 						},
 						{
-							"id": 1921,
+							"id": 1919,
 							"name": "addEvent",
 							"kind": 2048,
 							"kindString": "Method",
@@ -233,7 +233,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1922,
+									"id": 1920,
 									"name": "addEvent",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -243,7 +243,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1923,
+											"id": 1921,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -309,7 +309,7 @@
 							}
 						},
 						{
-							"id": 1927,
+							"id": 1925,
 							"name": "getBoundaries",
 							"kind": 2048,
 							"kindString": "Method",
@@ -319,7 +319,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1928,
+									"id": 1926,
 									"name": "getBoundaries",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -329,7 +329,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1929,
+											"id": 1927,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -374,7 +374,7 @@
 							]
 						},
 						{
-							"id": 1930,
+							"id": 1928,
 							"name": "interpolateHold",
 							"kind": 2048,
 							"kindString": "Method",
@@ -384,7 +384,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1931,
+									"id": 1929,
 									"name": "interpolateHold",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -395,7 +395,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1932,
+											"id": 1930,
 											"name": "boundaryTime",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -407,7 +407,7 @@
 											}
 										},
 										{
-											"id": 1933,
+											"id": 1931,
 											"name": "setNone",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -442,7 +442,7 @@
 							]
 						},
 						{
-							"id": 1934,
+							"id": 1932,
 							"name": "interpolateLinear",
 							"kind": 2048,
 							"kindString": "Method",
@@ -452,7 +452,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1935,
+									"id": 1933,
 									"name": "interpolateLinear",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -462,7 +462,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1936,
+											"id": 1934,
 											"name": "boundaryTime",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -474,7 +474,7 @@
 											}
 										},
 										{
-											"id": 1937,
+											"id": 1935,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -520,7 +520,7 @@
 							]
 						},
 						{
-							"id": 1924,
+							"id": 1922,
 							"name": "isAligned",
 							"kind": 2048,
 							"kindString": "Method",
@@ -530,7 +530,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1925,
+									"id": 1923,
 									"name": "isAligned",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -540,7 +540,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1926,
+											"id": 1924,
 											"name": "event",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -583,29 +583,29 @@
 							"title": "Constructors",
 							"kind": 512,
 							"children": [
-								1918
+								1916
 							]
 						},
 						{
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1913,
-								1916,
-								1915,
+								1911,
 								1914,
-								1917
+								1913,
+								1912,
+								1915
 							]
 						},
 						{
 							"title": "Methods",
 							"kind": 2048,
 							"children": [
-								1921,
-								1927,
-								1930,
-								1934,
-								1924
+								1919,
+								1925,
+								1928,
+								1932,
+								1922
 							]
 						}
 					],
@@ -650,7 +650,7 @@
 					"title": "Classes",
 					"kind": 128,
 					"children": [
-						1911
+						1909
 					]
 				}
 			],
@@ -6442,7 +6442,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 359,
+									"line": 394,
 									"character": 5
 								}
 							]
@@ -6460,7 +6460,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 403,
+									"line": 438,
 									"character": 48
 								}
 							],
@@ -6492,7 +6492,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 403,
+									"line": 438,
 									"character": 29
 								}
 							],
@@ -6534,13 +6534,13 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 528,
+									"line": 577,
 									"character": 16
 								}
 							]
 						},
 						{
-							"id": 1860,
+							"id": 1858,
 							"name": "collapse",
 							"kind": 2048,
 							"kindString": "Method",
@@ -6550,7 +6550,7 @@
 							},
 							"signatures": [
 								{
-									"id": 1861,
+									"id": 1859,
 									"name": "collapse",
 									"kind": 4096,
 									"kindString": "Call signature",
@@ -6561,7 +6561,7 @@
 									},
 									"parameters": [
 										{
-											"id": 1862,
+											"id": 1860,
 											"name": "fieldSpecList",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -6575,7 +6575,7 @@
 											}
 										},
 										{
-											"id": 1863,
+											"id": 1861,
 											"name": "fieldName",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -6586,7 +6586,7 @@
 											}
 										},
 										{
-											"id": 1864,
+											"id": 1862,
 											"name": "reducer",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -6598,7 +6598,7 @@
 											}
 										},
 										{
-											"id": 1865,
+											"id": 1863,
 											"name": "append",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -6631,7 +6631,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 594,
+									"line": 651,
 									"character": 19
 								}
 							]
@@ -6664,7 +6664,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 537,
+									"line": 586,
 									"character": 14
 								}
 							]
@@ -6724,7 +6724,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 463,
+									"line": 501,
 									"character": 14
 								}
 							]
@@ -6767,7 +6767,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 426,
+									"line": 464,
 									"character": 18
 								}
 							]
@@ -6789,7 +6789,8 @@
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Returns the key this `Event` was constructed with"
+										"shortText": "Returns the key this `Event`.",
+										"text": "The result is of type T (a `Time`, `TimeRange` or `Index`), depending on\nwhat the `Event` was constructed with.\n"
 									},
 									"type": {
 										"type": "typeParameter",
@@ -6805,7 +6806,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 410,
+									"line": 448,
 									"character": 17
 								}
 							]
@@ -6836,7 +6837,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 541,
+									"line": 590,
 									"character": 16
 								}
 							]
@@ -6866,7 +6867,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 545,
+									"line": 594,
 									"character": 24
 								}
 							]
@@ -6926,7 +6927,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 497,
+									"line": 535,
 									"character": 18
 								}
 							]
@@ -6959,13 +6960,13 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 417,
+									"line": 455,
 									"character": 18
 								}
 							]
 						},
 						{
-							"id": 1866,
+							"id": 1864,
 							"name": "select",
 							"kind": 2048,
 							"kindString": "Method",
@@ -6975,17 +6976,18 @@
 							},
 							"signatures": [
 								{
-									"id": 1867,
+									"id": 1865,
 									"name": "select",
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Selects specific fields of an `Event` using a `fields` and returns\na new event with just those fields."
+										"shortText": "Selects specific fields of an `Event` using the `fields` array of strings\nand returns a new event with just those fields.",
+										"text": "Example:\n```\nconst t = time(new Date(\"2015-04-22T03:30:00Z\"));\nconst e = event(t, Immutable.Map({ a: 5, b: 6, c: 7 }));\nconst result = e.select([\"a\", \"b\"]);  // data is { a: 5, b: 6 }}\n```\n"
 									},
 									"parameters": [
 										{
-											"id": 1868,
+											"id": 1866,
 											"name": "fields",
 											"kind": 32768,
 											"kindString": "Parameter",
@@ -7020,7 +7022,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 610,
+									"line": 674,
 									"character": 17
 								}
 							]
@@ -7103,7 +7105,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 486,
+									"line": 524,
 									"character": 14
 								}
 							]
@@ -7171,7 +7173,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 435,
+									"line": 473,
 									"character": 18
 								}
 							]
@@ -7192,6 +7194,9 @@
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
+									"comment": {
+										"shortText": "Returns the `TimeRange` over which this `Event` occurs. If this `Event`\nhas a `Time` key then the duration of this range will be 0."
+									},
 									"type": {
 										"type": "reference",
 										"name": "TimeRange",
@@ -7202,7 +7207,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 549,
+									"line": 602,
 									"character": 20
 								}
 							]
@@ -7223,6 +7228,9 @@
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
+									"comment": {
+										"shortText": "Shortcut for `timerange()` followed by `toUTCString()`."
+									},
 									"type": {
 										"type": "intrinsic",
 										"name": "string"
@@ -7232,7 +7240,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 553,
+									"line": 609,
 									"character": 31
 								}
 							]
@@ -7253,6 +7261,10 @@
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
+									"comment": {
+										"shortText": "Returns the timestamp of the `Event`.",
+										"text": "This a convenience for calling `Event.getKey()` followed by `timestamp()`.\n"
+									},
 									"type": {
 										"type": "reference",
 										"name": "Date"
@@ -7262,38 +7274,8 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 519,
+									"line": 568,
 									"character": 20
-								}
-							]
-						},
-						{
-							"id": 1856,
-							"name": "timestampAsUTCString",
-							"kind": 2048,
-							"kindString": "Method",
-							"flags": {
-								"isExported": true,
-								"isPublic": true
-							},
-							"signatures": [
-								{
-									"id": 1857,
-									"name": "timestampAsUTCString",
-									"kind": 4096,
-									"kindString": "Call signature",
-									"flags": {},
-									"type": {
-										"type": "intrinsic",
-										"name": "string"
-									}
-								}
-							],
-							"sources": [
-								{
-									"fileName": "event.ts",
-									"line": 557,
-									"character": 31
 								}
 							]
 						},
@@ -7313,6 +7295,9 @@
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
+									"comment": {
+										"shortText": "Converts the `Event` into a standard Javascript object"
+									},
 									"type": {
 										"type": "reference",
 										"name": "__type"
@@ -7322,13 +7307,13 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 507,
+									"line": 548,
 									"character": 17
 								}
 							]
 						},
 						{
-							"id": 1858,
+							"id": 1856,
 							"name": "toPoint",
 							"kind": 2048,
 							"kindString": "Method",
@@ -7338,11 +7323,14 @@
 							},
 							"signatures": [
 								{
-									"id": 1859,
+									"id": 1857,
 									"name": "toPoint",
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
+									"comment": {
+										"shortText": "Returns an array containing the key in the first element and then the data map\nexpressed as JSON as the second element. This is the method that is used by\na `TimeSeries` to build its wireformat representation."
+									},
 									"type": {
 										"type": "array",
 										"elementType": {
@@ -7355,7 +7343,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 561,
+									"line": 618,
 									"character": 18
 								}
 							]
@@ -7376,6 +7364,9 @@
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
+									"comment": {
+										"shortText": "Converts the `Event` to a string"
+									},
 									"type": {
 										"type": "intrinsic",
 										"name": "string"
@@ -7385,7 +7376,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 515,
+									"line": 559,
 									"character": 19
 								}
 							]
@@ -7408,13 +7399,8 @@
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Takes a `Immutable.List` of events and a reducer function and a\n`fieldSpec` (or list of fieldSpecs) and returns an aggregated\nresult in the form of a new Event, for each column.\nThe reducer is of the form:\n```\nfunction sum(valueList) {\n    return calcValue;\n}\n```",
-										"tags": [
-											{
-												"tag": "example",
-												"text": "\n```\nconst result = Event.aggregate(EVENT_LIST, avg(), [\"in\", \"out\"]);\n// result = { in: 5, out: 14.25 }\n```\n"
-											}
-										]
+										"shortText": "Static function that takes a `Immutable.List` of events, a `reducer` function and a\n`fieldSpec` (field or list of fields) and returns an aggregated result in the form\nof a new Event, for each column.",
+										"text": "The reducer is of the form:\n```\n(values: number[]) => number\n```\n\nExample:\n```\nconst result = Event.aggregate(EVENT_LIST, avg(), [\"in\", \"out\"]);\n// result = { in: 5, out: 14.25 }\n```\n"
 									},
 									"typeParameter": [
 										{
@@ -7506,7 +7492,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 345,
+									"line": 380,
 									"character": 27
 								}
 							]
@@ -7529,8 +7515,8 @@
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Combines multiple `Event`s together into a new array of events, one\nfor each key of the source events. The list of Events may be specified\nas an array or `Immutable.List`.",
-										"text": "Combining acts on the fields specified in the `fieldSpec` (or all\nfields) and uses the reducer function supplied to take the multiple\nvalues associated with the key and reduce them down to a single value.\n\nThe return result will be an `Event` of the same type as the input.\n\nThis is the general version of `Event.sum()` and `Event.avg()`. If those\ncommon use cases are what you want, just use those functions. If you\nwant to specify your own reducer you can use this function.\n\nSee also: `TimeSeries.timeSeriesListSum()`\n"
+										"shortText": "Static function to combine multiple `Event`s together into a new array\nof events, one `Event` for each key of the source events. The list of\n`Events` should be specified as an array or `Immutable.List<Event<K>>`.",
+										"text": "Combining acts on the fields specified in the `fieldSpec` (or all\nfields) and uses the `reducer` function supplied to take the multiple\nvalues associated with the key and reduce them down to a single value.\n\nThe return result will be an `Immutable.List<Event<K>>` of the same type K\nas the input.\n\nExample:\n```\nconst t = time(\"2015-04-22T03:30:00Z\");\nconst events = [\n    event(t, Immutable.Map({ a: 5, b: 6, c: 7 })),\n    event(t, Immutable.Map({ a: 2, b: 3, c: 4 })),\n    event(t, Immutable.Map({ a: 1, b: 2, c: 3 }))\n];\nconst result = Event.combine(Immutable.List(events), sum());\n// result[0] is {a: 8, b: 11, c: 14 }\n```\nSee also: `TimeSeries.timeSeriesListSum()`\n"
 									},
 									"typeParameter": [
 										{
@@ -7641,7 +7627,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 187,
+									"line": 221,
 									"character": 25
 								}
 							]
@@ -7663,7 +7649,7 @@
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Returns a function that will take a list of `Event`'s and combine them\ntogether using the `fieldSpec` and reducer function provided. This is\nused as an event reducer for merging multiple `TimeSeries` together\nwith `timeSeriesListReduce()`."
+										"shortText": "Static method that returns a function that will take a list of `Event`'s\nand combine them together using the `fieldSpec` and reducer function provided.\nThis is used as an event reducer for merging multiple `TimeSeries` together\nwith `timeSeriesListReduce()`."
 									},
 									"typeParameter": [
 										{
@@ -7772,7 +7758,7 @@
 											"sources": [
 												{
 													"fileName": "event.ts",
-													"line": 276,
+													"line": 305,
 													"character": 6
 												}
 											]
@@ -7783,7 +7769,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 273,
+									"line": 302,
 									"character": 19
 								}
 							]
@@ -7881,7 +7867,7 @@
 									"flags": {},
 									"comment": {
 										"shortText": "Returns if the two supplied events are duplicates of each other.",
-										"text": "Duplicated means that the keys are the same. This is the case\nwith incoming events sometimes where a second event is either known\nto be the same (but duplicate) of the first, or supersedes the first.\n\nYou can also pass in false for ignoreValues and get a full compare,\nincluding the data of the event, thus ignoring the supersede case.\n"
+										"text": "Duplicated is defined as the keys of the `Event`s being the same.\nThis is the case with incoming events sometimes where a second event\nis either known to be the same (but duplicate) of the first, or\nsupersedes the first.\n\nYou can also pass in `false` for `ignoreValues` and get a full compare,\nincluding the data of the event, thus ignoring the supersede case.\n\nExample:\n```\nconst e1 = event(t, Immutable.Map({ a: 5, b: 6, c: 7 }));\nconst e2 = event(t, Immutable.Map({ a: 5, b: 6, c: 7 }));\nconst e3 = event(t, Immutable.Map({ a: 100, b: 6, c: 7 }));\n\nEvent.isDuplicate(e1, e2)        // true\nEvent.isDuplicate(e1, e3)        // true\nEvent.isDuplicate(e1, e3, false) // false\nEvent.isDuplicate(e1, e2, false) // false\n```\n"
 									},
 									"parameters": [
 										{
@@ -7944,7 +7930,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 75,
+									"line": 88,
 									"character": 29
 								}
 							]
@@ -7967,13 +7953,8 @@
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Takes a list of `Events<T>` and makes a map from the `Event` field names\nto an array of values, one value for each Event.",
-										"tags": [
-											{
-												"tag": "example",
-												"text": "\n```\nconst eventMap = Event.map(events, [\"in\"]);\n// { in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] }\n```\n"
-											}
-										]
+										"shortText": "Static function that takes a list of `Events<T>` and makes a map from each\nfield names to an array of values, one value for each Event.",
+										"text": "Example:\n```\nconst events = [\n    event(t1, Immutable.Map({in: 2, out: 11 })),\n    event(t2, Immutable.Map({in: 4, out: 13 })),\n    event(t3, Immutable.Map({in: 6, out: 15 })),\n    event(t4, Immutable.Map({in: 8, out: 17 }))\n];\n\nconst fieldMapping = Event.map(events, [\"in\", \"out\"]);\n// { in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] }\n```\n"
 									},
 									"typeParameter": [
 										{
@@ -8053,12 +8034,12 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 290,
+									"line": 326,
 									"character": 21
 								},
 								{
 									"fileName": "event.ts",
-									"line": 294,
+									"line": 330,
 									"character": 21
 								}
 							]
@@ -8081,8 +8062,8 @@
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Merges multiple `Event`'s together into a new array of events, one\nfor each key of the source events. Merging is done on the data of\neach event. Values from later events in the list overwrite\nearly values if fields conflict.",
-										"text": "Common use cases:\n  - append events of different timestamps\n  - merge in events with one field to events with another\n  - merge in events that supersede the previous events\n\nEvents in the supplied list need to be of homogeneous types\n\nSee also: `TimeSeries.timeSeriesListMerge()`.\n"
+										"shortText": "Merges multiple `Event`'s together into a new array of `Event`s, one\nfor each key of the source events. Merging is done on the data of\neach `Event`. Values from later events in the list overwrite\nearlier values if fields conflict.",
+										"text": "Common use cases:\n  * append events of different timestamps\n    e.g. merge earlier events with later events\n  * merge in events with one field to events with another field\n    e.g. combine events with a field \"in\" with another list of events\n         with a field \"out\" to get events with both \"in\" and \"out\"\n  * merge in events that supersede the previous events\n\nEvents in the supplied list need to be of homogeneous types\n\nSee also:\n * `TimeSeries.timeSeriesListMerge()` if what you have is a\n`TimeSeries`. That uses this code but with a friendlier API.\n\nExample:\n```\nconst t = time(new Date(\"2015-04-22T03:30:00Z\"));\nconst event1 = event(t, Immutable.Map({ a: 5, b: 6 }));\nconst event2 = event(t, Immutable.Map({ c: 2 }));\nconst merged = Event.merge(Immutable.List([event1, event2]));\nmerged.get(0).get(\"a\");    // 5\nmerged.get(0).get(\"b\");    // 6\nmerged.get(0).get(\"c\");    // 2\n"
 									},
 									"typeParameter": [
 										{
@@ -8169,7 +8150,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 105,
+									"line": 133,
 									"character": 23
 								}
 							]
@@ -8191,7 +8172,7 @@
 									"kindString": "Call signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Returns a function that will take a list of `event`'s and merge them\ntogether using the `fieldSpec` provided. This is used as a reducer for\nmerging multiple `TimeSeries` together with `timeSeriesListMerge()`."
+										"shortText": "Returns a function that will take a list of `Event`s and merge them\ntogether using the `fieldSpec` provided. This is used as a `reducer` for\nmerging multiple `TimeSeries` together with `TimeSeries.timeSeriesListMerge()`."
 									},
 									"typeParameter": [
 										{
@@ -8289,7 +8270,7 @@
 											"sources": [
 												{
 													"fileName": "event.ts",
-													"line": 165,
+													"line": 192,
 													"character": 6
 												}
 											]
@@ -8300,7 +8281,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 163,
+									"line": 190,
 									"character": 17
 								}
 							]
@@ -8327,7 +8308,7 @@
 							"kind": 2048,
 							"children": [
 								1844,
-								1860,
+								1858,
 								1846,
 								1828,
 								1823,
@@ -8336,15 +8317,14 @@
 								1850,
 								1835,
 								1821,
-								1866,
+								1864,
 								1831,
 								1825,
 								1852,
 								1854,
 								1842,
-								1856,
 								1838,
-								1858,
+								1856,
 								1840,
 								1807,
 								1788,
@@ -8373,7 +8353,7 @@
 					]
 				},
 				{
-					"id": 1875,
+					"id": 1873,
 					"name": "IndexedEventObject",
 					"kind": 256,
 					"kindString": "Interface",
@@ -8382,7 +8362,7 @@
 					},
 					"children": [
 						{
-							"id": 1877,
+							"id": 1875,
 							"name": "data",
 							"kind": 1024,
 							"kindString": "Property",
@@ -8392,28 +8372,28 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 640,
+									"line": 704,
 									"character": 8
 								}
 							],
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 1878,
+									"id": 1876,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"indexSignature": [
 										{
-											"id": 1879,
+											"id": 1877,
 											"name": "__index",
 											"kind": 8192,
 											"kindString": "Index signature",
 											"flags": {},
 											"parameters": [
 												{
-													"id": 1880,
+													"id": 1878,
 													"name": "data",
 													"kind": 32768,
 													"kindString": "Parameter",
@@ -8433,7 +8413,7 @@
 									"sources": [
 										{
 											"fileName": "event.ts",
-											"line": 640,
+											"line": 704,
 											"character": 9
 										}
 									]
@@ -8441,7 +8421,7 @@
 							}
 						},
 						{
-							"id": 1876,
+							"id": 1874,
 							"name": "index",
 							"kind": 1024,
 							"kindString": "Property",
@@ -8451,7 +8431,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 639,
+									"line": 703,
 									"character": 9
 								}
 							],
@@ -8466,21 +8446,21 @@
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1877,
-								1876
+								1875,
+								1874
 							]
 						}
 					],
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 638,
+							"line": 702,
 							"character": 35
 						}
 					]
 				},
 				{
-					"id": 1869,
+					"id": 1867,
 					"name": "TimeEventObject",
 					"kind": 256,
 					"kindString": "Interface",
@@ -8489,7 +8469,7 @@
 					},
 					"children": [
 						{
-							"id": 1871,
+							"id": 1869,
 							"name": "data",
 							"kind": 1024,
 							"kindString": "Property",
@@ -8499,28 +8479,28 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 622,
+									"line": 686,
 									"character": 8
 								}
 							],
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 1872,
+									"id": 1870,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"indexSignature": [
 										{
-											"id": 1873,
+											"id": 1871,
 											"name": "__index",
 											"kind": 8192,
 											"kindString": "Index signature",
 											"flags": {},
 											"parameters": [
 												{
-													"id": 1874,
+													"id": 1872,
 													"name": "data",
 													"kind": 32768,
 													"kindString": "Parameter",
@@ -8540,7 +8520,7 @@
 									"sources": [
 										{
 											"fileName": "event.ts",
-											"line": 622,
+											"line": 686,
 											"character": 9
 										}
 									]
@@ -8548,7 +8528,7 @@
 							}
 						},
 						{
-							"id": 1870,
+							"id": 1868,
 							"name": "time",
 							"kind": 1024,
 							"kindString": "Property",
@@ -8558,7 +8538,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 621,
+									"line": 685,
 									"character": 8
 								}
 							],
@@ -8573,21 +8553,21 @@
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1871,
-								1870
+								1869,
+								1868
 							]
 						}
 					],
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 620,
+							"line": 684,
 							"character": 32
 						}
 					]
 				},
 				{
-					"id": 1881,
+					"id": 1879,
 					"name": "TimeRangeEventObject",
 					"kind": 256,
 					"kindString": "Interface",
@@ -8596,7 +8576,7 @@
 					},
 					"children": [
 						{
-							"id": 1883,
+							"id": 1881,
 							"name": "data",
 							"kind": 1024,
 							"kindString": "Property",
@@ -8606,28 +8586,28 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 658,
+									"line": 722,
 									"character": 8
 								}
 							],
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 1884,
+									"id": 1882,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"indexSignature": [
 										{
-											"id": 1885,
+											"id": 1883,
 											"name": "__index",
 											"kind": 8192,
 											"kindString": "Index signature",
 											"flags": {},
 											"parameters": [
 												{
-													"id": 1886,
+													"id": 1884,
 													"name": "data",
 													"kind": 32768,
 													"kindString": "Parameter",
@@ -8647,7 +8627,7 @@
 									"sources": [
 										{
 											"fileName": "event.ts",
-											"line": 658,
+											"line": 722,
 											"character": 9
 										}
 									]
@@ -8655,7 +8635,7 @@
 							}
 						},
 						{
-							"id": 1882,
+							"id": 1880,
 							"name": "timerange",
 							"kind": 1024,
 							"kindString": "Property",
@@ -8665,7 +8645,7 @@
 							"sources": [
 								{
 									"fileName": "event.ts",
-									"line": 657,
+									"line": 721,
 									"character": 13
 								}
 							],
@@ -8683,35 +8663,35 @@
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1883,
-								1882
+								1881,
+								1880
 							]
 						}
 					],
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 656,
+							"line": 720,
 							"character": 37
 						}
 					]
 				},
 				{
-					"id": 1905,
+					"id": 1903,
 					"name": "event",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1906,
+							"id": 1904,
 							"name": "event",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"typeParameter": [
 								{
-									"id": 1907,
+									"id": 1905,
 									"name": "T",
 									"kind": 131072,
 									"kindString": "Type parameter",
@@ -8725,7 +8705,7 @@
 							],
 							"parameters": [
 								{
-									"id": 1908,
+									"id": 1906,
 									"name": "key",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8741,7 +8721,7 @@
 									}
 								},
 								{
-									"id": 1909,
+									"id": 1907,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8778,27 +8758,27 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 674,
+							"line": 738,
 							"character": 14
 						}
 					]
 				},
 				{
-					"id": 1893,
+					"id": 1891,
 					"name": "indexedEvent",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1894,
+							"id": 1892,
 							"name": "indexedEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1895,
+									"id": 1893,
 									"name": "arg",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8806,7 +8786,7 @@
 									"type": {
 										"type": "reference",
 										"name": "IndexedEventObject",
-										"id": 1875
+										"id": 1873
 									}
 								}
 							],
@@ -8824,14 +8804,14 @@
 							}
 						},
 						{
-							"id": 1896,
+							"id": 1894,
 							"name": "indexedEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1897,
+									"id": 1895,
 									"name": "idx",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8843,7 +8823,7 @@
 									}
 								},
 								{
-									"id": 1898,
+									"id": 1896,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8881,37 +8861,37 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 643,
+							"line": 707,
 							"character": 21
 						},
 						{
 							"fileName": "event.ts",
-							"line": 644,
+							"line": 708,
 							"character": 21
 						},
 						{
 							"fileName": "event.ts",
-							"line": 645,
+							"line": 709,
 							"character": 21
 						}
 					]
 				},
 				{
-					"id": 1887,
+					"id": 1885,
 					"name": "timeEvent",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1888,
+							"id": 1886,
 							"name": "timeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1889,
+									"id": 1887,
 									"name": "arg",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8919,7 +8899,7 @@
 									"type": {
 										"type": "reference",
 										"name": "TimeEventObject",
-										"id": 1869
+										"id": 1867
 									}
 								}
 							],
@@ -8937,14 +8917,14 @@
 							}
 						},
 						{
-							"id": 1890,
+							"id": 1888,
 							"name": "timeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1891,
+									"id": 1889,
 									"name": "t",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8956,7 +8936,7 @@
 									}
 								},
 								{
-									"id": 1892,
+									"id": 1890,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8994,37 +8974,37 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 625,
+							"line": 689,
 							"character": 18
 						},
 						{
 							"fileName": "event.ts",
-							"line": 626,
+							"line": 690,
 							"character": 18
 						},
 						{
 							"fileName": "event.ts",
-							"line": 627,
+							"line": 691,
 							"character": 18
 						}
 					]
 				},
 				{
-					"id": 1899,
+					"id": 1897,
 					"name": "timeRangeEvent",
 					"kind": 64,
 					"kindString": "Function",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 1900,
+							"id": 1898,
 							"name": "timeRangeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1901,
+									"id": 1899,
 									"name": "arg",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -9032,7 +9012,7 @@
 									"type": {
 										"type": "reference",
 										"name": "TimeRangeEventObject",
-										"id": 1881
+										"id": 1879
 									}
 								}
 							],
@@ -9050,14 +9030,14 @@
 							}
 						},
 						{
-							"id": 1902,
+							"id": 1900,
 							"name": "timeRangeEvent",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 1903,
+									"id": 1901,
 									"name": "idx",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -9069,7 +9049,7 @@
 									}
 								},
 								{
-									"id": 1904,
+									"id": 1902,
 									"name": "data",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -9107,17 +9087,17 @@
 					"sources": [
 						{
 							"fileName": "event.ts",
-							"line": 661,
+							"line": 725,
 							"character": 23
 						},
 						{
 							"fileName": "event.ts",
-							"line": 662,
+							"line": 726,
 							"character": 23
 						},
 						{
 							"fileName": "event.ts",
-							"line": 663,
+							"line": 727,
 							"character": 23
 						}
 					]
@@ -9135,19 +9115,19 @@
 					"title": "Interfaces",
 					"kind": 256,
 					"children": [
-						1875,
-						1869,
-						1881
+						1873,
+						1867,
+						1879
 					]
 				},
 				{
 					"title": "Functions",
 					"kind": 64,
 					"children": [
-						1905,
-						1893,
-						1887,
-						1899
+						1903,
+						1891,
+						1885,
+						1897
 					]
 				}
 			],
@@ -9160,7 +9140,7 @@
 			]
 		},
 		{
-			"id": 1938,
+			"id": 1936,
 			"name": "\"exports\"",
 			"kind": 1,
 			"kindString": "External module",
@@ -13669,7 +13649,7 @@
 						{
 							"type": "reference",
 							"name": "Align",
-							"id": 1911
+							"id": 1909
 						}
 					]
 				}
@@ -20142,7 +20122,7 @@
 							"type": {
 								"type": "reference",
 								"name": "Align",
-								"id": 1911,
+								"id": 1909,
 								"typeArguments": [
 									{
 										"type": "typeParameter",
@@ -40570,13 +40550,13 @@
 			"title": "External modules",
 			"kind": 1,
 			"children": [
-				1910,
+				1908,
 				1762,
 				1020,
 				1478,
 				15,
 				1764,
-				1938,
+				1936,
 				1030,
 				447,
 				1720,
