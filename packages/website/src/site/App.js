@@ -27,6 +27,7 @@ import TsType from "./api/Type";
 import TsEnum from "./api/Enum";
 import TsObject from "./api/Object";
 import TsFunction from "./api/Function";
+import TsFunctionList from "./api/FunctionList";
 import TsInterface from "./api/Interface";
 import TsMethod from "./api/Method";
 
@@ -90,6 +91,29 @@ function buildTypes(root) {
 
 buildTypes(docsJSON.children);
 
+const filterList = [
+    "keepMissing",
+    "ignoreMissing",
+    "zeroMissing",
+    "propagateMissing",
+    "noneIfEmpty"
+];
+
+const aggregationList = [
+    "avg",
+    "count",
+    "difference",
+    "first",
+    "keep",
+    "last",
+    "max",
+    "median",
+    "min",
+    "percentile",
+    "stdev",
+    "sum"
+];
+
 class ScrollToTop extends Component {
     componentDidUpdate(prevProps) {
         if (this.props.location !== prevProps.location) {
@@ -113,6 +137,26 @@ export default class extends Component {
                     <Main>
                         <Switch>
                             <Route exact path="/" component={Home} />
+                            <Route
+                                path={`/filters`}
+                                render={() => (
+                                    <TsFunctionList
+                                        list={filterList}
+                                        functions={docs.functions}
+                                        title="Filter functions"
+                                    />
+                                )}
+                            />
+                            <Route
+                                path={`/aggregation`}
+                                render={() => (
+                                    <TsFunctionList
+                                        list={aggregationList}
+                                        functions={docs.functions}
+                                        title="Aggregation functions"
+                                    />
+                                )}
+                            />
                             <Route
                                 path={`/module/:name`}
                                 render={() => <TsModule module={docs.modules[name]} />}

@@ -35,6 +35,18 @@ export default class extends Component {
                     marginTop: "auto"
                 }}
             >
+                <div style={sidebarTitleStyle}>FUNCTIONS</div>
+                <div key="filters" style={sidebarItemStyle}>
+                    <NavLink exact to={`/filters`} activeStyle={{ color: "steelblue" }}>
+                        Filters
+                    </NavLink>
+                </div>
+                <div key="agg" style={sidebarItemStyle}>
+                    <NavLink exact to={`/aggregation`} activeStyle={{ color: "steelblue" }}>
+                        Aggregators
+                    </NavLink>
+                </div>
+
                 <div style={sidebarTitleStyle}>CLASSES</div>
                 {_.map(classes, c => (
                     <div key={c.name} style={sidebarItemStyle}>

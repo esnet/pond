@@ -10,11 +10,17 @@
 
 import React, { Component } from "react";
 import logo from "./logo.png";
+import github from "./github.png";
 
 /* eslint-disable  jsx-a11y/href-no-hash */
 
 export default class Header extends Component {
     render() {
+        const githubLogoStyle = {
+            width: 24,
+            paddingRight: 5,
+            marginTop: -4
+        };
         return (
             <nav className="navbar navbar-fixed-top">
                 <div className="container-fluid">
@@ -22,7 +28,12 @@ export default class Header extends Component {
                         <div className="navbar-brand">
                             <span>
                                 <a href="/">
-                                    <img src={logo} alt="logo" height={60} />
+                                    <img
+                                        style={{ marginTop: -4 }}
+                                        src={logo}
+                                        alt="logo"
+                                        height={60}
+                                    />
                                 </a>
                             </span>
                             <span style={{ fontSize: 32, marginLeft: 10 }}>pond.js</span>
@@ -31,12 +42,13 @@ export default class Header extends Component {
                     <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul className="nav navbar-nav navbar-right tools-links">
                             <li>
-                                <a href="http://my.es.net" style={{ paddingTop: 8 }}>
-                                    ESnet Portal
+                                <a href="https://github.com/esnet/pond" style={{ paddingTop: 8 }}>
+                                    <img src={github} style={githubLogoStyle} alt="github" />
+                                    Github
                                 </a>
                             </li>
                             <li>
-                                <a className="selected" style={{ paddingTop: 8 }} href="#">
+                                <a href="http://software.es.net" style={{ paddingTop: 8 }}>
                                     Open Source
                                 </a>
                             </li>

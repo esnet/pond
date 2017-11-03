@@ -22,7 +22,8 @@ import { ReducerFunction, ValueListMap, ValueMap } from "./types";
 import util from "./util";
 
 /**
- * An Event is a mapping from a time based key to a Data object.
+ * An Event is a mapping from a time based key to a data object represented
+ * by an `Immutable.Map`.
  *
  * The key needs to be a sub-class of the base class `Key`, which typically
  * would be one of the following:
@@ -31,23 +32,33 @@ import util from "./util";
  *  * `TimeRange` - a timerange over which the Event took place
  *  * `Index` - a different representation of a TimeRange
  *
- * The data needs to be an Immutable.Map<string, any>.
+ * The data object needs to be an `Immutable.Map<string, any>`.
  *
  * To get values out of the data, use `get()`. This method takes
- * what is called a field, which is a top level key of the Data
- * Map.
+ * what is called a field, which is a top level key of the data
+ * map.
  *
  * Fields can refer to deep data with either a path (as an array)
- * or dot notation. Not specifying  a field implies a field of
- * name `"value""`.
+ * or dot notation ("path.to.value").
  *
  * Example:
  *
  * ```
  * const timestamp = time(new Date("2015-04-22T03:30:00Z");
- * const e = event(t, Immutable.Map({ humidity: 84.2 }));
+ * const e = event(t, Immutable.Map({ temperatuue: 75.2, humidity: 84 }));
+ * const humidity = e.get("humidity");  // 84
  * ```
  *
+ * There exists several static methods for `Event` that enable the
+ * ability to compare `Events`, `merge()` or `combine()` lists of `Event`s or
+ * check for duplicates.
+ *
+ * You can also do per-`Event` operations like `select()` out specific fields or
+ * `collapse()` multiple fields into one using an aggregation function.
+ *
+ * Note: Managing multiple `Event`s is typically done with a `Collection`
+ * which is literally a collections of `Event`s, or a `TimeSeries` which
+ * is an chronological set of `Event`s plus some additional meta data.
  */
 export class Event<T extends Key = Time> extends Base {
     /**
@@ -394,8 +405,6 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Construct a new `Event`.
-     *
      * Construction of an `Event` requires both a time-based key and an
      * `Immutable.Map` of (`string` -> data) mappings.
      *

@@ -13,25 +13,48 @@ import * as _ from "lodash";
 import { ReducerFunction } from "./types";
 import util from "./util";
 
-export class Functions {}
-
 //
 // Functions to process missing values out of a value list
 //
+
+/**
+ * A pass through filter, keeps the input values just as they were.
+ */
 const keepMissing = (values: number[]) => values;
+
+/**
+ * Filters out any missing values (`null`, `undefined` or `NaN`) from the input values
+ */
 const ignoreMissing = (values: number[]) => values.filter(util.isValid);
+
+/**
+ * Replaces any missing value (`null`, `undefined` or `NaN`) with the value `0`
+ */
 const zeroMissing = (values: number[]) => values.map(v => (util.isValid(v) ? v : 0));
+
+/**
+ * Scans the input values for missing values (`null`, `undefined` or `NaN`) and
+ * returns `null` if one or more exist, otherwise returns the original values. An
+ * example of doing this might be that you are summing values of events in
+ * an hour, but if you are missing any values you don't want do the sum at all,
+ * you want to say that for that hour the sum is unknown.
+ */
 const propagateMissing = (values: number[]) =>
     ignoreMissing(values).length === values.length ? values : null;
+
+/**
+ * If the input values are an empty array, return `null`, otherwise return
+ * the input values.
+ */
 const noneIfEmpty = (values: number[]) => (values.length === 0 ? null : values);
 
 /**
  * Like `first()` except it will return null if not all the values are
  * the same. This can be used to transfer a value when doing aggregation.
  *
- * For instance you might `group by` the 'type', then `avg` the 'value', but
- * you want to results to include the type. So you would `'keep'` the type
- * and `'avg'` the value.
+ * For instance you might "group by" the 'type', then `avg` the 'value', but
+ * you want to results to include the type. So you would `keep()` the type
+ * and `avg()` the value.
  */
 export function keep(clean = filter.ignoreMissing): ReducerFunction {
     return (values: number[]) => {
@@ -50,14 +73,23 @@ export function keep(clean = filter.ignoreMissing): ReducerFunction {
 }
 
 /**
- * Returns a `sum()` function.
+ * Returns a `sum()` function, i.e. returns a function that takes a list
+ * of values and returns their total.
+ *
+ * Example:
+ * ```
+ * import { sum } from "pondjs";
+ * const aggregationFunction = sum()
+ * const result = aggregationFunction([3, 5, 6]) // 14
+ * ```
  *
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the sum calculation. Other possibilities are:
- * * `propagateMissing` - which will cause the min itself to be null if the
- *                         values contain a missing value
- * * `zeroMissing` - will replace missing values with a zero
+ * * `propagateMissing` - which will cause the sum itself to be null if the
+ *                        values contain a missing value
+ * * `zeroMissing` - will replace missing values with a zero, which for a sum
+ *                   is the same as excluding those values
  */
 export function sum(clean = filter.ignoreMissing): ReducerFunction {
     return (values: number[]): number => {
@@ -70,14 +102,23 @@ export function sum(clean = filter.ignoreMissing): ReducerFunction {
 }
 
 /**
- * Returns an `avg()` function.
+ * Returns an `avg()` function. i.e. returns a function that takes a list
+ * of values and returns the average of those.
+ *
+ * Example:
+ * ```
+ * import { avg } from "pondjs";
+ * const aggregationFunction = avg()
+ * const result = aggregationFunction([3, 5, 6]) // ~4.66666
+ * ```
  *
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
  * the average calculation. Other possibilities are:
- * * `propagateMissing` - which will cause the avg itself to be null if the values
- *                         contain a missing value
- * * `zeroMissing` - will replace missing values with a zero
+ * * `propagateMissing` - which will cause the resulting average to be null if the values
+ *                        contain a missing value
+ * * `zeroMissing` - will replace missing values with a zero, thus missing values will bring
+ *                   the average down
  */
 export function avg(clean = filter.ignoreMissing): ReducerFunction {
     return (values: number[]): number => {
@@ -97,7 +138,8 @@ export function avg(clean = filter.ignoreMissing): ReducerFunction {
 }
 
 /**
- * Return a `max()` function.
+ * Return a `max()` function.  i.e. returns a function that takes a list
+ * of values and returns the average of those.
  *
  * Optionally you can specify the method by which unclean values
  * are treated. The default is to exclude missing values from
@@ -274,9 +316,9 @@ export enum InterpolationType {
  * Returns a `percentile` function within the a values list.
  *
  * The parameters controlling the function:
- *  * q -      The percentile (should be between 0 and 100), e.g q=75 for 75th percentile.
- *  * interp - Specifies the interpolation method to use when the desired
- *             quantile lies between two data points.
+ *  * `q` - The percentile (should be between 0 and 100), e.g q=75 for 75th percentile.
+ *  * `interp` - Specifies the interpolation method to use when the desired
+ *    quantile lies between two data points.
  *             Options are:
  *              * linear: i + (j - i) * fraction, where fraction is
  *                the fractional part of the index surrounded by i and j.
@@ -284,7 +326,7 @@ export enum InterpolationType {
  *              * higher: j.
  *              * nearest: i or j whichever is nearest.
  *              * midpoint: (i + j) / 2.
- *  * clean    Strategy to use when encountering missing data:
+ *  * `clean` - Strategy to use when encountering missing data:
  *              * `propagateMissing` - which will cause the min
  *                 itself to be null if the values contain a
  *                 missing value

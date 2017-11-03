@@ -10,18 +10,34 @@
 
 import React, { Component } from "react";
 import Markdown from "react-markdown";
+import Prism from "prismjs";
 
-import { headingStyle, textStyle, codeStyle } from "./styles";
+import { headingStyle, textStyle, sigStyle } from "./styles";
 import { codeRenderer } from "./renderers";
 
 export default class TsFunction extends Component {
+    componentDidMount() {
+        Prism.highlightAll();
+    }
+
+    componentDidUpdate() {
+        Prism.highlightAll();
+    }
+
     buildType(type) {
         if (type) {
-            const typeArgs = this.buildTypeArguments(type.typeArguments);
-            return `${type.name}${typeArgs}`;
+            if (type.typeArguments) {
+                const typeArgs = this.buildTypeArguments(type.typeArguments);
+                return `${type.name}${typeArgs}`;
+            } else if (type.elementType) {
+                console.log(" -- elemental", type.elementType);
+                return `${type.elementType.name}`;
+            }
         }
     }
+
     buildTypeArguments(typeArguments, unionTypes = null) {
+        console.log("  built type", typeArguments);
         if (typeArguments) {
             const typeArgs = typeArguments.map(t => {
                 return this.buildType(t);
@@ -52,10 +68,12 @@ export default class TsFunction extends Component {
                   let paramTypeName = paramType.name;
                   const isArray = paramType.isArray;
                   const isOptional = param.flags.isOptional;
+                  console.log("param type args", paramType);
                   const typeArgs = this.buildTypeArguments(
                       paramType.typeArguments,
                       paramType.types
                   );
+
                   const defaultValue = param.defaultValue;
                   if (paramTypeName === "(Anonymous function)") {
                       paramTypeName = defaultValue;
@@ -69,21 +87,28 @@ export default class TsFunction extends Component {
     buildReturnType(signature) {
         if (signature.type) {
             const typeName = this.buildType(signature.type);
-            const isArray = signature.type.isArray;
+            let isArray = false;
+            if (signature.type.isArray !== undefined) {
+                isArray = signature.type.isArray;
+            } else if (signature.type.elementType) {
+                isArray = signature.type.type === "array";
+            }
             return `${typeName}${isArray ? "[]" : ""}`;
         } else {
             return "";
         }
     }
-    buildSignatures(signatures) {
-        const methodSignatures = signatures.map(signature => {
+    buildFunctionSignatures(signatures) {
+        const methodSignatures = signatures.map((signature, i) => {
             const parameters = signature.parameters;
             const paramList = this.buildParamList(parameters);
             const returnType = this.buildReturnType(signature);
             const output = `${signature.name}(${paramList.join(", ")}): ${returnType}`;
             return (
-                <div>
-                    <span>{output}</span>
+                <div key={i} style={{ marginTop: 15 }}>
+                    <pre style={sigStyle}>
+                        <code className="language-typescript">{output}</code>
+                    </pre>
                 </div>
             );
         });
@@ -115,14 +140,14 @@ export default class TsFunction extends Component {
     }
     render() {
         const { name, signatures } = this.props.function;
-        const methodSignatures = this.buildSignatures(signatures);
+        const functionSignatureList = this.buildFunctionSignatures(signatures);
         return (
             <div style={{ marginBottom: 20 }}>
                 <h2 style={headingStyle}>
                     <a id={name}>{name}()</a>
                 </h2>
                 <div style={textStyle}>{this.renderShortComment(signatures)}</div>
-                <code style={codeStyle}>{methodSignatures}</code>
+                <div>{functionSignatureList}</div>
                 <div style={textStyle}>{this.renderDiscussion(signatures)}</div>
             </div>
         );
