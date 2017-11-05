@@ -13,9 +13,8 @@ html {
 }
 
 body {
-    padding-top: 85px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 0;
+    margin: 0;
 }
 
 h2 {

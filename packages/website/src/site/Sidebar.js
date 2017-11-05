@@ -16,6 +16,18 @@ import { sidebarTitleStyle, sidebarItemStyle } from "./api/styles";
 
 export default class extends Component {
     render() {
+        const sidebarStyle = {
+            flex: "0 0 12em",
+            background: "#FEFEFE",
+            color: "#4183C4",
+            textDecoration: "none"
+        };
+        const activeStyle = {
+            color: "black",
+            fontWeight: 800,
+            textDecoration: "none"
+        };
+
         const filter = this.props.filter || "";
         const classes = _.sortBy(
             _.filter(this.props.docs.classes, c => !c.flags.isPrivate && c.name.includes(filter)),
@@ -23,26 +35,15 @@ export default class extends Component {
         );
         const interfaces = _.filter(this.props.docs.interfaces, c => !c.flags.isPrivate);
         return (
-            <div
-                style={{
-                    position: "absolute",
-                    top: 80,
-                    left: 0,
-                    width: "21vw",
-                    height: "100vh",
-                    overflow: "auto",
-                    background: "#eee",
-                    marginTop: "auto"
-                }}
-            >
+            <div style={sidebarStyle}>
                 <div style={sidebarTitleStyle}>FUNCTIONS</div>
                 <div key="filters" style={sidebarItemStyle}>
-                    <NavLink exact to={`/filters`} activeStyle={{ color: "steelblue" }}>
+                    <NavLink exact to={`/filters`} activeStyle={activeStyle}>
                         Filters
                     </NavLink>
                 </div>
                 <div key="agg" style={sidebarItemStyle}>
-                    <NavLink exact to={`/aggregation`} activeStyle={{ color: "steelblue" }}>
+                    <NavLink exact to={`/aggregation`} activeStyle={activeStyle}>
                         Aggregators
                     </NavLink>
                 </div>
@@ -53,7 +54,7 @@ export default class extends Component {
                         <NavLink
                             exact
                             to={`/class/${c.name.toLowerCase()}`}
-                            activeStyle={{ color: "steelblue" }}
+                            activeStyle={activeStyle}
                         >
                             {c.name}
                         </NavLink>
@@ -65,7 +66,7 @@ export default class extends Component {
                         <NavLink
                             exact
                             to={`/interface/${c.name.toLowerCase()}`}
-                            activeStyle={{ color: "steelblue" }}
+                            activeStyle={activeStyle}
                         >
                             {c.name}
                         </NavLink>

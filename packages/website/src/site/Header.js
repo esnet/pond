@@ -16,6 +16,14 @@ import github from "./github.png";
 
 export default class Header extends Component {
     render() {
+        const headerStyle = {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 100,
+            background: "#DDD"
+        };
         const githubLogoStyle = {
             width: 24,
             paddingRight: 5,
@@ -39,7 +47,7 @@ export default class Header extends Component {
                             <span style={{ fontSize: 32, marginLeft: 10 }}>pond.js</span>
                         </div>
                     </div>
-                    <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <div>
                         <ul className="nav navbar-nav navbar-right tools-links">
                             <li>
                                 <a href="https://github.com/esnet/pond" style={{ paddingTop: 8 }}>

@@ -13744,7 +13744,8 @@
 						"isExported": true
 					},
 					"comment": {
-						"shortText": "A `Processor` to align the data into bins of regular time period."
+						"shortText": "A `Processor` to take the derivative of the incoming `Event`s\nfor the given fields. The resulting output `Event`s will contain\nper second values.",
+						"text": "Optionally you can substitute in `null` values if the rate is negative.\nThis is useful when a negative rate would be considered invalid like an\never increasing counter.\n\nTo control the rate calculation you need to specify a `RateOptions` object\nin the constuctor, which takes the following form:\n```\n{\n    fieldSpec: string | string[];\n    allowNegative?: boolean;\n}\n```\nOptions:\n * `fieldSpec` - the field to calculate the rate on\n * `allowNegative` - allow emit of negative rates\n"
 					},
 					"typeParameter": [
 						{
@@ -13800,7 +13801,7 @@
 							"sources": [
 								{
 									"fileName": "rate.ts",
-									"line": 33,
+									"line": 51,
 									"character": 32
 								}
 							]
@@ -13817,7 +13818,7 @@
 							"sources": [
 								{
 									"fileName": "rate.ts",
-									"line": 31,
+									"line": 49,
 									"character": 26
 								}
 							],
@@ -13838,7 +13839,7 @@
 							"sources": [
 								{
 									"fileName": "rate.ts",
-									"line": 30,
+									"line": 48,
 									"character": 22
 								}
 							],
@@ -13862,7 +13863,7 @@
 							"sources": [
 								{
 									"fileName": "rate.ts",
-									"line": 33,
+									"line": 51,
 									"character": 21
 								}
 							],
@@ -13954,7 +13955,7 @@
 							"sources": [
 								{
 									"fileName": "rate.ts",
-									"line": 88,
+									"line": 106,
 									"character": 12
 								}
 							],
@@ -14012,7 +14013,7 @@
 							"sources": [
 								{
 									"fileName": "rate.ts",
-									"line": 51,
+									"line": 69,
 									"character": 11
 								}
 							]
@@ -14047,7 +14048,7 @@
 					"sources": [
 						{
 							"fileName": "rate.ts",
-							"line": 28,
+							"line": 46,
 							"character": 17
 						}
 					],

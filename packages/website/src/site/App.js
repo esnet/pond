@@ -20,6 +20,7 @@ import "prismjs/themes/prism.css";
 import Home, { Root, Main } from "./Home";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import ScrollToTop from "./ScrollToTop";
 
 import TsModule from "./api/Module";
 import TsClass from "./api/Class";
@@ -114,112 +115,230 @@ const aggregationList = [
     "sum"
 ];
 
-class ScrollToTop extends Component {
-    componentDidUpdate(prevProps) {
-        if (this.props.location !== prevProps.location) {
-            window.scrollTo(0, 0);
-        }
-    }
-
-    render() {
-        return this.props.children;
-    }
-}
-
 export default class extends Component {
     render() {
         const { name } = docs;
+        const bodyStyle = {
+            marginTop: 100,
+            display: "flex",
+            minHeight: "100vh",
+            flexDirection: "column"
+        };
+        const mainStyle = {
+            display: "flex",
+            flex: 1,
+            marginLeft: 20
+        };
+
+        const footerStyle = {
+            flex: "none",
+            height: 10,
+            background: "#DDD"
+        };
+        const contentStyle = {
+            flex: 1
+        };
+
         return (
             <Router>
-                <Root>
+                <div style={bodyStyle}>
                     <Header />
-                    <Sidebar docs={docs} />
-                    <Main>
-                        <Switch>
-                            <Route exact path="/" component={Home} />
-                            <Route
-                                path={`/filters`}
-                                render={() => (
-                                    <TsFunctionList
-                                        list={filterList}
-                                        functions={docs.functions}
-                                        title="Filter functions"
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={`/aggregation`}
-                                render={() => (
-                                    <TsFunctionList
-                                        list={aggregationList}
-                                        functions={docs.functions}
-                                        title="Aggregation functions"
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={`/module/:name`}
-                                render={() => <TsModule module={docs.modules[name]} />}
-                            />
-                            <Route
-                                path={`/class/:name`}
-                                render={props => (
-                                    <ScrollToTop key={props.match.params.name}>
-                                        <TsClass
-                                            class={docs.classes[props.match.params.name]}
-                                            lookups={docs}
+                    <div style={mainStyle}>
+                        <div style={contentStyle}>
+                            {" "}
+                            <Switch>
+                                <Route exact path="/" component={Home} />
+                                <Route
+                                    path={`/filters`}
+                                    render={() => (
+                                        <ScrollToTop>
+                                            <TsFunctionList
+                                                list={filterList}
+                                                functions={docs.functions}
+                                                title="Filter functions"
+                                            />
+                                        </ScrollToTop>
+                                    )}
+                                />
+                                <Route
+                                    path={`/aggregation`}
+                                    render={() => (
+                                        <ScrollToTop>
+                                            <TsFunctionList
+                                                list={aggregationList}
+                                                functions={docs.functions}
+                                                title="Aggregation functions"
+                                            />
+                                        </ScrollToTop>
+                                    )}
+                                />
+                                <Route
+                                    path={`/module/:name`}
+                                    render={() => <TsModule module={docs.modules[name]} />}
+                                />
+                                <Route
+                                    path={`/class/:name`}
+                                    render={props => (
+                                        <ScrollToTop key={props.match.params.name}>
+                                            <TsClass
+                                                class={docs.classes[props.match.params.name]}
+                                                lookups={docs}
+                                            />
+                                        </ScrollToTop>
+                                    )}
+                                />
+                                <Route
+                                    path={`/function/:name`}
+                                    render={props => (
+                                        <TsFunction
+                                            function={docs.function[props.match.params.name]}
                                         />
-                                    </ScrollToTop>
-                                )}
-                            />
-                            <Route
-                                path={`/function/:name`}
-                                render={props => (
-                                    <TsFunction function={docs.function[props.match.params.name]} />
-                                )}
-                            />
-                            <Route
-                                path={`/method/:name`}
-                                render={props => (
-                                    <TsMethod method={docs.methods[props.match.params.name]} />
-                                )}
-                            />
-                            <Route
-                                path={`/interface/:name`}
-                                render={props => (
-                                    <TsInterface
-                                        interface={docs.interfaces[props.match.params.name]}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={`/enum/:name`}
-                                render={props => (
-                                    <TsEnum enum={docs.enums[props.match.params.name]} />
-                                )}
-                            />
-                            <Route
-                                path={`/type/:name`}
-                                render={props => (
-                                    <TsObject object={docs.types[props.match.params.name]} />
-                                )}
-                            />
-                            <Route
-                                path={`/object/:name`}
-                                render={props => (
-                                    <TsObject object={docs.objects[props.match.params.name]} />
-                                )}
-                            />
-                            <Route
-                                path={`/type/:name`}
-                                render={props => (
-                                    <TsType type={docs.types[props.match.params.name]} />
-                                )}
-                            />
-                        </Switch>
-                    </Main>
-                </Root>
+                                    )}
+                                />
+                                <Route
+                                    path={`/method/:name`}
+                                    render={props => (
+                                        <TsMethod method={docs.methods[props.match.params.name]} />
+                                    )}
+                                />
+                                <Route
+                                    path={`/interface/:name`}
+                                    render={props => (
+                                        <ScrollToTop>
+                                            <TsInterface
+                                                interface={docs.interfaces[props.match.params.name]}
+                                            />
+                                        </ScrollToTop>
+                                    )}
+                                />
+                                <Route
+                                    path={`/enum/:name`}
+                                    render={props => (
+                                        <TsEnum enum={docs.enums[props.match.params.name]} />
+                                    )}
+                                />
+                                <Route
+                                    path={`/type/:name`}
+                                    render={props => (
+                                        <TsObject object={docs.types[props.match.params.name]} />
+                                    )}
+                                />
+                                <Route
+                                    path={`/object/:name`}
+                                    render={props => (
+                                        <TsObject object={docs.objects[props.match.params.name]} />
+                                    )}
+                                />
+                                <Route
+                                    path={`/type/:name`}
+                                    render={props => (
+                                        <TsType type={docs.types[props.match.params.name]} />
+                                    )}
+                                />
+                            </Switch>
+                        </div>
+                        <Sidebar docs={docs} />
+                    </div>
+                    <div style={footerStyle}>…</div>
+                </div>
             </Router>
         );
     }
+}
+
+{
+    /* <div style={bodyStyle}>
+<Header />
+<div style={{ background: "#abb", width: "100%" }}>
+    <Sidebar docs={docs} />
+    <Main>
+        <Switch>
+            <Route exact path="/" component={Home} />
+            <Route
+                path={`/filters`}
+                render={() => (
+                    <TsFunctionList
+                        list={filterList}
+                        functions={docs.functions}
+                        title="Filter functions"
+                    />
+                )}
+            />
+            <Route
+                path={`/aggregation`}
+                render={() => (
+                    <ScrollToTop>
+                        <TsFunctionList
+                            list={aggregationList}
+                            functions={docs.functions}
+                            title="Aggregation functions"
+                        />
+                    </ScrollToTop>
+                )}
+            />
+            <Route
+                path={`/module/:name`}
+                render={() => <TsModule module={docs.modules[name]} />}
+            />
+            <Route
+                path={`/class/:name`}
+                render={props => (
+                    <ScrollToTop key={props.match.params.name}>
+                        <TsClass
+                            class={docs.classes[props.match.params.name]}
+                            lookups={docs}
+                        />
+                    </ScrollToTop>
+                )}
+            />
+            <Route
+                path={`/function/:name`}
+                render={props => (
+                    <TsFunction
+                        function={docs.function[props.match.params.name]}
+                    />
+                )}
+            />
+            <Route
+                path={`/method/:name`}
+                render={props => (
+                    <TsMethod method={docs.methods[props.match.params.name]} />
+                )}
+            />
+            <Route
+                path={`/interface/:name`}
+                render={props => (
+                    <TsInterface
+                        interface={docs.interfaces[props.match.params.name]}
+                    />
+                )}
+            />
+            <Route
+                path={`/enum/:name`}
+                render={props => (
+                    <TsEnum enum={docs.enums[props.match.params.name]} />
+                )}
+            />
+            <Route
+                path={`/type/:name`}
+                render={props => (
+                    <TsObject object={docs.types[props.match.params.name]} />
+                )}
+            />
+            <Route
+                path={`/object/:name`}
+                render={props => (
+                    <TsObject object={docs.objects[props.match.params.name]} />
+                )}
+            />
+            <Route
+                path={`/type/:name`}
+                render={props => (
+                    <TsType type={docs.types[props.match.params.name]} />
+                )}
+            />
+        </Switch>
+    </Main>
+</div>
+</div> */
 }
