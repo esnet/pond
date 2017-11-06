@@ -18,6 +18,7 @@ import "prismjs/components/prism-typescript";
 import "prismjs/themes/prism.css";
 
 import Home, { Root, Main } from "./Home";
+import Guide from "./Guide";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import ScrollToTop from "./ScrollToTop";
@@ -127,7 +128,8 @@ export default class extends Component {
         const mainStyle = {
             display: "flex",
             flex: 1,
-            marginLeft: 20
+            marginLeft: 20,
+            marginRight: 40
         };
 
         const footerStyle = {
@@ -147,7 +149,7 @@ export default class extends Component {
                         <div style={contentStyle}>
                             {" "}
                             <Switch>
-                                <Route exact path="/" component={Home} />
+                                <Route exact path="/" component={Guide} />
                                 <Route
                                     path={`/filters`}
                                     render={() => (

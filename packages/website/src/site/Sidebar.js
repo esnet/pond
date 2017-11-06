@@ -20,11 +20,13 @@ export default class extends Component {
             flex: "0 0 12em",
             background: "#FEFEFE",
             color: "#4183C4",
-            textDecoration: "none"
+            textDecoration: "none",
+            borderLeftStyle: "solid",
+            borderLeftColor: "#64b2c5",
+            marginLeft: 40
         };
         const activeStyle = {
             color: "black",
-            fontWeight: 800,
             textDecoration: "none"
         };
 
@@ -36,6 +38,11 @@ export default class extends Component {
         const interfaces = _.filter(this.props.docs.interfaces, c => !c.flags.isPrivate);
         return (
             <div style={sidebarStyle}>
+                <div key="intro" style={sidebarItemStyle}>
+                    <NavLink exact to={`/`} activeStyle={activeStyle}>
+                        Introduction
+                    </NavLink>
+                </div>
                 <div style={sidebarTitleStyle}>FUNCTIONS</div>
                 <div key="filters" style={sidebarItemStyle}>
                     <NavLink exact to={`/filters`} activeStyle={activeStyle}>
@@ -60,7 +67,7 @@ export default class extends Component {
                         </NavLink>
                     </div>
                 ))}
-                <div style={sidebarTitleStyle}>INTERFACES</div>
+                {/* <div style={sidebarTitleStyle}>INTERFACES</div>
                 {_.map(interfaces, c => (
                     <div key={c.name} style={sidebarItemStyle}>
                         <NavLink
@@ -71,7 +78,7 @@ export default class extends Component {
                             {c.name}
                         </NavLink>
                     </div>
-                ))}
+                ))} */}
             </div>
         );
     }
