@@ -23,6 +23,10 @@ h2 {
     color: #333;
 }
 
+h4 {
+    padding-top: 20px;
+}
+
 /* react-select dropdown conflicts with Bootstrap controls */
 
 .list-group-item.active,

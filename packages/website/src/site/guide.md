@@ -28,7 +28,7 @@ Pond.js was built to address these pain points.
 ---
 ## API
 
-### Time
+#### [Time](./class/time)
 
 As this is a TimeSeries abstraction library, time is fundamental to all parts of the library. We represent `Time` as a type in the Typescript version of the library, but in fact it is a light weight wrapper over the milliseconds since the epoch. As a convenience, certain parts of the library will also accept or return a standard Javascript `Date` object.
 
@@ -40,7 +40,7 @@ const now = time(new Date())
 
 You can also construct a `Time` in a number of different ways and convert the time to a string in either UTC or local time, or several other convenience methods. `Time` is a subclass of a `Key`, meaning it can be combined with a data object to form an event `Event<Time>`.
 
-### TimeRange
+#### [TimeRange](./class/timerange)
 
 Sometimes we also want to express a range of time. For a basic expression of this, we use a `TimeRange`. This is simply a begin and end time, but comes with many handy methods for display and comparison.
 
@@ -54,60 +54,176 @@ range1.overlaps(range2)  // boolean
 
 `TimeRange` is also a subclass of `Key`, so it can be associated with data to form an `Event<TimeRange>`. Hence you can express an event that occurs over a period of time (like a network outage).
 
-### Index
+#### [Index](./class/index)
 
-A time range denoted by a string, for example "5m-1234" is a specific 5 minute time range, or "2014-09" is September 2014
+An alternative time range denoted by a string, for example "5m-4135541" is a specific 5 minute time range,
+or "2014-09" is September 2014.
 
-### Period
+```js
+const i = index("5m-4135541");
+i.asTimerange(); // Sat, 25 Apr 2009 12:25:00 GMT, Sat, 25 Apr 2009 12:30:00 GMT
+```
+
+You can aggregate a `TimeSeries` by a duration like "5m" to build a new `TimeSeries` of
+`Event<Index>`s. An `Index`'s string is also a good caching key in some use cases.
+
+#### [Duration](./class/duration)
+
+A length of time, with no particular anchor in history, used to specify `Period` frequencies
+and `Window` durations.
+
+```js
+const d = duration(5, "minutes");
+```
+
+#### [Period](./class/period)
 
 A `Period` is a way to represent a repeating time, such as every 2 hours. Generally a `Period` is used to construct a reoccurring window, which in Pond is a `Window`. A `Period` specifies a `frequency` (or the length of time between repeats) and an `offset` (which offsets the beginning of the period by a duration).
 
-```typescript
+```js
 const p = period(duration("5m"))  // 5m, 10m, 15m, ...
 ```
+#### [Window](./class/window)
 
-### Duration
-
-A length of time, with no particular anchor
-
-### Window
-
-A reoccurring duration of time, such as a one hour window, incrementing forward in time every 5 min
-
-### Event\<K\>
-
-A key of type T, which could be Time, TimeRange or Index, and a data object packaged together.
-
-### Collection\<K\>
-
-A bag of events `Event<K>`, with a comprehensive set of methods for operating on those events.
-
-### TimeSeries\<K\>
-
-A sorted `Collection<K>` of events `Event<K>` and associated meta data
+A reoccurring duration of time, such as a 15 minute window, incrementing forward in time every 5 min,
+offset to align with a particular time. A `Window` is typically used for time range based grouping of
+`Event`s for performing aggregations within a `TimeSeries` or `Event` streams.
 
 ```js
-timeseries.avg("sensor");
+const fifteenMinuteSliding = window(duration("15m"))
+    .every(duration("5m"))
+    .offsetBy(time("2017-07-21T09:33:00.000Z"));
 ```
 
-Or quickly performing aggregations on a timeseries:
+#### [Event](./class/event)
+
+A key of a type that extends `Key`, which could be a `Time`, `TimeRange` or `Index`, and a data object
+expressed as an `Immutable.Map` packaged together. `Event`s may signify a particular measurement or
+metric, taken at a time, or over a time range. A `Collection` is used to hold many `Event`s, while
+a `TimeSeries` holds many `Event`s, ordered by time, along with associated meta data.
 
 ```js
-const dailyAvg = timeseries.fixedWindowRollup({
-    window: everyDay,
-    aggregation: { dailyAvg: ["sensor", avg()] }
+    const e = event(time(new Date(1487983075328)), Immutable.Map({ sensor: 3 }));
+```
+
+#### [Collection](./class/collection)
+
+A bag of `Event`s, with a comprehensive set of methods for operating on those events. A
+`Collection` underpins a `TimeSeries` as well as grouped and windowed processing within
+streams.
+
+```
+const c = collection(
+    Immutable.List([
+        event(time("2015-04-22T03:30:00Z"), Immutable.Map({ a: 5, b: 6 })),
+        event(time("2015-04-22T02:30:00Z"), Immutable.Map({ a: 4, b: 2 }))
+    ])
+);
+c.size();  // 2
+```
+
+Using `.groupBy` you can create a [`GroupedCollection`](./class/groupedcollection), while
+using `.window()` you can create a [`WindowedCollection`](./class/windowedcollection). Both
+give a you a mapping between grouping and `Collection`s.
+
+#### [TimeSeries](./class/timeseries)
+
+The heart of the library, a TimeSeries is a sorted `Collection<K>` of events `Event<K>` and associated meta data. One is constructed either with a list of `Event`s, or with a JSON object:
+
+```
+const series = timeSeries({
+    name: "data",
+    columns: ["time", "sensor"],
+    points: [
+        [1400425947000, 52],
+        [1400425948000, 18],
+        [1400425949000, 26],
+        [1400425950000, 93],
+        ...
+    ]
 });
 ```
 
-### Streaming
+Once established a wide range of operations can be performed on the series, from the simple:
 
-Stream style processing of events to build more complex processing operations, either on incoming real-time data. Supports remapping, filtering, windowing and aggregation.
+```js
+series.avg("sensor");  // returns the average of the sensor column values
+```
+
+to performing time-based aggregations:
+
+```js
+const dailyAvg = series.fixedWindowRollup({
+    window: everyDay,
+    aggregation: { dailyAvg: ["sensor", avg()] }
+}); // returns avg for every day of sensor values
+```
+
+As well as ways to split, combine and merge multiple `TimeSeries` in different ways.
+
+```js
+const mergedSeries = TimeSeries.timeSeriesListMerge({
+    name: "traffic",
+    seriesList: [inSeries, outSeries]
+});
+```
+
+#### [Aggregation Functions](./aggregation)
+
+One of the most useful capabilities of the library is the ability to perform aggregations,
+such as doing roll-ups using some window, or combining columns of a `TimeSeries` into a
+single columns using some function. Many of the most common aggregation functions, such
+as avg(), max(), min() are provided for this purpose. Each is a function that takes the
+function's options and returns the function that provides the aggregation. 
+
+One option is a [filter function](./filters) function which can be used to clean data on
+the fly so that aggregation functions do not fail for messy data sets (such as containing
+null or NaN values).
+
+#### Streaming
+
+Stream style processing of events to build more complex processing operations, either on incoming
+real-time data. Supports remapping, filtering, windowing and aggregation. It is designed to
+relatively light weight handling of incoming events. The current version of the streaming code
+no longer supports grouping as generally this should be handled outside of Pond by creating
+multiple streams. Still, the functionality provided here can be useful in many circumstances, such
+as when sending events directly to a browser:
+
+```typescript
+const result = {};
+const slidingWindow = window(duration("3m"), period(duration("1m")));
+const fixedHourlyWindow = window(duration("1h"));
+
+const source = stream()
+    .groupByWindow({
+        window: slidingWindow,
+        trigger: Trigger.onDiscardedWindow
+    })
+    .aggregate({
+        in_avg: ["in", avg()],
+        out_avg: ["out", avg()],
+        count: ["in", count()]
+    })
+    .map(e => new Event<Time>(time(e.timerange().end()), e.getData()))
+    .groupByWindow({
+        window: fixedHourlyWindow,
+        trigger: Trigger.perEvent
+    })
+    .output((col, key) => {
+        result[key] = col as Collection<Time>;
+        calls += 1;
+    });
+
+source.addEvent(e1)
+source.addEvent(e2)
+...
+```
 
 ---
 ## Typescript
 
 This library, as of 1.0 alpha, is now written entirely in Typescript. As a result, we recommend that it
-is used in a Typescipt application for full enjoyment of the type strictness it provides. However,
+is used in a Typescript application for full enjoyment of the type strictness it provides. However,
 that is not a requirement.
 
 Documentation is generated from the Typescript definitions and so will provide type information. While

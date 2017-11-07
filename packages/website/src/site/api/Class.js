@@ -107,7 +107,12 @@ export default class TsClass extends Component {
             });
             const groups = this.props.class.groups.map((group, i) => {
                 const groupEntities = group.children.map((entity, j) => {
-                    return <div key={j}>{this.renderEntity(entityMap[entity])}</div>;
+                    const ee = entityMap[entity];
+                    if (!ee.flags.isPrivate) {
+                        return <div key={j}>{this.renderEntity(entityMap[entity])}</div>;
+                    } else {
+                        return <div key={j} />;
+                    }
                 });
                 if (group.title === "Constructors") {
                     const factoryLookup = `${this.props.class.name}Factory`.toLocaleLowerCase();

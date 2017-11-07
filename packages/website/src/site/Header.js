@@ -16,14 +16,6 @@ import github from "./github.png";
 
 export default class Header extends Component {
     render() {
-        const headerStyle = {
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 100,
-            background: "#DDD"
-        };
         const githubLogoStyle = {
             width: 24,
             paddingRight: 5,

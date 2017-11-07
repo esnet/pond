@@ -216,13 +216,13 @@ export { timeSeries, indexedSeries, timeRangeSeries };
  *
  * ```javascript
  * const data = {
- *     name: "trafficc",
- *     columns: ["time", "value"],
+ *     name: "traffic",
+ *     columns: ["time", "in", "out"],
  *     points: [
- *         [1400425947000, 52],
- *         [1400425948000, 18],
- *         [1400425949000, 26],
- *         [1400425950000, 93],
+ *         [1400425947000, 52, 11],
+ *         [1400425948000, 18, 45],
+ *         [1400425949000, 26, 22],
+ *         [1400425950000, 93, 10],
  *         ...
  *     ]
  * };
@@ -279,7 +279,7 @@ export { timeSeries, indexedSeries, timeRangeSeries };
  * example where each value is itself an object with "in" and "out" keys:
  *
  * ```javascript
- * const series = new TimeSeries({
+ * const series = timeSeries({
  *     name: "Map Traffic",
  *     columns: ["time", "NASA_north", "NASA_south"],
  *     points: [

@@ -17,7 +17,6 @@ import Prism from "prismjs"; // eslint-disable-line
 import "prismjs/components/prism-typescript";
 import "prismjs/themes/prism.css";
 
-import Home, { Root, Main } from "./Home";
 import Guide from "./Guide";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
@@ -246,101 +245,4 @@ export default class extends Component {
             </Router>
         );
     }
-}
-
-{
-    /* <div style={bodyStyle}>
-<Header />
-<div style={{ background: "#abb", width: "100%" }}>
-    <Sidebar docs={docs} />
-    <Main>
-        <Switch>
-            <Route exact path="/" component={Home} />
-            <Route
-                path={`/filters`}
-                render={() => (
-                    <TsFunctionList
-                        list={filterList}
-                        functions={docs.functions}
-                        title="Filter functions"
-                    />
-                )}
-            />
-            <Route
-                path={`/aggregation`}
-                render={() => (
-                    <ScrollToTop>
-                        <TsFunctionList
-                            list={aggregationList}
-                            functions={docs.functions}
-                            title="Aggregation functions"
-                        />
-                    </ScrollToTop>
-                )}
-            />
-            <Route
-                path={`/module/:name`}
-                render={() => <TsModule module={docs.modules[name]} />}
-            />
-            <Route
-                path={`/class/:name`}
-                render={props => (
-                    <ScrollToTop key={props.match.params.name}>
-                        <TsClass
-                            class={docs.classes[props.match.params.name]}
-                            lookups={docs}
-                        />
-                    </ScrollToTop>
-                )}
-            />
-            <Route
-                path={`/function/:name`}
-                render={props => (
-                    <TsFunction
-                        function={docs.function[props.match.params.name]}
-                    />
-                )}
-            />
-            <Route
-                path={`/method/:name`}
-                render={props => (
-                    <TsMethod method={docs.methods[props.match.params.name]} />
-                )}
-            />
-            <Route
-                path={`/interface/:name`}
-                render={props => (
-                    <TsInterface
-                        interface={docs.interfaces[props.match.params.name]}
-                    />
-                )}
-            />
-            <Route
-                path={`/enum/:name`}
-                render={props => (
-                    <TsEnum enum={docs.enums[props.match.params.name]} />
-                )}
-            />
-            <Route
-                path={`/type/:name`}
-                render={props => (
-                    <TsObject object={docs.types[props.match.params.name]} />
-                )}
-            />
-            <Route
-                path={`/object/:name`}
-                render={props => (
-                    <TsObject object={docs.objects[props.match.params.name]} />
-                )}
-            />
-            <Route
-                path={`/type/:name`}
-                render={props => (
-                    <TsType type={docs.types[props.match.params.name]} />
-                )}
-            />
-        </Switch>
-    </Main>
-</div>
-</div> */
 }

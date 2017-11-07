@@ -8,19 +8,20 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { Component } from "react";
 import Markdown from "react-markdown";
 import markdownFile from "./guide.md";
 import Prism from "prismjs";
-import { codeStyle } from "./api/styles";
 import { codeRenderer, codeBlockRenderer } from "./api/renderers";
 
-export default React.createClass({
-    getInitialState() {
-        return {
+export default class extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
             markdown: null
         };
-    },
+    }
+
     componentDidMount() {
         window.scrollTo(0, 0);
         Prism.highlightAll();
@@ -32,7 +33,8 @@ export default React.createClass({
                 this.setState({ markdown });
             });
         this.setState({ markdown: null });
-    },
+    }
+
     componentWillReceiveProps(nextProps) {
         window.scrollTo(0, 0);
         fetch(markdownFile)
@@ -43,10 +45,12 @@ export default React.createClass({
                 this.setState({ markdown });
             });
         this.setState({ markdown: null });
-    },
+    }
+
     componentDidUpdate() {
         Prism.highlightAll();
-    },
+    }
+
     render() {
         if (this.state.markdown !== null) {
             return (
@@ -69,4 +73,4 @@ export default React.createClass({
             );
         }
     }
-});
+}

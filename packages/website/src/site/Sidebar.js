@@ -35,7 +35,7 @@ export default class extends Component {
             _.filter(this.props.docs.classes, c => !c.flags.isPrivate && c.name.includes(filter)),
             c => c.name
         );
-        const interfaces = _.filter(this.props.docs.interfaces, c => !c.flags.isPrivate);
+        // const interfaces = _.filter(this.props.docs.interfaces, c => !c.flags.isPrivate);
         return (
             <div style={sidebarStyle}>
                 <div key="intro" style={sidebarItemStyle}>
