@@ -2,7 +2,7 @@
   "name": "pondjs",
   "version": "0.8.6",
   "main": "lib/entry",
-  "types": "lib/entry.d.ts",
+  "types": "src/index.d.ts",
   "description": "A timeseries library build on top of immutable.js",
   "homepage": "http://software.es.net/pond",
   "scripts": {
