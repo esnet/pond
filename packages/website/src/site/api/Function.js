@@ -36,7 +36,7 @@ export default class TsFunction extends Component {
         }
     }
 
-    buildTypeArguments(typeArguments, unionTypes = null) {
+    buildTypeArguments(typeArguments, unionTypes = null, elementType) {
         console.log("  built type", typeArguments);
         if (typeArguments) {
             const typeArgs = typeArguments.map(t => {
@@ -57,6 +57,8 @@ export default class TsFunction extends Component {
                 }
             });
             return `${typeArgs.join(" | ")}`;
+        } else if (elementType) {
+            return `${elementType.name}`;
         }
         return "";
     }
@@ -66,12 +68,13 @@ export default class TsFunction extends Component {
                   const paramType = param.type;
                   const paramName = param.name;
                   let paramTypeName = paramType.name;
-                  const isArray = paramType.isArray;
+                  const isArray = paramType.isArray || paramType.type === "array";
                   const isOptional = param.flags.isOptional;
                   console.log("param type args", paramType);
                   const typeArgs = this.buildTypeArguments(
                       paramType.typeArguments,
-                      paramType.types
+                      paramType.types,
+                      paramType.elementType
                   );
 
                   const defaultValue = param.defaultValue;
