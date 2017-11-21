@@ -32,6 +32,8 @@ export default class TsFunction extends Component {
             } else if (type.elementType) {
                 console.log(" -- elemental", type.elementType);
                 return `${type.elementType.name}`;
+            } else {
+                return `${type.name}`;
             }
         }
     }
@@ -81,7 +83,7 @@ export default class TsFunction extends Component {
                   if (paramTypeName === "(Anonymous function)") {
                       paramTypeName = defaultValue;
                   }
-                  return `${paramName}${isOptional ? "?" : ""}: ${paramTypeName
+                  return `${paramName}${isOptional || defaultValue ? "?" : ""}: ${paramTypeName
                       ? paramTypeName
                       : ""}${typeArgs}${isArray ? "[]" : ""}`;
               })
