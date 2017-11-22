@@ -54,7 +54,7 @@ function buildTypes(root) {
         const n = name.toLowerCase();
         switch (kindString) {
             case "External module":
-                docs.modules[n] = child;
+                docs.modules[n.replace(/['"]+/g, '')] = child;
                 break;
             case "Class":
                 docs.classes[n] = child;
@@ -175,7 +175,7 @@ export default class extends Component {
                                 />
                                 <Route
                                     path={`/module/:name`}
-                                    render={() => <TsModule module={docs.modules[name]} />}
+                                    render={props => <TsModule module={docs.modules[props.match.params.name]} />}
                                 />
                                 <Route
                                     path={`/class/:name`}
