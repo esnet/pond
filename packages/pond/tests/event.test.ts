@@ -93,8 +93,8 @@ describe("Event static", () => {
 describe("Time Events", () => {
     it("can create a time event", () => {
         const t = time(new Date(1487983075328));
-        const timeEvent = event(t, Immutable.Map({ name: "bob" }));
-        expect(timeEvent.toString()).toEqual(`{"time":1487983075328,"data":{"name":"bob"}}`);
+        const e = event(t, Immutable.Map({ name: "bob" }));
+        expect(e.toString()).toEqual(`{"time":1487983075328,"data":{"name":"bob"}}`);
     });
 
     it("can create a time event with a serialized object", () => {
@@ -107,9 +107,9 @@ describe("Time Events", () => {
 
     it("can set a new value", () => {
         const t = time(new Date(1487983075328));
-        const timeEvent = event(t, Immutable.Map({ name: "bob" }));
-        const newTimeEvent = timeEvent.set("name", "fred");
-        expect(newTimeEvent.toString()).toEqual(`{"time":1487983075328,"data":{"name":"fred"}}`);
+        const e = event(t, Immutable.Map({ name: "bob" }));
+        const ee = e.set("name", "fred");
+        expect(ee.toString()).toEqual(`{"time":1487983075328,"data":{"name":"fred"}}`);
     });
 
     it("can create a Event<Time>, with deep data", () => {
@@ -131,8 +131,8 @@ describe("Indexed Events", () => {
     it("can create an IndexedEvent using a existing Index and data", () => {
         const event1 = event(index("1d-12355"), Immutable.Map({ value: 42 }));
         const expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
-        const timerange = event1.getKey().asTimerange();
-        expect(timerange.toUTCString()).toBe(expected);
+        const e = event1.getKey().asTimerange();
+        expect(e.toUTCString()).toBe(expected);
         expect(event1.get("value")).toBe(42);
     });
 });
@@ -284,13 +284,13 @@ describe("Event list combining", () => {
     });
 
     it("can sum multiple events together if they have different timestamps", () => {
-        const t1 = time("2015-04-22T03:30:00Z");
-        const t2 = time("2015-04-22T04:00:00Z");
-        const t3 = time("2015-04-22T04:30:00Z");
+        const ts1 = time("2015-04-22T03:30:00Z");
+        const ts2 = time("2015-04-22T04:00:00Z");
+        const ts3 = time("2015-04-22T04:30:00Z");
         const events = Immutable.List([
-            event(t1, Immutable.Map({ a: 5, b: 6, c: 7 })),
-            event(t1, Immutable.Map({ a: 2, b: 3, c: 4 })),
-            event(t3, Immutable.Map({ a: 1, b: 2, c: 3 }))
+            event(ts1, Immutable.Map({ a: 5, b: 6, c: 7 })),
+            event(ts1, Immutable.Map({ a: 2, b: 3, c: 4 })),
+            event(ts3, Immutable.Map({ a: 1, b: 2, c: 3 }))
         ]);
         const result = Event.combine(events, sum());
         expect(result.get(0).get("a")).toBe(7);

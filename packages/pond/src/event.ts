@@ -22,39 +22,43 @@ import { ReducerFunction, ValueListMap, ValueMap } from "./types";
 import util from "./util";
 
 /**
- * An Event is a mapping from a time based key to a Data object.
+ * An Event is a mapping from a time based key to a data object represented
+ * by an `Immutable.Map`.
  *
- * The key needs to be a sub-class of the `Key`, which typically
+ * The key needs to be a sub-class of the base class `Key`, which typically
  * would be one of the following:
  *
  *  * `Time` - a single timestamp
  *  * `TimeRange` - a timerange over which the Event took place
  *  * `Index` - a different representation of a TimeRange
  *
- * The data needs to be a sub-class of the `Data` type. That
- * type lets you construct it as either:
- *  - A string or number
- *  - A JS object
- *  - An Immutable.Map<string, any>
- *
- * Internally the Data object is, by default (since subclasses my
- * implement differently) a `Immutable.Map`.
+ * The data object needs to be an `Immutable.Map<string, any>`.
  *
  * To get values out of the data, use `get()`. This method takes
- * what is called a field, which is a top level key of the Data
- * Map.
+ * what is called a field, which is a top level key of the data
+ * map.
  *
  * Fields can refer to deep data with either a path (as an array)
- * or dot notation. Not specifying  a field implies a field of
- * name `"value""`.
+ * or dot notation ("path.to.value").
  *
- * @example
+ * Example:
  *
  * ```
  * const timestamp = time(new Date("2015-04-22T03:30:00Z");
- * const e = new Event(timestamp, data({ temperature: 42 }));
+ * const e = event(t, Immutable.Map({ temperatuue: 75.2, humidity: 84 }));
+ * const humidity = e.get("humidity");  // 84
  * ```
  *
+ * There exists several static methods for `Event` that enable the
+ * ability to compare `Events`, `merge()` or `combine()` lists of `Event`s or
+ * check for duplicates.
+ *
+ * You can also do per-`Event` operations like `select()` out specific fields or
+ * `collapse()` multiple fields into one using an aggregation function.
+ *
+ * Note: Managing multiple `Event`s is typically done with a `Collection`
+ * which is literally a collections of `Event`s, or a `TimeSeries` which
+ * is an chronological set of `Event`s plus some additional meta data.
  */
 export class Event<T extends Key = Time> extends Base {
     /**
@@ -72,12 +76,25 @@ export class Event<T extends Key = Time> extends Base {
     /**
      * Returns if the two supplied events are duplicates of each other.
      *
-     * Duplicated means that the keys are the same. This is the case
-     * with incoming events sometimes where a second event is either known
-     * to be the same (but duplicate) of the first, or supersedes the first.
+     * Duplicated is defined as the keys of the `Event`s being the same.
+     * This is the case with incoming events sometimes where a second event
+     * is either known to be the same (but duplicate) of the first, or
+     * supersedes the first.
      *
-     * You can also pass in false for ignoreValues and get a full compare,
+     * You can also pass in `false` for `ignoreValues` and get a full compare,
      * including the data of the event, thus ignoring the supersede case.
+     *
+     * Example:
+     * ```
+     * const e1 = event(t, Immutable.Map({ a: 5, b: 6, c: 7 }));
+     * const e2 = event(t, Immutable.Map({ a: 5, b: 6, c: 7 }));
+     * const e3 = event(t, Immutable.Map({ a: 100, b: 6, c: 7 }));
+     *
+     * Event.isDuplicate(e1, e2)        // true
+     * Event.isDuplicate(e1, e3)        // true
+     * Event.isDuplicate(e1, e3, false) // false
+     * Event.isDuplicate(e1, e2, false) // false
+     * ```
      */
     public static isDuplicate(
         event1: Event<Key>,
@@ -95,19 +112,34 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Merges multiple `Event`'s together into a new array of events, one
+     * Merges multiple `Event`'s together into a new array of `Event`s, one
      * for each key of the source events. Merging is done on the data of
-     * each event. Values from later events in the list overwrite
-     * early values if fields conflict.
+     * each `Event`. Values from later events in the list overwrite
+     * earlier values if fields conflict.
      *
      * Common use cases:
-     *   - append events of different timestamps
-     *   - merge in events with one field to events with another
-     *   - merge in events that supersede the previous events
+     *   * append events of different timestamps
+     *     e.g. merge earlier events with later events
+     *   * merge in events with one field to events with another field
+     *     e.g. combine events with a field "in" with another list of events
+     *          with a field "out" to get events with both "in" and "out"
+     *   * merge in events that supersede the previous events
      *
      * Events in the supplied list need to be of homogeneous types
      *
-     * See also: `TimeSeries.timeSeriesListMerge()`.
+     * See also:
+     *  * `TimeSeries.timeSeriesListMerge()` if what you have is a
+     * `TimeSeries`. That uses this code but with a friendlier API.
+     *
+     * Example:
+     * ```
+     * const t = time(new Date("2015-04-22T03:30:00Z"));
+     * const event1 = event(t, Immutable.Map({ a: 5, b: 6 }));
+     * const event2 = event(t, Immutable.Map({ c: 2 }));
+     * const merged = Event.merge(Immutable.List([event1, event2]));
+     * merged.get(0).get("a");    // 5
+     * merged.get(0).get("b");    // 6
+     * merged.get(0).get("c");    // 2
      */
     public static merge<K extends Key>(
         events: Immutable.List<Event<K>>,
@@ -121,7 +153,6 @@ export class Event<T extends Key = Time> extends Base {
         //
         // Group events by event key
         //
-
         const mergeDeep = deep || false;
         const eventList: Array<Event<K>> = [];
 
@@ -163,9 +194,9 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Returns a function that will take a list of `event`'s and merge them
-     * together using the `fieldSpec` provided. This is used as a reducer for
-     * merging multiple `TimeSeries` together with `timeSeriesListMerge()`.
+     * Returns a function that will take a list of `Event`s and merge them
+     * together using the `fieldSpec` provided. This is used as a `reducer` for
+     * merging multiple `TimeSeries` together with `TimeSeries.timeSeriesListMerge()`.
      */
     static merger<K extends Key>(
         deep
@@ -174,29 +205,35 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Combines multiple `Event`s together into a new array of events, one
-     * for each key of the source events. The list of Events may be specified
-     * as an array or `Immutable.List`.
+     * Static function to combine multiple `Event`s together into a new array
+     * of events, one `Event` for each key of the source events. The list of
+     * `Events` should be specified as an array or `Immutable.List<Event<K>>`.
      *
      * Combining acts on the fields specified in the `fieldSpec` (or all
-     * fields) and uses the reducer function supplied to take the multiple
+     * fields) and uses the `reducer` function supplied to take the multiple
      * values associated with the key and reduce them down to a single value.
      *
-     * The return result will be an `Event` of the same type as the input.
+     * The return result will be an `Immutable.List<Event<K>>` of the same type K
+     * as the input.
      *
-     * This is the general version of `Event.sum()` and `Event.avg()`. If those
-     * common use cases are what you want, just use those functions. If you
-     * want to specify your own reducer you can use this function.
-     *
+     * Example:
+     * ```
+     * const t = time("2015-04-22T03:30:00Z");
+     * const events = [
+     *     event(t, Immutable.Map({ a: 5, b: 6, c: 7 })),
+     *     event(t, Immutable.Map({ a: 2, b: 3, c: 4 })),
+     *     event(t, Immutable.Map({ a: 1, b: 2, c: 3 }))
+     * ];
+     * const result = Event.combine(Immutable.List(events), sum());
+     * // result[0] is {a: 8, b: 11, c: 14 }
+     * ```
      * See also: `TimeSeries.timeSeriesListSum()`
      */
-    // tslint:disable:max-line-length
     public static combine<K extends Key>(
         events: Immutable.List<Event<K>>,
         reducer: ReducerFunction,
         fieldSpec?: string | string[]
     ): Immutable.List<Event<K>> {
-        // Early exit
         if (events instanceof Immutable.List && events.size === 0) {
             return Immutable.List();
         }
@@ -264,17 +301,13 @@ export class Event<T extends Key = Time> extends Base {
             outEvents.push(e);
         });
 
-        // This function outputs the same as its input. If we are
-        // passed an Immutable.List of events, the user will get
-        // an Immutable.List back. If an array, a simple JS array will
-        // be returned.
         return Immutable.List(outEvents);
     }
 
     /**
-     * Returns a function that will take a list of `Event`'s and combine them
-     * together using the `fieldSpec` and reducer function provided. This is
-     * used as an event reducer for merging multiple `TimeSeries` together
+     * Static method that returns a function that will take a list of `Event`'s
+     * and combine them together using the `fieldSpec` and reducer function provided.
+     * This is used as an event reducer for merging multiple `TimeSeries` together
      * with `timeSeriesListReduce()`.
      */
     static combiner<K extends Key>(
@@ -285,12 +318,19 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Takes a list of `Events<T>` and makes a map from the `Event` field names
-     * to an array of values, one value for each Event.
+     * Static function that takes a list of `Events<T>` and makes a map from each
+     * field names to an array of values, one value for each Event.
      *
-     * @example
+     * Example:
      * ```
-     * const eventMap = Event.map(events, ["in"]);
+     * const events = [
+     *     event(t1, Immutable.Map({in: 2, out: 11 })),
+     *     event(t2, Immutable.Map({in: 4, out: 13 })),
+     *     event(t3, Immutable.Map({in: 6, out: 15 })),
+     *     event(t4, Immutable.Map({in: 8, out: 17 }))
+     * ];
+     *
+     * const fieldMapping = Event.map(events, ["in", "out"]);
      * // { in: [ 2, 4, 6, 8 ], out: [ 11, 13, 15, 18 ] }
      * ```
      */
@@ -333,17 +373,16 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Takes a `Immutable.List` of events and a reducer function and a
-     * `fieldSpec` (or list of fieldSpecs) and returns an aggregated
-     * result in the form of a new Event, for each column.
+     * Static function that takes a `Immutable.List` of events, a `reducer` function and a
+     * `fieldSpec` (field or list of fields) and returns an aggregated result in the form
+     * of a new Event, for each column.
+     *
      * The reducer is of the form:
      * ```
-     * function sum(valueList) {
-     *     return calcValue;
-     * }
+     * (values: number[]) => number
      * ```
      *
-     * @example
+     * Example:
      * ```
      * const result = Event.aggregate(EVENT_LIST, avg(), ["in", "out"]);
      * // result = { in: 5, out: 14.25 }
@@ -366,7 +405,43 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Constructor
+     * Construction of an `Event` requires both a time-based key and an
+     * `Immutable.Map` of (`string` -> data) mappings.
+     *
+     * The time-based key should be either a `Time`, a `TimeRange` or an `Index`,
+     * though it would be possible to subclass `Key` with another type so long
+     * as it implements that abstract interface.
+     *
+     * The data portion maybe deep data. Using `Immutable.toJS()` is helpful in
+     * that case.
+     *
+     * You can use `new Event<T>()` to create a new `Event`, but it's easier to use
+     * one of the factory functions: `event()`, `timeEvent()`, `timeRangeEvent()` and
+     * `indexedEvent()`
+     *
+     * Example 1:
+     * ```
+     * const e = event(time(new Date(1487983075328)), Immutable.Map({ name: "bob" }));
+     * ```
+     *
+     * Example 2:
+     * ```
+     * // An event for a particular day with indexed key
+     * const e = event(index("1d-12355"), Immutable.Map({ value: 42 }));
+     * ```
+     *
+     * Example 3:
+     * ```
+     * // Outage event spans a timerange
+     * const e = event(timerange(beginTime, endTime), Immutable.Map({ ticket: "A1787383" }));
+     * ```
+     *
+     * Example 4:
+     * ```
+     * const e = timeEvent({
+     *     time: 1487983075328,
+     *     data: { a: 2, b: 3 }
+     * });
      */
 
     constructor(protected key: T, protected data: Immutable.Map<string, any>) {
@@ -374,7 +449,10 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Returns the key this `Event` was constructed with
+     * Returns the key this `Event`.
+     *
+     * The result is of type T (a `Time`, `TimeRange` or `Index`), depending on
+     * what the `Event` was constructed with.
      */
     public getKey(): T {
         return this.key;
@@ -388,16 +466,18 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Returns the data associated with this event, which be
-     * of type `T`.
+     * Returns the data associated with this event in the form
+     * of an `Immutable.Map`. This is infact an accessor for the internal
+     * representation of data in this `Event`.
      */
     public getData(): Immutable.Map<string, any> {
         return this.data;
     }
 
     /**
-     * Returns the data associated with this event, which be
-     * of type `T`.
+     * Sets new `data` associated with this event. The new `data` is supplied
+     * in the form of an `Immutable.Map`. A new `Event<T>` will be returned
+     * containing this new data, but having the same key.
      */
     public setData(data: Immutable.Map<string, any>): Event<T> {
         return new Event<T>(this.key, data);
@@ -412,6 +492,20 @@ export class Event<T extends Key = Time> extends Base {
      *  * "path.to.deep.data"
      *  * ["path", "to", "deep", "data"].
      *
+     * Example 1:
+     * ```
+     * const e = event(index("1d-12355"), Immutable.Map({ value: 42 }));
+     * e.get("value"); // 42
+     * ```
+     *
+     * Example 2:
+     * ```
+     * const t = time(new Date("2015-04-22T03:30:00Z"));
+     * const e = event(t, Immutable.fromJS({ a: 5, b: { c: 6 } }));
+     * e.get("b.c"); // 6
+     * ```
+     *
+     * Note: the default `field` is "value".
      */
     public get(field: string | string[] = "value"): any {
         const f = util.fieldAsArray(field);
@@ -421,13 +515,20 @@ export class Event<T extends Key = Time> extends Base {
     /**
      * Set a new `value` on the `Event` for the given `field`, and return a new `Event`.
      *
-     * You can refer to a `field`s with one of the following notations:
+     * You can refer to a `field` with one of the following notations:
      *  * (undefined) -> "value"
      *  * "temperature"
      *  * "path.to.deep.data"
      *  * ["path", "to", "deep", "data"].
      *
      * `value` is the new value to set on for the given `field` on the `Event`.
+     *
+     * ```
+     * const t = time(new Date(1487983075328));
+     * const initial = event(t, Immutable.Map({ name: "bob" }));
+     * const modified = e.set("name", "fred");
+     * modified.toString() // {"time": 1487983075328, "data": {"name":"fred"} }
+     * ```
      */
     public set(field: string | string[] = "value", value: any): Event<T> {
         const f = util.fieldAsArray(field);
@@ -435,9 +536,10 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Will return false if the value in this `Event` is either `undefined`, `NaN` or
-     * `null` for the given field or fields. This serves as a determination of a "missing"
-     * value within a `TimeSeries` or `Collection`.
+     * Will return false if the value for the specified `fields` in this `Event` is
+     * either `undefined`, `NaN` or `null` for the given field or fields. This
+     * serves as a determination of a "missing" value within a `TimeSeries` or
+     * `Collection`.
      */
     public isValid(fields?: string | string[]): boolean {
         let invalid = false;
@@ -449,6 +551,9 @@ export class Event<T extends Key = Time> extends Base {
         return !invalid;
     }
 
+    /**
+     * Converts the `Event` into a standard Javascript object
+     */
     public toJSON(): {} {
         const k = this.getKey().toJSON()[this.keyType()];
         return {
@@ -457,18 +562,36 @@ export class Event<T extends Key = Time> extends Base {
         };
     }
 
+    /**
+     * Converts the `Event` to a string
+     */
     public toString(): string {
         return JSON.stringify(this.toJSON());
     }
 
+    /**
+     * Returns the timestamp of the `Event`.
+     *
+     * This a convenience for calling `Event.getKey()` followed by `timestamp()`.
+     */
     public timestamp(): Date {
         return this.getKey().timestamp();
     }
 
+    /**
+     * The begin time of the `Event`. If the key of the `Event` is a `Time` then
+     * the begin and end time of the `Event` will be the same as the `Event`
+     * timestamp.
+     */
     public begin(): Date {
         return this.getKey().begin();
     }
 
+    /**
+     * The end time of the `Event`. If the key of the `Event` is a `Time` then
+     * the begin and end time of the `Event` will be the same as the `Event`
+     * timestamp.
+     */
     public end(): Date {
         return this.getKey().end();
     }
@@ -481,18 +604,26 @@ export class Event<T extends Key = Time> extends Base {
         return this.key.toString();
     }
 
+    /**
+     * Returns the `TimeRange` over which this `Event` occurs. If this `Event`
+     * has a `Time` key then the duration of this range will be 0.
+     */
     public timerange() {
         return new TimeRange(this.key.begin(), this.key.end());
     }
 
+    /**
+     * Shortcut for `timerange()` followed by `toUTCString()`.
+     */
     public timerangeAsUTCString() {
         return this.timerange().toUTCString();
     }
 
-    public timestampAsUTCString() {
-        return this.timestamp().toUTCString();
-    }
-
+    /**
+     * Returns an array containing the key in the first element and then the data map
+     * expressed as JSON as the second element. This is the method that is used by
+     * a `TimeSeries` to build its wireformat representation.
+     */
     public toPoint() {
         if (this.keyType() === "time") {
             return [this.timestamp().getTime(), ..._.values(this.getData().toJSON())];
@@ -514,16 +645,16 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Collapses multiple fields (specified in the `fieldSpecList`) into a single
-     * field named `fieldName` using the supplied reducer. Optionally you can keep
-     * all existing fields by supplying the `append` argument as true.
+     * Collapses an array of fields, specified in the `fieldSpecList`, into a single
+     * field named `fieldName` using the supplied reducer function. Optionally you can keep
+     * all existing fields by supplying the `append` argument as `true`.
      *
-     * @example:
+     * Example:
      * ```
      * const t = time(new Date("2015-04-22T03:30:00Z"));
      * const e = event(t, Immutable.Map({ in: 5, out: 6, status: "ok" }));
      * const result = e.collapse(["in", "out"], "total", sum(), true);
-     * // result: data: { "in": 5, "out": 6, "status": "ok", "total": 11 } }
+     * // { "in": 5, "out": 6, "status": "ok", "total": 11 } }
      * ```
      */
     public collapse(
@@ -539,8 +670,15 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
-     * Selects specific fields of an `Event` using a `fields` and returns
-     * a new event with just those fields.
+     * Selects specific fields of an `Event` using the `fields` array of strings
+     * and returns a new event with just those fields.
+     *
+     * Example:
+     * ```
+     * const t = time(new Date("2015-04-22T03:30:00Z"));
+     * const e = event(t, Immutable.Map({ a: 5, b: 6, c: 7 }));
+     * const result = e.select(["a", "b"]);  // data is { a: 5, b: 6 }}
+     * ```
      */
     public select(fields: string[]): Event<T> {
         const data = {};

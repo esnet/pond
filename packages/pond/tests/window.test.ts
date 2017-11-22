@@ -6,9 +6,9 @@ import * as moment from "moment";
 
 import { duration } from "../src/duration";
 import { period } from "../src/period";
-import { window, daily } from "../src/window";
-import { time, now } from "../src/time";
+import { now, time } from "../src/time";
 import { TimeRange } from "../src/timerange";
+import { daily, window } from "../src/window";
 
 import Util from "../src/util";
 
@@ -54,10 +54,10 @@ describe("Window", () => {
 
     it("can use a day window", () => {
         const dayWindowNewYork = daily("America/New_York");
-        //const dayWindowPacificTime = daily("America/Los_Angeles");
+        // const dayWindowPacificTime = daily("America/Los_Angeles");
         const indexes = dayWindowNewYork.getIndexSet(Util.untilNow(duration("5d")));
-        //console.log(indexes);
-        //indexes.forEach(i => console.log(i.asTimerange()));
+        // console.log(indexes);
+        // indexes.forEach(i => console.log(i.asTimerange()));
     });
 
     it("can create a day index for a date", () => {
@@ -66,9 +66,24 @@ describe("Window", () => {
         const window1 = daily("America/Los_Angeles");
         const window2 = daily("Etc/UTC");
         const window3 = daily();
-        expect(window1.getIndexSet(t).first().asString()).toBe("2015-04-21");
-        expect(window2.getIndexSet(t).first().asString()).toBe("2015-04-22");
-        expect(window3.getIndexSet(t).first().asString()).toBe("2015-04-22");
+        expect(
+            window1
+                .getIndexSet(t)
+                .first()
+                .asString()
+        ).toBe("2015-04-21");
+        expect(
+            window2
+                .getIndexSet(t)
+                .first()
+                .asString()
+        ).toBe("2015-04-22");
+        expect(
+            window3
+                .getIndexSet(t)
+                .first()
+                .asString()
+        ).toBe("2015-04-22");
     });
 
     /*
