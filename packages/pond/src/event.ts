@@ -620,15 +620,27 @@ export class Event<T extends Key = Time> extends Base {
     }
 
     /**
+     * Shortcut for `timestamp()` followed by `toUTCString()`.
+     */
+    public timestampAsUTCString() {
+        return this.timestamp().toUTCString();
+    }
+
+    /**
      * Returns an array containing the key in the first element and then the data map
      * expressed as JSON as the second element. This is the method that is used by
      * a `TimeSeries` to build its wireformat representation.
      */
-    public toPoint() {
+    public toPoint(columns: string[]) {
+        const values = [];
+        columns.forEach(c => {
+            const v = this.getData().get(c);
+            values.push(v === "undefined" ? null : v);
+        });
         if (this.keyType() === "time") {
-            return [this.timestamp().getTime(), ..._.values(this.getData().toJSON())];
+            return [this.timestamp().getTime(), ...values];
         } else if (this.keyType() === "index") {
-            return [this.indexAsString(), ..._.values(this.getData().toJSON())];
+            return [this.indexAsString(), ...values];
         } else if (this.keyType() === "timerange") {
             return [
                 [
@@ -639,7 +651,7 @@ export class Event<T extends Key = Time> extends Base {
                         .end()
                         .getTime()
                 ],
-                ..._.values(this.getData().toJSON())
+                ...values
             ];
         }
     }
