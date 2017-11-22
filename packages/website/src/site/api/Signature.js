@@ -72,9 +72,9 @@ export default class TsSignatureList extends Component {
 
     buildRType(signature) {
         const typeName = this.buildType(signature.type);
-        const typeArgs = this.buildTypeArguments(signature.typeParameter);
+        // const typeArgs = this.buildTypeArguments(signature.typeParameter);
         const isArray = signature.type.isArray;
-        return `${typeName}${typeArgs}${isArray ? "[]" : ""}`;
+        return `${typeName}${isArray ? "[]" : ""}`;
     }
 
     buildReturnType(signature) {
@@ -118,14 +118,31 @@ export default class TsSignatureList extends Component {
         }
     }
 
+    buildTypeParameter(typeParameter) {
+        if (typeParameter && typeParameter.length) {
+            const typeParameters = typeParameter.map(t => {
+                if (t.type) {
+                    const type = t.type.name;
+                    return `${t.name} extends ${type}`;
+                } else {
+                    return `${t.name}`;
+                }
+            });
+            return `<${typeParameters.join(", ")}>`;
+        } else {
+            return "";
+        }
+    }
+
     render() {
         const { signatures } = this.props;
         const methodSignatures = signatures.map((signature, k) => {
             const parameters = signature.parameters;
             const paramList = this.buildParamList(parameters);
             const returnType = this.buildReturnType(signature);
+            const typeParameter = this.buildTypeParameter(signature.typeParameter);
 
-            const output = `${signature.name}(${paramList.join(", ")}): ${returnType}`;
+            const output = `${signature.name}${typeParameter}(${paramList.join(", ")}): ${returnType}`;
             return (
                 <div key={k} style={{ marginTop: 15 }}>
                     <pre style={sigStyle}>
