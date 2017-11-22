@@ -29,8 +29,14 @@ export default class TsSignatureList extends Component {
         } else if (unionTypes) {
             const types = unionTypes.map(t => {
                 const typeArgs = this.buildTypeArguments(t.typeArguments);
-                const isArray = t.isArray ? true : false;
-                return `${t.name}${typeArgs}${isArray ? "[]" : ""}`;
+                const isArray = (t.isArray || t.type === "array") ? true : false;
+                let elementType;
+                if(t.elementType) {
+                    elementType = t.elementType.name;
+                    return `${elementType}${isArray ? "[]" : ""}`;
+                } else {
+                    return `${t.name}${typeArgs}${isArray ? "[]" : ""}`;
+                }
             });
             return `${types.join(" | ")}`;
         } else if (declaration) {
@@ -110,6 +116,8 @@ export default class TsSignatureList extends Component {
                         });
                         return methodSignatures;
                     }
+                case "array":
+                    return `${signature.type.elementType.name}[]`;
                 default:
                     return this.buildRType(signature);
             }
