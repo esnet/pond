@@ -86,8 +86,13 @@ class TimeEvent extends Event {
     /**
      * Returns a flat array starting with the timestamp, followed by the values.
      */
-    toPoint() {
-        return [this.timestamp().getTime(), ..._.values(this.data().toJSON())];
+    toPoint(columns) {
+        const values = [];
+        columns.forEach(c => {
+            const v = this.data().get(c);
+            values.push(v === "undefined" ? null : v);
+        });
+        return [this.timestamp().getTime(), ...values];
     }
 
     /**

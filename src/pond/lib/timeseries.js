@@ -243,7 +243,7 @@ class TimeSeries {
 
         const points = [];
         for (const e of this._collection.events()) {
-            points.push(e.toPoint());
+            points.push(e.toPoint(this.columns()));
         }
 
         return _.extend(this._data.toJSON(), { columns, points });
