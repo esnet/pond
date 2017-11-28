@@ -762,6 +762,24 @@ describe("Slicing a timeseries", () => {
     });
 });
 
+describe("Cropping a timeseries", () => {
+    it("can create crop a series", () => {
+        const series = timeSeries({
+            name: 'exact timestamps',
+            columns: ['time', 'value'],
+            points: [[1504014065240,1],[1504014065243,2],[1504014065244,3],[1504014065245,4],[1504014065249,5]]
+        });
+        const ts1 = series.crop(timerange(1504014065243,1504014065245));
+        expect(ts1.size()).toBe(3);
+        const ts2 = series.crop(timerange(1504014065242,1504014065245));
+        expect(ts2.size()).toBe(3);
+        const ts3 = series.crop(timerange(1504014065243,1504014065247));
+        expect(ts3.size()).toBe(3);
+        const ts4 = series.crop(timerange(1504014065242,1504014065247));
+        expect(ts4.size()).toBe(3);
+    });
+});
+
 describe("Merging two timeseries together", () => {
     it("can merge two timeseries columns together using merge", () => {
         const inTraffic = timeSeries(TRAFFIC_DATA_IN);

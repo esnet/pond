@@ -460,9 +460,12 @@ export class TimeSeries<T extends Key> {
      * return a new `TimeSeries`.
      */
     crop(tr: TimeRange): TimeSeries<T> {
-        const beginPos = this.bisect(tr.begin());
+        const timerangeBegin = tr.begin();
+        let beginPos = this.bisect(timerangeBegin);
+        const bisectedEventOutsideRange = this.at(beginPos).timestamp() < timerangeBegin;
+        beginPos = bisectedEventOutsideRange ? beginPos + 1 : beginPos;
         const endPos = this.bisect(tr.end(), beginPos);
-        return this.slice(beginPos, endPos);
+        return this.slice(beginPos, endPos + 1);
     }
 
     //
