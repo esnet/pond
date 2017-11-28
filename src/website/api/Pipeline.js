@@ -10,8 +10,7 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import Highlighter from "../components/Highlighter";
-
+import Highlighter from "../components/highlighter";
 import markdown from "raw!../docs/Pipeline.md";
 
 export default React.createClass({

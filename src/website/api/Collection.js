@@ -10,7 +10,7 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import Highlighter from "../components/Highlighter";
+import Highlighter from "../components/highlighter";
 import text from "raw!../docs/Collection.md";
 
 export default React.createClass({
