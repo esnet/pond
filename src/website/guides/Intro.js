@@ -12,7 +12,7 @@ import React from "react";
 import Markdown from "react-markdown";
 import logo from "../img/pond.png";
 import text from "raw!./intro.md";
-import Highlighter from "../components/highlighter";
+import Highlighter from "../api/highlighter";
 
 export default React.createClass({
     mixins: [ Highlighter ],
