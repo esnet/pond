@@ -699,7 +699,7 @@ describe("Time Range Events", () => {
             name: "outages",
             events: TIMERANGE_EVENT_LIST
         });
-        const expected = `{"name":"outages","tz":"Etc/UTC","columns":["timerange","title","description","completed","external_ticket","esnet_ticket","organization","type"],"points":[[[1425459600000,1425477600000],"ANL Scheduled Maintenance","ANL will be switching border routers...",true,"","ESNET-20150302-002","ANL","Planned"],[[1429673400000,1429707600000],"At 13:33 pacific circuit 06519 went down.","STAR-CR5 < 100 ge 06519 > ANL  - Outage",true,"","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1429673700000,1429721400000],"STAR-CR5 < 100 ge 06519 > ANL  - Outage","The listed circuit was unavailable due to bent pins.",true,"3576:144","ESNET-20150421-013","Internet2 / Level 3","Unplanned"]]}`;
+        const expected = `{"name":"outages","tz":"Etc/UTC","columns":["timerange","title","description","completed","external_ticket","esnet_ticket","organization","type"],"points":[[[1425459600000,1425477600000],"ANL Scheduled Maintenance","ANL will be switching border routers...",true,"","ESNET-20150302-002","ANL","Planned"],[[1429673400000,1429707600000],"STAR-CR5 < 100 ge 06519 > ANL  - Outage","At 13:33 pacific circuit 06519 went down.",true,"","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1429673700000,1429721400000],"STAR-CR5 < 100 ge 06519 > ANL  - Outage","The listed circuit was unavailable due to bent pins.",true,"3576:144","ESNET-20150421-013","Internet2 / Level 3","Unplanned"]]}`;
         expect(series.toString()).toBe(expected);
     });
 
@@ -762,6 +762,24 @@ describe("Slicing a timeseries", () => {
     });
 });
 
+describe("Cropping a timeseries", () => {
+    it("can create crop a series", () => {
+        const series = timeSeries({
+            name: 'exact timestamps',
+            columns: ['time', 'value'],
+            points: [[1504014065240,1],[1504014065243,2],[1504014065244,3],[1504014065245,4],[1504014065249,5]]
+        });
+        const ts1 = series.crop(timerange(1504014065243,1504014065245));
+        expect(ts1.size()).toBe(3);
+        const ts2 = series.crop(timerange(1504014065242,1504014065245));
+        expect(ts2.size()).toBe(3);
+        const ts3 = series.crop(timerange(1504014065243,1504014065247));
+        expect(ts3.size()).toBe(3);
+        const ts4 = series.crop(timerange(1504014065242,1504014065247));
+        expect(ts4.size()).toBe(3);
+    });
+});
+
 describe("Merging two timeseries together", () => {
     it("can merge two timeseries columns together using merge", () => {
         const inTraffic = timeSeries(TRAFFIC_DATA_IN);
@@ -808,6 +826,41 @@ describe("Merging two timeseries together", () => {
         expect(trafficSeries.at(0).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:12:30 GMT");
         expect(trafficSeries.at(1).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:13:00 GMT");
         expect(trafficSeries.at(2).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:13:30 GMT");
+    });
+
+    it("can merge two irregular time series together", () => {
+        const A = {
+            name: "a",
+            columns: ["time", "valueA"],
+            points: [
+                [1400425947000, 34],
+                [1400425948000, 13],
+                [1400425949000, 67],
+                [1400425950000, 91]
+            ]
+        };
+
+        const B = {
+            name: "b",
+            columns: ["time", "valueB"],
+            points: [
+                [1400425951000, 65],
+                [1400425952000, 86],
+                [1400425953000, 27],
+                [1400425954000, 72]
+            ]
+        };
+
+        const tile1 = timeSeries(A);
+        const tile2 = timeSeries(B);
+
+        const series = TimeSeries.timeSeriesListMerge({
+            name: "traffic",
+            seriesList: [tile1, tile2]
+        });
+        // console.log("series is ", series);
+        const expected = `{"name":"traffic","tz":"Etc/UTC","columns":["time","valueA","valueB"],"points":[[1400425947000,34,null],[1400425948000,13,null],[1400425949000,67,null],[1400425950000,91,null],[1400425951000,null,65],[1400425952000,null,86],[1400425953000,null,27],[1400425954000,null,72]]}`;
+        expect(series.toString()).toBe(expected);
     });
 });
 

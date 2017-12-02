@@ -32,9 +32,12 @@ describe("Collection", () => {
                 t.toTimeRange(duration("1h"), TimeAlignment.Middle)
             );
 
-            expect(c2.at(0).getKey().toUTCString()).toBe(
-                "[Wed, 22 Apr 2015 03:00:00 GMT, Wed, 22 Apr 2015 04:00:00 GMT]"
-            );
+            expect(
+                c2
+                    .at(0)
+                    .getKey()
+                    .toUTCString()
+            ).toBe("[Wed, 22 Apr 2015 03:00:00 GMT, Wed, 22 Apr 2015 04:00:00 GMT]");
         });
 
         it("can make an empty collection and add events to it", () => {
@@ -57,7 +60,9 @@ describe("Collection", () => {
             const e1 = event(timestamp1, Immutable.Map({ a: 5, b: 6 }));
             const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 2 }));
 
-            const c1 = collection().addEvent(e1).addEvent(e2);
+            const c1 = collection()
+                .addEvent(e1)
+                .addEvent(e2);
             const c2 = collection(c1);
 
             expect(c2.size()).toEqual(2);
@@ -97,7 +102,10 @@ describe("Collection", () => {
             const e1 = event(timestamp1, Immutable.Map({ a: 5, b: 6 }));
             const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 2 }));
             const e3 = event(timestamp2, Immutable.Map({ a: 6, b: 3 }));
-            const c = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3, true);
+            const c = collection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3, true);
             expect(c.size()).toEqual(2);
             expect(c.at(1).get("a")).toEqual(6);
         });
@@ -108,10 +116,13 @@ describe("Collection", () => {
             const e1 = event(timestamp1, Immutable.Map({ a: 5, b: 6 }));
             const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 2 }));
             const e3 = event(timestamp2, Immutable.Map({ a: 6, b: 3 }));
-            const c = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3, events => {
-                const a = events.reduce((sum, e) => sum + e.get("a"), 0);
-                return event(timestamp2, Immutable.Map({ a }));
-            });
+            const c = collection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3, events => {
+                    const a = events.reduce((total, e) => total + e.get("a"), 0);
+                    return event(timestamp2, Immutable.Map({ a }));
+                });
             expect(c.size()).toEqual(2);
             expect(c.at(1).get("a")).toEqual(10);
         });
@@ -123,10 +134,13 @@ describe("Collection", () => {
             const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 2 }));
             const e3 = event(timestamp2, Immutable.Map({ a: 6, b: 3 }));
             const e4 = event(timestamp2, Immutable.Map({ a: 7, b: 1 }));
-            const c = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3);
+            const c = collection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3);
 
             const c2 = c.addEvent(e4, events => {
-                const a = events.reduce((sum, e) => sum + e.get("a"), 0);
+                const a = events.reduce((total, e) => total + e.get("a"), 0);
                 return event(timestamp2, Immutable.Map({ a }));
             });
             expect(c.size()).toEqual(3);
@@ -204,7 +218,12 @@ describe("Collection", () => {
             const c = collection(Immutable.List([e1, e2, e2]));
 
             expect(c.at(1).get("a")).toEqual(2);
-            expect(c.atKey(timestamp2).get(0).get("a")).toEqual(2);
+            expect(
+                c
+                    .atKey(timestamp2)
+                    .get(0)
+                    .get("a")
+            ).toEqual(2);
         });
 
         it("can return the first and last events", () => {
@@ -236,6 +255,23 @@ describe("Collection", () => {
         });
     });
 
+    describe("Filtering", () => {
+        it("can filter a list of events", () => {
+            const timestamp1 = new Time("2015-04-22T01:30:00Z");
+            const timestamp2 = new Time("2015-04-22T02:30:00Z");
+            const timestamp3 = new Time("2015-04-22T03:30:00Z");
+
+            const e1 = event(timestamp1, Immutable.Map({ a: 1 }));
+            const e2 = event(timestamp2, Immutable.Map({ a: 2 }));
+            const e3 = event(timestamp3, Immutable.Map({ a: 3 }));
+
+            const c = collection(Immutable.List([e1, e2, e3]));
+
+            const filtered = c.filter(e => e.get("a") <= 2);
+            expect(filtered.size()).toEqual(2);
+        });
+    });
+
     describe("Side effects", () => {
         it("can iterate over the events", () => {
             const timestamp1 = new Time("2015-04-22T01:30:00Z");
@@ -248,12 +284,12 @@ describe("Collection", () => {
 
             const c = collection(Immutable.List([e1, e2, e3]));
 
-            let sum = 0;
+            let total = 0;
             c.forEach(e => {
-                sum = sum + e.get("a");
+                total = total + e.get("a");
             });
 
-            expect(sum).toEqual(6);
+            expect(total).toEqual(6);
         });
     });
 
@@ -308,7 +344,11 @@ describe("Collection", () => {
             const e2 = event(timestamp2, Immutable.Map({ a: 2 }));
             const e3 = event(timestamp3, Immutable.Map({ a: 3 }));
 
-            const sorted = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3).sortByKey();
+            const sorted = collection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3)
+                .sortByKey();
 
             expect(sorted.at(0).get("a")).toEqual(2);
             expect(sorted.at(1).get("a")).toEqual(1);
@@ -324,7 +364,11 @@ describe("Collection", () => {
             const e2 = event(timestamp2, Immutable.Map({ a: 3 }));
             const e3 = event(timestamp3, Immutable.Map({ a: 5 }));
 
-            const sorted = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3).sort("a");
+            const sorted = collection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3)
+                .sort("a");
 
             expect(sorted.at(0).get("a")).toEqual(3);
             expect(sorted.at(1).get("a")).toEqual(5);
@@ -336,7 +380,10 @@ describe("Collection", () => {
         const e1 = event(time("2015-04-22T02:30:00Z"), Immutable.Map({ a: 8, b: 2 }));
         const e2 = event(time("2015-04-22T01:30:00Z"), Immutable.Map({ a: 3, b: 1 }));
         const e3 = event(time("2015-04-22T03:30:00Z"), Immutable.Map({ a: 5, b: 5 }));
-        const test = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3);
+        const test = collection<Time>()
+            .addEvent(e1)
+            .addEvent(e2)
+            .addEvent(e3);
 
         it("can find the first event", () => {
             expect(test.first("a")).toEqual(8);
@@ -382,7 +429,10 @@ describe("Collection", () => {
             const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 2 }));
             const e3 = event(timestamp2, Immutable.Map({ a: 6, b: 3 }));
 
-            const c = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3);
+            const c = collection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3);
 
             const c1 = c.collapse({
                 fieldSpecList: ["a", "b"],
@@ -417,7 +467,10 @@ describe("Collection", () => {
             const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 5, c: 6 }));
             const e3 = event(timestamp2, Immutable.Map({ a: 6, b: 3, c: 2 }));
 
-            const c = collection<Time>().addEvent(e1).addEvent(e2).addEvent(e3);
+            const c = collection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3);
 
             const c1 = c.select({
                 fields: ["b", "c"]

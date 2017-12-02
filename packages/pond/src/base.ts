@@ -26,4 +26,7 @@ import { Rate } from "./rate";
 
 import { AlignmentMethod, AlignmentOptions, CollapseOptions, RateOptions } from "./types";
 
+/**
+ * Abstract base class used by classes which maybe passed within the streaming code.
+ */
 export abstract class Base {}

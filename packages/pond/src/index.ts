@@ -17,10 +17,11 @@ import util from "./util";
 
 /**
  * An `Index` is a specific instance of a `Window`. For example
- * a `Window` may represent "every day", then an `Index` could
- * represent a specific day like last Tuesday.
+ * a `Window` may represent "every day", and so an `Index` would
+ * represent a specific day like last Tuesday in that case.
  *
- * There are two basic types:
+ * There are two basic types, determined by string format supplied
+ * in the constructor:
  *
  * * *Duration index* - the number of some unit of time
  *                       (e.g. 5 minutes) since the UNIX epoch.
@@ -37,7 +38,7 @@ import util from "./util";
  * You can also use seconds (e.g. 30s), minutes (e.g. 5m), hours (e.g. 1h)
  * or days (e.g. 7d).
  *
- * Here are several examples of a calendar index:
+ * For the second type, a calendar style `Index`, here are several examples:
  *
  * ```text
  *     2003-10-30    // 30th Oct 2003
@@ -45,7 +46,7 @@ import util from "./util";
  *     2015          // All of the year 2015
  * ```
  *
- * A specific period of time, and associated data can be looked up based
+ * A specific `TimeRange`, and associated data can be associated up based
  * on that string. It also allows us to represent things like months,
  * which have variable length.
  *
@@ -58,6 +59,17 @@ export class Index extends Key {
     private _string: string;
     private _timerange: TimeRange;
 
+    /**
+     * Constructs a new `Index` by passing in the index string `s` and
+     * optionally a timezone `tz`. You can also use the `index()` factory
+     * function to construct one.
+     *
+     * Example:
+     * ```
+     * const idx = index("5m-4135541");
+     * idx.asTimerange().humanizeDuration();  // "5 minutes"
+     * ```
+     */
     constructor(s, tz = "Etc/UTC") {
         super();
         this._tz = tz;
@@ -70,17 +82,16 @@ export class Index extends Key {
     }
 
     /**
-     * Returns the timestamp to represent this `Index`
-     * which in this case will return the midpoint
-     * of the `TimeRange`
+     * Returns the timestamp as a `Date` to represent this `Index`, which in this
+     * case will return the midpoint of the `TimeRange` this represents
      */
     public timestamp(): Date {
         return this._timerange.mid();
     }
 
     /**
-     * Returns the `Index` as JSON, which will just be its string
-     * representation
+     * Returns the `Index` as JSON, which will just be its string representation
+     * within an object e.g. `{ index: 1d-1234 }`
      */
     public toJSON(): {} {
         return { index: this._string };
@@ -94,10 +105,16 @@ export class Index extends Key {
     }
 
     /**
-     * For the calendar range style `Index`es, this lets you return
+     * For the calendar style `Index`, this lets you return
      * that calendar range as a human readable format, e.g. "June, 2014".
      *
-     * The format specified is a `Moment.format`.
+     * The `format` specified is a `Moment.format`.
+     *
+     * Example:
+     * ```
+     * const idx = index("2014-09-17");
+     * idx.toNiceString("DD MMM YYYY") // "17 Sep 2014"
+     * ```
      */
     public toNiceString(format?: string): string {
         return util.niceIndexString(this._string, format);
@@ -143,10 +160,11 @@ export class Index extends Key {
  * * *Calendar index* - a calendar range (e.g. Oct 2014) that
  *                      maybe and uneven amount of time.
  *
- * Indexes also contain a timezone, which defaults to UTC. For instance if
+ * Indexes also contain a timezone `tz`, which defaults to UTC. For instance if
  * you have a day 2017-08-11, then the `TimeRange` representation depends
  * on the timezone of that day (a day in London is not the same time range
- * as a day in Los Angeles).
+ * as a day in Los Angeles), they are offset from each other by their timezone
+ * difference.
  */
 function indexFactory(s, tz = "Etc/UTC"): Index {
     return new Index(s, tz);

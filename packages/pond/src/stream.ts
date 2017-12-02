@@ -44,8 +44,6 @@ import {
     WindowingOptions
 } from "./types";
 
-export class Streaming {}
-
 /**
  * A Node is a transformation between type S and type T. Both S
  * and T much extend Base.
@@ -315,9 +313,6 @@ class AggregationNode<T extends Key> extends Node<KeyedCollection<T>, Event<Inde
 //
 
 /**
- *
- * @private
- *
  * An `EventStream` is the interface to the stream provided for manipulation of
  * parts of the streaming pipeline that map a stream of Events of type <T>.
  *
@@ -338,6 +333,8 @@ export class EventStream<T extends Key, U extends Key> {
     constructor(private stream: Stream<U>) {}
 
     /**
+     * @private
+     *
      * Add events into the stream
      */
     addEvent(e: Event<U>) {
@@ -533,13 +530,14 @@ export class EventStream<T extends Key, U extends Key> {
 }
 
 /**
- * @private
+ *
  */
 // tslint:disable-next-line:max-classes-per-file
 export class KeyedCollectionStream<T extends Key, U extends Key> {
     constructor(private stream: Stream<U>) {}
 
     /**
+     * @private
      * Add events into the stream
      */
     addEvent(event: Event<U>) {
@@ -628,19 +626,62 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
 //
 
 /**
- * @private
+ * Processing of incoming `Event` streams to for real time processing.
  *
- * A stream is the user facing object which implements addEvent()
- * in such a way that the pipeline is executed.
+ * Supports remapping, filtering, windowing and aggregation. It is designed for
+ * relatively light weight handling of incoming events.
  *
- * @example
- * ```
- * const s = Stream()
- *  .align({})
- *  .rate({});
+ * A `Stream` object manages a chain of processing nodes, each type of which
+ * provides an appropiate interface. When a `Stream` is initially created with
+ * the `stream()` factory function the interface you will be returned in an
+ * `EventStream`. If you perform a windowing operation you will be exposed to
+ * `KeyedCollectionStream`. While if you aggregate a `KeyedCollectionStream` you
+ * will be back to an `EventStream` and so on.
  *
- * s.addEvent(e);
+ * ---
+ * Note:
  *
+ * Generic grouping ("group by") should be handled outside of Pond now by creating
+ * multiple streams and mapping incoming `Event`s to those streams. This allows for flexibility
+ * as to where those streams live and how work should be divided.
+ *
+ * For "at scale" stream processing, use Apache Beam or Spark. This library is intended to
+ * simplify passing of events to a browser and enabling convenient processing for visualization
+ * purposes, or for light weight handling of events in Node.
+ *
+ * ---
+ * Example:
+ *
+ * ```typescript
+ * const result = {};
+ * const slidingWindow = window(duration("3m"), period(duration("1m")));
+ * const fixedHourlyWindow = window(duration("1h"));
+ *
+ * const source = stream()
+ *     .groupByWindow({
+ *         window: slidingWindow,
+ *         trigger: Trigger.onDiscardedWindow
+ *     })
+ *     .aggregate({
+ *         in_avg: ["in", avg()],
+ *         out_avg: ["out", avg()],
+ *         count: ["in", count()]
+ *     })
+ *     .map(e =>
+ *         new Event<Time>(time(e.timerange().end()), e.getData())
+ *     )
+ *     .groupByWindow({
+ *         window: fixedHourlyWindow,
+ *         trigger: Trigger.perEvent
+ *     })
+ *     .output((col, key) => {
+ *         result[key] = col as Collection<Time>;
+ *         calls += 1;
+ *     });
+ *
+ * source.addEvent(e1)
+ * source.addEvent(e2)
+ * ...
  * ```
  */
 // tslint:disable-next-line:max-classes-per-file
@@ -648,32 +689,50 @@ export class Stream<U extends Key = Time> {
     private head: Node<Base, Base>;
     private tail: Node<Base, Base>;
 
+    /**
+     * @private
+     */
     addEventMappingNode<S extends Key, T extends Key>(node: EventMap<S, T>) {
         this.addNode(node);
         return new EventStream<T, U>(this);
     }
 
+    /**
+     * @private
+     */
     addEventToCollectorNode<S extends Key, T extends Key>(node: EventToKeyedCollection<S, T>) {
         this.addNode(node);
         return new KeyedCollectionStream<T, U>(this);
     }
 
+    /**
+     * @private
+     */
     addCollectorMappingNode<S extends Key, T extends Key>(node: KeyedCollectionMap<S, T>) {
         this.addNode(node);
         return new KeyedCollectionStream<T, U>(this);
     }
 
+    /**
+     * @private
+     */
     addCollectionToEventNode<S extends Key, T extends Key>(node: KeyedCollectionToEvent<S, T>) {
         this.addNode(node);
         return new EventStream<T, U>(this);
     }
 
+    /**
+     * Add an `Event` into the stream
+     */
     addEvent<T extends Key>(e: Event<U>) {
         if (this.head) {
             this.head.set(e);
         }
     }
 
+    /**
+     * @private
+     */
     protected addNode(node) {
         if (!this.head) {
             this.head = node;

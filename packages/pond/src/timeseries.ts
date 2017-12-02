@@ -74,7 +74,6 @@ function buildMetaData(meta) {
     if (_.isString(meta.tz)) {
         d.tz = meta.tz;
     }
-
     return Immutable.Map(d);
 }
 
@@ -336,12 +335,11 @@ export class TimeSeries<T extends Key> {
         if (!e) {
             return;
         }
-
         const columns = [e.keyType(), ...this.columns()];
 
         const points = [];
         for (const evt of this._collection.eventList()) {
-            points.push(evt.toPoint());
+            points.push(evt.toPoint(this.columns()));
         }
 
         return _.extend(this._data.toJSON(), { columns, points });
@@ -449,9 +447,12 @@ export class TimeSeries<T extends Key> {
      * return a new `TimeSeries`.
      */
     crop(tr: TimeRange): TimeSeries<T> {
-        const beginPos = this.bisect(tr.begin());
+        const timerangeBegin = tr.begin();
+        let beginPos = this.bisect(timerangeBegin);
+        const bisectedEventOutsideRange = this.at(beginPos).timestamp() < timerangeBegin;
+        beginPos = bisectedEventOutsideRange ? beginPos + 1 : beginPos;
         const endPos = this.bisect(tr.end(), beginPos);
-        return this.slice(beginPos, endPos);
+        return this.slice(beginPos, endPos + 1);
     }
 
     //
@@ -753,11 +754,11 @@ export class TimeSeries<T extends Key> {
             const d = e.getData().mapKeys(key => renameMap[key] || key);
             switch (eventType) {
                 case "time":
-                    return new Event(time(e.toPoint()[0]), d);
+                    return new Event(time(e.toPoint(this.columns())[0]), d);
                 case "index":
-                    return new Event(index(e.toPoint()[0]), d);
+                    return new Event(index(e.toPoint(this.columns())[0]), d);
                 case "timerange":
-                    const timeArray = e.toPoint()[0];
+                    const timeArray = e.toPoint(this.columns())[0];
                     return new Event(timerange(timeArray[0], timeArray[1]), d);
             }
         });
