@@ -205,112 +205,99 @@ function timeRangeSeries(arg: TimeSeriesWireFormat) {
 export { timeSeries, indexedSeries, timeRangeSeries };
 
 /**
- * A `TimeSeries` represents a series of `Event`'s, with each event being a combination of:
- * * time (or `TimeRange`, or `Index`)
- * * data - corresponding set of key/values.
+ * A `TimeSeries<K>` represents a series of `Event<K>`'s, contained within a `Collection<K>`,
+ * along with associated meta data. Each `Event<K>` being a combination of:
+ * * `Key` of type K (`Time`, `TimeRange`, or `Index`)
+ * * `data` of type Immutable.Map<string, any> - corresponding set of key/values
  *
- * ### Construction
+ * To construct a `TimeSeries` you would typicaly use the wire format, which is a data
+ * structure passed into one of the helper factory functions. See the constructor
+ * docs below. You can also construct one from a list of `Event`s.
  *
- * Currently you can initialize a `TimeSeries` with either a list of `Event`'s, or with
- * a data format that looks like this:
+ * Methods exist to get data back out of the `TimeSeries`, such as a direct index
+ * lookup with `at()`, `begin()` and `end()`, or at a particular time with `atTime()`.
  *
- * ```javascript
- * const data = {
- *     name: "trafficc",
- *     columns: ["time", "value"],
- *     points: [
- *         [1400425947000, 52],
- *         [1400425948000, 18],
- *         [1400425949000, 26],
- *         [1400425950000, 93],
- *         ...
- *     ]
- * };
- * ```
- *
- * To create a new `TimeSeries` object from the above format, simply use the constructor:
- *
- * ```javascript
- * const series = new TimeSeries(data);
- * ```
- *
- * The format of the data is as follows:
- *
- *  - **name** - optional, but a good practice
- *  - **columns** - are necessary and give labels to the data in the points.
- *  - **points** - are an array of tuples. Each row is at a different time (or timerange),
- * and each value corresponds to the column labels.
- *
- * As just hinted at, the first column may actually be:
- *
- *  - "time"
- *  - "timeRange" represented by a `TimeRange`
- *  - "index" - a time range represented by an `Index`. By using an index it is possible,
- * for example, to refer to a specific month:
- *
- * ```javascript
- * const availabilityData = {
- *     name: "Last 3 months availability",
- *     columns: ["index", "uptime"],
- *     points: [
- *         ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
- *         ["2015-05", "92%"],
- *         ["2015-04", "87%"],
- *     ]
- * };
- * ```
- *
- * Alternatively, you can construct a `TimeSeries` with a list of events.
- * These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
- *
- * ```javascript
- * const events = [];
- * events.push(new TimeEvent(new Date(2015, 7, 1), {value: 27}));
- * events.push(new TimeEvent(new Date(2015, 8, 1), {value: 29}));
- * const series = new TimeSeries({
- *     name: "avg temps",
- *     events: events
- * });
- * ```
- *
- * ### Nested data
- *
- * The values do not have to be simple types like the above examples. Here's an
- * example where each value is itself an object with "in" and "out" keys:
- *
- * ```javascript
- * const series = new TimeSeries({
- *     name: "Map Traffic",
- *     columns: ["time", "NASA_north", "NASA_south"],
- *     points: [
- *         [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
- *         [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
- *         [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
- *         [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
- *     ]
- * });
- * ```
- *
- * Complex data is stored in an Immutable structure. To get a value out of nested
- * data like this you will get the event you want (by row), as usual, and then use
- * `get()` to fetch the value by column name. The result of this call will be a
- * JSON copy of the Immutable data so you can query deeper in the usual way:
- *
- * ```javascript
- * series.at(0).get("NASA_north")["in"]  // 200`
- * ```
- *
- * It is then possible to use a value mapper function when calculating different
- * properties. For example, to get the average "in" value of the NASA_north column:
- *
- * ```javascript
- * series.avg("NASA_north", d => d.in);  // 250
- * ```
+ * You can modify the set of `Event`s (returning a new `TimeSeries`) with operations
+ * such as `slice()`, `crop()`, `setName()`
  */
 export class TimeSeries<T extends Key> {
     private _collection: SortedCollection<T> = null;
     private _data = null;
 
+    /**
+     * You can initialize a `TimeSeries` with either a list of `Event`'s, or with
+     * what we call the wire format. Usually you would want to construct a `TimeSeries`
+     * by converting your data into this format.
+     *
+     * The format of the data is an object which has several special keys,
+     * i.e. fields that have special meaning for the `TimeSeries` and additional keys
+     * that are optionally added to form the meta data for the `TimeSeries`:
+     *
+     * Special keys:
+     *
+     *  - **name** - The name of the series (optional)
+     *  - **columns** - are necessary and give labels to the data in the points. The first
+     *                  column is special, it is the the key for the row and should be
+     *                  either "time", "timerange" or "index". Other columns are user
+     *                  defined. (required)
+     *  - **points** - are an array of tuples. Each row is at a different time (or timerange),
+     *                 and each value corresponds to the column labels. (required)
+     *  - **tz** - timezone (optional)
+     *
+     * You can add additional fields as meta data custom to your application.
+     *
+     * To create a new `TimeSeries` object from the above data format, simply use one of
+     * the factory functions. For `Time` based `TimeSeries` you would use `timeSeries()`.
+     * Other options are `timeRangeSeries()` and `indexedSeries()`:
+     *
+     * Example:
+     *
+     * ```
+     * import { timeSeries } from "pondjs";
+     *
+     * const series = timeSeries({
+     *     name: "traffic",
+     *     columns: ["time", "in", "out"],
+     *     points: [
+     *         [1400425947000, 52, 12],
+     *         [1400425948000, 18, 42],
+     *         [1400425949000, 26, 81],
+     *         [1400425950000, 93, 11],
+     *         ...
+     *     ]
+     * });
+     * ```
+     *
+     * Another example:
+     *
+     * ```
+     * const availability = indexedSeries({
+     *     name: "Last 3 months",
+     *     columns: ["index", "uptime", incidents],
+     *     points: [
+     *         ["2015-06", "100%", 0], // 2015-06 specified here for June 2015
+     *         ["2015-05", "92%", 2],
+     *         ["2015-04", "87%", 5]
+     *     ]
+     * });
+     * ```
+     *
+     * Alternatively, you can construct a `TimeSeries` with a list of events.
+     * To do this you need to use the `TimeSeries` constructor directly.
+     *
+     * These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`:
+     *
+     * ```
+     * import { TimeSeries } from "pondjs"
+     * const events = [];
+     * events.push(timeEvent(time(new Date(2015, 7, 1)), Immutable.Map({ value: 27 })));
+     * events.push(timeEvent(time(new Date(2015, 8, 1)), Immutable.Map({ value: 14 })));
+     * const series = new TimeSeries({
+     *     name: "events",
+     *     events: Immutable.List(events)
+     * });
+     * ```
+     */
     constructor(arg: TimeSeries<T> | TimeSeriesEvents<T>) {
         if (arg instanceof TimeSeries) {
             //
@@ -798,20 +785,12 @@ export class TimeSeries<T extends Key> {
 
         let filledCollection: Collection<T>;
         if (method === FillMethod.Zero || method === FillMethod.Pad) {
-            filledCollection = this._collection.fill({
-                fieldSpec,
-                method,
-                limit
-            });
+            filledCollection = this._collection.fill({ fieldSpec, method, limit });
         } else if (method === FillMethod.Linear) {
             if (_.isArray(fieldSpec)) {
                 filledCollection = this._collection;
                 fieldSpec.forEach(fieldPath => {
-                    const args: FillOptions = {
-                        fieldSpec: fieldPath,
-                        method,
-                        limit
-                    };
+                    const args: FillOptions = { fieldSpec: fieldPath, method, limit };
                     filledCollection = filledCollection.fill(args);
                 });
             } else {
@@ -956,7 +935,10 @@ export class TimeSeries<T extends Key> {
             );
         }
 
-        return this.fixedWindowRollup({ window: window(duration("1h")), aggregation });
+        return this.fixedWindowRollup({
+            window: window(duration("1h")),
+            aggregation
+        });
     }
 
     /**
