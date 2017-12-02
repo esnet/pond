@@ -10,7 +10,7 @@
 
 import React from "react";
 import Markdown from "react-markdown";
-import Highlighter from "../components/Highlighter";
+import Highlighter from "./Highlighter";
 import text from "raw!../docs/TimeRange.md";
 
 export default React.createClass({

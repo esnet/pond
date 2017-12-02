@@ -243,7 +243,7 @@ class TimeSeries {
 
         const points = [];
         for (const e of this._collection.events()) {
-            points.push(e.toPoint());
+            points.push(e.toPoint(this.columns()));
         }
 
         return _.extend(this._data.toJSON(), { columns, points });
@@ -420,9 +420,12 @@ class TimeSeries {
      * @return {TimeSeries}    The new, cropped, TimeSeries.
      */
     crop(timerange) {
-        const beginPos = this.bisect(timerange.begin());
+        const timerangeBegin = timerange.begin();
+        let beginPos = this.bisect(timerangeBegin);
+        const bisectedEventOutsideRange = this.at(beginPos).timestamp() < timerangeBegin;
+        beginPos = bisectedEventOutsideRange ? beginPos + 1 : beginPos;
         const endPos = this.bisect(timerange.end(), beginPos);
-        return this.slice(beginPos, endPos);
+        return this.slice(beginPos, endPos + 1);
     }
 
     /**
