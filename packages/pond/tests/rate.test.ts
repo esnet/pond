@@ -11,6 +11,7 @@ import { collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { period } from "../src/period";
+import { sortedCollection } from "../src/sorted";
 import { time } from "../src/time";
 
 import { AlignmentMethod } from "../src/types";
@@ -34,7 +35,7 @@ it("can calculate the rate using Collection.rate()", () => {
         return event(time(e[0]), Immutable.Map({ in: e[1] }));
     });
 
-    const c = collection(Immutable.List(list));
+    const c = sortedCollection(Immutable.List(list));
     const rates = c.rate({ fieldSpec: "in" });
 
     expect(rates.size()).toEqual(list.length - 1);
@@ -50,7 +51,7 @@ it("can do basic rate using Collection.rate()", () => {
         return event(time(e[0]), Immutable.Map({ value: e[1] }));
     });
 
-    const c = collection(Immutable.List(list));
+    const c = sortedCollection(Immutable.List(list));
     const rates = c
         .align({
             fieldSpec: "value",
@@ -73,7 +74,7 @@ it("can output nulls for negative values", () => {
         return event(time(e[0]), Immutable.Map({ value: e[1] }));
     });
 
-    const c = collection(Immutable.List(list));
+    const c = sortedCollection(Immutable.List(list));
 
     const rates1 = c
         .align({

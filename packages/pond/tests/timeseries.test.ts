@@ -765,17 +765,23 @@ describe("Slicing a timeseries", () => {
 describe("Cropping a timeseries", () => {
     it("can create crop a series", () => {
         const series = timeSeries({
-            name: 'exact timestamps',
-            columns: ['time', 'value'],
-            points: [[1504014065240,1],[1504014065243,2],[1504014065244,3],[1504014065245,4],[1504014065249,5]]
+            name: "exact timestamps",
+            columns: ["time", "value"],
+            points: [
+                [1504014065240, 1],
+                [1504014065243, 2],
+                [1504014065244, 3],
+                [1504014065245, 4],
+                [1504014065249, 5]
+            ]
         });
-        const ts1 = series.crop(timerange(1504014065243,1504014065245));
+        const ts1 = series.crop(timerange(1504014065243, 1504014065245));
         expect(ts1.size()).toBe(3);
-        const ts2 = series.crop(timerange(1504014065242,1504014065245));
+        const ts2 = series.crop(timerange(1504014065242, 1504014065245));
         expect(ts2.size()).toBe(3);
-        const ts3 = series.crop(timerange(1504014065243,1504014065247));
+        const ts3 = series.crop(timerange(1504014065243, 1504014065247));
         expect(ts3.size()).toBe(3);
-        const ts4 = series.crop(timerange(1504014065242,1504014065247));
+        const ts4 = series.crop(timerange(1504014065242, 1504014065247));
         expect(ts4.size()).toBe(3);
     });
 });
@@ -1034,6 +1040,33 @@ describe("Remapping Events in a TimeSeries", () => {
         expect(ts.at(0).get("in")).toBe(34);
         expect(ts.at(0).get("out")).toBe(52);
         expect(ts.size()).toBe(timeseries.size());
+    });
+
+    it("can run a flat map over the TimeSeries", () => {
+        const series = timeSeries({
+            name: "Map Traffic",
+            columns: ["time", "NASA_north", "NASA_south"],
+            points: [
+                [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
+                [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
+                [1400425953000, { in: 300, out: 600 }, { in: 147, out: 158 }],
+                [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175, other: 1 }]
+            ]
+        });
+        const split = series.flatMap(e =>
+            Immutable.List([e.setData(e.get("NASA_north")), e.setData(e.get("NASA_south"))])
+        );
+        console.log(split.toString());
+        expect(split.size()).toBe(8);
+        expect(split.at(0).get("in")).toBe(100);
+        expect(split.at(0).get("out")).toBe(200);
+        expect(split.at(0).get("other")).toBeUndefined();
+        expect(split.at(1).get("in")).toBe(145);
+        expect(split.at(1).get("out")).toBe(135);
+        expect(split.at(1).get("other")).toBeUndefined();
+        expect(split.at(7).get("in")).toBe(155);
+        expect(split.at(7).get("out")).toBe(175);
+        expect(split.at(7).get("other")).toBe(1);
     });
 });
 

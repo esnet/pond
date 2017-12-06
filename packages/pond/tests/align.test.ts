@@ -21,6 +21,7 @@ import { collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { period } from "../src/period";
+import { sortedCollection } from "../src/sorted";
 import { time } from "../src/time";
 
 import { AlignmentMethod } from "../src/types";
@@ -48,7 +49,7 @@ it("can do basic alignment using TimeSeries.align()", () => {
         return event(time(e[0]), Immutable.Map({ value: e[1] }));
     });
 
-    const c = collection(Immutable.List(list));
+    const c = sortedCollection(Immutable.List(list));
     const aligned = c.align({
         fieldSpec: "value",
         period: period().every(duration("1m")),
@@ -71,7 +72,7 @@ it("can do basic hold alignment", () => {
         return event(time(e[0]), Immutable.Map({ value: e[1] }));
     });
 
-    const c = collection(Immutable.List(list));
+    const c = sortedCollection(Immutable.List(list));
     const aligned = c.align({
         fieldSpec: ["value"],
         period: period(duration("1m")),

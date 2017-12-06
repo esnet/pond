@@ -20,7 +20,9 @@ describe("SortedCollection", () => {
             const e1 = event(timestamp1, Immutable.Map({ a: 5, b: 6 }));
             const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 2 }));
 
-            const c = SortedCollection<Time>().addEvent(e1).addEvent(e2);
+            const c = SortedCollection<Time>()
+                .addEvent(e1)
+                .addEvent(e2);
 
             expect(c.size()).toEqual(2);
             expect(c.at(0).get("a")).toEqual(4);
@@ -36,7 +38,10 @@ describe("SortedCollection", () => {
             const e2 = event(timestamp3, Immutable.Map({ a: 3 }));
             const e3 = event(timestamp2, Immutable.Map({ a: 2 }));
 
-            const c1 = SortedCollection<Time>().addEvent(e1).addEvent(e2).addEvent(e3);
+            const c1 = SortedCollection<Time>()
+                .addEvent(e1)
+                .addEvent(e2)
+                .addEvent(e3);
 
             const c2 = SortedCollection(c1);
             expect(c2.size()).toEqual(3);
@@ -63,6 +68,21 @@ describe("SortedCollection", () => {
             expect(c.at(0).get("a")).toEqual(1);
             expect(c.at(1).get("a")).toEqual(2);
             expect(c.at(2).get("a")).toEqual(3);
+        });
+
+        it("can filter a sorted collection", () => {
+            const timestamp1 = new Time("2015-04-22T02:30:00Z");
+            const timestamp2 = new Time("2015-04-22T03:30:00Z");
+            const timestamp3 = new Time("2015-04-22T04:30:00Z");
+
+            const e1 = event(timestamp1, Immutable.Map({ a: 1 }));
+            const e2 = event(timestamp3, Immutable.Map({ a: 3 }));
+            const e3 = event(timestamp2, Immutable.Map({ a: 8 }));
+
+            const c = SortedCollection<Time>(Immutable.List([e1, e3, e2]));
+            const cc = c.filter(e => e.get("a") > 4);
+            expect(cc.size()).toEqual(1);
+            expect(cc.at(0).get("a")).toEqual(8);
         });
     });
 });

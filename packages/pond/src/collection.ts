@@ -432,7 +432,7 @@ export class Collection<T extends Key> extends Base {
     }
 
     /**
-     * Map the `Event`s in this Collection to new `Event`s.
+     * Map the `Event`s in this `Collection` to new `Event`s.
      *
      * For each `Event` passed to your `mapper` function you return a new Event.
      *
@@ -654,7 +654,7 @@ export class Collection<T extends Key> extends Base {
      * Aggregates the `Collection`'s `Event`s down to a single value per field.
      *
      * This makes use of a user defined function suppled as the `reducer` to do
-     * the reduction of values to a single value. The ReducerFunction is defined
+     * the reduction of values to a single value. The `ReducerFunction` is defined
      * like so:
      *
      * ```
@@ -912,95 +912,6 @@ export class Collection<T extends Key> extends Base {
             }
         });
         return result;
-    }
-
-    /**
-     * The `align()` method takes a `Event`s and interpolates new values on precise
-     * time intervals. For example we get measurements from our network every 30 seconds,
-     * but not exactly. We might get values timestamped at :32, 1:01, 1:28, 2:00 and so on.
-     *
-     * It is helpful to remove this at some stage of processing incoming data so that later
-     * the aligned values can be aggregated together (combining multiple series into a singe
-     * aggregated series).
-     *
-     * The alignment is controlled by the `AlignmentOptions`. This is an object of the form:
-     * ```
-     * {
-     *    fieldSpec: string | string[];
-     *    period: Period;
-     *    method?: AlignmentMethod;
-     *    limit?: number;
-     * }
-     * ```
-     * Options:
-     *  * `fieldSpec` - the field or fields to align
-     *  * `period` - a `Period` object to control the time interval to align to
-     *  * `method` - the interpolation method, which may be
-     *    `AlignmentMethod.Linear` or `AlignmentMethod.Hold`
-     *  * `limit` - how long to interpolate values before inserting nulls on boundaries.
-     *
-     * Note: Only a `Collection` of `Event<Time>` objects can be aligned. `Event<Index>`
-     * objects are basically already aligned and it makes no sense in the case of a
-     * `Event<TimeRange>`.
-     *
-     * Note: Aligned `Event`s will only contain the fields that the alignment was requested
-     * on. Which is to say if you have two columns, "in" and "out", and only request to align
-     * the "in" column, the "out" value will not be contained in the resulting collection.
-     */
-    public align(options: AlignmentOptions): Collection<T> {
-        const p = new Align<T>(options);
-        return this.flatMap<T>(e => p.addEvent(e));
-    }
-
-    /**
-     * Returns the derivative of the `Event`s in this `Collection` for the given columns.
-     *
-     * The result will be per second. Optionally you can substitute in `null` values
-     * if the rate is negative. This is useful when a negative rate would be considered
-     * invalid like an ever increasing counter.
-     *
-     * To control the rate calculation you need to specify a `RateOptions` object, which
-     * takes the following form:
-     * ```
-     * {
-     *     fieldSpec: string | string[];
-     *     allowNegative?: boolean;
-     * }
-     * ```
-     * Options:
-     *  * `fieldSpec` - the field to calculate the rate on
-     *  * `allowNegative` - allow emit of negative rates
-     */
-    public rate(options: RateOptions): Collection<TimeRange> {
-        const p = new Rate<T>(options);
-        return this.flatMap<TimeRange>(e => p.addEvent(e));
-    }
-
-    /**
-     * Fills missing/invalid values in the `Event` with new values.
-     *
-     * These new value can be either zeros, interpolated values from neighbors, or padded,
-     * meaning copies of previous value.
-     *
-     * The fill is controlled by the `FillOptions`. This is an object of the form:
-     * ```
-     * {
-     *     fieldSpec: string | string[];
-     *     method?: FillMethod;
-     *     limit?: number;
-     * }
-     * ```
-     * Options:
-     *  * `fieldSpec` - the field to fill
-     *  * `method` - the interpolation method, one of `FillMethod.Hold`, `FillMethod.Pad`
-     *               or `FillMethod.Linear`
-     *  * `limit` - the number of missing values to fill before giving up
-     *
-     * Returns a new filled `Collection`.
-     */
-    public fill(options: FillOptions): Collection<T> {
-        const p = new Fill<T>(options);
-        return this.flatMap<T>(e => p.addEvent(e));
     }
 
     /**
