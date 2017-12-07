@@ -15,12 +15,14 @@ import { Align } from "./align";
 import { Collection } from "./collection";
 import { Event } from "./event";
 import { Fill } from "./fill";
+import { grouped, GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Key } from "./key";
 import { Rate } from "./rate";
 import { TimeRange } from "./timerange";
 import { DedupFunction } from "./types";
+import { windowed, WindowedCollection } from "./windowedcollection";
 
-import { AlignmentOptions, FillOptions, RateOptions } from "./types";
+import { AlignmentOptions, FillOptions, RateOptions, WindowingOptions } from "./types";
 
 /**
  * In general, a `Collection` is a bucket of `Event`'s, with no particular order. This,
@@ -34,13 +36,90 @@ import { AlignmentOptions, FillOptions, RateOptions } from "./types";
  */
 export class SortedCollection<T extends Key> extends Collection<T> {
     /**
-     * Construct a new `Sorted Collection` (experimental)
+     * Construct a new `Sorted Collection`
      */
     constructor(arg1?: Immutable.List<Event<T>> | Collection<T>) {
         super(arg1);
-        if (!this.isChronological()) {
-            this.sortByKey();
+        if (!super.isChronological()) {
+            this._events = this._events.sortBy(event => {
+                return +event.getKey().timestamp();
+            });
         }
+    }
+
+    /**
+     * Appends a new `Event` to the `SortedCollection`, returning a new `SortedCollection`
+     * containing that `Event`. Optionally the `Event`s may be de-duplicated.
+     *
+     * The `dedup` arg may `true` (in which case any existing `Event`s with the
+     * same key will be replaced by this new `Event`), or with a function. If
+     * `dedup` is a user function that function will be passed a list of all `Event`s
+     * with that duplicated key and will be expected to return a single `Event`
+     * to replace them with, thus shifting de-duplication logic to the user.
+     * 
+     * DedupFunction:
+     * ```
+     * (events: Immutable.List<Event<T>>) => Event<T>
+     * ```
+     *
+     * Example 1:
+     *
+     * ```
+     * let myCollection = collection<Time>()
+     *     .addEvent(e1)
+     *     .addEvent(e2);
+     * ```
+     *
+     * Example 2:
+     * ```
+     * // dedup with the sum of the duplicated events
+     * const myDedupedCollection = sortedCollection<Time>()
+     *     .addEvent(e1)
+     *     .addEvent(e2)
+     *     .addEvent(e3, (events) => {
+     *         const a = events.reduce((sum, e) => sum + e.get("a"), 0);
+     *         return new Event<Time>(t, { a });
+     *     });
+     * ```
+     */
+    public addEvent(event: Event<T>, dedup?: DedupFunction<T> | boolean): SortedCollection<T> {
+        const events = this.eventList();
+        const sortRequired = events.size > 0 && event.begin() < events.get(0).begin();
+        const c = super.addEvent(event, dedup);
+        if (sortRequired) {
+            return new SortedCollection(c.sortByKey());
+        } else {
+            return new SortedCollection(c);
+        }
+    }
+
+    /**
+     * Returns true if all `Event`s are in chronological order. In the case
+     * of a `SortedCollection` this will always return `true`.
+     */
+    public isChronological(): boolean {
+        return true;
+    }
+
+    /**
+     * Sorts the `Collection` by the `Event` key `T`.
+     *
+     * In the case case of the key being `Time`, this is clear.
+     * For `TimeRangeEvents` and `IndexedEvents`, the `Collection`
+     * will be sorted by the begin time.
+     *
+     * This method is particularly useful when the `Collection`
+     * will be passed into a `TimeSeries`.
+     *
+     * See also `Collection.isChronological()`.
+     *
+     * @example
+     * ```
+     * const sorted = collection.sortByKey();
+     * ```
+     */
+    public sortByKey(): Collection<T> {
+        return this;
     }
 
     /**
@@ -212,6 +291,67 @@ export class SortedCollection<T extends Key> extends Collection<T> {
     }
 
     /**
+     * GroupBy a field's value. The result is a `GroupedCollection`, which internally maps
+     * a key (the value of the field) to a `Collection` of `Event`s in that group.
+     *
+     * Example:
+     *
+     * In this example we group by the field "team_name" and then call the `aggregate()`
+     * method on the resulting `GroupedCollection`.
+     *
+     * ```
+     * const teamAverages = c
+     *     .groupBy("team_name")
+     *     .aggregate({
+     *         "goals_avg": ["goals", avg()],
+     *         "against_avg": ["against", avg()],
+     *     });
+     * teamAverages.get("raptors").get("goals_avg"));
+     * teamAverages.get("raptors").get("against_avg"))
+     * ```
+     */
+    public groupBy(field: string | string[] | GroupingFunction<T>): GroupedCollection<T> {
+        return grouped(field, this);
+    }
+
+    /**
+     * Window the `Collection` into a given period of time.
+     *
+     * This is similar to `groupBy` except `Event`s are grouped by their timestamp
+     * based on the `Period` supplied. The result is a `WindowedCollection`.
+     *
+     * The windowing is controlled by the `WindowingOptions`, which takes the form:
+     * ```
+     * {
+     *     window: WindowBase;
+     *     trigger?: Trigger;
+     * }
+     * ```
+     * Options:
+     *  * `window` - a `WindowBase` subclass, currently `Window` or `DayWindow`
+     *  * `trigger` - not needed in this context
+     *
+     * Example:
+     *
+     * ```
+     * const c = new Collection()
+     *     .addEvent(event(time("2015-04-22T02:28:00Z"), map({ team: "a", value: 3 })))
+     *     .addEvent(event(time("2015-04-22T02:29:00Z"), map({ team: "a", value: 4 })))
+     *     .addEvent(event(time("2015-04-22T02:30:00Z"), map({ team: "b", value: 5 })));
+     *
+     * const thirtyMinutes = window(duration("30m"));
+     *
+     * const windowedCollection = c.window({
+     *     window: thirtyMinutes
+     * });
+     *
+     * ```
+     */
+    public window(options: WindowingOptions): WindowedCollection<T> {
+        return windowed(options, Immutable.Map({ all: this }));
+    }
+
+    /**
      * Static function to compare two collections to each other. If the collections
      * are of the same value as each other then equals will return true.
      */
@@ -237,22 +377,10 @@ export class SortedCollection<T extends Key> extends Collection<T> {
         c._keyMap = keyMap;
         return c;
     }
-
-    /**
-     * If our new `Event` was added at the end, then we don't have anything to maintain.
-     * However, if the `Event` would otherwise be out of order then we sort the `Collection`.
-     */
-    protected onEventAdded(events: Immutable.List<Event<T>>): Immutable.List<Event<T>> {
-        const size = events.size;
-        if (size > 1 && events.get(size - 2).begin() > events.get(size - 1).begin()) {
-            return events.sortBy(event => +event.getKey().timestamp());
-        }
-        return events;
-    }
 }
 
 function sortedCollectionFactory<T extends Key>(arg1?: Immutable.List<Event<T>> | Collection<T>) {
     return new SortedCollection<T>(arg1);
 }
 
-export { sortedCollectionFactory as sortedCollection };
+export { sortedCollectionFactory as sortedCollection, sortedCollectionFactory as sorted };

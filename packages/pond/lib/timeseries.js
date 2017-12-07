@@ -23,7 +23,7 @@ const _ = require("lodash");
 const duration_1 = require("./duration");
 const event_1 = require("./event");
 const index_1 = require("./index");
-const sorted_1 = require("./sorted");
+const sortedcollection_1 = require("./sortedcollection");
 const time_1 = require("./time");
 const timerange_1 = require("./timerange");
 const window_1 = require("./window");
@@ -128,109 +128,151 @@ function timeRangeSeries(arg) {
 }
 exports.timeRangeSeries = timeRangeSeries;
 /**
- * A `TimeSeries` represents a series of `Event`'s, with each event being a combination of:
- * * time (or `TimeRange`, or `Index`)
- * * data - corresponding set of key/values.
+ * A `TimeSeries<K>` represents a series of `Event<K>`'s, contained within a `Collection<K>`,
+ * along with associated meta data.
  *
- * ### Construction
+ * Each `Event<K>`, a single entity in the Collection, is a combination of:
+ * * `Key` of type K (`Time`, `TimeRange`, or `Index`)
+ * * `data` of type Immutable.Map<string, any> - corresponding set of key/values
  *
- * Currently you can initialize a `TimeSeries` with either a list of `Event`'s, or with
- * a data format that looks like this:
+ * To construct a `TimeSeries` you would typicaly use the wire format, which is a data
+ * structure passed into one of the helper factory functions. See the constructor
+ * docs below for details of this format. It's fairly simple.
  *
- * ```javascript
- * const data = {
- *     name: "trafficc",
- *     columns: ["time", "value"],
- *     points: [
- *         [1400425947000, 52],
- *         [1400425948000, 18],
- *         [1400425949000, 26],
- *         [1400425950000, 93],
- *         ...
- *     ]
- * };
- * ```
+ * You can also construct a `TimeSeries` from a list of `Event`s.
  *
- * To create a new `TimeSeries` object from the above format, simply use the constructor:
+ * A `TimeSeries` supports some notion of what timezone it is in, and this can be
+ * specified in the constructor. `Event`s in this `TimeSeries` are considered to
+ * be in this timezone. Specifically, if they are `Event<Index>`'s an event might be
+ * at "2014-08-31". The actual timerange of that representation depends on where
+ * you are. Note: an `Index` of "1d-1234" is always a UTC representation.
  *
- * ```javascript
- * const series = new TimeSeries(data);
- * ```
+ * Methods exist to query back out of the `TimeSeries`:
  *
- * The format of the data is as follows:
+ *  * Specific `Event`s with `at()`, `atFirst()` and `atLast()`, or at a
+ * particular time with `atTime()`.
+ *  * Meta data can also be accessed using `name()`, `timezone()` and `isUTC()`,
+ * along with `columns()` and the `eventList()` or `collection()` itself. More
+ * general user defined meta data can be accessed with `meta()`.
+ *  * The overall time range of the `TimeSeries` can be queried with `timerange()`,
+ * of for convenience also see `begin()` and `end()`.
  *
- *  - **name** - optional, but a good practice
- *  - **columns** - are necessary and give labels to the data in the points.
- *  - **points** - are an array of tuples. Each row is at a different time (or timerange),
- * and each value corresponds to the column labels.
+ * Mutating a `TimeSeries` will always return a new `TimeSeries`:
+ *  * Meta data can be modified with `setMeta()`, `setName()` and renameColumns().
+ *  * The set of `Event`s can be altered with operations such as `slice()`, `crop()`.
+ *  * Or alternatively you can `select()` specific columns.
+ *  * You can take the `rate()` of data
  *
- * As just hinted at, the first column may actually be:
+ * Basic statistics operations allow you to get percentiles, quantiles,
+ * `avg()`, `min()`, `max()`, `sum()`, `count()` etc for any column within the
+ * `TimeSeries`.
  *
- *  - "time"
- *  - "timeRange" represented by a `TimeRange`
- *  - "index" - a time range represented by an `Index`. By using an index it is possible,
- * for example, to refer to a specific month:
+ * Traversing over the `Event`s in the `TimeSeries` can be done most efficiently
+ * with either `forEach()` or `map()`.
  *
- * ```javascript
- * const availabilityData = {
- *     name: "Last 3 months availability",
- *     columns: ["index", "uptime"],
- *     points: [
- *         ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
- *         ["2015-05", "92%"],
- *         ["2015-04", "87%"],
- *     ]
- * };
- * ```
+ * Reducing data within a `TimeSeries` is a common task:
+ *  * `collapse()` will take a list of columns an collapse those down to
+ *    a single output column using a function (e.g. sum())
+ *  * `fixedWindowRollup()` lets you aggregate into specific time windows
+ *    to produce a new series.
+ *  * `hourlyRollup()` and `dailyRollup()` similarly
+ *  * You can also make a new mapping from a window to a `Collection` out
+ *    of the `TimeSeries` with `collectionByWindow()`
+ *  * see also static functions for reducing and merging
+ *    multiple `TimeSeries` together
  *
- * Alternatively, you can construct a `TimeSeries` with a list of events.
- * These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
+ * Fixing or transforming non-ideal data is another important function:
+ *  * `sizeValid()` will tell you how many `Event`s are valid
+ *  * statistic functions all take a filter function that can filter the
+ *    `Event`s being processed to handle missing or bad data
+ *  * `fill()` will fix missing data by inserting a new value where undefined,
+ *    null or NaN values are found, using interpolation or 0.
+ *  * `align()` will change the time position of data to lie on specific time
+ *    boundaries using different interpolation methods (e.g. align to each minute)
  *
- * ```javascript
- * const events = [];
- * events.push(new TimeEvent(new Date(2015, 7, 1), {value: 27}));
- * events.push(new TimeEvent(new Date(2015, 8, 1), {value: 29}));
- * const series = new TimeSeries({
- *     name: "avg temps",
- *     events: events
- * });
- * ```
+ * Some static methods also exist:
+ *  * `equal()` and `is()` are two was to compare if a `TimeSeries` is the same.
+ *  * `timeSeriesListMerge()` can be used to concatenate two `TimeSeries` together
+ *    or to merge multiple `TimeSeries` together that have different column names.
+ *  * `timeSeriesListReduce()` can be used for operations like summing multiple
+ *    `TimeSeries` together
  *
- * ### Nested data
- *
- * The values do not have to be simple types like the above examples. Here's an
- * example where each value is itself an object with "in" and "out" keys:
- *
- * ```javascript
- * const series = new TimeSeries({
- *     name: "Map Traffic",
- *     columns: ["time", "NASA_north", "NASA_south"],
- *     points: [
- *         [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
- *         [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
- *         [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
- *         [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
- *     ]
- * });
- * ```
- *
- * Complex data is stored in an Immutable structure. To get a value out of nested
- * data like this you will get the event you want (by row), as usual, and then use
- * `get()` to fetch the value by column name. The result of this call will be a
- * JSON copy of the Immutable data so you can query deeper in the usual way:
- *
- * ```javascript
- * series.at(0).get("NASA_north")["in"]  // 200`
- * ```
- *
- * It is then possible to use a value mapper function when calculating different
- * properties. For example, to get the average "in" value of the NASA_north column:
- *
- * ```javascript
- * series.avg("NASA_north", d => d.in);  // 250
- * ```
  */
 class TimeSeries {
+    /**
+     * You can initialize a `TimeSeries` with either a list of `Event`'s, or with
+     * what we call the wire format. Usually you would want to construct a `TimeSeries`
+     * by converting your data into this format.
+     *
+     * The format of the data is an object which has several special keys,
+     * i.e. fields that have special meaning for the `TimeSeries` and additional keys
+     * that are optionally added to form the meta data for the `TimeSeries`:
+     *
+     * Special keys:
+     *
+     *  - **name** - The name of the series (optional)
+     *  - **columns** - are necessary and give labels to the data in the points. The first
+     *                  column is special, it is the the key for the row and should be
+     *                  either "time", "timerange" or "index". Other columns are user
+     *                  defined. (required)
+     *  - **points** - are an array of tuples. Each row is at a different time (or timerange),
+     *                 and each value corresponds to the column labels. (required)
+     *  - **tz** - timezone (optional)
+     *
+     * You can add additional fields as meta data custom to your application.
+     *
+     * To create a new `TimeSeries` object from the above data format, simply use one of
+     * the factory functions. For `Time` based `TimeSeries` you would use `timeSeries()`.
+     * Other options are `timeRangeSeries()` and `indexedSeries()`:
+     *
+     * Example:
+     *
+     * ```
+     * import { timeSeries } from "pondjs";
+     *
+     * const series = timeSeries({
+     *     name: "traffic",
+     *     columns: ["time", "in", "out"],
+     *     points: [
+     *         [1400425947000, 52, 12],
+     *         [1400425948000, 18, 42],
+     *         [1400425949000, 26, 81],
+     *         [1400425950000, 93, 11],
+     *         ...
+     *     ]
+     * });
+     * ```
+     *
+     * Another example:
+     *
+     * ```
+     * const availability = indexedSeries({
+     *     name: "Last 3 months",
+     *     columns: ["index", "uptime", incidents],
+     *     points: [
+     *         ["2015-06", "100%", 0], // 2015-06 specified here for June 2015
+     *         ["2015-05", "92%", 2],
+     *         ["2015-04", "87%", 5]
+     *     ]
+     * });
+     * ```
+     *
+     * Alternatively, you can construct a `TimeSeries` with a list of events.
+     * To do this you need to use the `TimeSeries` constructor directly.
+     *
+     * These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`:
+     *
+     * ```
+     * import { TimeSeries } from "pondjs"
+     * const events = [];
+     * events.push(timeEvent(time(new Date(2015, 7, 1)), Immutable.Map({ value: 27 })));
+     * events.push(timeEvent(time(new Date(2015, 8, 1)), Immutable.Map({ value: 14 })));
+     * const series = new TimeSeries({
+     *     name: "events",
+     *     events: Immutable.List(events)
+     * });
+     * ```
+     */
     constructor(arg) {
         this._collection = null;
         this._data = null;
@@ -248,7 +290,7 @@ class TimeSeries {
                 // Initialized from a Collection
                 //
                 const { collection } = arg, meta3 = __rest(arg, ["collection"]);
-                this._collection = new sorted_1.SortedCollection(collection);
+                this._collection = new sortedcollection_1.SortedCollection(collection);
                 this._data = buildMetaData(meta3);
             }
             else if (_.has(arg, "events")) {
@@ -256,14 +298,11 @@ class TimeSeries {
                 // Has a list of events
                 //
                 const { events } = arg, meta1 = __rest(arg, ["events"]);
-                this._collection = new sorted_1.SortedCollection(events);
+                this._collection = new sortedcollection_1.SortedCollection(events);
                 this._data = buildMetaData(meta1);
             }
         }
     }
-    //
-    // Serialize
-    //
     /**
      * Turn the `TimeSeries` into regular javascript objects
      */
@@ -275,12 +314,13 @@ class TimeSeries {
         const columns = [e.keyType(), ...this.columns()];
         const points = [];
         for (const evt of this._collection.eventList()) {
-            points.push(evt.toPoint());
+            points.push(evt.toPoint(this.columns()));
         }
         return _.extend(this._data.toJSON(), { columns, points });
     }
     /**
-     * Represent the `TimeSeries` as a string
+     * Represent the `TimeSeries` as a string, which is useful for
+     * serializing it across the network.
      */
     toString() {
         return JSON.stringify(this.toJSON());
@@ -338,7 +378,8 @@ class TimeSeries {
         return this._collection.lastEvent();
     }
     /**
-     * Sets a new underlying collection for this `TimeSeries`.
+     * Sets a new underlying collection for this `TimeSeries` and retuns a
+     * new `TimeSeries`.
      */
     setCollection(collection) {
         const result = new TimeSeries(this);
@@ -346,12 +387,12 @@ class TimeSeries {
             result._collection = collection;
         }
         else {
-            result._collection = new sorted_1.SortedCollection();
+            result._collection = new sortedcollection_1.SortedCollection();
         }
         return result;
     }
     /**
-     * Returns the `Index` that bisects the `TimeSeries` at the time specified.
+     * Returns the index that bisects the `TimeSeries` at the time specified.
      */
     bisect(t, b) {
         return this._collection.bisect(t, b);
@@ -359,20 +400,22 @@ class TimeSeries {
     /**
      * Perform a slice of events within the `TimeSeries`, returns a new
      * `TimeSeries` representing a portion of this `TimeSeries` from
-     * begin up to but not including end.
+     * `begin` up to but not including `end`.
      */
     slice(begin, end) {
-        const sliced = new sorted_1.SortedCollection(this._collection.slice(begin, end));
+        const sliced = new sortedcollection_1.SortedCollection(this._collection.slice(begin, end));
         return this.setCollection(sliced);
     }
     /**
-     * Crop the `TimeSeries` to the specified `TimeRange` and
-     * return a new `TimeSeries`.
+     * Crop the `TimeSeries` to the specified `TimeRange` and return a new `TimeSeries`.
      */
     crop(tr) {
-        const beginPos = this.bisect(tr.begin());
+        const timerangeBegin = tr.begin();
+        let beginPos = this.bisect(timerangeBegin);
+        const bisectedEventOutsideRange = this.at(beginPos).timestamp() < timerangeBegin;
+        beginPos = bisectedEventOutsideRange ? beginPos + 1 : beginPos;
         const endPos = this.bisect(tr.end(), beginPos);
-        return this.slice(beginPos, endPos);
+        return this.slice(beginPos, endPos + 1);
     }
     //
     // Access meta data about the series
@@ -390,7 +433,9 @@ class TimeSeries {
         return this.setMeta("name", name);
     }
     /**
-     * Fetch the timeSeries `Index`, if it has one.
+     * Fetch the timeSeries `Index`, if it has one. This is still in the
+     * API for historical reasons but is just a short cut to calling
+     * `series.getMeta("index")`.
      */
     index() {
         return index_1.index(this._data.get("index"));
@@ -408,19 +453,20 @@ class TimeSeries {
         return this.index() ? this.index().asTimerange() : undefined;
     }
     /**
-     * Fetch the UTC flag, i.e. are the events in this `TimeSeries` in
-     * UTC or local time (if they are `IndexedEvent`'s an event might be
-     * "2014-08-31". The actual time range of that representation
-     * depends on where you are. Pond supports thinking about that in
-     * either as a UTC day, or a local day).
+     * Fetch if the timezone is UTC
      */
     isUTC() {
-        return this._data.get("utc");
+        return this._data.get("tz") === "Etc/UTC";
     }
     /**
-     * Fetch the list of column names. This is determined by
-     * traversing though the events and collecting the set.
-     *
+     * Returns the timezone set on this `TimeSeries`.
+     */
+    timezone() {
+        return this._data.get("tz");
+    }
+    /**
+     * Fetch the list of column names as a list of string.
+     * This is determined by traversing though the events and collecting the set.
      * Note: the order is not defined
      */
     columns() {
@@ -435,12 +481,13 @@ class TimeSeries {
     }
     /**
      * Returns the list of Events in the `Collection` of events for this `TimeSeries`
+     * The result is an Immutable.List of the `Event`s.
      */
     eventList() {
         return this.collection().eventList();
     }
     /**
-     * Returns the internal `Collection` of events for this `TimeSeries`
+     * Returns the internal `SortedCollection` of events for this `TimeSeries`
      */
     collection() {
         return this._collection;
@@ -460,8 +507,8 @@ class TimeSeries {
         }
     }
     /**
-     * Set new meta data for the `TimeSeries`. The result will
-     * be a new `TimeSeries`.
+     * Set new meta data for the `TimeSeries` using a `key` and `value`.
+     * The result will be a new `TimeSeries`.
      */
     setMeta(key, value) {
         const newTimeSeries = new TimeSeries(this);
@@ -470,9 +517,6 @@ class TimeSeries {
         newTimeSeries._data = dd;
         return newTimeSeries;
     }
-    //
-    // Access the series itself
-    //
     /**
      * Returns the number of events in this `TimeSeries`
      */
@@ -497,14 +541,24 @@ class TimeSeries {
         return this.size();
     }
     /**
-     * Returns the sum for the `fieldspec`
-     *
+     * Returns the sum of the `Event`'s in this `Collection`
+     * for the `fieldspec`. Optionally pass in a filter function.
      */
     sum(fieldPath = "value", filter) {
         return this._collection.sum(fieldPath, filter);
     }
     /**
-     * Aggregates the events down to their maximum value
+     * Aggregates the `Event`'s in this `TimeSeries` down to
+     * their maximum value(s).
+     *
+     * The `fieldSpec` passed into the avg function is either a field name or
+     * a list of fields.
+     *
+     * The `filter` is one of the Pond filter functions that can be used to remove
+     * bad values in different ways before filtering.
+     *
+     * The result is the maximum value if the fieldSpec is for one field. If
+     * multiple fields then a map of fieldName -> max values is returned
      */
     max(fieldPath = "value", filter) {
         return this._collection.max(fieldPath, filter);
@@ -516,7 +570,28 @@ class TimeSeries {
         return this._collection.min(fieldPath, filter);
     }
     /**
-     * Aggregates the events in the `TimeSeries` down to their average
+     * Aggregates the `Event`'s in this `TimeSeries` down
+     * to their average(s).
+     *
+     * The `fieldSpec` passed into the avg function is either
+     * a field name or a list of fields.
+     *
+     * The `filter` is one of the Pond filter functions that can be used to remove
+     * bad values in different ways before filtering.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "data",
+     *     columns: ["time", "temperature"],
+     *     points: [
+     *         [1509725624100, 5],
+     *         [1509725624200, 8],
+     *         [1509725624300, 2]
+     *     ]
+     * });
+     * const avg = series.avg("temperature"); // 5
+     * ```
      */
     avg(fieldPath = "value", filter) {
         return this._collection.avg(fieldPath, filter);
@@ -535,13 +610,50 @@ class TimeSeries {
     }
     /**
      * Gets percentile q within the `TimeSeries`. This works the same way as numpy.
+     *
+     * The percentile function has several parameters that can be supplied:
+     * * `q` - The percentile (should be between 0 and 100)
+     * * `fieldSpec` - Field or fields to find the percentile of
+     * * `interp` - Specifies the interpolation method to use when the desired, see below
+     * * `filter` - Optional filter function used to clean data before aggregating
+     *
+     * For `interp` a `InterpolationType` should be supplied if the default ("linear") is
+     * not used. This enum is defined like so:
+     * ```
+     * enum InterpolationType {
+     *     linear = 1,  // i + (j - i) * fraction
+     *     lower,       // i
+     *     higher,      // j
+     *     nearest,     // i or j, whichever is nearest
+     *     midpoint     // (i + j) / 2
+     * }
+     * ```
      */
     percentile(q, fieldPath = "value", interp = functions_1.InterpolationType.linear, filter) {
         return this._collection.percentile(q, fieldPath, interp, filter);
     }
     /**
-     * Aggregates the events down using a user defined function to
-     * do the reduction.
+     * Aggregates the `TimeSeries` `Event`s down to a single value per field.
+     *
+     * This makes use of a user defined function suppled as the `func` to do
+     * the reduction of values to a single value. The `ReducerFunction` is defined
+     * like so:
+     *
+     * ```
+     * (values: number[]) => number
+     * ```
+     *
+     * Fields to be aggregated are specified using a `fieldSpec` argument, which
+     * can be a field name or array of field names.
+     *
+     * If the `fieldSpec` matches multiple fields then an object is returned
+     * with keys being the fields and the values being the aggregated value for
+     * those fields. If the `fieldSpec` is for a single field then just the
+     * aggregated value is returned.
+     *
+     * Note: The `TimeSeries` class itself contains most of the common aggregation functions
+     * built in (e.g. `series.avg("value")`), but this is here to help when what
+     * you need isn't supplied out of the box.
      */
     aggregate(func, fieldPath = "value") {
         return this._collection.aggregate(func, fieldPath);
@@ -555,14 +667,20 @@ class TimeSeries {
         return this._collection.quantile(quantity, fieldPath, interp);
     }
     /**
-     * Iterate over the events in this `TimeSeries`. Events are in the
-     * order that they were added, unless the underlying Collection has since been
-     * sorted.
+     * Iterate over the events in this `TimeSeries`.
      *
-     * @example
+     * `Event`s are in the chronological. The `sideEffect` is a user supplied
+     * function which is passed the `Event<T>` and the index:
      * ```
-     * series.forEach((e, k) => {
-     *     console.log(e, k);
+     * (e: Event<T>, index: number) => { //... }
+     * ```
+     *
+     * Returns the number of items iterated.
+     *
+     * Example:
+     * ```
+     * series.forEach((e, i) => {
+     *     console.log(`Event[${i}] is ${e.toString()}`);
      * })
      * ```
      */
@@ -570,48 +688,173 @@ class TimeSeries {
         return this._collection.forEach(sideEffect);
     }
     /**
-     * Takes an operator that is used to remap events from this `TimeSeries` to
-     * a new set of `Event`'s.
+     * Map the `Event`s in this `TimeSeries` to new `Event`s.
+     *
+     * For each `Event` passed to your `mapper` function you return a new Event:
+     * ```
+     * (event: Event<T>, index: number) => Event<M>
+     * ```
+     *
+     * Example:
+     * ```
+     * const mapped = sorted.map(e => {
+     *     return new Event(e.key(), { a: e.get("x") * 2 });
+     * });
+     * ```
      */
     map(mapper) {
         const remapped = this._collection.map(mapper);
         return this.setCollection(remapped);
     }
     /**
-     * Takes a `fieldSpec` (list of column names) and outputs to the callback just those
-     * columns in a new `TimeSeries`.
+     * Flat map over the events in this `TimeSeries`.
      *
-     * @example
+     * For each `Event` passed to your callback function you should map that to
+     * zero, one or many `Event`s, returned as an `Immutable.List<Event>`.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "Map Traffic",
+     *     columns: ["time", "NASA_north", "NASA_south"],
+     *     points: [
+     *         [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
+     *         [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
+     *         [1400425953000, { in: 300, out: 600 }, { in: 147, out: 158 }],
+     *         [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175, other: 42 }]
+     *     ]
+     * });
+     * const split = series.flatMap(e =>
+     *     Immutable.List([
+     *         e.setData(e.get("NASA_north")),
+     *         e.setData(e.get("NASA_south"))
+     *     ])
+     * );
+     * split.toString();
+     *
+     * // {
+     * //     "name": "Map Traffic",
+     * //     "tz": "Etc/UTC",
+     * //     "columns": ["time","in","out","other"],
+     * //     "points":[
+     * //         [1400425951000, 100, 200, null],
+     * //         [1400425951000, 145, 135, null],
+     * //         [1400425952000, 200, 400, null],
+     * //         [1400425952000, 146, 142, null],
+     * //         [1400425953000, 300, 600, null],
+     * //         [1400425953000, 147, 158, null],
+     * //         [1400425954000, 400, 800, null],
+     * //         [1400425954000, 155, 175, 42]
+     * //     ]
+     * // }
+     * ```
+     */
+    flatMap(mapper) {
+        const remapped = this._collection.flatMap(mapper);
+        return this.setCollection(remapped);
+    }
+    /**
+     * Filter the `TimeSeries`'s `Event`'s with the supplied function.
+     *
+     * The function `predicate` is passed each `Event` and should return
+     * true to keep the `Event` or false to discard.
+     *
+     * Example:
+     * ```
+     * const filtered = series.filter(e => e.get("a") < 8)
+     * ```
+     */
+    filter(predicate) {
+        const filtered = this._collection.filter(predicate);
+        return this.setCollection(filtered);
+    }
+    /**
+     * Select out specified columns from the `Event`s within this `TimeSeries`.
+     *
+     * The `select()` method needs to be supplied with a `SelectOptions`
+     * object, which takes the following form:
      *
      * ```
-     * const ts = timeseries.select({fieldSpec: ["uptime", "notes"]});
+     * {
+     *     fields: string[];
+     * }
+     * ```
+     * Options:
+     *  * `fields` - array of columns to keep within each `Event`.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "data",
+     *     columns: ["time", "a", "b", "c"],
+     *     points: [
+     *         [1509725624100, 5, 3, 4],
+     *         [1509725624200, 8, 1, 3],
+     *         [1509725624300, 2, 9, 1]
+     *     ]
+     * });
+     * const newSeries = series.select({
+     *     fields: ["b", "c"]
+     * });
+     *
+     * // returns a series with columns ["b", "c"] only, "a" is discarded.
      * ```
      */
     select(options) {
-        const collection = new sorted_1.SortedCollection(this._collection.select(options));
+        const collection = new sortedcollection_1.SortedCollection(this._collection.select(options));
         return this.setCollection(collection);
     }
     /**
-     * Takes a `fieldSpecList` (list of column names) and collapses
-     * them to a new column named `name` which is the reduction (using
-     * the `reducer` function) of the matched columns in the `fieldSpecList`.
+     * Collapse multiple columns of a `Collection` into a new column.
      *
-     * The column may be appended to the existing columns, or replace them,
-     * based on the `append` boolean.
-     *
-     * @example
+     * The `collapse()` method needs to be supplied with a `CollapseOptions`
+     * object. You use this to specify the columns to collapse, the column name
+     * of the column to collapse to and the reducer function. In addition you
+     * can choose to append this new column or use it in place of the columns
+     * collapsed.
      *
      * ```
-     * const sums = ts.collapse({
-     *     name: "sum_series",
-     *     fieldSpecList: ["in", "out"],
+     * {
+     *    fieldSpecList: string[];
+     *    fieldName: string;
+     *    reducer: any;
+     *    append: boolean;
+     * }
+     * ```
+     * Options:
+     *  * `fieldSpecList` - the list of fields to collapse
+     *  * `fieldName` - the new field's name
+     *  * `reducer()` - a function to collapse using e.g. `avg()`
+     *  * `append` - to include only the new field, or include it in addition
+     *     to the previous fields.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "data",
+     *     columns: ["time", "a", "b"],
+     *     points: [
+     *         [1509725624100, 5, 6],
+     *         [1509725624200, 4, 2],
+     *         [1509725624300, 6, 3]
+     *     ]
+     * });
+     *
+     * // Sum columns "a" and "b" into a new column "v"
+     * const sums = series.collapse({
+     *     fieldSpecList: ["a", "b"],
+     *     fieldName: "v",
      *     reducer: sum(),
      *     append: false
      * });
+     *
+     * sums.at(0).get("v")  // 11
+     * sums.at(1).get("v")  // 6
+     * sums.at(2).get("v")  // 9
      * ```
      */
     collapse(options) {
-        const collection = new sorted_1.SortedCollection(this._collection.collapse(options));
+        const collection = new sortedcollection_1.SortedCollection(this._collection.collapse(options));
         return this.setCollection(collection);
     }
     /**
@@ -620,7 +863,7 @@ class TimeSeries {
      * Takes a object of columns to rename. Returns a new `TimeSeries` containing
      * new events. Columns not in the dict will be retained and not renamed.
      *
-     * @example
+     * Example:
      * ```
      * new_ts = ts.renameColumns({
      *     renameMap: {in: "new_in", out: "new_out"}
@@ -638,11 +881,11 @@ class TimeSeries {
             const d = e.getData().mapKeys(key => renameMap[key] || key);
             switch (eventType) {
                 case "time":
-                    return new event_1.Event(time_1.time(e.toPoint()[0]), d);
+                    return new event_1.Event(time_1.time(e.toPoint(this.columns())[0]), d);
                 case "index":
-                    return new event_1.Event(index_1.index(e.toPoint()[0]), d);
+                    return new event_1.Event(index_1.index(e.toPoint(this.columns())[0]), d);
                 case "timerange":
-                    const timeArray = e.toPoint()[0];
+                    const timeArray = e.toPoint(this.columns())[0];
                     return new event_1.Event(timerange_1.timerange(timeArray[0], timeArray[1]), d);
             }
         });
@@ -653,9 +896,21 @@ class TimeSeries {
      * operations will succeed, interpolate a new value, or pad with the
      * previously given value.
      *
-     * The `fill()` method takes a single `options` arg.
+     * The fill is controlled by the `FillOptions`. This is an object of the form:
+     * ```
+     * {
+     *     fieldSpec: string | string[];
+     *     method?: FillMethod;
+     *     limit?: number;
+     * }
+     * ```
+     * Options:
+     *  * `fieldSpec` - the field to fill
+     *  * `method` - the interpolation method, one of `FillMethod.Hold`, `FillMethod.Pad`
+     *               or `FillMethod.Linear`
+     *  * `limit` - the number of missing values to fill before giving up
      *
-     * @example
+     * Example:
      * ```
      * const filled = timeseries.fill({
      *     fieldSpec: ["direction.in", "direction.out"],
@@ -668,21 +923,13 @@ class TimeSeries {
         const { fieldSpec = null, method = types_1.FillMethod.Zero, limit = null } = options;
         let filledCollection;
         if (method === types_1.FillMethod.Zero || method === types_1.FillMethod.Pad) {
-            filledCollection = this._collection.fill({
-                fieldSpec,
-                method,
-                limit
-            });
+            filledCollection = this._collection.fill({ fieldSpec, method, limit });
         }
         else if (method === types_1.FillMethod.Linear) {
             if (_.isArray(fieldSpec)) {
                 filledCollection = this._collection;
                 fieldSpec.forEach(fieldPath => {
-                    const args = {
-                        fieldSpec: fieldPath,
-                        method,
-                        limit
-                    };
+                    const args = { fieldSpec: fieldPath, method, limit };
                     filledCollection = filledCollection.fill(args);
                 });
             }
@@ -697,7 +944,7 @@ class TimeSeries {
         else {
             throw new Error(`Invalid fill method: ${method}`);
         }
-        const collection = new sorted_1.SortedCollection(filledCollection);
+        const collection = new sortedcollection_1.SortedCollection(filledCollection);
         return this.setCollection(collection);
     }
     /**
@@ -721,7 +968,7 @@ class TimeSeries {
      * can be filled with nulls. This is really useful when downstream
      * processing depends on complete sequences.
      *
-     * @example
+     * Example:
      * ```
      * const aligned = ts.align({
      *     fieldSpec: "value",
@@ -731,7 +978,7 @@ class TimeSeries {
      * ```
      */
     align(options) {
-        const collection = new sorted_1.SortedCollection(this._collection.align(options));
+        const collection = new sortedcollection_1.SortedCollection(this._collection.align(options));
         return this.setCollection(collection);
     }
     /**
@@ -740,7 +987,7 @@ class TimeSeries {
      * is negative. This is useful when a negative rate would be considered invalid.
      */
     rate(options) {
-        const collection = new sorted_1.SortedCollection(this._collection.rate(options));
+        const collection = new sortedcollection_1.SortedCollection(this._collection.rate(options));
         return this.setCollection(collection);
     }
     /**
@@ -768,7 +1015,7 @@ class TimeSeries {
      * { value_avg: { value: avg(filter.ignoreMissing) } }
      * ```
      *
-     * @example
+     * Example:
      * ```
      *     const timeseries = new TimeSeries(data);
      *     const dailyAvg = timeseries.fixedWindowRollup({
@@ -795,7 +1042,7 @@ class TimeSeries {
             .window({ window: options.window, trigger: types_1.Trigger.onDiscardedWindow })
             .aggregate(options.aggregation)
             .flatten();
-        const collections = new sorted_1.SortedCollection(aggregatorPipeline);
+        const collections = new sortedcollection_1.SortedCollection(aggregatorPipeline);
         return this.setCollection(collections);
     }
     /**
@@ -814,7 +1061,10 @@ class TimeSeries {
         if (!aggregation || !_.isObject(aggregation)) {
             throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
-        return this.fixedWindowRollup({ window: window_1.window(duration_1.duration("1h")), aggregation });
+        return this.fixedWindowRollup({
+            window: window_1.window(duration_1.duration("1h")),
+            aggregation
+        });
     }
     /**
      * Builds a new `TimeSeries` by dividing events into days.
@@ -894,7 +1144,7 @@ class TimeSeries {
             .window({ window: options.window, trigger: types_1.Trigger.onDiscardedWindow })
             .aggregate(options.aggregation)
             .flatten();
-        const collections = new sorted_1.SortedCollection(aggregatorPipeline);
+        const collections = new sortedcollection_1.SortedCollection(aggregatorPipeline);
         return this.setCollection(collections);
     }
     /**
@@ -902,7 +1152,7 @@ class TimeSeries {
      * events within a window of size `windowSize`. Note that these
      * are windows defined relative to Jan 1st, 1970, and are UTC.
      *
-     * @example
+     * Example:
      * ```
      * const timeseries = new TimeSeries(data);
      * const collections = timeseries.collectByFixedWindow({windowSize: "1d"});
@@ -930,7 +1180,7 @@ class TimeSeries {
      */
     static is(series1, series2) {
         return (Immutable.is(series1._data, series2._data) &&
-            sorted_1.SortedCollection.is(series1._collection, series2._collection));
+            sortedcollection_1.SortedCollection.is(series1._collection, series2._collection));
     }
     /**
      * Reduces a list of `TimeSeries` objects using a reducer function. This works
@@ -940,9 +1190,9 @@ class TimeSeries {
      * applied to all columns in the `fieldSpec`. Those new events are then
      * collected together to form a new `TimeSeries`.
      *
-     * @example
+     * Example:
      *
-     * For example you might have three TimeSeries with columns "in" and "out" which
+     * For example you might have two TimeSeries with columns "in" and "out" which
      * corresponds to two measurements per timestamp. You could use this function to
      * obtain a new TimeSeries which was the sum of the the three measurements using
      * the `sum()` reducer function and an ["in", "out"] fieldSpec.
@@ -966,8 +1216,7 @@ class TimeSeries {
      * Takes a list of `TimeSeries` and merges them together to form a new
      * `TimeSeries`.
      *
-     * Merging will produce a new `Event`;
-     * only when events are conflict free, so
+     * Merging will produce a new `Event` only when events are conflict free, so
      * it is useful in the following cases:
      *  * to combine multiple `TimeSeries` which have different time ranges, essentially
      *  concatenating them together
@@ -975,7 +1224,7 @@ class TimeSeries {
      *  a column "in" and outTraffic has a column "out" and you want to produce a merged
      *  trafficSeries with columns "in" and "out".
      *
-     * @example
+     * Example:
      * ```
      * const inTraffic = new TimeSeries(trafficDataIn);
      * const outTraffic = new TimeSeries(trafficDataOut);
@@ -1015,10 +1264,10 @@ class TimeSeries {
         // It's always possible that events are out of order here, depending
         // on the start times of the series, along with it the series
         // have missing data, so I think we don't have a choice here.
-        const collection = new sorted_1.SortedCollection(events);
+        const collection = new sortedcollection_1.SortedCollection(events);
         const timeseries = new TimeSeries(Object.assign({}, data, { collection }));
         return timeseries;
     }
 }
 exports.TimeSeries = TimeSeries;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGltZXNlcmllcy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy90aW1lc2VyaWVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7R0FRRzs7Ozs7Ozs7Ozs7QUFFSCx1Q0FBdUM7QUFDdkMsNEJBQTRCO0FBSTVCLHlDQUFzQztBQUN0QyxtQ0FBZ0Y7QUFDaEYsbUNBQXVDO0FBSXZDLHFDQUE0QztBQUM1QyxpQ0FBb0M7QUFDcEMsMkNBQW1EO0FBQ25ELHFDQUF5QztBQUV6QywyQ0FXcUI7QUFFckIsbUNBZWlCO0FBRWpCLHVCQUF1QixJQUFJO0lBQ3ZCLE1BQU0sQ0FBQyxHQUFHLElBQUksQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxFQUFFLENBQUM7SUFFM0IsT0FBTztJQUNQLENBQUMsQ0FBQyxJQUFJLEdBQUcsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsRUFBRSxDQUFDO0lBRXBDLFFBQVE7SUFDUixFQUFFLENBQUMsQ0FBQyxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsQ0FBQztRQUNiLEVBQUUsQ0FBQyxDQUFDLENBQUMsQ0FBQyxRQUFRLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFDLENBQUMsQ0FBQztZQUN6QixDQUFDLENBQUMsS0FBSyxHQUFHLElBQUksYUFBSyxDQUFDLElBQUksQ0FBQyxLQUFLLENBQUMsQ0FBQyxRQUFRLEVBQUUsQ0FBQztRQUMvQyxDQUFDO1FBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxDQUFDLElBQUksQ0FBQyxLQUFLLFlBQVksYUFBSyxDQUFDLENBQUMsQ0FBQztZQUNyQyxDQUFDLENBQUMsS0FBSyxHQUFHLElBQUksQ0FBQyxLQUFLLENBQUMsUUFBUSxFQUFFLENBQUM7UUFDcEMsQ0FBQztJQUNMLENBQUM7SUFFRCxXQUFXO0lBQ1gsQ0FBQyxDQUFDLEVBQUUsR0FBRyxTQUFTLENBQUM7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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGltZXNlcmllcy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy90aW1lc2VyaWVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQTs7Ozs7Ozs7R0FRRzs7Ozs7Ozs7Ozs7QUFFSCx1Q0FBdUM7QUFDdkMsNEJBQTRCO0FBSTVCLHlDQUFzQztBQUN0QyxtQ0FBZ0Y7QUFDaEYsbUNBQXVDO0FBSXZDLHlEQUFzRDtBQUN0RCxpQ0FBb0M7QUFDcEMsMkNBQW1EO0FBQ25ELHFDQUF5QztBQUV6QywyQ0FXcUI7QUFFckIsbUNBZWlCO0FBRWpCLHVCQUF1QixJQUFJO0lBQ3ZCLE1BQU0sQ0FBQyxHQUFHLElBQUksQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxFQUFFLENBQUM7SUFFM0IsT0FBTztJQUNQLENBQUMsQ0FBQyxJQUFJLEdBQUcsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsRUFBRSxDQUFDO0lBRXBDLFFBQVE7SUFDUixFQUFFLENBQUMsQ0FBQyxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsQ0FBQztRQUNiLEVBQUUsQ0FBQyxDQUFDLENBQUMsQ0FBQyxRQUFRLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFDLENBQUMsQ0FBQztZQUN6QixDQUFDLENBQUMsS0FBSyxHQUFHLElBQUksYUFBSyxDQUFDLElBQUksQ0FBQyxLQUFLLENBQUMsQ0FBQyxRQUFRLEVBQUUsQ0FBQztRQUMvQyxDQUFDO1FBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQyxDQUFDLElBQUksQ0FBQyxLQUFLLFlBQVksYUFBSyxDQUFDLENBQUMsQ0FBQztZQUNyQyxDQUFDLENBQUMsS0FBSyxHQUFHLElBQUksQ0FBQyxLQUFLLENBQUMsUUFBUSxFQUFFLENBQUM7UUFDcEMsQ0FBQztJQUNMLENBQUM7SUFFRCxXQUFXO0lBQ1gsQ0FBQyxDQUFDLEVBQUUsR0FBRyxTQUFTLENBQUM7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

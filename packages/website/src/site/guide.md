@@ -106,11 +106,14 @@ a `TimeSeries` holds many `Event`s, ordered by time, along with associated meta 
     const e = event(time(new Date(1487983075328)), Immutable.Map({ sensor: 3 }));
 ```
 
-#### [Collection](./class/collection)
+#### [Collection](./class/collection) and [SortedCollection](./class/sortedcollection)
 
-A bag of `Event`s, with a comprehensive set of methods for operating on those events. A
-`Collection` underpins a `TimeSeries` as well as grouped and windowed processing within
-streams.
+A `Collection` is a bag of `Event`s, with a comprehensive set of methods for
+operating on those. `SortedCollection` is a `Collection` that maintains a
+chronological order to those `Event`s.
+
+A `SortedCollection` underpins a `TimeSeries` as well as backing grouping and windowing within
+`Stream`s.
 
 ```
 const c = collection(
@@ -122,13 +125,15 @@ const c = collection(
 c.size();  // 2
 ```
 
-Using `.groupBy` you can create a [`GroupedCollection`](./class/groupedcollection), while
-using `.window()` you can create a [`WindowedCollection`](./class/windowedcollection). Both
-give a you a mapping between grouping and `Collection`s.
+Using `SortedCollection.groupBy` you can create a [`GroupedCollection`](./class/groupedcollection), while
+using `SortedCollection.window()` you can create a [`WindowedCollection`](./class/windowedcollection). Both
+give a you a mapping between the grouping and a corresponding `SortedCollection`.
 
 #### [TimeSeries](./class/timeseries)
 
-The heart of the library, a TimeSeries is a sorted `Collection<K>` of events `Event<K>` and associated meta data. One is constructed either with a list of `Event`s, or with a JSON object:
+The heart of the library, a TimeSeries is a `SortedCollection<K>` of events `Event<K>` and
+associated meta data. One is constructed either with a list of `Event`s, or with a JSON
+object (the so-called wire format):
 
 ```
 const series = timeSeries({
@@ -242,6 +247,7 @@ The library is written in Typescript and has a large and growing Jest test suite
 To run the tests interactively, use:
 
 ```
+cd packages/pond
 npm test
 ```
 

@@ -8,7 +8,7 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import { event } from "../src/event";
-import { sortedCollection as SortedCollection } from "../src/sorted";
+import { sortedCollection as SortedCollection } from "../src/sortedcollection";
 import { time, Time } from "../src/time";
 
 describe("SortedCollection", () => {
@@ -23,16 +23,15 @@ describe("SortedCollection", () => {
             const c = SortedCollection<Time>()
                 .addEvent(e1)
                 .addEvent(e2);
-
             expect(c.size()).toEqual(2);
             expect(c.at(0).get("a")).toEqual(4);
             expect(c.at(1).get("a")).toEqual(5);
         });
 
         it("can make a collection from another collection", () => {
-            const timestamp1 = new Time("2015-04-22T02:30:00Z");
+            const timestamp1 = new Time("2014-04-22T02:30:00Z");
             const timestamp2 = new Time("2015-04-22T03:30:00Z");
-            const timestamp3 = new Time("2015-04-22T04:30:00Z");
+            const timestamp3 = new Time("2016-04-22T04:30:00Z");
 
             const e1 = event(timestamp1, Immutable.Map({ a: 1 }));
             const e2 = event(timestamp3, Immutable.Map({ a: 3 }));
@@ -42,7 +41,6 @@ describe("SortedCollection", () => {
                 .addEvent(e1)
                 .addEvent(e2)
                 .addEvent(e3);
-
             const c2 = SortedCollection(c1);
             expect(c2.size()).toEqual(3);
             expect(c2.at(0).get("a")).toEqual(1);

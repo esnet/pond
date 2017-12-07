@@ -19,7 +19,7 @@ import { Index, index } from "./index";
 import { Key } from "./key";
 import { period, Period } from "./period";
 import { Select } from "./select";
-import { SortedCollection } from "./sorted";
+import { SortedCollection } from "./sortedcollection";
 import { time, Time } from "./time";
 import { TimeRange, timerange } from "./timerange";
 import { daily, window } from "./window";

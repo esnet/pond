@@ -8,11 +8,12 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import { collection } from "../src/collection";
+import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { avg, sum } from "../src/functions";
-import { AggregationSpec } from "../src/grouped";
+import { AggregationSpec } from "../src/groupedcollection";
 import { index, Index } from "../src/index";
-import { duration } from "../src/duration";
+import { sorted } from "../src/sortedcollection";
 import { time, Time } from "../src/time";
 import { TimeRange } from "../src/timerange";
 
@@ -344,15 +345,15 @@ describe("Collection", () => {
             const e2 = event(timestamp2, Immutable.Map({ a: 2 }));
             const e3 = event(timestamp3, Immutable.Map({ a: 3 }));
 
-            const sorted = collection<Time>()
+            const sortedCollection = collection<Time>()
                 .addEvent(e1)
                 .addEvent(e2)
                 .addEvent(e3)
                 .sortByKey();
 
-            expect(sorted.at(0).get("a")).toEqual(2);
-            expect(sorted.at(1).get("a")).toEqual(1);
-            expect(sorted.at(2).get("a")).toEqual(3);
+            expect(sortedCollection.at(0).get("a")).toEqual(2);
+            expect(sortedCollection.at(1).get("a")).toEqual(1);
+            expect(sortedCollection.at(2).get("a")).toEqual(3);
         });
 
         it("can sort by field", () => {
@@ -364,15 +365,15 @@ describe("Collection", () => {
             const e2 = event(timestamp2, Immutable.Map({ a: 3 }));
             const e3 = event(timestamp3, Immutable.Map({ a: 5 }));
 
-            const sorted = collection<Time>()
+            const sortedCollection = collection<Time>()
                 .addEvent(e1)
                 .addEvent(e2)
                 .addEvent(e3)
                 .sort("a");
 
-            expect(sorted.at(0).get("a")).toEqual(3);
-            expect(sorted.at(1).get("a")).toEqual(5);
-            expect(sorted.at(2).get("a")).toEqual(8);
+            expect(sortedCollection.at(0).get("a")).toEqual(3);
+            expect(sortedCollection.at(1).get("a")).toEqual(5);
+            expect(sortedCollection.at(2).get("a")).toEqual(8);
         });
     });
 
@@ -497,7 +498,7 @@ describe("Collection", () => {
             const e5 = event(t3, Immutable.Map({ team: "dragons", a: 8, b: 5 }));
             const events = Immutable.List([e1, e2, e3, e4, e5]);
 
-            const grouped = collection(events).groupBy("team");
+            const grouped = sorted(collection(events)).groupBy("team");
 
             expect(grouped.get("raptors").avg("b")).toBe(1.5);
             expect(grouped.get("dragons").avg("a")).toBe(7);
@@ -523,7 +524,7 @@ describe("Collection", () => {
             const e5 = event(t3, Immutable.Map({ team: "dragons", a: 8, b: 5 }));
             const events = Immutable.List([e1, e2, e3, e4, e5]);
 
-            const grouped = collection(events).groupBy("team");
+            const grouped = sorted(collection(events)).groupBy("team");
 
             expect(grouped.get("raptors").avg("b")).toBe(1.5);
             expect(grouped.get("dragons").avg("a")).toBe(7);

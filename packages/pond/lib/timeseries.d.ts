@@ -3,21 +3,11 @@ import { Collection } from "./collection";
 import { Event } from "./event";
 import { Index } from "./index";
 import { Key } from "./key";
-import { SortedCollection } from "./sorted";
+import { SortedCollection } from "./sortedcollection";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
 import { InterpolationType } from "./functions";
-import {
-    AlignmentOptions,
-    CollapseOptions,
-    FillOptions,
-    RateOptions,
-    ReducerFunction,
-    RenameColumnOptions,
-    RollupOptions,
-    SelectOptions,
-    TimeSeriesOptions
-} from "./types";
+import { AlignmentOptions, CollapseOptions, FillOptions, RateOptions, ReducerFunction, RenameColumnOptions, RollupOptions, SelectOptions, TimeSeriesOptions } from "./types";
 export interface TimeSeriesWireFormat {
     name?: string;
     tz?: string;
@@ -90,118 +80,161 @@ declare function indexedSeries(arg: TimeSeriesWireFormat): TimeSeries<Index>;
 declare function timeRangeSeries(arg: TimeSeriesWireFormat): TimeSeries<TimeRange>;
 export { timeSeries, indexedSeries, timeRangeSeries };
 /**
- * A `TimeSeries` represents a series of `Event`'s, with each event being a combination of:
- * * time (or `TimeRange`, or `Index`)
- * * data - corresponding set of key/values.
+ * A `TimeSeries<K>` represents a series of `Event<K>`'s, contained within a `Collection<K>`,
+ * along with associated meta data.
  *
- * ### Construction
+ * Each `Event<K>`, a single entity in the Collection, is a combination of:
+ * * `Key` of type K (`Time`, `TimeRange`, or `Index`)
+ * * `data` of type Immutable.Map<string, any> - corresponding set of key/values
  *
- * Currently you can initialize a `TimeSeries` with either a list of `Event`'s, or with
- * a data format that looks like this:
+ * To construct a `TimeSeries` you would typicaly use the wire format, which is a data
+ * structure passed into one of the helper factory functions. See the constructor
+ * docs below for details of this format. It's fairly simple.
  *
- * ```javascript
- * const data = {
- *     name: "trafficc",
- *     columns: ["time", "value"],
- *     points: [
- *         [1400425947000, 52],
- *         [1400425948000, 18],
- *         [1400425949000, 26],
- *         [1400425950000, 93],
- *         ...
- *     ]
- * };
- * ```
+ * You can also construct a `TimeSeries` from a list of `Event`s.
  *
- * To create a new `TimeSeries` object from the above format, simply use the constructor:
+ * A `TimeSeries` supports some notion of what timezone it is in, and this can be
+ * specified in the constructor. `Event`s in this `TimeSeries` are considered to
+ * be in this timezone. Specifically, if they are `Event<Index>`'s an event might be
+ * at "2014-08-31". The actual timerange of that representation depends on where
+ * you are. Note: an `Index` of "1d-1234" is always a UTC representation.
  *
- * ```javascript
- * const series = new TimeSeries(data);
- * ```
+ * Methods exist to query back out of the `TimeSeries`:
  *
- * The format of the data is as follows:
+ *  * Specific `Event`s with `at()`, `atFirst()` and `atLast()`, or at a
+ * particular time with `atTime()`.
+ *  * Meta data can also be accessed using `name()`, `timezone()` and `isUTC()`,
+ * along with `columns()` and the `eventList()` or `collection()` itself. More
+ * general user defined meta data can be accessed with `meta()`.
+ *  * The overall time range of the `TimeSeries` can be queried with `timerange()`,
+ * of for convenience also see `begin()` and `end()`.
  *
- *  - **name** - optional, but a good practice
- *  - **columns** - are necessary and give labels to the data in the points.
- *  - **points** - are an array of tuples. Each row is at a different time (or timerange),
- * and each value corresponds to the column labels.
+ * Mutating a `TimeSeries` will always return a new `TimeSeries`:
+ *  * Meta data can be modified with `setMeta()`, `setName()` and renameColumns().
+ *  * The set of `Event`s can be altered with operations such as `slice()`, `crop()`.
+ *  * Or alternatively you can `select()` specific columns.
+ *  * You can take the `rate()` of data
  *
- * As just hinted at, the first column may actually be:
+ * Basic statistics operations allow you to get percentiles, quantiles,
+ * `avg()`, `min()`, `max()`, `sum()`, `count()` etc for any column within the
+ * `TimeSeries`.
  *
- *  - "time"
- *  - "timeRange" represented by a `TimeRange`
- *  - "index" - a time range represented by an `Index`. By using an index it is possible,
- * for example, to refer to a specific month:
+ * Traversing over the `Event`s in the `TimeSeries` can be done most efficiently
+ * with either `forEach()` or `map()`.
  *
- * ```javascript
- * const availabilityData = {
- *     name: "Last 3 months availability",
- *     columns: ["index", "uptime"],
- *     points: [
- *         ["2015-06", "100%"], // <-- 2015-06 specified here represents June 2015
- *         ["2015-05", "92%"],
- *         ["2015-04", "87%"],
- *     ]
- * };
- * ```
+ * Reducing data within a `TimeSeries` is a common task:
+ *  * `collapse()` will take a list of columns an collapse those down to
+ *    a single output column using a function (e.g. sum())
+ *  * `fixedWindowRollup()` lets you aggregate into specific time windows
+ *    to produce a new series.
+ *  * `hourlyRollup()` and `dailyRollup()` similarly
+ *  * You can also make a new mapping from a window to a `Collection` out
+ *    of the `TimeSeries` with `collectionByWindow()`
+ *  * see also static functions for reducing and merging
+ *    multiple `TimeSeries` together
  *
- * Alternatively, you can construct a `TimeSeries` with a list of events.
- * These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`. Here's an example of that:
+ * Fixing or transforming non-ideal data is another important function:
+ *  * `sizeValid()` will tell you how many `Event`s are valid
+ *  * statistic functions all take a filter function that can filter the
+ *    `Event`s being processed to handle missing or bad data
+ *  * `fill()` will fix missing data by inserting a new value where undefined,
+ *    null or NaN values are found, using interpolation or 0.
+ *  * `align()` will change the time position of data to lie on specific time
+ *    boundaries using different interpolation methods (e.g. align to each minute)
  *
- * ```javascript
- * const events = [];
- * events.push(new TimeEvent(new Date(2015, 7, 1), {value: 27}));
- * events.push(new TimeEvent(new Date(2015, 8, 1), {value: 29}));
- * const series = new TimeSeries({
- *     name: "avg temps",
- *     events: events
- * });
- * ```
+ * Some static methods also exist:
+ *  * `equal()` and `is()` are two was to compare if a `TimeSeries` is the same.
+ *  * `timeSeriesListMerge()` can be used to concatenate two `TimeSeries` together
+ *    or to merge multiple `TimeSeries` together that have different column names.
+ *  * `timeSeriesListReduce()` can be used for operations like summing multiple
+ *    `TimeSeries` together
  *
- * ### Nested data
- *
- * The values do not have to be simple types like the above examples. Here's an
- * example where each value is itself an object with "in" and "out" keys:
- *
- * ```javascript
- * const series = new TimeSeries({
- *     name: "Map Traffic",
- *     columns: ["time", "NASA_north", "NASA_south"],
- *     points: [
- *         [1400425951000, {in: 100, out: 200}, {in: 145, out: 135}],
- *         [1400425952000, {in: 200, out: 400}, {in: 146, out: 142}],
- *         [1400425953000, {in: 300, out: 600}, {in: 147, out: 158}],
- *         [1400425954000, {in: 400, out: 800}, {in: 155, out: 175}],
- *     ]
- * });
- * ```
- *
- * Complex data is stored in an Immutable structure. To get a value out of nested
- * data like this you will get the event you want (by row), as usual, and then use
- * `get()` to fetch the value by column name. The result of this call will be a
- * JSON copy of the Immutable data so you can query deeper in the usual way:
- *
- * ```javascript
- * series.at(0).get("NASA_north")["in"]  // 200`
- * ```
- *
- * It is then possible to use a value mapper function when calculating different
- * properties. For example, to get the average "in" value of the NASA_north column:
- *
- * ```javascript
- * series.avg("NASA_north", d => d.in);  // 250
- * ```
  */
 export declare class TimeSeries<T extends Key> {
     private _collection;
     private _data;
+    /**
+     * You can initialize a `TimeSeries` with either a list of `Event`'s, or with
+     * what we call the wire format. Usually you would want to construct a `TimeSeries`
+     * by converting your data into this format.
+     *
+     * The format of the data is an object which has several special keys,
+     * i.e. fields that have special meaning for the `TimeSeries` and additional keys
+     * that are optionally added to form the meta data for the `TimeSeries`:
+     *
+     * Special keys:
+     *
+     *  - **name** - The name of the series (optional)
+     *  - **columns** - are necessary and give labels to the data in the points. The first
+     *                  column is special, it is the the key for the row and should be
+     *                  either "time", "timerange" or "index". Other columns are user
+     *                  defined. (required)
+     *  - **points** - are an array of tuples. Each row is at a different time (or timerange),
+     *                 and each value corresponds to the column labels. (required)
+     *  - **tz** - timezone (optional)
+     *
+     * You can add additional fields as meta data custom to your application.
+     *
+     * To create a new `TimeSeries` object from the above data format, simply use one of
+     * the factory functions. For `Time` based `TimeSeries` you would use `timeSeries()`.
+     * Other options are `timeRangeSeries()` and `indexedSeries()`:
+     *
+     * Example:
+     *
+     * ```
+     * import { timeSeries } from "pondjs";
+     *
+     * const series = timeSeries({
+     *     name: "traffic",
+     *     columns: ["time", "in", "out"],
+     *     points: [
+     *         [1400425947000, 52, 12],
+     *         [1400425948000, 18, 42],
+     *         [1400425949000, 26, 81],
+     *         [1400425950000, 93, 11],
+     *         ...
+     *     ]
+     * });
+     * ```
+     *
+     * Another example:
+     *
+     * ```
+     * const availability = indexedSeries({
+     *     name: "Last 3 months",
+     *     columns: ["index", "uptime", incidents],
+     *     points: [
+     *         ["2015-06", "100%", 0], // 2015-06 specified here for June 2015
+     *         ["2015-05", "92%", 2],
+     *         ["2015-04", "87%", 5]
+     *     ]
+     * });
+     * ```
+     *
+     * Alternatively, you can construct a `TimeSeries` with a list of events.
+     * To do this you need to use the `TimeSeries` constructor directly.
+     *
+     * These may be `TimeEvents`, `TimeRangeEvents` or `IndexedEvents`:
+     *
+     * ```
+     * import { TimeSeries } from "pondjs"
+     * const events = [];
+     * events.push(timeEvent(time(new Date(2015, 7, 1)), Immutable.Map({ value: 27 })));
+     * events.push(timeEvent(time(new Date(2015, 8, 1)), Immutable.Map({ value: 14 })));
+     * const series = new TimeSeries({
+     *     name: "events",
+     *     events: Immutable.List(events)
+     * });
+     * ```
+     */
     constructor(arg: TimeSeries<T> | TimeSeriesEvents<T>);
     /**
      * Turn the `TimeSeries` into regular javascript objects
      */
     toJSON(): {};
     /**
-     * Represent the `TimeSeries` as a string
+     * Represent the `TimeSeries` as a string, which is useful for
+     * serializing it across the network.
      */
     toString(): string;
     /**
@@ -238,22 +271,22 @@ export declare class TimeSeries<T extends Key> {
      */
     atLast(): Event<T>;
     /**
-     * Sets a new underlying collection for this `TimeSeries`.
+     * Sets a new underlying collection for this `TimeSeries` and retuns a
+     * new `TimeSeries`.
      */
     setCollection<M extends Key>(collection: SortedCollection<M>): TimeSeries<M>;
     /**
-     * Returns the `Index` that bisects the `TimeSeries` at the time specified.
+     * Returns the index that bisects the `TimeSeries` at the time specified.
      */
     bisect(t: Date, b?: number): number;
     /**
      * Perform a slice of events within the `TimeSeries`, returns a new
      * `TimeSeries` representing a portion of this `TimeSeries` from
-     * begin up to but not including end.
+     * `begin` up to but not including `end`.
      */
     slice(begin?: number, end?: number): TimeSeries<T>;
     /**
-     * Crop the `TimeSeries` to the specified `TimeRange` and
-     * return a new `TimeSeries`.
+     * Crop the `TimeSeries` to the specified `TimeRange` and return a new `TimeSeries`.
      */
     crop(tr: TimeRange): TimeSeries<T>;
     /**
@@ -265,7 +298,9 @@ export declare class TimeSeries<T extends Key> {
      */
     setName(name: string): TimeSeries<T>;
     /**
-     * Fetch the timeSeries `Index`, if it has one.
+     * Fetch the timeSeries `Index`, if it has one. This is still in the
+     * API for historical reasons but is just a short cut to calling
+     * `series.getMeta("index")`.
      */
     index(): Index;
     /**
@@ -277,26 +312,26 @@ export declare class TimeSeries<T extends Key> {
      */
     indexAsRange(): TimeRange;
     /**
-     * Fetch the UTC flag, i.e. are the events in this `TimeSeries` in
-     * UTC or local time (if they are `IndexedEvent`'s an event might be
-     * "2014-08-31". The actual time range of that representation
-     * depends on where you are. Pond supports thinking about that in
-     * either as a UTC day, or a local day).
+     * Fetch if the timezone is UTC
      */
-    isUTC(): TimeRange;
+    isUTC(): boolean;
     /**
-     * Fetch the list of column names. This is determined by
-     * traversing though the events and collecting the set.
-     *
+     * Returns the timezone set on this `TimeSeries`.
+     */
+    timezone(): string;
+    /**
+     * Fetch the list of column names as a list of string.
+     * This is determined by traversing though the events and collecting the set.
      * Note: the order is not defined
      */
     columns(): string[];
     /**
      * Returns the list of Events in the `Collection` of events for this `TimeSeries`
+     * The result is an Immutable.List of the `Event`s.
      */
     eventList(): Immutable.List<Event<T>>;
     /**
-     * Returns the internal `Collection` of events for this `TimeSeries`
+     * Returns the internal `SortedCollection` of events for this `TimeSeries`
      */
     collection(): SortedCollection<T>;
     /**
@@ -307,8 +342,8 @@ export declare class TimeSeries<T extends Key> {
      */
     meta(key: string): {};
     /**
-     * Set new meta data for the `TimeSeries`. The result will
-     * be a new `TimeSeries`.
+     * Set new meta data for the `TimeSeries` using a `key` and `value`.
+     * The result will be a new `TimeSeries`.
      */
     setMeta(key: any, value: any): TimeSeries<T>;
     /**
@@ -329,12 +364,22 @@ export declare class TimeSeries<T extends Key> {
      */
     count(): number;
     /**
-     * Returns the sum for the `fieldspec`
-     *
+     * Returns the sum of the `Event`'s in this `Collection`
+     * for the `fieldspec`. Optionally pass in a filter function.
      */
     sum(fieldPath?: string, filter?: any): number;
     /**
-     * Aggregates the events down to their maximum value
+     * Aggregates the `Event`'s in this `TimeSeries` down to
+     * their maximum value(s).
+     *
+     * The `fieldSpec` passed into the avg function is either a field name or
+     * a list of fields.
+     *
+     * The `filter` is one of the Pond filter functions that can be used to remove
+     * bad values in different ways before filtering.
+     *
+     * The result is the maximum value if the fieldSpec is for one field. If
+     * multiple fields then a map of fieldName -> max values is returned
      */
     max(fieldPath?: string, filter?: any): number;
     /**
@@ -342,7 +387,28 @@ export declare class TimeSeries<T extends Key> {
      */
     min(fieldPath?: string, filter?: any): number;
     /**
-     * Aggregates the events in the `TimeSeries` down to their average
+     * Aggregates the `Event`'s in this `TimeSeries` down
+     * to their average(s).
+     *
+     * The `fieldSpec` passed into the avg function is either
+     * a field name or a list of fields.
+     *
+     * The `filter` is one of the Pond filter functions that can be used to remove
+     * bad values in different ways before filtering.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "data",
+     *     columns: ["time", "temperature"],
+     *     points: [
+     *         [1509725624100, 5],
+     *         [1509725624200, 8],
+     *         [1509725624300, 2]
+     *     ]
+     * });
+     * const avg = series.avg("temperature"); // 5
+     * ```
      */
     avg(fieldPath?: string, filter?: any): number;
     /**
@@ -355,11 +421,48 @@ export declare class TimeSeries<T extends Key> {
     stdev(fieldPath?: string, filter?: any): number;
     /**
      * Gets percentile q within the `TimeSeries`. This works the same way as numpy.
+     *
+     * The percentile function has several parameters that can be supplied:
+     * * `q` - The percentile (should be between 0 and 100)
+     * * `fieldSpec` - Field or fields to find the percentile of
+     * * `interp` - Specifies the interpolation method to use when the desired, see below
+     * * `filter` - Optional filter function used to clean data before aggregating
+     *
+     * For `interp` a `InterpolationType` should be supplied if the default ("linear") is
+     * not used. This enum is defined like so:
+     * ```
+     * enum InterpolationType {
+     *     linear = 1,  // i + (j - i) * fraction
+     *     lower,       // i
+     *     higher,      // j
+     *     nearest,     // i or j, whichever is nearest
+     *     midpoint     // (i + j) / 2
+     * }
+     * ```
      */
     percentile(q: number, fieldPath?: string, interp?: InterpolationType, filter?: any): number;
     /**
-     * Aggregates the events down using a user defined function to
-     * do the reduction.
+     * Aggregates the `TimeSeries` `Event`s down to a single value per field.
+     *
+     * This makes use of a user defined function suppled as the `func` to do
+     * the reduction of values to a single value. The `ReducerFunction` is defined
+     * like so:
+     *
+     * ```
+     * (values: number[]) => number
+     * ```
+     *
+     * Fields to be aggregated are specified using a `fieldSpec` argument, which
+     * can be a field name or array of field names.
+     *
+     * If the `fieldSpec` matches multiple fields then an object is returned
+     * with keys being the fields and the values being the aggregated value for
+     * those fields. If the `fieldSpec` is for a single field then just the
+     * aggregated value is returned.
+     *
+     * Note: The `TimeSeries` class itself contains most of the common aggregation functions
+     * built in (e.g. `series.avg("value")`), but this is here to help when what
+     * you need isn't supplied out of the box.
      */
     aggregate(func: ReducerFunction, fieldPath?: string): number;
     /**
@@ -369,51 +472,176 @@ export declare class TimeSeries<T extends Key> {
      */
     quantile(quantity: number, fieldPath?: string, interp?: InterpolationType): any[];
     /**
-     * Iterate over the events in this `TimeSeries`. Events are in the
-     * order that they were added, unless the underlying Collection has since been
-     * sorted.
+     * Iterate over the events in this `TimeSeries`.
      *
-     * @example
+     * `Event`s are in the chronological. The `sideEffect` is a user supplied
+     * function which is passed the `Event<T>` and the index:
      * ```
-     * series.forEach((e, k) => {
-     *     console.log(e, k);
+     * (e: Event<T>, index: number) => { //... }
+     * ```
+     *
+     * Returns the number of items iterated.
+     *
+     * Example:
+     * ```
+     * series.forEach((e, i) => {
+     *     console.log(`Event[${i}] is ${e.toString()}`);
      * })
      * ```
      */
     forEach<M extends Key>(sideEffect: (value?: Event<T>, index?: number) => any): number;
     /**
-     * Takes an operator that is used to remap events from this `TimeSeries` to
-     * a new set of `Event`'s.
+     * Map the `Event`s in this `TimeSeries` to new `Event`s.
+     *
+     * For each `Event` passed to your `mapper` function you return a new Event:
+     * ```
+     * (event: Event<T>, index: number) => Event<M>
+     * ```
+     *
+     * Example:
+     * ```
+     * const mapped = sorted.map(e => {
+     *     return new Event(e.key(), { a: e.get("x") * 2 });
+     * });
+     * ```
      */
     map<M extends Key>(mapper: (event?: Event<T>, index?: number) => Event<M>): TimeSeries<M>;
     /**
-     * Takes a `fieldSpec` (list of column names) and outputs to the callback just those
-     * columns in a new `TimeSeries`.
+     * Flat map over the events in this `TimeSeries`.
      *
-     * @example
+     * For each `Event` passed to your callback function you should map that to
+     * zero, one or many `Event`s, returned as an `Immutable.List<Event>`.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "Map Traffic",
+     *     columns: ["time", "NASA_north", "NASA_south"],
+     *     points: [
+     *         [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
+     *         [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
+     *         [1400425953000, { in: 300, out: 600 }, { in: 147, out: 158 }],
+     *         [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175, other: 42 }]
+     *     ]
+     * });
+     * const split = series.flatMap(e =>
+     *     Immutable.List([
+     *         e.setData(e.get("NASA_north")),
+     *         e.setData(e.get("NASA_south"))
+     *     ])
+     * );
+     * split.toString();
+     *
+     * // {
+     * //     "name": "Map Traffic",
+     * //     "tz": "Etc/UTC",
+     * //     "columns": ["time","in","out","other"],
+     * //     "points":[
+     * //         [1400425951000, 100, 200, null],
+     * //         [1400425951000, 145, 135, null],
+     * //         [1400425952000, 200, 400, null],
+     * //         [1400425952000, 146, 142, null],
+     * //         [1400425953000, 300, 600, null],
+     * //         [1400425953000, 147, 158, null],
+     * //         [1400425954000, 400, 800, null],
+     * //         [1400425954000, 155, 175, 42]
+     * //     ]
+     * // }
+     * ```
+     */
+    flatMap<M extends Key>(mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<M>>): TimeSeries<M>;
+    /**
+     * Filter the `TimeSeries`'s `Event`'s with the supplied function.
+     *
+     * The function `predicate` is passed each `Event` and should return
+     * true to keep the `Event` or false to discard.
+     *
+     * Example:
+     * ```
+     * const filtered = series.filter(e => e.get("a") < 8)
+     * ```
+     */
+    filter(predicate: (event: Event<T>, index: number) => boolean): TimeSeries<T>;
+    /**
+     * Select out specified columns from the `Event`s within this `TimeSeries`.
+     *
+     * The `select()` method needs to be supplied with a `SelectOptions`
+     * object, which takes the following form:
      *
      * ```
-     * const ts = timeseries.select({fieldSpec: ["uptime", "notes"]});
+     * {
+     *     fields: string[];
+     * }
+     * ```
+     * Options:
+     *  * `fields` - array of columns to keep within each `Event`.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "data",
+     *     columns: ["time", "a", "b", "c"],
+     *     points: [
+     *         [1509725624100, 5, 3, 4],
+     *         [1509725624200, 8, 1, 3],
+     *         [1509725624300, 2, 9, 1]
+     *     ]
+     * });
+     * const newSeries = series.select({
+     *     fields: ["b", "c"]
+     * });
+     *
+     * // returns a series with columns ["b", "c"] only, "a" is discarded.
      * ```
      */
     select(options: SelectOptions): TimeSeries<T>;
     /**
-     * Takes a `fieldSpecList` (list of column names) and collapses
-     * them to a new column named `name` which is the reduction (using
-     * the `reducer` function) of the matched columns in the `fieldSpecList`.
+     * Collapse multiple columns of a `Collection` into a new column.
      *
-     * The column may be appended to the existing columns, or replace them,
-     * based on the `append` boolean.
-     *
-     * @example
+     * The `collapse()` method needs to be supplied with a `CollapseOptions`
+     * object. You use this to specify the columns to collapse, the column name
+     * of the column to collapse to and the reducer function. In addition you
+     * can choose to append this new column or use it in place of the columns
+     * collapsed.
      *
      * ```
-     * const sums = ts.collapse({
-     *     name: "sum_series",
-     *     fieldSpecList: ["in", "out"],
+     * {
+     *    fieldSpecList: string[];
+     *    fieldName: string;
+     *    reducer: any;
+     *    append: boolean;
+     * }
+     * ```
+     * Options:
+     *  * `fieldSpecList` - the list of fields to collapse
+     *  * `fieldName` - the new field's name
+     *  * `reducer()` - a function to collapse using e.g. `avg()`
+     *  * `append` - to include only the new field, or include it in addition
+     *     to the previous fields.
+     *
+     * Example:
+     * ```
+     * const series = timeSeries({
+     *     name: "data",
+     *     columns: ["time", "a", "b"],
+     *     points: [
+     *         [1509725624100, 5, 6],
+     *         [1509725624200, 4, 2],
+     *         [1509725624300, 6, 3]
+     *     ]
+     * });
+     *
+     * // Sum columns "a" and "b" into a new column "v"
+     * const sums = series.collapse({
+     *     fieldSpecList: ["a", "b"],
+     *     fieldName: "v",
      *     reducer: sum(),
      *     append: false
      * });
+     *
+     * sums.at(0).get("v")  // 11
+     * sums.at(1).get("v")  // 6
+     * sums.at(2).get("v")  // 9
      * ```
      */
     collapse(options: CollapseOptions): TimeSeries<T>;
@@ -423,7 +651,7 @@ export declare class TimeSeries<T extends Key> {
      * Takes a object of columns to rename. Returns a new `TimeSeries` containing
      * new events. Columns not in the dict will be retained and not renamed.
      *
-     * @example
+     * Example:
      * ```
      * new_ts = ts.renameColumns({
      *     renameMap: {in: "new_in", out: "new_out"}
@@ -441,9 +669,21 @@ export declare class TimeSeries<T extends Key> {
      * operations will succeed, interpolate a new value, or pad with the
      * previously given value.
      *
-     * The `fill()` method takes a single `options` arg.
+     * The fill is controlled by the `FillOptions`. This is an object of the form:
+     * ```
+     * {
+     *     fieldSpec: string | string[];
+     *     method?: FillMethod;
+     *     limit?: number;
+     * }
+     * ```
+     * Options:
+     *  * `fieldSpec` - the field to fill
+     *  * `method` - the interpolation method, one of `FillMethod.Hold`, `FillMethod.Pad`
+     *               or `FillMethod.Linear`
+     *  * `limit` - the number of missing values to fill before giving up
      *
-     * @example
+     * Example:
      * ```
      * const filled = timeseries.fill({
      *     fieldSpec: ["direction.in", "direction.out"],
@@ -474,7 +714,7 @@ export declare class TimeSeries<T extends Key> {
      * can be filled with nulls. This is really useful when downstream
      * processing depends on complete sequences.
      *
-     * @example
+     * Example:
      * ```
      * const aligned = ts.align({
      *     fieldSpec: "value",
@@ -515,7 +755,7 @@ export declare class TimeSeries<T extends Key> {
      * { value_avg: { value: avg(filter.ignoreMissing) } }
      * ```
      *
-     * @example
+     * Example:
      * ```
      *     const timeseries = new TimeSeries(data);
      *     const dailyAvg = timeseries.fixedWindowRollup({
@@ -591,7 +831,7 @@ export declare class TimeSeries<T extends Key> {
      * events within a window of size `windowSize`. Note that these
      * are windows defined relative to Jan 1st, 1970, and are UTC.
      *
-     * @example
+     * Example:
      * ```
      * const timeseries = new TimeSeries(data);
      * const collections = timeseries.collectByFixedWindow({windowSize: "1d"});
@@ -618,9 +858,9 @@ export declare class TimeSeries<T extends Key> {
      * applied to all columns in the `fieldSpec`. Those new events are then
      * collected together to form a new `TimeSeries`.
      *
-     * @example
+     * Example:
      *
-     * For example you might have three TimeSeries with columns "in" and "out" which
+     * For example you might have two TimeSeries with columns "in" and "out" which
      * corresponds to two measurements per timestamp. You could use this function to
      * obtain a new TimeSeries which was the sum of the the three measurements using
      * the `sum()` reducer function and an ["in", "out"] fieldSpec.
@@ -639,8 +879,7 @@ export declare class TimeSeries<T extends Key> {
      * Takes a list of `TimeSeries` and merges them together to form a new
      * `TimeSeries`.
      *
-     * Merging will produce a new `Event`;
-     * only when events are conflict free, so
+     * Merging will produce a new `Event` only when events are conflict free, so
      * it is useful in the following cases:
      *  * to combine multiple `TimeSeries` which have different time ranges, essentially
      *  concatenating them together
@@ -648,7 +887,7 @@ export declare class TimeSeries<T extends Key> {
      *  a column "in" and outTraffic has a column "out" and you want to produce a merged
      *  trafficSeries with columns "in" and "out".
      *
-     * @example
+     * Example:
      * ```
      * const inTraffic = new TimeSeries(trafficDataIn);
      * const outTraffic = new TimeSeries(trafficDataOut);

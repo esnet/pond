@@ -11,22 +11,19 @@
 import * as Immutable from "immutable";
 import * as _ from "lodash";
 
+import { Align } from "./align";
 import { Base } from "./base";
-
+import { Collapse } from "./collapse";
 import { Event } from "./event";
-import { grouped, GroupedCollection, GroupingFunction } from "./grouped";
+import { Fill } from "./fill";
+import { grouped, GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Index } from "./index";
 import { Key } from "./key";
 import { Period } from "./period";
-import { Time } from "./time";
-import { timerange, TimeRange } from "./timerange";
-import { windowed, WindowedCollection } from "./windowed";
-
-import { Align } from "./align";
-import { Collapse } from "./collapse";
-import { Fill } from "./fill";
 import { Rate } from "./rate";
 import { Select } from "./select";
+import { Time } from "./time";
+import { timerange, TimeRange } from "./timerange";
 
 import {
     AlignmentMethod,
@@ -125,6 +122,11 @@ export class Collection<T extends Key> extends Base {
      * A `Collection` may also be constructed with an initial list of `Events`
      * by supplying an `Immutable.List<Event<T>>`, or from another `Collection`
      * to make a copy.
+     * 
+     * See also `SortedCollection`, which keeps `Event`s in chronological order,
+     * and also allows you to do `groupBy` and `window` operations. For a higher
+     * level interface for managing `Event`s, use the `TimeSeries`, which wraps
+     * the `SortedCollection` along with meta data about that collection.
      */
     constructor(arg1?: Immutable.List<Event<T>> | Collection<T>) {
         super();
@@ -220,19 +222,11 @@ export class Collection<T extends Key> extends Base {
         // Call the post add hook to give sub-classes a chance to modify
         // the event list. If they do, then we'll rebuild the keyMap.
         let newKeyMap = this._keyMap;
-        let newEvents = events;
 
-        newEvents = this.onEventAdded(events);
+        indicies = indicies.add(events.size - 1);
+        newKeyMap = this._keyMap.set(k, indicies);
 
-        if (newEvents === events) {
-            // Add in the new event's index to our keyMap indicies
-            indicies = indicies.add(newEvents.size - 1);
-            newKeyMap = this._keyMap.set(k, indicies);
-        } else {
-            newKeyMap = Collection.buildKeyMap(newEvents);
-        }
-
-        return this.clone(newEvents, newKeyMap) as Collection<T>;
+        return this.clone(events, newKeyMap) as Collection<T>;
     }
 
     /**
@@ -333,8 +327,8 @@ export class Collection<T extends Key> extends Base {
     /**
      * Returns the `Event` located at the key specified, if it exists.
      *
-     * Note: this doesn't find the closest key, or implement `bisect`.
-     * For that you need the `SortedCollection`, that is also part of a `TimeSeries`.
+     * Note: this doesn't find the closest key, or implement `bisect`. For that you need the
+     * `SortedCollection`, that is also part of a `TimeSeries`.
      * On the plus side, if you know the key this is an efficient way to access the
      * `Event` within the `Collection`.
      *
@@ -534,67 +528,6 @@ export class Collection<T extends Key> extends Base {
             })
         );
         return new Collection<T>(sorted);
-    }
-
-    /**
-     * GroupBy a field's value. The result is a `GroupedCollection`, which internally maps
-     * a key (the value of the field) to a `Collection` of `Event`s in that group.
-     *
-     * Example:
-     *
-     * In this example we group by the field "team_name" and then call the `aggregate()`
-     * method on the resulting `GroupedCollection`.
-     *
-     * ```
-     * const teamAverages = c
-     *     .groupBy("team_name")
-     *     .aggregate({
-     *         "goals_avg": ["goals", avg()],
-     *         "against_avg": ["against", avg()],
-     *     });
-     * teamAverages.get("raptors").get("goals_avg"));
-     * teamAverages.get("raptors").get("against_avg"))
-     * ```
-     */
-    public groupBy(field: string | string[] | GroupingFunction<T>): GroupedCollection<T> {
-        return grouped(field, this);
-    }
-
-    /**
-     * Window the `Collection` into a given period of time.
-     *
-     * This is similar to `groupBy` except `Event`s are grouped by their timestamp
-     * based on the `Period` supplied. The result is a `WindowedCollection`.
-     *
-     * The windowing is controlled by the `WindowingOptions`, which takes the form:
-     * ```
-     * {
-     *     window: WindowBase;
-     *     trigger?: Trigger;
-     * }
-     * ```
-     * Options:
-     *  * `window` - a `WindowBase` subclass, currently `Window` or `DayWindow`
-     *  * `trigger` - not needed in this context
-     *
-     * Example:
-     *
-     * ```
-     * const c = new Collection()
-     *     .addEvent(event(time("2015-04-22T02:28:00Z"), map({ team: "a", value: 3 })))
-     *     .addEvent(event(time("2015-04-22T02:29:00Z"), map({ team: "a", value: 4 })))
-     *     .addEvent(event(time("2015-04-22T02:30:00Z"), map({ team: "b", value: 5 })));
-     *
-     * const thirtyMinutes = window(duration("30m"));
-     *
-     * const windowedCollection = c.window({
-     *     window: thirtyMinutes
-     * });
-     *
-     * ```
-     */
-    public window(options: WindowingOptions): WindowedCollection<T> {
-        return windowed(options, Immutable.Map({ all: this }));
     }
 
     /**

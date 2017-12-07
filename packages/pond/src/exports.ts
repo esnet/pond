@@ -19,21 +19,21 @@ import {
     stdev,
     sum
 } from "./functions";
-import { grouped, GroupedCollection } from "./grouped";
+import { grouped, GroupedCollection } from "./groupedcollection";
 import { index, Index } from "./index";
 import { Key } from "./key";
 import { period, Period } from "./period";
 import { Processor } from "./processor";
 import { Rate } from "./rate";
 import { Select } from "./select";
-import { sortedCollection, SortedCollection } from "./sorted";
+import { sortedCollection, SortedCollection } from "./sortedcollection";
 import { stream } from "./stream";
 import { time, Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
 import { indexedSeries, timeRangeSeries, timeSeries, TimeSeries } from "./timeseries";
 import { Trigger, WindowingOptions } from "./types";
 import util from "./util";
-import { windowed, WindowedCollection } from "./windowed";
+import { windowed, WindowedCollection } from "./windowedcollection";
 
 export { Align };
 export { Base };
@@ -71,4 +71,4 @@ export { timerange, TimeRange };
 export { timeSeries, indexedSeries, timeRangeSeries, TimeSeries };
 export { Trigger, WindowingOptions };
 export { util };
-export { windowed, WindowedCollection } from "./windowed";
+export { windowed, WindowedCollection } from "./windowedcollection";

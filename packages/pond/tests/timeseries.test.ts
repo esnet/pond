@@ -1056,7 +1056,7 @@ describe("Remapping Events in a TimeSeries", () => {
         const split = series.flatMap(e =>
             Immutable.List([e.setData(e.get("NASA_north")), e.setData(e.get("NASA_south"))])
         );
-        console.log(split.toString());
+
         expect(split.size()).toBe(8);
         expect(split.at(0).get("in")).toBe(100);
         expect(split.at(0).get("out")).toBe(200);

@@ -1,9 +1,9 @@
 import * as Immutable from "immutable";
 import { Event } from "./event";
 import { Key } from "./key";
-import { SortedCollection } from "./sorted";
+import { SortedCollection } from "./sortedcollection";
 import { TimeRange } from "./timerange";
-import { WindowedCollection } from "./windowed";
+import { WindowedCollection } from "./windowedcollection";
 import { Aggregation, AlignmentOptions, RateOptions, WindowingOptions } from "./types";
 /**
  * Example:

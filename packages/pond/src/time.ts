@@ -32,7 +32,9 @@ export class Time extends Key {
         super();
         if (_.isDate(d)) {
             this._d = d;
-        } else if (_.isNumber(d) || _.isString(d)) {
+        } else if (_.isNumber(d)) {
+            this._d = new Date(d);
+        } else if (_.isString(d)) {
             this._d = new Date(d);
         } else {
             this._d = new Date();

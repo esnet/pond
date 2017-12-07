@@ -12,7 +12,7 @@ import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event, Event } from "../src/event";
 import { avg, count, keep, sum } from "../src/functions";
-import { grouped, GroupedCollection } from "../src/grouped";
+import { grouped, GroupedCollection } from "../src/groupedcollection";
 import { index, Index } from "../src/index";
 import { period } from "../src/period";
 import { stream } from "../src/stream";

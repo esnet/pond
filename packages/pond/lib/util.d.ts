@@ -18,9 +18,7 @@ export interface DecodedIndexString {
     decodedIndex: number;
 }
 declare const _default: {
-    dataFromArg: (
-        arg: string | number | {} | Immutable.Map<string, any>
-    ) => Immutable.Map<string, any>;
+    dataFromArg: (arg: string | number | {} | Immutable.Map<string, any>) => Immutable.Map<string, any>;
     fieldAsArray: (field: string | string[]) => string[];
     indexFromArgs: (arg1: string | Index, arg2?: string) => Index;
     isMissing: (val: any) => boolean;

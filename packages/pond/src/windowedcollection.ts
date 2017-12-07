@@ -11,22 +11,19 @@
 import * as Immutable from "immutable";
 import * as _ from "lodash";
 
-import { Base } from "./base";
-
 import { Align } from "./align";
-import { Collection } from "./collection";
+import { Base } from "./base";
+import { SortedCollection } from "./sortedcollection";
 import { Event } from "./event";
-import { GroupedCollection, GroupingFunction } from "./grouped";
+import { GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Index, index } from "./index";
 import { Key } from "./key";
 import { Period } from "./period";
 import { Processor } from "./processor";
 import { Rate } from "./rate";
+import { KeyedCollection } from "./stream";
 import { Time, time } from "./time";
 import { timerange, TimeRange } from "./timerange";
-
-import { KeyedCollection } from "./stream";
-
 import util from "./util";
 
 import {
@@ -54,7 +51,7 @@ import {
 } from "./functions";
 
 export class WindowedCollection<T extends Key> extends Base {
-    protected collections: Immutable.Map<string, Collection<T>>;
+    protected collections: Immutable.Map<string, SortedCollection<T>>;
     protected options: WindowingOptions;
     protected group: string | string[] | GroupingFunction<T>;
 
@@ -62,31 +59,35 @@ export class WindowedCollection<T extends Key> extends Base {
 
     /**
      * Builds a new grouping that is based on a window period. This is combined
-     * with any groupBy to divide the events among multiple `Collection`s, one
+     * with any groupBy to divide the events among multiple `SortedCollection`s, one
      * for each group and window combination.
      *
      * The main way to construct a `WindowedCollection` is to pass in a "window"
      * defined as a `Period` and a "group", which can be a field to group by, or
      * a function that can be called to do the grouping. Optionally, you may pass
-     * in a `Collection` of initial `Event`s to group, as is the case when this is
+     * in a `SortedCollection` of initial `Event`s to group, as is the case when this is
      * used in a batch context.
      *
-     * As an `Event` is added to this `Processor`, via `addEvent()`, the windowing
-     * and grouping will be applied to it and it will be appended to the appropiate
-     * `Collection`, or a new `Collection` will be created.
-     *
-     * @TODO: Need hooks for removing old Collections and when to return new
-     * aggregated events and when to not.
+     * As an `Event` is added via `addEvent()`, the windowing and grouping will be
+     * applied to it and it will be appended to the appropiate `SortedCollection`,
+     * or a new `SortedCollection` will be created.
      *
      * The other way to construct a `WindowedCollection` is by passing in a map
-     * of group name to Collection. This is generally used if there are are
+     * of group name to `SortedCollection`. This is generally used if there are are
      * events already grouped and you want to apply a window group on top of that.
-     * This is the case when calling `window()` on a `GroupedCollection`.
+     * This is the case when calling `GroupedCollection.window()`.
      */
-    constructor(collectionMap: Immutable.Map<string, Collection<T>>);
-    constructor(windowing: WindowingOptions, collectionMap: Immutable.Map<string, Collection<T>>);
-    constructor(windowing: WindowingOptions, collection?: Collection<T>);
-    constructor(windowing: WindowingOptions, group: string | string[], collection?: Collection<T>);
+    constructor(collectionMap: Immutable.Map<string, SortedCollection<T>>);
+    constructor(
+        windowing: WindowingOptions,
+        collectionMap: Immutable.Map<string, SortedCollection<T>>
+    );
+    constructor(windowing: WindowingOptions, collection?: SortedCollection<T>);
+    constructor(
+        windowing: WindowingOptions,
+        group: string | string[],
+        collection?: SortedCollection<T>
+    );
     constructor(arg1: any, arg2?: any, arg3?: any) {
         super();
         if (Immutable.Map.isMap(arg1)) {
@@ -95,12 +96,12 @@ export class WindowedCollection<T extends Key> extends Base {
             this.options = arg1 as WindowingOptions;
 
             if (Immutable.Map.isMap(arg2)) {
-                const collections = arg2 as Immutable.Map<string, Collection<T>>;
+                const collections = arg2 as Immutable.Map<string, SortedCollection<T>>;
 
                 // Rekey all the events in the collections with a new key that
                 // combines their existing group with the windows they fall in.
                 // An event could fall into 0, 1 or many windows, depending on the
-                // window's period and duration, as supplied in the WindowOptions.
+                // window's period and duration, as supplied in the `WindowOptions`.
                 let remapped = Immutable.List();
                 collections.forEach((c, k) => {
                     c.forEach(e => {
@@ -116,49 +117,36 @@ export class WindowedCollection<T extends Key> extends Base {
                 this.collections = remapped
                     .groupBy(e => e[0])
                     .map(eventList => eventList.map(kv => kv[1]))
-                    .map(eventList => new Collection<T>(eventList.toList()))
+                    .map(eventList => new SortedCollection<T>(eventList.toList()))
                     .toMap();
             } else {
                 let collection;
                 if (_.isString(arg2) || _.isArray(arg2)) {
                     this.group = util.fieldAsArray(arg2 as string | string[]);
-                    collection = arg3 as Collection<T>;
+                    collection = arg3 as SortedCollection<T>;
                 } else {
-                    collection = arg2 as Collection<T>;
+                    collection = arg2 as SortedCollection<T>;
                 }
 
                 if (collection) {
-                    // TODO: This code needs fixing (do we use this code path?)
+                    // TODO: do we use this code path?
                     throw new Error("Unimplemented");
-                    /*
-                    this.collections = collection
-                        .eventList()
-                        .groupBy(e =>
-                            Index.getIndexString(this.options.window.toString(), e.timestamp())
-                        )
-                        .toMap()
-                        .map(events => new Collection(events.toList()))
-                        .mapEntries(([window, e]) => [
-                            this.group ? `${e.get(this.group)}::${window}` : `all::${window}`,
-                            e
-                        ]);
-                    */
                 } else {
-                    this.collections = Immutable.Map<string, Collection<T>>();
+                    this.collections = Immutable.Map<string, SortedCollection<T>>();
                 }
             }
         }
     }
 
     /**
-     * Fetch the Collection of events contained in the windowed grouping
+     * Fetch the SortedCollection of events contained in the windowed grouping
      */
-    get(key: string): Collection<T> {
+    get(key: string): SortedCollection<T> {
         return this.collections.get(key);
     }
 
     /**
-     * @example
+     * Example:
      * ```
      * const rolledUp = collection
      *   .groupBy("team")
@@ -185,20 +173,28 @@ export class WindowedCollection<T extends Key> extends Base {
             }
             eventMap = eventMap.set(groupKey, eventMap.get(groupKey).push(indexedEvent));
         });
-        const mapping = eventMap.map(eventList => new Collection<Index>(eventList));
+        const mapping = eventMap.map(eventList => new SortedCollection<Index>(eventList));
         return new GroupedCollection<Index>(mapping);
     }
 
-    public flatten(): Collection<T> {
+    /**
+     * Collects all `Event`s from the groupings and returns them placed
+     * into a single `SortedCollection`.
+     */
+    public flatten(): SortedCollection<T> {
         let events = Immutable.List<Event<T>>();
         this.collections.flatten().forEach(collection => {
             events = events.concat(collection.eventList());
         });
-        return new Collection<T>(events);
+        return new SortedCollection<T>(events);
     }
 
-    public ungroup(): Immutable.Map<string, Collection<T>> {
-        const result = Immutable.Map<string, Collection<T>>();
+    /**
+     * Removes any grouping present, returning an Immutable.Map
+     * mapping just the window to the `SortedCollection`.
+     */
+    public ungroup(): Immutable.Map<string, SortedCollection<T>> {
+        const result = Immutable.Map<string, SortedCollection<T>>();
         this.collections.forEach((collection, key) => {
             const newKey = key.split("::")[1];
             result[newKey] = collection;
@@ -218,12 +214,12 @@ export class WindowedCollection<T extends Key> extends Base {
         // Add event to an existing collection(s) or a new collection(s)
         keys.forEach(key => {
             // Add event to collection referenced by this key
-            let targetCollection: Collection<T>;
+            let targetCollection: SortedCollection<T>;
             let createdCollection = false;
             if (this.collections.has(key)) {
                 targetCollection = this.collections.get(key);
             } else {
-                targetCollection = new Collection<T>(Immutable.List());
+                targetCollection = new SortedCollection<T>(Immutable.List());
                 createdCollection = true;
             }
             this.collections = this.collections.set(key, targetCollection.addEvent(event));
@@ -235,8 +231,8 @@ export class WindowedCollection<T extends Key> extends Base {
         });
 
         // Discard past collections
-        let keep = Immutable.Map<string, Collection<T>>();
-        let discard = Immutable.Map<string, Collection<T>>();
+        let keep = Immutable.Map<string, SortedCollection<T>>();
+        let discard = Immutable.Map<string, SortedCollection<T>>();
         this.collections.forEach((collection, collectionKey) => {
             const [__, windowKey] =
                 collectionKey.split("::").length > 1
@@ -279,19 +275,19 @@ export class WindowedCollection<T extends Key> extends Base {
     }
 }
 
-function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, Collection<T>>);
+function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, SortedCollection<T>>);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
-    collectionMap?: Immutable.Map<string, Collection<T>>
+    collectionMap?: Immutable.Map<string, SortedCollection<T>>
 );
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
-    initialCollection?: Collection<T> // tslint:disable-line:unified-signatures
+    initialCollection?: SortedCollection<T> // tslint:disable-line:unified-signatures
 );
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     group: string | string[],
-    initialCollection?: Collection<T>
+    initialCollection?: SortedCollection<T>
 );
 function windowFactory<T extends Key>(arg1: any, arg2?: any) {
     return new WindowedCollection<T>(arg1, arg2);

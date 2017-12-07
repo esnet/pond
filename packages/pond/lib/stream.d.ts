@@ -6,16 +6,7 @@ import { Index } from "./index";
 import { Key } from "./key";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
-import {
-    AggregationSpec,
-    AlignmentOptions,
-    CollapseOptions,
-    FillOptions,
-    RateOptions,
-    SelectOptions,
-    WindowingOptions
-} from "./types";
-export declare class Streaming {}
+import { AggregationSpec, AlignmentOptions, CollapseOptions, FillOptions, RateOptions, SelectOptions, WindowingOptions } from "./types";
 /**
  * A Node is a transformation between type S and type T. Both S
  * and T much extend Base.
@@ -29,16 +20,13 @@ export declare class Streaming {}
  * the passed onto other downstream Nodes, by calling their `set()` methods.
  */
 export declare type EventCallback = (event: Event<Key>) => void;
-export declare type KeyedCollectionCallback<T extends Key> = (
-    collection: Collection<T>,
-    key: string
-) => void;
+export declare type KeyedCollectionCallback<T extends Key> = (collection: Collection<T>, key: string) => void;
 export declare type KeyedCollection<T extends Key> = [string, Collection<T>];
 /**
  * @private
  *
  */
-export abstract class Node<S extends Base, T extends Base> {
+export declare abstract class Node<S extends Base, T extends Base> {
     protected observers: Immutable.List<Node<T, Base>>;
     addObserver(node: Node<T, Base>): void;
     set(input: S): void;
@@ -46,9 +34,6 @@ export abstract class Node<S extends Base, T extends Base> {
     protected abstract process(input: S): Immutable.List<T>;
 }
 /**
- *
- * @private
- *
  * An `EventStream` is the interface to the stream provided for manipulation of
  * parts of the streaming pipeline that map a stream of Events of type <T>.
  *
@@ -68,6 +53,8 @@ export declare class EventStream<T extends Key, U extends Key> {
     private stream;
     constructor(stream: Stream<U>);
     /**
+     * @private
+     *
      * Add events into the stream
      */
     addEvent(e: Event<U>): void;
@@ -78,9 +65,7 @@ export declare class EventStream<T extends Key, U extends Key> {
     /**
      * Remaps each Event<T> in the stream to 0, 1 or many Event<M>s.
      */
-    flatMap<M extends Key>(
-        mapper: (event: Event<T>) => Immutable.List<Event<M>>
-    ): EventStream<M, U>;
+    flatMap<M extends Key>(mapper: (event: Event<T>) => Immutable.List<Event<M>>): EventStream<M, U>;
     /**
      * Fill missing values in stream events.
      *
@@ -235,12 +220,13 @@ export declare class EventStream<T extends Key, U extends Key> {
     groupByWindow(options: WindowingOptions): KeyedCollectionStream<T, U>;
 }
 /**
- * @private
+ *
  */
 export declare class KeyedCollectionStream<T extends Key, U extends Key> {
     private stream;
     constructor(stream: Stream<U>);
     /**
+     * @private
      * Add events into the stream
      */
     addEvent(event: Event<U>): void;
@@ -295,49 +281,95 @@ export declare class KeyedCollectionStream<T extends Key, U extends Key> {
      */
     aggregate(spec: AggregationSpec<T>): EventStream<Index, U>;
 }
-export declare type EventToKeyedCollection<S extends Key, T extends Key> = Node<
-    Event<S>,
-    KeyedCollection<T>
->;
-export declare type KeyedCollectionToEvent<S extends Key, T extends Key> = Node<
-    KeyedCollection<S>,
-    Event<T>
->;
-export declare type KeyedCollectionMap<S extends Key, T extends Key> = Node<
-    KeyedCollection<S>,
-    KeyedCollection<T>
->;
+export declare type EventToKeyedCollection<S extends Key, T extends Key> = Node<Event<S>, KeyedCollection<T>>;
+export declare type KeyedCollectionToEvent<S extends Key, T extends Key> = Node<KeyedCollection<S>, Event<T>>;
+export declare type KeyedCollectionMap<S extends Key, T extends Key> = Node<KeyedCollection<S>, KeyedCollection<T>>;
 export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
 /**
- * @private
+ * Processing of incoming `Event` streams to for real time processing.
  *
- * A stream is the user facing object which implements addEvent()
- * in such a way that the pipeline is executed.
+ * Supports remapping, filtering, windowing and aggregation. It is designed for
+ * relatively light weight handling of incoming events.
  *
- * @example
- * ```
- * const s = Stream()
- *  .align({})
- *  .rate({});
+ * A `Stream` object manages a chain of processing nodes, each type of which
+ * provides an appropiate interface. When a `Stream` is initially created with
+ * the `stream()` factory function the interface you will be returned in an
+ * `EventStream`. If you perform a windowing operation you will be exposed to
+ * `KeyedCollectionStream`. While if you aggregate a `KeyedCollectionStream` you
+ * will be back to an `EventStream` and so on.
  *
- * s.addEvent(e);
+ * ---
+ * Note:
  *
+ * Generic grouping ("group by") should be handled outside of Pond now by creating
+ * multiple streams and mapping incoming `Event`s to those streams. This allows for flexibility
+ * as to where those streams live and how work should be divided.
+ *
+ * For "at scale" stream processing, use Apache Beam or Spark. This library is intended to
+ * simplify passing of events to a browser and enabling convenient processing for visualization
+ * purposes, or for light weight handling of events in Node.
+ *
+ * ---
+ * Example:
+ *
+ * ```typescript
+ * const result = {};
+ * const slidingWindow = window(duration("3m"), period(duration("1m")));
+ * const fixedHourlyWindow = window(duration("1h"));
+ *
+ * const source = stream()
+ *     .groupByWindow({
+ *         window: slidingWindow,
+ *         trigger: Trigger.onDiscardedWindow
+ *     })
+ *     .aggregate({
+ *         in_avg: ["in", avg()],
+ *         out_avg: ["out", avg()],
+ *         count: ["in", count()]
+ *     })
+ *     .map(e =>
+ *         new Event<Time>(time(e.timerange().end()), e.getData())
+ *     )
+ *     .groupByWindow({
+ *         window: fixedHourlyWindow,
+ *         trigger: Trigger.perEvent
+ *     })
+ *     .output((col, key) => {
+ *         result[key] = col as Collection<Time>;
+ *         calls += 1;
+ *     });
+ *
+ * source.addEvent(e1)
+ * source.addEvent(e2)
+ * ...
  * ```
  */
 export declare class Stream<U extends Key = Time> {
     private head;
     private tail;
+    /**
+     * @private
+     */
     addEventMappingNode<S extends Key, T extends Key>(node: EventMap<S, T>): EventStream<T, U>;
-    addEventToCollectorNode<S extends Key, T extends Key>(
-        node: EventToKeyedCollection<S, T>
-    ): KeyedCollectionStream<T, U>;
-    addCollectorMappingNode<S extends Key, T extends Key>(
-        node: KeyedCollectionMap<S, T>
-    ): KeyedCollectionStream<T, U>;
-    addCollectionToEventNode<S extends Key, T extends Key>(
-        node: KeyedCollectionToEvent<S, T>
-    ): EventStream<T, U>;
+    /**
+     * @private
+     */
+    addEventToCollectorNode<S extends Key, T extends Key>(node: EventToKeyedCollection<S, T>): KeyedCollectionStream<T, U>;
+    /**
+     * @private
+     */
+    addCollectorMappingNode<S extends Key, T extends Key>(node: KeyedCollectionMap<S, T>): KeyedCollectionStream<T, U>;
+    /**
+     * @private
+     */
+    addCollectionToEventNode<S extends Key, T extends Key>(node: KeyedCollectionToEvent<S, T>): EventStream<T, U>;
+    /**
+     * Add an `Event` into the stream
+     */
     addEvent<T extends Key>(e: Event<U>): void;
+    /**
+     * @private
+     */
     protected addNode(node: any): void;
 }
 declare function streamFactory<T extends Key>(): EventStream<T, T>;

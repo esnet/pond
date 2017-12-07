@@ -29,8 +29,8 @@ import { Fill } from "./fill";
 import { Rate } from "./rate";
 import { Select } from "./select";
 
-import { GroupedCollection } from "./grouped";
-import { WindowedCollection } from "./windowed";
+import { GroupedCollection } from "./groupedcollection";
+import { WindowedCollection } from "./windowedcollection";
 
 import {
     AggregationSpec,

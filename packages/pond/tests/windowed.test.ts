@@ -13,20 +13,21 @@ import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { avg, count, keep, sum } from "../src/functions";
-import { grouped, GroupedCollection } from "../src/grouped";
+import { grouped, GroupedCollection } from "../src/groupedcollection";
 import { index } from "../src/index";
 import { period } from "../src/period";
+import { sortedCollection } from "../src/sortedcollection";
 import { time, Time } from "../src/time";
 import { TimeRange } from "../src/timerange";
 import { window } from "../src/window";
 
-import { WindowedCollection } from "../src/windowed";
+import { WindowedCollection } from "../src/windowedcollection";
 
 import { TimeAlignment } from "../src/types";
 
 describe("Windowed", () => {
     it("can build a WindowedCollection", () => {
-        const eventCollection = new Collection()
+        const eventCollection = sortedCollection()
             .addEvent(event(time("2015-04-22T02:28:00Z"), map({ team: "a", value: 3 })))
             .addEvent(event(time("2015-04-22T02:29:00Z"), map({ team: "a", value: 4 })))
             .addEvent(event(time("2015-04-22T02:30:00Z"), map({ team: "b", value: 5 })));
@@ -76,7 +77,7 @@ describe("Windowed", () => {
     });
 
     it("can combine a groupBy with a window", () => {
-        const eventCollection = new Collection(
+        const eventCollection = sortedCollection(
             Immutable.List([
                 event(time("2015-04-22T02:28:00Z"), map({ team: "raptors", score: 3 })),
                 event(time("2015-04-22T02:29:00Z"), map({ team: "raptors", score: 4 })),
@@ -110,7 +111,7 @@ describe("Windowed", () => {
     });
 
     it("can build an aggregated result per group", () => {
-        const eventCollection = new Collection(
+        const eventCollection = sortedCollection(
             Immutable.List([
                 event(time("2015-04-22T02:28:00Z"), map({ team: "raptors", score: 3 })),
                 event(time("2015-04-22T02:29:00Z"), map({ team: "raptors", score: 4 })),
@@ -134,7 +135,7 @@ describe("Windowed", () => {
     });
 
     it("can build an aggregated Collection with grouping and windowing", () => {
-        const eventCollection = new Collection(
+        const eventCollection = sortedCollection(
             Immutable.List([
                 event(time("2015-04-22T02:28:00Z"), map({ team: "raptors", score: 3 })),
                 event(time("2015-04-22T02:29:00Z"), map({ team: "raptors", score: 4 })),
@@ -154,12 +155,12 @@ describe("Windowed", () => {
                 total: ["score", sum()]
             })
             .flatten()
-            .mapKeys(index => time(index.asTimerange().mid()));
+            .mapKeys(idx => time(idx.asTimerange().mid()));
 
         expect(rolledUp.size()).toBe(4);
         expect(rolledUp.at(0).get("total")).toBe(7);
-        expect(rolledUp.at(1).get("total")).toBe(5);
-        expect(rolledUp.at(2).get("total")).toBe(3);
+        expect(rolledUp.at(1).get("total")).toBe(3);
+        expect(rolledUp.at(2).get("total")).toBe(5);
         expect(rolledUp.at(3).get("total")).toBe(10);
     });
 });

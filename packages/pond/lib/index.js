@@ -13,10 +13,11 @@ const key_1 = require("./key");
 const util_1 = require("./util");
 /**
  * An `Index` is a specific instance of a `Window`. For example
- * a `Window` may represent "every day", then an `Index` could
- * represent a specific day like last Tuesday.
+ * a `Window` may represent "every day", and so an `Index` would
+ * represent a specific day like last Tuesday in that case.
  *
- * There are two basic types:
+ * There are two basic types, determined by string format supplied
+ * in the constructor:
  *
  * * *Duration index* - the number of some unit of time
  *                       (e.g. 5 minutes) since the UNIX epoch.
@@ -33,7 +34,7 @@ const util_1 = require("./util");
  * You can also use seconds (e.g. 30s), minutes (e.g. 5m), hours (e.g. 1h)
  * or days (e.g. 7d).
  *
- * Here are several examples of a calendar index:
+ * For the second type, a calendar style `Index`, here are several examples:
  *
  * ```text
  *     2003-10-30    // 30th Oct 2003
@@ -41,7 +42,7 @@ const util_1 = require("./util");
  *     2015          // All of the year 2015
  * ```
  *
- * A specific period of time, and associated data can be looked up based
+ * A specific `TimeRange`, and associated data can be associated up based
  * on that string. It also allows us to represent things like months,
  * which have variable length.
  *
@@ -50,6 +51,17 @@ const util_1 = require("./util");
  * on the timezone of that day.
  */
 class Index extends key_1.Key {
+    /**
+     * Constructs a new `Index` by passing in the index string `s` and
+     * optionally a timezone `tz`. You can also use the `index()` factory
+     * function to construct one.
+     *
+     * Example:
+     * ```
+     * const idx = index("5m-4135541");
+     * idx.asTimerange().humanizeDuration();  // "5 minutes"
+     * ```
+     */
     constructor(s, tz = "Etc/UTC") {
         super();
         this._tz = tz;
@@ -60,16 +72,15 @@ class Index extends key_1.Key {
         return "index";
     }
     /**
-     * Returns the timestamp to represent this `Index`
-     * which in this case will return the midpoint
-     * of the `TimeRange`
+     * Returns the timestamp as a `Date` to represent this `Index`, which in this
+     * case will return the midpoint of the `TimeRange` this represents
      */
     timestamp() {
         return this._timerange.mid();
     }
     /**
-     * Returns the `Index` as JSON, which will just be its string
-     * representation
+     * Returns the `Index` as JSON, which will just be its string representation
+     * within an object e.g. `{ index: 1d-1234 }`
      */
     toJSON() {
         return { index: this._string };
@@ -81,10 +92,16 @@ class Index extends key_1.Key {
         return this._string;
     }
     /**
-     * For the calendar range style `Index`es, this lets you return
+     * For the calendar style `Index`, this lets you return
      * that calendar range as a human readable format, e.g. "June, 2014".
      *
-     * The format specified is a `Moment.format`.
+     * The `format` specified is a `Moment.format`.
+     *
+     * Example:
+     * ```
+     * const idx = index("2014-09-17");
+     * idx.toNiceString("DD MMM YYYY") // "17 Sep 2014"
+     * ```
      */
     toNiceString(format) {
         return util_1.default.niceIndexString(this._string, format);
@@ -127,13 +144,14 @@ exports.Index = Index;
  * * *Calendar index* - a calendar range (e.g. Oct 2014) that
  *                      maybe and uneven amount of time.
  *
- * Indexes also contain a timezone, which defaults to UTC. For instance if
+ * Indexes also contain a timezone `tz`, which defaults to UTC. For instance if
  * you have a day 2017-08-11, then the `TimeRange` representation depends
  * on the timezone of that day (a day in London is not the same time range
- * as a day in Los Angeles).
+ * as a day in Los Angeles), they are offset from each other by their timezone
+ * difference.
  */
 function indexFactory(s, tz = "Etc/UTC") {
     return new Index(s, tz);
 }
 exports.index = indexFactory;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7OztHQVFHOztBQUtILCtCQUE0QjtBQUU1QixpQ0FBMEI7QUFFMUI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7R0FxQ0c7QUFDSCxXQUFtQixTQUFRLFNBQUc7SUFLMUIsWUFBWSxDQUFDLEVBQUUsRUFBRSxHQUFHLFNBQVM7UUFDekIsS0FBSyxFQUFFLENBQUM7UUFDUixJQUFJLENBQUMsR0FBRyxHQUFHLEVBQUUsQ0FBQztRQUNkLElBQUksQ0FBQyxPQUFPLEdBQUcsQ0FBQyxDQUFDO1FBQ2pCLElBQUksQ0FBQyxVQUFVLEdBQUcsY0FBSSxDQUFDLHdCQUF3QixDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUM7SUFDakUsQ0FBQztJQUVNLElBQUk7UUFDUCxNQUFNLENBQUMsT0FBTyxDQUFDO0lBQ25CLENBQUM7SUFFRDs7OztPQUlHO0lBQ0ksU0FBUztRQUNaLE1BQU0sQ0FBQyxJQUFJLENBQUMsVUFBVSxDQUFDLEdBQUcsRUFBRSxDQUFDO0lBQ2pDLENBQUM7SUFFRDs7O09BR0c7SUFDSSxNQUFNO1FBQ1QsTUFBTSxDQUFDLEVBQUUsS0FBSyxFQUFFLElBQUksQ0FBQyxPQUFPLEVBQUUsQ0FBQztJQUNuQyxDQUFDO0lBRUQ7O09BRUc7SUFDSSxRQUFRO1FBQ1gsTUFBTSxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUM7SUFDeEIsQ0FBQztJQUVEOzs7OztPQUtHO0lBQ0ksWUFBWSxDQUFDLE1BQWU7UUFDL0IsTUFBTSxDQUFDLGNBQUksQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLE9BQU8sRUFBRSxNQUFNLENBQUMsQ0FBQztJQUN0RCxDQUFDO0lBRUQ7O09BRUc7SUFDSSxRQUFRO1FBQ1gsTUFBTSxDQUFDLElBQUksQ0FBQyxRQUFRLEVBQUUsQ0FBQztJQUMzQixDQUFDO0lBRUQ7O09BRUc7SUFDSSxXQUFXO1FBQ2QsTUFBTSxDQUFDLElBQUksQ0FBQyxVQUFVLENBQUM7SUFDM0IsQ0FBQztJQUVEOztPQUVHO0lBQ0ksS0FBSztRQUNSLE1BQU0sQ0FBQyxJQUFJLENBQUMsVUFBVSxDQUFDLEtBQUssRUFBRSxDQUFDO0lBQ25DLENBQUM7SUFFRDs7T0FFRztJQUNJLEdBQUc7UUFDTixNQUFNLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxHQUFHLEVBQUUsQ0FBQztJQUNqQyxDQUFDO0NBQ0o7QUE3RUQsc0JBNkVDO0FBQ0Q7Ozs7Ozs7Ozs7Ozs7Ozs7R0FnQkc7QUFDSCxzQkFBc0IsQ0FBQyxFQUFFLEVBQUUsR0FBRyxTQUFTO0lBQ25DLE1BQU0sQ0FBQyxJQUFJLEtBQUssQ0FBQyxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQUM7QUFDNUIsQ0FBQztBQUV3Qiw2QkFBSyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBOzs7Ozs7OztHQVFHOztBQUtILCtCQUE0QjtBQUU1QixpQ0FBMEI7QUFFMUI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0dBc0NHO0FBQ0gsV0FBbUIsU0FBUSxTQUFHO0lBSzFCOzs7Ozs7Ozs7O09BVUc7SUFDSCxZQUFZLENBQUMsRUFBRSxFQUFFLEdBQUcsU0FBUztRQUN6QixLQUFLLEVBQUUsQ0FBQztRQUNSLElBQUksQ0FBQyxHQUFHLEdBQUcsRUFBRSxDQUFDO1FBQ2QsSUFBSSxDQUFDLE9BQU8sR0FBRyxDQUFDLENBQUM7UUFDakIsSUFBSSxDQUFDLFVBQVUsR0FBRyxjQUFJLENBQUMsd0JBQXdCLENBQUMsQ0FBQyxFQUFFLElBQUksQ0FBQyxHQUFHLENBQUMsQ0FBQztJQUNqRSxDQUFDO0lBRU0sSUFBSTtRQUNQLE1BQU0sQ0FBQyxPQUFPLENBQUM7SUFDbkIsQ0FBQztJQUVEOzs7T0FHRztJQUNJLFNBQVM7UUFDWixNQUFNLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxHQUFHLEVBQUUsQ0FBQztJQUNqQyxDQUFDO0lBRUQ7OztPQUdHO0lBQ0ksTUFBTTtRQUNULE1BQU0sQ0FBQyxFQUFFLEtBQUssRUFBRSxJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7SUFDbkMsQ0FBQztJQUVEOztPQUVHO0lBQ0ksUUFBUTtRQUNYLE1BQU0sQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDO0lBQ3hCLENBQUM7SUFFRDs7Ozs7Ozs7Ozs7T0FXRztJQUNJLFlBQVksQ0FBQyxNQUFlO1FBQy9CLE1BQU0sQ0FBQyxjQUFJLENBQUMsZUFBZSxDQUFDLElBQUksQ0FBQyxPQUFPLEVBQUUsTUFBTSxDQUFDLENBQUM7SUFDdEQsQ0FBQztJQUVEOztPQUVHO0lBQ0ksUUFBUTtRQUNYLE1BQU0sQ0FBQyxJQUFJLENBQUMsUUFBUSxFQUFFLENBQUM7SUFDM0IsQ0FBQztJQUVEOztPQUVHO0lBQ0ksV0FBVztRQUNkLE1BQU0sQ0FBQyxJQUFJLENBQUMsVUFBVSxDQUFDO0lBQzNCLENBQUM7SUFFRDs7T0FFRztJQUNJLEtBQUs7UUFDUixNQUFNLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxLQUFLLEVBQUUsQ0FBQztJQUNuQyxDQUFDO0lBRUQ7O09BRUc7SUFDSSxHQUFHO1FBQ04sTUFBTSxDQUFDLElBQUksQ0FBQyxVQUFVLENBQUMsR0FBRyxFQUFFLENBQUM7SUFDakMsQ0FBQztDQUNKO0FBN0ZELHNCQTZGQztBQUNEOzs7Ozs7Ozs7Ozs7Ozs7OztHQWlCRztBQUNILHNCQUFzQixDQUFDLEVBQUUsRUFBRSxHQUFHLFNBQVM7SUFDbkMsTUFBTSxDQUFDLElBQUksS0FBSyxDQUFDLENBQUMsRUFBRSxFQUFFLENBQUMsQ0FBQztBQUM1QixDQUFDO0FBRXdCLDZCQUFLIn0=

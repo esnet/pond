@@ -1,8 +1,8 @@
 import * as Immutable from "immutable";
 import { Base } from "./base";
-import { SortedCollection } from "./sorted";
+import { SortedCollection } from "./sortedcollection";
 import { Event } from "./event";
-import { GroupedCollection, GroupingFunction } from "./grouped";
+import { GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Index } from "./index";
 import { Key } from "./key";
 import { KeyedCollection } from "./stream";
@@ -14,26 +14,23 @@ export declare class WindowedCollection<T extends Key> extends Base {
     private triggerThreshold;
     /**
      * Builds a new grouping that is based on a window period. This is combined
-     * with any groupBy to divide the events among multiple `Collection`s, one
+     * with any groupBy to divide the events among multiple `SortedCollection`s, one
      * for each group and window combination.
      *
      * The main way to construct a `WindowedCollection` is to pass in a "window"
      * defined as a `Period` and a "group", which can be a field to group by, or
      * a function that can be called to do the grouping. Optionally, you may pass
-     * in a `Collection` of initial `Event`s to group, as is the case when this is
+     * in a `SortedCollection` of initial `Event`s to group, as is the case when this is
      * used in a batch context.
      *
-     * As an `Event` is added to this `Processor`, via `addEvent()`, the windowing
-     * and grouping will be applied to it and it will be appended to the appropiate
-     * `Collection`, or a new `Collection` will be created.
-     *
-     * @TODO: Need hooks for removing old SortedCollections and when to return new
-     * aggregated events and when to not.
+     * As an `Event` is added via `addEvent()`, the windowing and grouping will be
+     * applied to it and it will be appended to the appropiate `SortedCollection`,
+     * or a new `SortedCollection` will be created.
      *
      * The other way to construct a `WindowedCollection` is by passing in a map
-     * of group name to SortedCollection. This is generally used if there are are
+     * of group name to `SortedCollection`. This is generally used if there are are
      * events already grouped and you want to apply a window group on top of that.
-     * This is the case when calling `window()` on a `GroupedCollection`.
+     * This is the case when calling `GroupedCollection.window()`.
      */
     constructor(collectionMap: Immutable.Map<string, SortedCollection<T>>);
     constructor(windowing: WindowingOptions, collectionMap: Immutable.Map<string, SortedCollection<T>>);
@@ -44,7 +41,7 @@ export declare class WindowedCollection<T extends Key> extends Base {
      */
     get(key: string): SortedCollection<T>;
     /**
-     * @example
+     * Example:
      * ```
      * const rolledUp = collection
      *   .groupBy("team")
@@ -56,7 +53,15 @@ export declare class WindowedCollection<T extends Key> extends Base {
      * ```
      */
     aggregate(aggregationSpec: AggregationSpec<T>): GroupedCollection<Index>;
+    /**
+     * Collects all `Event`s from the groupings and returns them placed
+     * into a single `SortedCollection`.
+     */
     flatten(): SortedCollection<T>;
+    /**
+     * Removes any grouping present, returning an Immutable.Map
+     * mapping just the window to the `SortedCollection`.
+     */
     ungroup(): Immutable.Map<string, SortedCollection<T>>;
     addEvent(event: Event<T>): Immutable.List<KeyedCollection<T>>;
     private getEventGroups(event);

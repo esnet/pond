@@ -13,15 +13,15 @@ import * as _ from "lodash";
 
 import { Align } from "./align";
 import { Base } from "./base";
-import { Collection } from "./collection";
 import { Event } from "./event";
 import { Index } from "./index";
 import { Key } from "./key";
 import { Period } from "./period";
 import { Rate } from "./rate";
+import { SortedCollection } from "./sortedcollection";
 import { Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
-import { WindowedCollection } from "./windowed";
+import { WindowedCollection } from "./windowedcollection";
 
 import {
     Aggregation,
@@ -51,7 +51,7 @@ import {
 } from "./functions";
 
 /**
- * @example
+ * Example:
  * ```
  * const spec: AggregationSpec = {
  *    in_avg: ["in", avg(), "bob"],
@@ -71,7 +71,7 @@ export type GroupingFunction<T extends Key> = (e: Event<T>) => string;
  * a `Collection`.
  */
 export class GroupedCollection<T extends Key> {
-    protected collections: Immutable.Map<string, Collection<T>>;
+    protected collections: Immutable.Map<string, SortedCollection<T>>;
 
     /**
      * Builds a new Grouping from a `fieldSpec` and a `Collection`. This grouping
@@ -105,15 +105,18 @@ export class GroupedCollection<T extends Key> {
      * In this example the result of the `.groupBy()` will be the `GroupedCollection`
      * and the result of calling `window()` on this will be a `WindowedCollection`.
      */
-    constructor(collectionMap: Immutable.Map<string, Collection<T>>);
-    constructor(fieldSpec: string | string[] | GroupingFunction<T>, collection: Collection<T>);
+    constructor(collectionMap: Immutable.Map<string, SortedCollection<T>>);
+    constructor(
+        fieldSpec: string | string[] | GroupingFunction<T>,
+        collection: SortedCollection<T>
+    );
     constructor(arg1: any, arg2?: any) {
         if (Immutable.Map.isMap(arg1)) {
-            const collectionMap = arg1 as Immutable.Map<string, Collection<T>>;
+            const collectionMap = arg1 as Immutable.Map<string, SortedCollection<T>>;
             this.collections = collectionMap;
         } else {
             let fn: GroupingFunction<T>;
-            const collection = arg2 as Collection<T>;
+            const collection = arg2 as SortedCollection<T>;
             if (_.isFunction(arg1)) {
                 fn = arg1;
             } else {
@@ -125,14 +128,14 @@ export class GroupedCollection<T extends Key> {
                 .eventList()
                 .groupBy(fn)
                 .toMap()
-                .map(events => new Collection(events.toList()));
+                .map(events => new SortedCollection(events.toList()));
         }
     }
 
     /**
      * Gets the `Collection` contained in the `grouping` specified.
      */
-    public get(grouping: string): Collection<T> {
+    public get(grouping: string): SortedCollection<T> {
         return this.collections.get(grouping);
     }
 
@@ -140,7 +143,7 @@ export class GroupedCollection<T extends Key> {
      * Aggregate per grouping, essentially forming a map from the group name
      * to the aggregate of the former `Collection` associated with that group name.
      *
-     * @example
+     * Example:
      * ```
      * const eventCollection = new Collection(
      *     Immutable.List([
@@ -193,7 +196,7 @@ export class GroupedCollection<T extends Key> {
         this.collections.forEach((collection, group) => {
             eventList = eventList.concat(collection.eventList());
         });
-        const map = Immutable.Map({ _: new Collection<T>(eventList) });
+        const map = Immutable.Map({ _: new SortedCollection<T>(eventList) });
         return new GroupedCollection(map);
     }
 
@@ -202,7 +205,7 @@ export class GroupedCollection<T extends Key> {
      * `Collection` will containing all `Event`s in all the previously
      * grouped `Collection`s.
      */
-    public flatten(): Collection<T> {
+    public flatten(): SortedCollection<T> {
         return this.ungroup().get("_");
     }
 
@@ -233,7 +236,7 @@ export class GroupedCollection<T extends Key> {
      */
     public align(options: AlignmentOptions): GroupedCollection<T> {
         const collections = this.collections.map((collection, group) => {
-            return collection.align(options) as Collection<T>;
+            return collection.align(options) as SortedCollection<T>;
         });
         return new GroupedCollection<T>(collections);
     }
@@ -243,7 +246,7 @@ export class GroupedCollection<T extends Key> {
      */
     public rate(options: RateOptions): GroupedCollection<TimeRange> {
         const collections = this.collections.map((collection, group) => {
-            return collection.rate(options) as Collection<TimeRange>;
+            return collection.rate(options) as SortedCollection<TimeRange>;
         });
         return new GroupedCollection(collections);
     }
@@ -251,7 +254,7 @@ export class GroupedCollection<T extends Key> {
 
 function groupedFactory<T extends Key>(
     fieldSpec: string | string[] | GroupingFunction<T>,
-    collection: Collection<T>
+    collection: SortedCollection<T>
 ) {
     return new GroupedCollection<T>(fieldSpec, collection);
 }

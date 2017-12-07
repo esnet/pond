@@ -248,9 +248,10 @@ describe("Event list combining", () => {
             event(t, Immutable.Map({ a: 1, b: 2, c: 3 }))
         ];
         const result = Event.combine(Immutable.List(events), sum());
-        expect(result.getIn([0, "a"])).toBe(8);
-        expect(result.getIn([0, "b"])).toBe(11);
-        expect(result.getIn([0, "c"])).toBe(14);
+
+        expect(result.get(0).get("a")).toBe(8);
+        expect(result.get(0).get("b")).toBe(11);
+        expect(result.get(0).get("c")).toBe(14);
     });
 
     it("can pass no events to sum and get back an empty list", () => {

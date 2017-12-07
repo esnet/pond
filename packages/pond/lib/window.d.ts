@@ -8,11 +8,21 @@ export declare enum WindowType {
     Day = 1,
     Month = 2,
     Week = 3,
-    Year = 4
+    Year = 4,
 }
-export abstract class WindowBase {
+export declare abstract class WindowBase {
     abstract getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
+/**
+ * Specifies a repeating day duration specific to the supplied timezone. You can
+ * create one using the `daily()` factory function.
+ *
+ * Example:
+ * ```
+ * const dayWindowNewYork = daily("America/New_York");
+ * const indexes = dayWindowNewYork.getIndexSet(Util.untilNow(duration("5d")));
+ * ```
+ */
 export declare class DayWindow extends WindowBase {
     /**
      * Given an index string representing a day (e.g. "2015-08-22"), and optionally
@@ -20,41 +30,62 @@ export declare class DayWindow extends WindowBase {
      */
     static timeRangeOf(indexString: string, tz?: string): void;
     private _tz;
+    /**
+     * Construct a new `DayWindow`, optionally supplying the timezone `tz`
+     * for the `Window`. The default is `UTC`.
+     */
     constructor(tz?: string);
+    /**
+     * Returns an `Immutable.OrderedSet<Index>` set of day `Index`es for the
+     * `Time` or `TimeRange` supplied as `t`.
+     *
+     * The simplest invocation of this function would be to pass in a `Time`
+     * and get the day (e.g. "2017-09-10"). What day you get may depend on the
+     * timezone specified when constructing this `DayWindow`. The most useful
+     * aspect of a `DayWindow` is that you can use this index set to bucket
+     * `Event`s into days in a particular timezone.
+     */
     getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;
 }
 /**
  * A `Window` is a specification for repeating range of time range which is
- * typically used in Pond to describe an aggregation bounds. For example:
+ * typically used in Pond to describe an aggregation bounds.
  *
- * Windows have a `Period` (which defines a frequency and offset of window
+ * Windows have a `Period` (which defines the frequency and offset of window
  * placement) combined with a `Duration` (which is the size of the window
  * itself).
  *
- * If a window is defined with only a `Duration` then the freqency of the
- * window is equal to the duration of the window (i.e. a fixed window).
+ * If a `Window` is defined with only a `Duration` then the freqency of the
+ * `Window` is equal to the duration of the window (i.e. a fixed window).
  * If the period is smaller than the duration we have a sliding window.
+ *
+ * From a `Window` you can get a set of `Index`es for a specific `Time` or
+ * `TimeRange`, giving you the `Window` or `Window`s that overlap that `Time`
+ * or `TimeRange`. The main use of this is it allows you to easily bucket
+ * `Events` into the appropiate `Window`s.
+ *
+ * Example:
  * ```
- * Window(period("5m"), duration("1h"))
+ * const timeseries = timeSeries(data);
+ * const everyThirtyMinutes = window(duration("30m"));
+ * const dailyAvg = timeseries.fixedWindowRollup({
+ *     window: everyThirtyMinutes,
+ *     aggregation: { average: ["value", avg()] }
+ * });
  * ```
+ *
+ * Note: You can also use `DayWindow` with a specified timezone for more
+ * control over daily aggregations.
  */
 export declare class Window extends WindowBase {
     private _period;
     private _duration;
     /**
-     * A Window is a reoccurring duration of time, for example: "every day", or
-     * "1 hour, repeated every 5 minutes".
+     * To construct a `Window` you need to supply the `Duration` or length of the
+     * window and the sliding `Period` of the window.
      *
-     * A Window can be made in two ways. The first is a "Calendar" Window.
-     * You construct one of these by providing the appropriate type:
-     *  * "Day"
-     *  * "Month"
-     *  * "Year"
-     *
-     * The second is a `Period` based `Window`. An example might be to repeat a
-     * 5 minute interval every 10 second, starting at some beginning time.
-     *
-     * To define an duration `Period`, you need to specify up to three parts:
+     *  * Supply the `Duration` as the `d` arg.
+     *  * Optionally supply the `Period`
      *
      * Repeats of the Window are given an index to represent that specific repeat.
      * That index is represented by an `Index` object and can also be represented

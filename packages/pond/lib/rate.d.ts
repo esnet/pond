@@ -14,7 +14,25 @@ import { Processor } from "./processor";
 import { TimeRange } from "./timerange";
 import { RateOptions } from "./types";
 /**
- * A `Processor` to align the data into bins of regular time period.
+ * A `Processor` to take the derivative of the incoming `Event`s
+ * for the given fields. The resulting output `Event`s will contain
+ * per second values.
+ *
+ * Optionally you can substitute in `null` values if the rate is negative.
+ * This is useful when a negative rate would be considered invalid like an
+ * ever increasing counter.
+ *
+ * To control the rate calculation you need to specify a `RateOptions` object
+ * in the constuctor, which takes the following form:
+ * ```
+ * {
+ *     fieldSpec: string | string[];
+ *     allowNegative?: boolean;
+ * }
+ * ```
+ * Options:
+ *  * `fieldSpec` - the field to calculate the rate on
+ *  * `allowNegative` - allow emit of negative rates
  */
 export declare class Rate<T extends Key> extends Processor<T, TimeRange> {
     private _fieldSpec;

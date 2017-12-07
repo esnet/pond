@@ -27,7 +27,7 @@ export interface ValueMap {
 export declare enum TimeAlignment {
     Begin = 1,
     Middle = 2,
-    End = 3
+    End = 3,
 }
 /**
  * Rate of emit from within a stream:
@@ -36,7 +36,7 @@ export declare enum TimeAlignment {
  */
 export declare enum Trigger {
     perEvent = 1,
-    onDiscardedWindow = 2
+    onDiscardedWindow = 2,
 }
 /**
  * Method of interpolation used by the `align()` function:
@@ -45,7 +45,7 @@ export declare enum Trigger {
  */
 export declare enum AlignmentMethod {
     Hold = 1,
-    Linear = 2
+    Linear = 2,
 }
 /**
  * Method of filling used by the `fill()` function:
@@ -56,7 +56,7 @@ export declare enum AlignmentMethod {
 export declare enum FillMethod {
     Zero = 1,
     Pad = 2,
-    Linear = 3
+    Linear = 3,
 }
 /**
  * Options object expected by the `windowBy...()` functions. At this point,
@@ -109,8 +109,8 @@ export interface RateOptions {
     allowNegative?: boolean;
 }
 /**
- * Options object expected by the `align()` function:
- *  * `fieldSpec` - the field to align
+ * Options object expected by the `fill()` function:
+ *  * `fieldSpec` - the field to fill
  *  * `method` - the interpolation method, one of
  *    `FillMethod.Hold`, `FillMethod.Pad` or `FillMethod.Linear`
  *  * `limit` - the number of missing values to fill before giving up
@@ -186,9 +186,7 @@ export declare type ArrayReducer = (events: Array<Event<Key>>) => Array<Event<Ke
 /**
  * A function which combines a list of events into a new list of events
  */
-export declare type ListReducer = (
-    events: Immutable.List<Event<Key>>
-) => Immutable.List<Event<Key>>;
+export declare type ListReducer = (events: Immutable.List<Event<Key>>) => Immutable.List<Event<Key>>;
 /**
  * Tuple mapping a string -> `ReducerFunction`
  * e.g. `["value", avg()]`

@@ -1,11 +1,11 @@
 import * as Immutable from "immutable";
 import { Collection } from "./collection";
 import { Event } from "./event";
-import { GroupedCollection, GroupingFunction } from "./grouped";
+import { GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Key } from "./key";
 import { TimeRange } from "./timerange";
 import { DedupFunction } from "./types";
-import { WindowedCollection } from "./windowed";
+import { WindowedCollection } from "./windowedcollection";
 import { AlignmentOptions, FillOptions, RateOptions, WindowingOptions } from "./types";
 /**
  * In general, a `Collection` is a bucket of `Event`'s, with no particular order. This,
@@ -23,11 +23,44 @@ export declare class SortedCollection<T extends Key> extends Collection<T> {
      */
     constructor(arg1?: Immutable.List<Event<T>> | Collection<T>);
     /**
-     * TODO: Add comment here
+     * Appends a new `Event` to the `SortedCollection`, returning a new `SortedCollection`
+     * containing that `Event`. Optionally the `Event`s may be de-duplicated.
+     *
+     * The `dedup` arg may `true` (in which case any existing `Event`s with the
+     * same key will be replaced by this new `Event`), or with a function. If
+     * `dedup` is a user function that function will be passed a list of all `Event`s
+     * with that duplicated key and will be expected to return a single `Event`
+     * to replace them with, thus shifting de-duplication logic to the user.
+     *
+     * DedupFunction:
+     * ```
+     * (events: Immutable.List<Event<T>>) => Event<T>
+     * ```
+     *
+     * Example 1:
+     *
+     * ```
+     * let myCollection = collection<Time>()
+     *     .addEvent(e1)
+     *     .addEvent(e2);
+     * ```
+     *
+     * Example 2:
+     * ```
+     * // dedup with the sum of the duplicated events
+     * const myDedupedCollection = sortedCollection<Time>()
+     *     .addEvent(e1)
+     *     .addEvent(e2)
+     *     .addEvent(e3, (events) => {
+     *         const a = events.reduce((sum, e) => sum + e.get("a"), 0);
+     *         return new Event<Time>(t, { a });
+     *     });
+     * ```
      */
     addEvent(event: Event<T>, dedup?: DedupFunction<T> | boolean): SortedCollection<T>;
     /**
-     * Returns true if all events in this `Collection` are in chronological order.
+     * Returns true if all `Event`s are in chronological order. In the case
+     * of a `SortedCollection` this will always return `true`.
      */
     isChronological(): boolean;
     /**

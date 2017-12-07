@@ -21,7 +21,7 @@ import { collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { period } from "../src/period";
-import { sortedCollection } from "../src/sorted";
+import { sortedCollection } from "../src/sortedcollection";
 import { time } from "../src/time";
 
 import { AlignmentMethod } from "../src/types";

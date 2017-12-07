@@ -12,13 +12,13 @@ import * as Immutable from "immutable";
 import * as _ from "lodash";
 
 import { Event } from "./event";
-import { grouped, GroupedCollection, GroupingFunction } from "./grouped";
+import { grouped, GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Index } from "./index";
 import { Key } from "./key";
 import { Period } from "./period";
 import { Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
-import { windowed, WindowedCollection } from "./windowed";
+import { windowed, WindowedCollection } from "./windowedcollection";
 
 import { Align } from "./align";
 import { Collapse } from "./collapse";
