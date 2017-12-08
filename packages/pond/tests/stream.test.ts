@@ -4,9 +4,9 @@ declare const expect: any;
 declare const beforeEach: any;
 
 import * as Immutable from "immutable";
-import * as moment from "moment";
 import Moment = moment.Moment;
 import * as _ from "lodash";
+import * as moment from "moment";
 
 import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
