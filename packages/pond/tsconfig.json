@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "outDir": "lib",
+        "rootDir": "src",
+        "module": "commonjs",
+        "declaration": true,
+        "inlineSourceMap": true,
+        "listFiles": false,
+        "noStrictGenericChecks": true
+    },
+    "include": ["src/*.ts"],
+    "exclude": ["node_modules", "lib"]
+}

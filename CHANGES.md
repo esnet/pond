@@ -2,6 +2,191 @@
 
 ---
 
+## 1.0.0 alpha.1
+
+> December 2017
+
+This is a complete rewrite of Pond in Typescript. We think this is the future of this library and
+the visualization code that depend on it. However, we know this is a large change, but know that we
+will also maintain the 0.8.x code base for the foreseeable future. Also note that this is an initial
+release. Until this is fully integrated into our production code none of this is set in stone.
+Please file issues as you find problems or have concerns. Thanks!
+
+What follows is a high level tour of the differences. Please see the API docs for full details.
+
+**New classes:**
+
+* `Time` is now a Pond object (e.g. 12am June 2nd, 2017)
+* `Duration` is added to describe a length of time (e.g. a day)
+* `Period` is added to describe a repeating time (e.g. 12am each day)
+* `Window` is added to describe a repeating duration of time (e.g. each day)
+* Types all have constructor functions that are exported with the classes themselves, for example to
+  construct a `Time` you can use the `time()` function:
+
+```
+const timestamp = time(new Date("2015-04-22T03:30:00Z")
+```
+
+**Events:**
+
+* Events are generics now (i.e. Event<K>) where K is either a `Time`, `TimeRange` or `Index` or your
+  own subclass of `Key`.
+* Events are constructed using `event()`:
+
+```
+const timestamp = time(new Date("2015-04-22T03:30:00Z");
+const e = event(t, Immutable.Map({ temperature: 75.2, humidity: 84 }));
+```
+
+* Alternatively you can use `timeEvent()`, `timeRangeEvent()` or `indexedEvent()` for type safe
+  construction.
+
+```
+const e = timeEvent({
+   time: 1487983075328,
+   data: { a: 2, b: 3 }
+});
+```
+
+* Events no longer have a "value" field by default. You need to pass in an `Immutable.Map` to
+  specify data, even if it's just `Immutable.Map({value: 2})`.
+
+**Index**
+
+* Supports time zones now rather than just UTC or local, so that calendar style Indexes can be
+  interpreted in any time zone. (2017-11-14 in London is a different actual time range than that
+  same date in San Francisco)
+
+**Collections:**
+
+* Collections are now separated into two types: a `Collection` and a `SortedCollection`, the
+  difference being that a `SortedCollection` always maintains its events in chronological order
+* A `TimeSeries` now wraps a `SortedCollection` and as before, for many cases, you will likely want
+  to just use a `TimeSeries`
+* `Collection` now maintains a map of keys to enable faster de-duplication
+* You can now chain multiple processors off a `Collection`, which replaces the batch version of the
+  former Pipeline code. Here's an example using `SortedCollection`:
+
+```
+const trafficCollection = sortedCollection(events);
+const trafficSpeeds = trafficCollection
+    .align({
+        fieldSpec: "traffic",
+        period: period(duration("30s")),
+        method: AlignmentMethod.Linear
+    })
+    .rate({
+        fieldSpec: "traffic"
+    })
+    .mapKeys(tr => time(tr.mid()));
+```
+
+* New collection groupings with `GroupedCollection` and `WindowedCollection`. These map from a
+  string type key to a `SortedCollection`. Generally you end up with one of these if you `window()`
+  or `groupBy()` on a `SortedCollection` within a chain. These are also used in the streaming API.
+
+**TimeSeries**
+
+* Now wraps the `SortedCollection`
+* Uses a timezone `tz` specification rather than a UTC flag so that Indexed `TimeSeries` can
+  interpret keys like "2017-12-07" as a time range in any timezone rather than just local or UTC.
+  This will enable multi-timezone visualization in react-timeseries-charts in the future.
+* This brings in `moment-timezone` as a dependency which maybe too heavy for some use cases
+* The wire format for the `TimeSeries` is the same, but you should use the `timeSeries()`
+  constructor function to make one (if the `Event` `Key` is `Time`), for example:
+
+```
+   const series = timeSeries({
+   name: "Map Traffic",
+   columns: ["time", "north", "south"],
+   points: [
+       [1400425951000, 100, 200],
+       [1400425952000, 200, 400],
+       [1400425953000, 300, 600],
+       [1400425954000, 400, 800]
+   ]
+});
+```
+
+* Alternative constructor functions are `timeRangeSeries()` and `indexedSeries`. This allows type
+  safety when reading in this JSON structure.
+* Most methods take an option object which has a defined structure. This use pattern should be much
+  more consistent than the previous version. All of those types are defined in types.ts, but should
+  be called out in the docs string for the method as well.
+
+**Aggregation**
+
+A common task in Pond is aggregation of different forms, so here its worth calling out what that
+looks like in this version:
+
+* Introduces `Window` to specify the buckets for the aggregation. A `Window` allows you to use a
+  `Duration`:
+
+```
+const everyDay = window(duration("1d"));
+```
+
+* Or you can create a sliding window with the addition of the second argument which is a `Period`,
+  resulting in something like this:
+
+```
+const slidingWindow = window(duration("30m"), period(duration("10s"))`
+```
+
+* Putting this together with the `TimeSeries.fixedWindowRollup()` method you get:
+
+```
+const series = timeSeries(sept2014Data);
+const everyDay = window(duration("1d"));
+const dailyAvg = series.fixedWindowRollup({
+    window: everyDay,
+    aggregation: { value: ["value", avg()] }
+});
+```
+
+**Streaming**
+
+Pond has limited streaming capabilities and this hasn't exactly changed (in terms of how limited it
+is compared to things like Flink and Beam). It makes no attempt to distribute data. However, when
+sending events to a browser it can be a handy abstraction that allows you to process those events as
+they come into a dashboard.
+
+Previously streaming was done with a `Pipeline`. `Pipeline` is gone now. The batch style processing
+of a `Collection` or `TimeSeries` can now be chained directly off those objects.
+
+Streaming is now done with a `Stream` object. As before you can chain multiple processors together
+to form an output.
+
+```
+const everyThirtyMinutes = window(duration("30m"));
+const source = stream<Time>()
+    .groupByWindow({
+        window: everyThirtyMinutes,
+        trigger: Trigger.perEvent
+    })
+    .aggregate({
+        in_avg: ["in", avg()],
+        out_avg: ["out", avg()]
+    })
+    .output(evt => {
+        // Do something with the output...
+    });
+
+// Add events from some source...
+eventsIn.forEach(e => source.addEvent(e));
+```
+
+**Note:** you can not do `groupBy` within a stream anymore. Use multiple streams and do grouping as
+you add the events.
+
+**Developer**
+
+* Project is now organized with lerna.
+* Website now builds it's own API docs from the typedoc JSON generation
+* New website design
+
+---
+
 ## 0.8.8
 
 > November 2017

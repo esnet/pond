@@ -1,0 +1,2234 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders a snapshot 1`] = `
+<div
+  className="App"
+>
+  <div
+    style={
+      Object {
+        "display": "flex",
+      }
+    }
+  >
+    <nav
+      className="navbar navbar-inverse navbar-fixed-top"
+    >
+      <div
+        className="container"
+      >
+        <div
+          className="navbar-header"
+        >
+          <a
+            className="navbar-brand"
+            href="/"
+            style={
+              Object {
+                "color": "#FFF",
+              }
+            }
+          >
+            Pond - Immutable Timeseries Abstractions
+          </a>
+        </div>
+      </div>
+    </nav>
+    <div
+      style={
+        Object {
+          "background": "#eee",
+          "height": "100vh",
+          "marginTop": "auto",
+          "overflow": "auto",
+          "width": "21vw",
+        }
+      }
+    >
+      <div
+        style={
+          Object {
+            "fontWeight": 800,
+            "paddingLeft": 5,
+            "paddingTop": 5,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Classes
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Align"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Align
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Base"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Base
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Collapse"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Collapse
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Collection"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Collection
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Event"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Event
+          </a>
+        </div>
+      </div>
+      <div>
+        <div />
+      </div>
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/GroupedCollection"
+            onClick={[Function]}
+            style={undefined}
+          >
+            GroupedCollection
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Index"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Index
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Key"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Key
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Period"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Period
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Processor"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Processor
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Rate"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Rate
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/SortedCollection"
+            onClick={[Function]}
+            style={undefined}
+          >
+            SortedCollection
+          </a>
+        </div>
+      </div>
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Time"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Time
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/TimeRange"
+            onClick={[Function]}
+            style={undefined}
+          >
+            TimeRange
+          </a>
+        </div>
+      </div>
+      <div>
+        <div />
+      </div>
+      <div />
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/WindowedCollection"
+            onClick={[Function]}
+            style={undefined}
+          >
+            WindowedCollection
+          </a>
+        </div>
+      </div>
+      <div
+        style={
+          Object {
+            "fontWeight": 800,
+            "paddingLeft": 5,
+            "paddingTop": 5,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Functions
+      </div>
+      <div />
+      <div />
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/collectionFactory"
+            onClick={[Function]}
+            style={undefined}
+          >
+            collectionFactory
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/fieldAsArray"
+            onClick={[Function]}
+            style={undefined}
+          >
+            fieldAsArray
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/event"
+            onClick={[Function]}
+            style={undefined}
+          >
+            event
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/indexedEvent"
+            onClick={[Function]}
+            style={undefined}
+          >
+            indexedEvent
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/timeEvent"
+            onClick={[Function]}
+            style={undefined}
+          >
+            timeEvent
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/timeRangeEvent"
+            onClick={[Function]}
+            style={undefined}
+          >
+            timeRangeEvent
+          </a>
+        </div>
+      </div>
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/avg"
+            onClick={[Function]}
+            style={undefined}
+          >
+            avg
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/count"
+            onClick={[Function]}
+            style={undefined}
+          >
+            count
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/difference"
+            onClick={[Function]}
+            style={undefined}
+          >
+            difference
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/first"
+            onClick={[Function]}
+            style={undefined}
+          >
+            first
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/ignoreMissing"
+            onClick={[Function]}
+            style={undefined}
+          >
+            ignoreMissing
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/keep"
+            onClick={[Function]}
+            style={undefined}
+          >
+            keep
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/keepMissing"
+            onClick={[Function]}
+            style={undefined}
+          >
+            keepMissing
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/last"
+            onClick={[Function]}
+            style={undefined}
+          >
+            last
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/max"
+            onClick={[Function]}
+            style={undefined}
+          >
+            max
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/median"
+            onClick={[Function]}
+            style={undefined}
+          >
+            median
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/min"
+            onClick={[Function]}
+            style={undefined}
+          >
+            min
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/noneIfEmpty"
+            onClick={[Function]}
+            style={undefined}
+          >
+            noneIfEmpty
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/percentile"
+            onClick={[Function]}
+            style={undefined}
+          >
+            percentile
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/propagateMissing"
+            onClick={[Function]}
+            style={undefined}
+          >
+            propagateMissing
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/stdev"
+            onClick={[Function]}
+            style={undefined}
+          >
+            stdev
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/sum"
+            onClick={[Function]}
+            style={undefined}
+          >
+            sum
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/zeroMissing"
+            onClick={[Function]}
+            style={undefined}
+          >
+            zeroMissing
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/groupedFactory"
+            onClick={[Function]}
+            style={undefined}
+          >
+            groupedFactory
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/indexFactory"
+            onClick={[Function]}
+            style={undefined}
+          >
+            indexFactory
+          </a>
+        </div>
+      </div>
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/periodFactory"
+            onClick={[Function]}
+            style={undefined}
+          >
+            periodFactory
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/sortedCollectionFactory"
+            onClick={[Function]}
+            style={undefined}
+          >
+            sortedCollectionFactory
+          </a>
+        </div>
+      </div>
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/timeFactory"
+            onClick={[Function]}
+            style={undefined}
+          >
+            timeFactory
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/timerange"
+            onClick={[Function]}
+            style={undefined}
+          >
+            timerange
+          </a>
+        </div>
+      </div>
+      <div>
+        <div />
+      </div>
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/dataFromArg"
+            onClick={[Function]}
+            style={undefined}
+          >
+            dataFromArg
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/fieldAsArray"
+            onClick={[Function]}
+            style={undefined}
+          >
+            fieldAsArray
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/indexFromArgs"
+            onClick={[Function]}
+            style={undefined}
+          >
+            indexFromArgs
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/isMissing"
+            onClick={[Function]}
+            style={undefined}
+          >
+            isMissing
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/isValid"
+            onClick={[Function]}
+            style={undefined}
+          >
+            isValid
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/leftPad"
+            onClick={[Function]}
+            style={undefined}
+          >
+            leftPad
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/niceIndexString"
+            onClick={[Function]}
+            style={undefined}
+          >
+            niceIndexString
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/timeRangeFromArg"
+            onClick={[Function]}
+            style={undefined}
+          >
+            timeRangeFromArg
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/timeRangeFromIndexString"
+            onClick={[Function]}
+            style={undefined}
+          >
+            timeRangeFromIndexString
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/timestampFromArg"
+            onClick={[Function]}
+            style={undefined}
+          >
+            timestampFromArg
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/untilNow"
+            onClick={[Function]}
+            style={undefined}
+          >
+            untilNow
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/windowDuration"
+            onClick={[Function]}
+            style={undefined}
+          >
+            windowDuration
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/windowPositionFromDate"
+            onClick={[Function]}
+            style={undefined}
+          >
+            windowPositionFromDate
+          </a>
+        </div>
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/windowFactory"
+            onClick={[Function]}
+            style={undefined}
+          >
+            windowFactory
+          </a>
+        </div>
+      </div>
+      <div
+        style={
+          Object {
+            "fontWeight": 800,
+            "paddingLeft": 5,
+            "paddingTop": 5,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Interfaces
+      </div>
+      <div />
+      <div />
+      <div />
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/IndexedEventObject"
+            onClick={[Function]}
+            style={undefined}
+          >
+            IndexedEventObject
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/TimeEventObject"
+            onClick={[Function]}
+            style={undefined}
+          >
+            TimeEventObject
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/TimeRangeEventObject"
+            onClick={[Function]}
+            style={undefined}
+          >
+            TimeRangeEventObject
+          </a>
+        </div>
+      </div>
+      <div>
+        <div />
+      </div>
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/AggregationSpec"
+            onClick={[Function]}
+            style={undefined}
+          >
+            AggregationSpec
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/AggregationSpec"
+            onClick={[Function]}
+            style={undefined}
+          >
+            AggregationSpec
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/AlignmentOptions"
+            onClick={[Function]}
+            style={undefined}
+          >
+            AlignmentOptions
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/CollapseOptions"
+            onClick={[Function]}
+            style={undefined}
+          >
+            CollapseOptions
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/RateOptions"
+            onClick={[Function]}
+            style={undefined}
+          >
+            RateOptions
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/ValueListMap"
+            onClick={[Function]}
+            style={undefined}
+          >
+            ValueListMap
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/ValueMap"
+            onClick={[Function]}
+            style={undefined}
+          >
+            ValueMap
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div
+        style={
+          Object {
+            "fontWeight": 800,
+            "paddingLeft": 5,
+            "paddingTop": 5,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Enums
+      </div>
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/InterpolationType"
+            onClick={[Function]}
+            style={undefined}
+          >
+            InterpolationType
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/AlignmentMethod"
+            onClick={[Function]}
+            style={undefined}
+          >
+            AlignmentMethod
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/TimeAlignment"
+            onClick={[Function]}
+            style={undefined}
+          >
+            TimeAlignment
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Trigger"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Trigger
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/WindowType"
+            onClick={[Function]}
+            style={undefined}
+          >
+            WindowType
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div
+        style={
+          Object {
+            "fontWeight": 800,
+            "paddingLeft": 5,
+            "paddingTop": 5,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Objects
+      </div>
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/filter"
+            onClick={[Function]}
+            style={undefined}
+          >
+            filter
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/SHORT_UNITS"
+            onClick={[Function]}
+            style={undefined}
+          >
+            SHORT_UNITS
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/UNITS"
+            onClick={[Function]}
+            style={undefined}
+          >
+            UNITS
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/UNITS"
+            onClick={[Function]}
+            style={undefined}
+          >
+            UNITS
+          </a>
+        </div>
+      </div>
+      <div />
+      <div
+        style={
+          Object {
+            "fontWeight": 800,
+            "paddingLeft": 5,
+            "paddingTop": 5,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Types
+      </div>
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div />
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/GroupingFunction"
+            onClick={[Function]}
+            style={undefined}
+          >
+            GroupingFunction
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div />
+      <div />
+      <div>
+        <div />
+      </div>
+      <div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/Aggregation"
+            onClick={[Function]}
+            style={undefined}
+          >
+            Aggregation
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/AggregationMapFunction"
+            onClick={[Function]}
+            style={undefined}
+          >
+            AggregationMapFunction
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/AggregationTuple"
+            onClick={[Function]}
+            style={undefined}
+          >
+            AggregationTuple
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/DedupFunction"
+            onClick={[Function]}
+            style={undefined}
+          >
+            DedupFunction
+          </a>
+        </div>
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 10,
+              "lineHeight": 2,
+              "marginLeft": "1vw",
+            }
+          }
+        >
+          <a
+            className={undefined}
+            href="/ReducerFunction"
+            onClick={[Function]}
+            style={undefined}
+          >
+            ReducerFunction
+          </a>
+        </div>
+      </div>
+      <div />
+      <div />
+    </div>
+    <div
+      style={
+        Object {
+          "flex": 1,
+          "height": "100vh",
+          "marginTop": "50px",
+          "overflow": "auto",
+        }
+      }
+    >
+      <div
+        style={
+          Object {
+            "padding": "20px",
+          }
+        }
+      >
+        <div
+          style={
+            Object {
+              "color": "#626466",
+              "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+              "fontSize": 9,
+              "lineHeight": 2,
+            }
+          }
+        >
+          <h3
+            style={
+              Object {
+                "color": "#333",
+                "fontSize": "1.5em",
+                "fontWeight": 700,
+                "margin": "1.5rem 0 1.5rem",
+              }
+            }
+          >
+            Introduction
+          </h3>
+          <p
+            style={
+              Object {
+                "color": "#626466",
+                "fontFamily": "'Fira Sans','Helvetica Neue',Helvetica,Arial,sans-serif",
+                "fontSize": 9,
+                "lineHeight": 2,
+              }
+            }
+          >
+            Pond.js is a library built on top of immutable.js to provide time-based data structures, serialization and processing within our tools.
+            <br />
+            For data structures it unifies the use of time ranges, events and collections and time series. For processing it provides a chained pipeline interface to aggregate, collect and process batches or streams of events.
+            <br />
+            We are still developing Pond.js as it integrates further into our code, so it may change or be incomplete in parts. That said, it has a growing collection of tests and we will strive not to break those without careful consideration.
+          </p>
+          <h3
+            style={
+              Object {
+                "color": "#333",
+                "fontSize": "1.5em",
+                "fontWeight": 700,
+                "margin": "1.5rem 0 1.5rem",
+              }
+            }
+          >
+            Rationale
+          </h3>
+          <p>
+            ESnet runs a large research network for the US Department of Energy. Our tools consume events and time series data throughout our network visualization applications and data processing chains. As our tool set grew, so did our need to build a Javascript library to work with this type of data that was consistent and dependable. The alternative for us has been to pass ad-hoc data structures between the server and the client, making all elements of the system much more complicated. Not only do we need to deal with different formats at all layers of the system, we also repeat our processing code over and over. Pond.js was built to address these pain points. The result might be as simple as comparing two time ranges:
+          </p>
+          <code
+            style={
+              Object {
+                "background": "#F8F9FA",
+                "borderLeft": "solid 3px #ECEAE9",
+                "borderLeftColor": "#9CDAE9",
+                "boxSizing": "border-box",
+                "display": "block",
+                "fontSize": ".875em",
+                "margin": ".5rem 0",
+                "overflowY": "scroll",
+                "padding": ".5rem 8px .5rem 12px",
+                "whiteSpace": "pre",
+              }
+            }
+          >
+            const timerange = timerange1.intersection(timerange2); timerange.asRelativeString();  // "a few seconds ago to a month ago"
+          </code>
+          <p>
+            Or simply getting the average value in a timeseries:
+          </p>
+          <code
+            style={
+              Object {
+                "background": "#F8F9FA",
+                "borderLeft": "solid 3px #ECEAE9",
+                "borderLeftColor": "#9CDAE9",
+                "boxSizing": "border-box",
+                "display": "block",
+                "fontSize": ".875em",
+                "margin": ".5rem 0",
+                "overflowY": "scroll",
+                "padding": ".5rem 8px .5rem 12px",
+                "whiteSpace": "pre",
+              }
+            }
+          >
+            timeseries.avg("sensor");
+          </code>
+          <p>
+            Or quickly performing aggregations on a timeseries:
+          </p>
+          <code
+            style={
+              Object {
+                "background": "#F8F9FA",
+                "borderLeft": "solid 3px #ECEAE9",
+                "borderLeftColor": "#9CDAE9",
+                "boxSizing": "border-box",
+                "display": "block",
+                "fontSize": ".875em",
+                "margin": ".5rem 0",
+                "overflowY": "scroll",
+                "padding": ".5rem 8px .5rem 12px",
+                "whiteSpace": "pre",
+              }
+            }
+          >
+            const timeseries = new TimeSeries(weatherData);
+          </code>
+          <p>
+            Or much higher level batch or stream processing using the Pipeline API:
+          </p>
+          <code
+            style={
+              Object {
+                "background": "#F8F9FA",
+                "borderLeft": "solid 3px #ECEAE9",
+                "borderLeftColor": "#9CDAE9",
+                "boxSizing": "border-box",
+                "display": "block",
+                "fontSize": ".875em",
+                "margin": ".5rem 0",
+                "overflowY": "scroll",
+                "padding": ".5rem 8px .5rem 12px",
+                "whiteSpace": "pre",
+              }
+            }
+          >
+            const p = Pipeline() .from(timeseries) .take(10) .groupBy(e =&gt; e.value() &gt; 65 ? "high" : "low") .emitOn("flush")
+          </code>
+          <h3
+            style={
+              Object {
+                "color": "#333",
+                "fontSize": "1.5em",
+                "fontWeight": 700,
+                "margin": "1.5rem 0 1.5rem",
+              }
+            }
+          >
+            What does it do?
+          </h3>
+          <p>
+            Pond has three main goals:
+            <ol>
+              <li>
+                Data Structures - Provide a robust set of time-related data structures, built on Immutable.js
+              </li>
+              <li>
+                Serialization - Provide serialization of these structures for transmission across the wire
+              </li>
+              <li>
+                Processing - Provide processing operations to work with those structures
+              </li>
+            </ol>
+            Here is a summary of what is provided:
+            <ul>
+              <li>
+                TimeRange - a begin and end time, packaged together
+              </li>
+              <li>
+                Index - A time range denoted by a string, for example "5m-1234" is a specific 5 minute time range, or "2014-09" is September 2014
+              </li>
+              <li>
+                TimeEvent - A timestamp and a data object packaged together
+              </li>
+              <li>
+                IndexedEvents - An Index and a data object packaged together. e.g. 1hr max value
+              </li>
+              <li>
+                TimeRangeEvents - A TimeRange and a data object packaged together. e.g. outage event occurred from 9:10am until 10:15am
+              </li>
+            </ul>
+            And forming together collections of events:
+            <ul>
+              <li>
+                Collection - A bag of events, with a helpful set of methods for operating on those events
+              </li>
+              <li>
+                TimeSeries - An ordered Collection of Events and associated meta data, along with operations to roll-up, aggregate, break apart and recombine TimeSeries.
+              </li>
+            </ul>
+            And then high level processing via pipelines:
+            <ul>
+              <li>
+                Pipeline - Stream or batch style processing of events to build more complex processing operations, either on fixed TimeSeries or incoming realtime data. Supports windowing, grouping and aggregation.
+              </li>
+            </ul>
+            <h3
+              style={
+                Object {
+                  "color": "#333",
+                  "fontSize": "1.5em",
+                  "fontWeight": 700,
+                  "margin": "1.5rem 0 1.5rem",
+                }
+              }
+            >
+              Typescript support
+            </h3>
+            As of version 0.8.6 Pond ships with Typescript declarations. In addition, the project is also being rewritten in Typescript, which will probably eventually lead to a v1.0 version as the API will have significant differences. You can track the progress of that work in Issue #65.
+          </p>
+        </div>
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div>
+          <div />
+        </div>
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div />
+        <div>
+          <div />
+        </div>
+        <div />
+        <div />
+        <div>
+          <div />
+        </div>
+        <div />
+        <div />
+        <div />
+      </div>
+    </div>
+  </div>
+</div>
+`;
