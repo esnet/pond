@@ -1,6 +1,6 @@
 {
     "name": "pondjs",
-    "version": "0.8.7",
+    "version": "1.0.0-alpha.0",
     "description": "A TimeSeries library built on Immutable.js with Typescript",
     "main": "lib/exports.js",
     "types": "lib/exports.d.ts",
@@ -25,8 +25,7 @@
     "scripts": {
         "build": "tsc --version && tsc",
         "watch": "tsc --watch",
-        "docs":
-            "typedoc --json ../website/src/doc.json --mode modules ./src/*.ts --ignoreCompilerErrors",
+        "docs": "typedoc --json ../website/src/doc.json --mode modules ./src/*.ts --ignoreCompilerErrors",
         "test": "jest --watch",
         "lint": "tslint ./src/*.ts"
     },
@@ -35,6 +34,10 @@
             ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
         },
         "testRegex": "(/tests/.*)\\.(ts|tsx|js)$",
-        "moduleFileExtensions": ["ts", "tsx", "js"]
+        "moduleFileExtensions": [
+            "ts",
+            "tsx",
+            "js"
+        ]
     }
 }
