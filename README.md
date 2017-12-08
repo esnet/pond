@@ -1,6 +1,12 @@
 
 # Pond.js
 
+**Version 1.0 (alpha) of Pond.js is written in Typescript and has a brand new fully typed API**
+
+Version 0.8 ([Documentation](https://esnet-pondjs.appspot.com/#/)) is the last released version of the old Pond.js API. Note that v0.8 is the only version currently aligned with react-timeseries-charts.
+
+---
+
 Pond.js is a library built on top of [immutable.js](https://facebook.github.io/immutable-js/)
 and [Typescript](https://www.typescriptlang.org/) to provide time-based data structures,
 serialization and processing.
