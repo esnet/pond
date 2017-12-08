@@ -1,0 +1,22 @@
+{
+    "name": "esnet-pondjs",
+    "version": "0.1.0",
+    "private": true,
+    "engines": {
+        "node": "~6.10.3"
+    },
+    "dependencies": {
+        "express": "^4.15.2",
+        "fetch-jsonp": "^1.1.2",
+        "url-search-params-polyfill": "^2.0.1"
+    },
+    "scripts": {
+        "start": "node server/index.js",
+        "deploy": "gcloud app deploy app.yaml --project esnet-pondjs"
+    },
+    "description": "Website for Javascript version of Pond",
+    "main": "build/index.js",
+    "repository": "git@github.com:esnet/esnet-dataviewer.git",
+    "author": "tool@es.net",
+    "license": "MIT"
+}

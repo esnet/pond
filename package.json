@@ -3,15 +3,20 @@
     "version": "0.8.8",
     "main": "lib/entry",
     "types": "src/index.d.ts",
+    "engines": {
+        "node": "~6.10.3"
+    },
     "description": "A timeseries library build on top of immutable.js",
     "homepage": "http://software.es.net/",
     "scripts": {
+        "start": "node server/index.js",
         "lint": "eslint src website/modules/*.jsx",
         "test": "react-scripts test",
         "docs": "rm -f /src/website/docs/* && node ./scripts/renderdocs.js",
         "build": ". ./scripts/build.sh",
-        "start-website": "react-scripts start",
-        "build-website": "react-scripts build"
+        "dev": "react-scripts start",
+        "build-website": "react-scripts build",
+        "deploy": "gcloud app deploy app.yaml --project esnet-pondjs"
     },
     "pre-commit": ["build"],
     "license": "BSD-3-Clause-LBNL",
