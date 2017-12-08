@@ -2,6 +2,7 @@
     "name": "docs",
     "version": "0.1.0",
     "private": true,
+    "homepage": "http://software.es.net/pond",
     "dependencies": {
         "bootstrap": "^3.3.7",
         "jest-cli": "^20.0.4",
