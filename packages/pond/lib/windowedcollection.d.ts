@@ -1,10 +1,10 @@
 import * as Immutable from "immutable";
 import { Base } from "./base";
-import { SortedCollection } from "./sortedcollection";
 import { Event } from "./event";
 import { GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Index } from "./index";
 import { Key } from "./key";
+import { SortedCollection } from "./sortedcollection";
 import { KeyedCollection } from "./stream";
 import { AggregationSpec, WindowingOptions } from "./types";
 export declare class WindowedCollection<T extends Key> extends Base {
