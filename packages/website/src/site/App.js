@@ -11,7 +11,7 @@
 import "./App.css";
 import _ from "lodash";
 import React, { Component } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { HashRouter as Router, Route, Switch } from "react-router-dom";
 
 import Prism from "prismjs"; // eslint-disable-line
 import "prismjs/components/prism-typescript";
@@ -54,7 +54,7 @@ function buildTypes(root) {
         const n = name.toLowerCase();
         switch (kindString) {
             case "External module":
-                docs.modules[n.replace(/['"]+/g, '')] = child;
+                docs.modules[n.replace(/['"]+/g, "")] = child;
                 break;
             case "Class":
                 docs.classes[n] = child;
@@ -175,7 +175,9 @@ export default class extends Component {
                                 />
                                 <Route
                                     path={`/module/:name`}
-                                    render={props => <TsModule module={docs.modules[props.match.params.name]} />}
+                                    render={props => (
+                                        <TsModule module={docs.modules[props.match.params.name]} />
+                                    )}
                                 />
                                 <Route
                                     path={`/class/:name`}
