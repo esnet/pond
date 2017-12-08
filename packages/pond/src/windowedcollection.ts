@@ -13,7 +13,6 @@ import * as _ from "lodash";
 
 import { Align } from "./align";
 import { Base } from "./base";
-import { SortedCollection } from "./sortedcollection";
 import { Event } from "./event";
 import { GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Index, index } from "./index";
@@ -21,9 +20,11 @@ import { Key } from "./key";
 import { Period } from "./period";
 import { Processor } from "./processor";
 import { Rate } from "./rate";
+import { SortedCollection } from "./sortedcollection";
 import { KeyedCollection } from "./stream";
 import { Time, time } from "./time";
 import { timerange, TimeRange } from "./timerange";
+
 import util from "./util";
 
 import {

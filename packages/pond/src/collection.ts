@@ -122,7 +122,7 @@ export class Collection<T extends Key> extends Base {
      * A `Collection` may also be constructed with an initial list of `Events`
      * by supplying an `Immutable.List<Event<T>>`, or from another `Collection`
      * to make a copy.
-     * 
+     *
      * See also `SortedCollection`, which keeps `Event`s in chronological order,
      * and also allows you to do `groupBy` and `window` operations. For a higher
      * level interface for managing `Event`s, use the `TimeSeries`, which wraps

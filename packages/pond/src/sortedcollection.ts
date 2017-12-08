@@ -56,7 +56,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
      * `dedup` is a user function that function will be passed a list of all `Event`s
      * with that duplicated key and will be expected to return a single `Event`
      * to replace them with, thus shifting de-duplication logic to the user.
-     * 
+     *
      * DedupFunction:
      * ```
      * (events: Immutable.List<Event<T>>) => Event<T>

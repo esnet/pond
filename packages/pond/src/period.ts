@@ -121,7 +121,7 @@ export class Period {
      * const everyFiveMinutes = period()
      *     .every(duration("5m"))
      *     .offsetBy(time("2017-07-21T09:38:00.000Z"));
-     * 
+     *
      * const within = everyFiveMinutes.within(range);  // 9:33am, 9:38am, 9:43am
      * ```
      */
