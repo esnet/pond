@@ -100,6 +100,12 @@ it will tell you the expected types, as well as consistency in generics.
 See [How to read these docs](https://facebook.github.io/immutable-js/docs/#/) for a quick guide to reading
 Typescript definitions.
 
+# Typescript support
+
+As of version 0.8.6 Pond ships with Typescript declarations.
+
+In addition, the project is also being rewritten in Typescript, which will probably eventually lead to a v1.0 version as the API will have significant differences. You can track the progress of that work in [Issue #65](https://github.com/esnet/pond/issues/65).
+
 # Contributing
 
 Read the [contribution guidelines](./CONTRIBUTING.md).
