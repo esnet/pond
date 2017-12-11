@@ -1,5 +1,5 @@
 **This is the documentation for the next version (1.0 alpha) of Pond.js, written in Typescript. This
-version has a brand new fully typed API**
+version has a brand new fully typed API. [CHANGES.md](https://github.com/esnet/pond/blob/master/CHANGES.md) contains an overview of the differences between the old pre-1.0 API and this one**
 
 Version 0.8.x ([Documentation](https://esnet-pondjs.appspot.com/#/)) is the last released version of
 the old Pond.js API. Note that v0.8 is the only version currently aligned with
@@ -22,7 +22,7 @@ We are still developing Pond.js as it integrates further into our code, so it ma
 incomplete in parts. That said, it has a growing collection of tests and we will strive not to break
 those without careful consideration.
 
-See the [CHANGES.md](/#changelog).
+See the [CHANGES.md](https://github.com/esnet/pond/blob/master/CHANGES.md).
 
 ---
 
@@ -30,27 +30,60 @@ See the [CHANGES.md](/#changelog).
 
 [ESnet](http://www.es.net) runs a large research network for the US Department of Energy. Our tools
 consume events and time series data throughout our network visualization applications and data
-processing chains. As our tool set grew, so did our need to build a Javascript library to work with
+processing chains. As our tool set grew, so did our need to build a library to work with
 this type of data that was consistent and dependable. The alternative for us has been to pass ad-hoc
 data structures between the server and the client, making all elements of the system much more
-complicated. Not only do we need to deal with different formats at all layers of the system, we also
-repeat our processing code over and over. Pond.js was built to address these pain points.
+complicated. Not only did we need to deal with different formats at all layers of the system, we also
+repeated our processing code over and over. Pond.js was built to address these pain points.
 
 ---
 
-## How to install
+## Getting started
 
 Pond can be installed from npm. The current released version of the Typescript rewrite of Pond is in pre-release so you need to install it explicitly:
 
+```bash
+> npm install pondjs@1.0.0-alpha.0
 ```
-npm install pondjs@1.0.0-alpha.0
+
+The old pre-1.0 version (v8.8.x) is available as the default version:
+
+```bash
+> npm install pondjs
+```
+
+Within a browser it is highly recommended that you use a module bundler such as webpack:
+
+```
+import { timeSeries } from "pondjs";
+
+const series = timeSeries({
+    name: "sensor_data",
+    columns: ["time", "sensor", "status"],
+    points: [
+        [1400425947000, 3, "ok"],
+        [1400425948000, 8, "high"],
+        [1400425949000, 2, "low"],
+        [1400425950000, 3, "ok"],
+        ...
+    ]
+});
+
+series.avg("sensor");   // 4
+```
+
+In Node.js you should be able to just require Pond:
+
+```
+const { timeSeries } = require("pondjs");
+...
 ```
 
 ---
 
 ## API
 
-#### [Time](./class/time)
+#### [Time](./#class/time)
 
 As this is a TimeSeries abstraction library, time is fundamental to all parts of the library. We
 represent `Time` as a type in the Typescript version of the library, but in fact it is a light
@@ -67,7 +100,7 @@ You can also construct a `Time` in a number of different ways and convert the ti
 either UTC or local time, or several other convenience methods. `Time` is a subclass of a `Key`,
 meaning it can be combined with a data object to form an event `Event<Time>`.
 
-#### [TimeRange](./class/timerange)
+#### [TimeRange](./#class/timerange)
 
 Sometimes we also want to express a range of time. For a basic expression of this, we use a
 `TimeRange`. This is simply a begin and end time, but comes with many handy methods for display and
@@ -85,7 +118,7 @@ range1.overlaps(range2); // boolean
 `Event<TimeRange>`. Hence you can express an event that occurs over a period of time (like a network
 outage).
 
-#### [Index](./class/index)
+#### [Index](./#class/index)
 
 An alternative time range denoted by a string, for example "5m-4135541" is a specific 5 minute time
 range, or "2014-09" is September 2014.
@@ -98,7 +131,7 @@ i.asTimerange(); // Sat, 25 Apr 2009 12:25:00 GMT, Sat, 25 Apr 2009 12:30:00 GMT
 You can aggregate a `TimeSeries` by a duration like "5m" to build a new `TimeSeries` of
 `Event<Index>`s. An `Index`'s string is also a good caching key in some use cases.
 
-#### [Duration](./class/duration)
+#### [Duration](./#class/duration)
 
 A length of time, with no particular anchor in history, used to specify `Period` frequencies and
 `Window` durations.
@@ -107,7 +140,7 @@ A length of time, with no particular anchor in history, used to specify `Period`
 const d = duration(5, "minutes");
 ```
 
-#### [Period](./class/period)
+#### [Period](./#class/period)
 
 A `Period` is a way to represent a repeating time, such as every 2 hours. Generally a `Period` is
 used to construct a reoccurring window, which in Pond is a `Window`. A `Period` specifies a
@@ -118,7 +151,7 @@ the period by a duration).
 const p = period(duration("5m")); // 5m, 10m, 15m, ...
 ```
 
-#### [Window](./class/window)
+#### [Window](./#class/window)
 
 A reoccurring duration of time, such as a 15 minute window, incrementing forward in time every 5
 min, offset to align with a particular time. A `Window` is typically used for time range based
@@ -130,7 +163,7 @@ const fifteenMinuteSliding = window(duration("15m"))
     .offsetBy(time("2017-07-21T09:33:00.000Z"));
 ```
 
-#### [Event](./class/event)
+#### [Event](./#class/event)
 
 A key of a type that extends `Key`, which could be a `Time`, `TimeRange` or `Index`, and a data
 object expressed as an `Immutable.Map` packaged together. `Event`s may signify a particular
@@ -142,7 +175,7 @@ data.
 const e = event(time(new Date(1487983075328)), Immutable.Map({ sensor: 3 }));
 ```
 
-#### [Collection](./class/collection) and [SortedCollection](./class/sortedcollection)
+#### [Collection](./#class/collection) and [SortedCollection](./class/sortedcollection)
 
 A `Collection` is a bag of `Event`s, with a comprehensive set of methods for operating on those.
 `SortedCollection` is a `Collection` that maintains a chronological order to those `Event`s.
@@ -165,7 +198,7 @@ while using `SortedCollection.window()` you can create a
 [`WindowedCollection`](./class/windowedcollection). Both give a you a mapping between the grouping
 and a corresponding `SortedCollection`.
 
-#### [TimeSeries](./class/timeseries)
+#### [TimeSeries](./#class/timeseries)
 
 The heart of the library, a TimeSeries is a `SortedCollection<K>` of events `Event<K>` and
 associated meta data. One is constructed either with a list of `Event`s, or with a JSON object (the
@@ -209,7 +242,7 @@ const mergedSeries = TimeSeries.timeSeriesListMerge({
 });
 ```
 
-#### [Aggregation Functions](./aggregation)
+#### [Aggregation Functions](./#aggregation)
 
 One of the most useful capabilities of the library is the ability to perform aggregations, such as
 doing roll-ups using some window, or combining columns of a `TimeSeries` into a single columns using
@@ -217,10 +250,10 @@ some function. Many of the most common aggregation functions, such as avg(), max
 provided for this purpose. Each is a function that takes the function's options and returns the
 function that provides the aggregation.
 
-One option is a [filter function](./filters) function which can be used to clean data on the fly so
+One option is a [filter function](./#filters) function which can be used to clean data on the fly so
 that aggregation functions do not fail for messy data sets (such as containing null or NaN values).
 
-#### Streaming
+#### [Streaming](./#class/stream)
 
 Stream style processing of events to build more complex processing operations, either on incoming
 real-time data. Supports remapping, filtering, windowing and aggregation. It is designed to

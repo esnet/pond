@@ -266,6 +266,23 @@ class RateNode<T extends Key> extends Node<Event<T>, Event<TimeRange>> {
     }
 }
 
+// /**
+//  * @private
+//  *
+//  */
+// // tslint:disable-next-line:max-classes-per-file
+// class ReduceNode<T extends Key> extends Node<Event<T>, Event<T>> {
+//     private processor: Reduce<T>;
+//     constructor(options: ReduceOptions) {
+//         super();
+//         this.processor = new Reduce<T>(options);
+//     }
+
+//     process(e: Event<T>) {
+//         return this.processor.addEvent(e);
+//     }
+// }
+
 /**
  * @private
  *
