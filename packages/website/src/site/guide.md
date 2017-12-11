@@ -38,6 +38,16 @@ repeat our processing code over and over. Pond.js was built to address these pai
 
 ---
 
+## How to install
+
+Pond can be installed from npm. The current released version of the Typescript rewrite of Pond is in pre-release so you need to install it explicitly:
+
+```
+npm install pondjs@1.0.0-alpha.0
+```
+
+---
+
 ## API
 
 #### [Time](./class/time)

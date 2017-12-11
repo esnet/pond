@@ -6,9 +6,7 @@
         "prettier": "prettier --print-width 100 --tab-width 4 --write \"packages/pond/src/**/*.ts\""
     },
     "devDependencies": {
-        "husky": "^0.13.3",
-        "lerna": "^2.0.0",
-        "lint-staged": "^3.4.0",
+        "lerna": "^2.5.1",
         "prettier": "^1.7.0"
     },
     "dependencies": {}
