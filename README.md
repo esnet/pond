@@ -19,7 +19,7 @@ We are still developing Pond.js as it integrates further into our code, so it ma
 incomplete in parts. That said, it has a growing collection of tests and we will strive not to break
 those without careful consideration.
 
-See the [CHANGES.md](/#changelog).
+See the [CHANGES.md](https://github.com/esnet/pond/blob/master/CHANGES.md).
 
 ## Rationale
 
@@ -68,6 +68,26 @@ const source = stream()
     .output(evt => // result );
 ```
 
+---
+
+## How to install
+
+Pond can be installed from npm.
+
+The current version of the Typescript rewrite of Pond is pre-release 1.0 alpha, so you need to
+install it explicitly:
+
+```
+npm install pondjs@1.0.0-alpha.0
+```
+
+The older Javascript version (v0.8.x), which is the only one currently compatible with the companion
+visualization library react-timeseries-charts, is still the default version:
+
+```
+npm install pondjs
+```
+
 ## What does it do?
 
 Pond has three main goals:
@@ -96,21 +116,15 @@ And then high level processing can be achieved either by chaining together `Coll
 # Typescript
 
 This library, as of 1.0 alpha, is now written entirely in Typescript. As a result, we recommend that it
-is used in a Typescipt application for full enjoyment of the type strictness it provides. However,
-that is not a requirement.
+is used in a Typescipt application. However, that is not a requirement.
 
-Documentation is generated from the Typescript definitions and so will provide type information. While
-especially useful when building a Typescript application, it is also a guide for Javascript users as
-it will tell you the expected types, as well as consistency in generics.
+The [documentation](http://software.es.net/pond/#/) website is generated from the Typescript definitions
+and so will provide type information. While especially useful when building a Typescript application,
+it is also a guide for Javascript users as it will tell you the expected types, as well as understanding
+consistency in generics. See these [How to read these docs](https://facebook.github.io/immutable-js/docs/#/)
+for a quick guide to reading Typescript definitions.
 
-See [How to read these docs](https://facebook.github.io/immutable-js/docs/#/) for a quick guide to reading
-Typescript definitions.
-
-# Typescript support
-
-As of version 0.8.6 Pond ships with Typescript declarations.
-
-In addition, the project is also being rewritten in Typescript, which will probably eventually lead to a v1.0 version as the API will have significant differences. You can track the progress of that work in [Issue #65](https://github.com/esnet/pond/issues/65).
+v0.8.8 of Pond ships with basic Typescript declarations that were contributed to the project.
 
 # Contributing
 
