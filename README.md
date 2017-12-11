@@ -1,9 +1,11 @@
 
 # Pond.js
 
-**Version 1.0 (alpha) of Pond.js is written in Typescript and has a brand new fully typed API**
+**Version 1.0 (alpha)** of Pond.js is written in Typescript and has a brand new fully typed API**
 
-Version 0.8 ([Documentation](https://esnet-pondjs.appspot.com/#/)) is the last released version of the old Pond.js API. Note that v0.8 is the only version currently aligned with react-timeseries-charts.
+**Version 0.8.x** of Pond.js is the current version and the last version with the old API.
+([Documentation](https://esnet-pondjs.appspot.com/#/) is still available)  Note that v0.8.x
+is the only version currently aligned with [react-timeseries-charts](http://software.es.net/react-timeseries-charts).
 
 ---
 
@@ -116,7 +118,7 @@ And then high level processing can be achieved either by chaining together `Coll
 # Typescript
 
 This library, as of 1.0 alpha, is now written entirely in Typescript. As a result, we recommend that it
-is used in a Typescipt application. However, that is not a requirement.
+is used in a Typescript application. However, that is not a requirement.
 
 The [documentation](http://software.es.net/pond/#/) website is generated from the Typescript definitions
 and so will provide type information. While especially useful when building a Typescript application,
