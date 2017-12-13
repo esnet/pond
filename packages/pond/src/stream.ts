@@ -13,12 +13,12 @@ import * as _ from "lodash";
 
 import { Base } from "./base";
 import { Collection } from "./collection";
-import { Event } from "./event";
+import { Event, event } from "./event";
 import { Index, index } from "./index";
 import { Key } from "./key";
 import { Period } from "./period";
 import { Processor } from "./processor";
-import { Time } from "./time";
+import { Time, time } from "./time";
 import { TimeRange } from "./timerange";
 
 import { Trigger } from "./types";
@@ -27,6 +27,7 @@ import { Align } from "./align";
 import { Collapse } from "./collapse";
 import { Fill } from "./fill";
 import { Rate } from "./rate";
+import { Reducer } from "./reduce";
 import { Select } from "./select";
 
 import { GroupedCollection } from "./groupedcollection";
@@ -40,6 +41,7 @@ import {
     CollapseOptions,
     FillOptions,
     RateOptions,
+    ReduceOptions,
     SelectOptions,
     WindowingOptions
 } from "./types";
@@ -266,22 +268,22 @@ class RateNode<T extends Key> extends Node<Event<T>, Event<TimeRange>> {
     }
 }
 
-// /**
-//  * @private
-//  *
-//  */
-// // tslint:disable-next-line:max-classes-per-file
-// class ReduceNode<T extends Key> extends Node<Event<T>, Event<T>> {
-//     private processor: Reduce<T>;
-//     constructor(options: ReduceOptions) {
-//         super();
-//         this.processor = new Reduce<T>(options);
-//     }
+/**
+ * @private
+ *
+ */
+// tslint:disable-next-line:max-classes-per-file
+class ReduceNode<T extends Key> extends Node<Event<T>, Event<T>> {
+    private processor: Reducer<T>;
+    constructor(options: ReduceOptions<T>) {
+        super();
+        this.processor = new Reducer<T>(options);
+    }
 
-//     process(e: Event<T>) {
-//         return this.processor.addEvent(e);
-//     }
-// }
+    process(e: Event<T>) {
+        return this.processor.addEvent(e);
+    }
+}
 
 /**
  * @private
@@ -370,6 +372,57 @@ export class EventStream<T extends Key, U extends Key> {
      */
     flatMap<M extends Key>(mapper: (event: Event<T>) => Immutable.List<Event<M>>) {
         return this.stream.addEventMappingNode(new FlatMapNode<T, M>(mapper));
+    }
+
+    /**
+     * Reduces a sequence of past Event<T>s in the stream to a single output Event<M>.
+     */
+    reduce<M extends Key>(options: ReduceOptions<T>) {
+        return this.stream.addEventMappingNode(new ReduceNode<T>(options));
+    }
+
+    /**
+     * Takes the sequence of events and outputs a running total for the
+     * `field` specified.
+     */
+    runningTotal(field: string) {
+        return this.stream.addEventMappingNode(
+            new ReduceNode<T>({
+                count: 1,
+                iteratee(accum, eventList) {
+                    const currentEvent = eventList.get(0);
+                    const currentKey = currentEvent.getKey();
+                    const accumulatedEvent = accum
+                        ? accum
+                        : event(currentKey, Immutable.Map({ total: 0 }));
+                    const total = accumulatedEvent.get("total") + currentEvent.get(field);
+                    return event(currentKey, Immutable.Map({ total }));
+                }
+            })
+        );
+    }
+
+    coalesce(fields: string[]) {
+        function keyIn(...keys) {
+            const keySet = Immutable.Set(...keys);
+            return (v, k) => {
+                return keySet.has(k);
+            };
+        }
+        return this.stream.addEventMappingNode(
+            new ReduceNode<T>({
+                count: 1,
+                iteratee(accum, eventList) {
+                    const currentEvent = eventList.get(0);
+                    const currentKey = currentEvent.getKey();
+                    const accumulatedEvent = !_.isNull(accum)
+                        ? accum
+                        : event(currentKey, Immutable.Map({}));
+                    const filteredData = currentEvent.getData().filter(keyIn(fields));
+                    return event(currentKey, accumulatedEvent.getData().merge(filteredData));
+                }
+            })
+        );
     }
 
     /**
@@ -557,8 +610,8 @@ export class KeyedCollectionStream<T extends Key, U extends Key> {
      * @private
      * Add events into the stream
      */
-    addEvent(event: Event<U>) {
-        this.stream.addEvent(event);
+    addEvent(e: Event<U>) {
+        this.stream.addEvent(e);
     }
 
     /**
@@ -643,16 +696,20 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
 //
 
 /**
- * Processing of incoming `Event` streams to for real time processing.
+ * `Stream` and its associated objects are designed for processing of incoming
+ * `Event` streams at real time. This is useful for live dashboard situations or
+ * possibly real time monitoring and alerting from event streams.
  *
  * Supports remapping, filtering, windowing and aggregation. It is designed for
- * relatively light weight handling of incoming events.
+ * relatively light weight handling of incoming events. Any distribution of
+ * incoming events to different streams should be handled by the user. Typically
+ * you would separate streams based on some incoming criteria.
  *
  * A `Stream` object manages a chain of processing nodes, each type of which
  * provides an appropiate interface. When a `Stream` is initially created with
- * the `stream()` factory function the interface you will be returned in an
- * `EventStream`. If you perform a windowing operation you will be exposed to
- * `KeyedCollectionStream`. While if you aggregate a `KeyedCollectionStream` you
+ * the `stream()` factory function the interface exposed is an `EventStream`.
+ * If you perform a windowing operation you will be exposed to a
+ * `KeyedCollectionStream`. If you aggregate a `KeyedCollectionStream` you
  * will be back to an `EventStream` and so on.
  *
  * ---
@@ -667,7 +724,7 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  * purposes, or for light weight handling of events in Node.
  *
  * ---
- * Example:
+ * Examples:
  *
  * ```typescript
  * const result = {};
@@ -699,6 +756,66 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  * source.addEvent(e1)
  * source.addEvent(e2)
  * ...
+ * ```
+ *
+ * If you have multiple sources you can feed them into the same stream and combine them
+ * with the `coalese()` processor. In this example two event sources are fed into the
+ * `Stream`. One contains `Event`s with just a field "in", and the other just a field
+ * "out". The resulting output is `Event`s with the latest (in arrival time) value for
+ * "in" and "out" together:
+ *
+ * ```typescript
+ * const source = stream()
+ *     .coalesce(["in", "out"])
+ *     .output((e: Event) => results.push(e));
+ *
+ * // Stream events
+ * for (let i = 0; i < 5; i++) {
+ *     source.addEvent(streamIn[i]);  // from stream 1
+ *     source.addEvent(streamOut[i]); // from stream 2
+ * }
+ * ```
+ *
+ * You can do generalized reduce operations where you supply a function that
+ * is provided with the last n points (defaults to 1) and the previous result
+ * which is an `Event`. You will return the next result, and `Event`.
+ *
+ * You could use this to produce a running total:
+ *
+ * ```
+ * const source = stream()
+ *     .reduce({
+ *         count: 1,
+ *         accumulator: event(time(), Immutable.Map({ total: 0 })),
+ *         iteratee(accum, eventList) {
+ *             const current = eventList.get(0);
+ *             const total = accum.get("total") + current.get("count");
+ *             return event(time(current.timestamp()), Immutable.Map({ total }));
+ *         }
+ *     })
+ *     .output((e: Event) => console.log("Running total:", e.toString()) );
+ *
+ * // Add Events into the source...
+ * events.forEach(e => source.addEvent(e));
+ * ```
+ *
+ * Or produce a rolling average:
+ * ```
+ * const source = stream()
+ *     .reduce({
+ *         count: 5,
+ *         iteratee(accum, eventList) {
+ *             const values = eventList.map(e => e.get("value")).toJS();
+ *             return event(
+ *                 time(eventList.last().timestamp()),
+ *                 Immutable.Map({ avg: avg()(values) })
+ *             );
+ *          }
+ *     })
+ *     .output((e: Event) => console.log("Rolling average:", e.toString()) );
+ *
+ * // Add Events into the source...
+ * events.forEach(e => source.addEvent(e));
  * ```
  */
 // tslint:disable-next-line:max-classes-per-file

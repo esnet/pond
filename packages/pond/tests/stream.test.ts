@@ -23,6 +23,20 @@ import { window } from "../src/window";
 
 import { AlignmentMethod, TimeAlignment } from "../src/types";
 
+const streamingEvents = [
+    event(time(0), Immutable.Map({ count: 5, value: 1 })),
+    event(time(30000), Immutable.Map({ count: 3, value: 3 })),
+    event(time(60000), Immutable.Map({ count: 4, value: 10 })),
+    event(time(90000), Immutable.Map({ count: 1, value: 40 })),
+    event(time(120000), Immutable.Map({ count: 5, value: 70 })),
+    event(time(150000), Immutable.Map({ count: 3, value: 130 })),
+    event(time(180000), Immutable.Map({ count: 2, value: 190 })),
+    event(time(210000), Immutable.Map({ count: 6, value: 220 })),
+    event(time(240000), Immutable.Map({ count: 1, value: 300 })),
+    event(time(270000), Immutable.Map({ count: 0, value: 390 })),
+    event(time(300000), Immutable.Map({ count: 2, value: 510 }))
+];
+
 describe("Streaming", () => {
     it("can do streaming of just events", () => {
         const SIMPLE_GAP_DATA = [
@@ -341,73 +355,104 @@ describe("Streaming", () => {
         expect(c.at(3).get("in_avg")).toBe(3);
         expect(c.at(3).get("count")).toBe(3);
     });
-});
 
-/*
-    // TODO: Streaming grouping
+    it("can process a running total using the straeam reduce() function", () => {
+        const results = [];
 
-        it("can do streaming aggregation with grouping", () => {
-            const eventsIn = [
-                // tslint:disable:max-line-length
-                event(
-                    time(Date.UTC(2015, 2, 14, 7, 57, 0)),
-                    Immutable.Map({ type: "a", in: 3, out: 1 })
-                ),
-                event(
-                    time(Date.UTC(2015, 2, 14, 7, 58, 0)),
-                    Immutable.Map({ type: "a", in: 9, out: 2 })
-                ),
-                event(
-                    time(Date.UTC(2015, 2, 14, 7, 59, 0)),
-                    Immutable.Map({ type: "b", in: 6, out: 6 })
-                ),
-                event(
-                    time(Date.UTC(2015, 2, 14, 8, 0, 0)),
-                    Immutable.Map({ type: "a", in: 4, out: 7 })
-                ),
-                event(
-                    time(Date.UTC(2015, 2, 14, 8, 1, 0)),
-                    Immutable.Map({ type: "b", in: 5, out: 9 })
-                )
-            ];
+        const source = stream()
+            .reduce({
+                count: 1,
+                accumulator: event(time(), Immutable.Map({ total: 0 })),
+                iteratee(accum, eventList) {
+                    const current = eventList.get(0);
+                    const total = accum.get("total") + current.get("count");
+                    return event(time(current.timestamp()), Immutable.Map({ total }));
+                }
+            })
+            .output((e: Event) => results.push(e));
 
-            let result: Collection<Index>;
+        // Stream events
+        streamingEvents.forEach(e => source.addEvent(e));
 
-            const source = stream()
-                .emitPerEvent()
-                .groupBy("type")
-                .fixedWindow(period("1h"))
-                .aggregate({
-                    type: ["type", keep()],
-                    in_avg: ["in", avg()],
-                    out_avg: ["out", avg()]
-                })
-                .output(collection => {
-                    result = collection as Collection<Index>;
-                });
+        expect(results[0].get("total")).toBe(5);
+        expect(results[5].get("total")).toBe(21);
+        expect(results[10].get("total")).toBe(32);
+    });
 
-            eventsIn.forEach(event => source.addEvent(event));
+    it("can process a running total using the runningTotal() helper function", () => {
+        const results = [];
 
-            expect(result.at(0).get("type")).toBe("a");
-            expect(result.at(0).get("in_avg")).toBe(6);
-            expect(result.at(0).get("out_avg")).toBe(1.5);
-            expect(result.at(0).getKey().asString()).toBe("1h-396199");
+        const source = stream()
+            .runningTotal("count")
+            .output((e: Event) => results.push(e));
 
-            expect(result.at(1).get("type")).toBe("a");
-            expect(result.at(1).get("in_avg")).toBe(4);
-            expect(result.at(1).get("out_avg")).toBe(7);
-            expect(result.at(1).getKey().asString()).toBe("1h-396200");
+        // Stream events
+        streamingEvents.forEach(e => source.addEvent(e));
 
-            expect(result.at(3).get("type")).toBe("b");
-            expect(result.at(2).get("in_avg")).toBe(6);
-            expect(result.at(2).get("out_avg")).toBe(6);
-            expect(result.at(2).getKey().asString()).toBe("1h-396199");
+        expect(results[0].get("total")).toBe(5);
+        expect(results[5].get("total")).toBe(21);
+        expect(results[10].get("total")).toBe(32);
+    });
 
-            expect(result.at(3).get("type")).toBe("b");
-            expect(result.at(3).get("in_avg")).toBe(5);
-            expect(result.at(3).get("out_avg")).toBe(9);
-            expect(result.at(3).getKey().asString()).toBe("1h-396200");
-        });
+    it("can process a rolling average of the last 5 points", () => {
+        const results = [];
+
+        const source = stream()
+            .reduce({
+                count: 5,
+                iteratee(accum, eventList) {
+                    const values = eventList.map(e => e.get("value")).toJS();
+                    return event(
+                        time(eventList.last().timestamp()),
+                        Immutable.Map({ avg: avg()(values) })
+                    );
+                }
+            })
+            .output((e: Event) => results.push(e));
+
+        // Stream events
+        streamingEvents.forEach(e => source.addEvent(e));
+
+        expect(results[0].get("avg")).toBe(1);
+        expect(results[5].get("avg")).toBe(50.6);
+        expect(results[10].get("avg")).toBe(322);
+    });
+
+    it("can coalese two streams", () => {
+        const results = [];
+
+        const streamIn = [
+            event(time(Date.UTC(2015, 2, 14, 1, 15, 0)), Immutable.Map({ in: 1 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 16, 0)), Immutable.Map({ in: 2 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 17, 0)), Immutable.Map({ in: 3 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 18, 0)), Immutable.Map({ in: 4 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ in: 5 }))
+        ];
+
+        const streamOut = [
+            event(time(Date.UTC(2015, 2, 14, 1, 15, 0)), Immutable.Map({ out: 9, count: 2 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 16, 0)), Immutable.Map({ out: 10, count: 3 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 17, 0)), Immutable.Map({ count: 4 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 18, 0)), Immutable.Map({ out: 12, count: 5 })),
+            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ out: 13, count: 6 }))
+        ];
+
+        const source = stream()
+            .coalesce(["in", "out"])
+            .output((e: Event) => results.push(e));
+
+        // Stream events
+        for (let i = 0; i < 5; i++) {
+            source.addEvent(streamIn[i]);
+            source.addEvent(streamOut[i]);
+        }
+
+        expect(results.length).toBe(10);
+        expect(results[5].get("in")).toBe(3);
+        expect(results[5].get("out")).toBe(10);
+        expect(results[8].get("in")).toBe(5);
+        expect(results[8].get("out")).toBe(12);
+        expect(results[9].get("in")).toBe(5);
+        expect(results[9].get("out")).toBe(13);
     });
 });
-*/
