@@ -379,21 +379,6 @@ describe("Streaming", () => {
         expect(results[10].get("total")).toBe(32);
     });
 
-    it("can process a running total using the runningTotal() helper function", () => {
-        const results = [];
-
-        const source = stream()
-            .runningTotal("count")
-            .output((e: Event) => results.push(e));
-
-        // Stream events
-        streamingEvents.forEach(e => source.addEvent(e));
-
-        expect(results[0].get("total")).toBe(5);
-        expect(results[5].get("total")).toBe(21);
-        expect(results[10].get("total")).toBe(32);
-    });
-
     it("can process a rolling average of the last 5 points", () => {
         const results = [];
 

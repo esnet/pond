@@ -382,27 +382,6 @@ export class EventStream<T extends Key, U extends Key> {
         return this.stream.addEventMappingNode(new ReduceNode<T>(options));
     }
 
-    /**
-     * Takes the sequence of events and outputs a running total for the
-     * `field` specified.
-     */
-    runningTotal(field: string) {
-        return this.stream.addEventMappingNode(
-            new ReduceNode<T>({
-                count: 1,
-                iteratee(accum, eventList) {
-                    const currentEvent = eventList.get(0);
-                    const currentKey = currentEvent.getKey();
-                    const accumulatedEvent = accum
-                        ? accum
-                        : event(currentKey, Immutable.Map({ total: 0 }));
-                    const total = accumulatedEvent.get("total") + currentEvent.get(field);
-                    return event(currentKey, Immutable.Map({ total }));
-                }
-            })
-        );
-    }
-
     coalesce(options: CoalesceOptions) {
         const { fields } = options;
         function keyIn(...keys) {
