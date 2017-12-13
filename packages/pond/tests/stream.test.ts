@@ -438,7 +438,9 @@ describe("Streaming", () => {
         ];
 
         const source = stream()
-            .coalesce(["in", "out"])
+            .coalesce({
+                fields: ["in", "out"]
+            })
             .output((e: Event) => results.push(e));
 
         // Stream events

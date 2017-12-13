@@ -112,6 +112,15 @@ export interface ReduceOptions<K extends Key> {
 }
 
 /**
+ * Options object expected by the `coalesce()` stream processor. This
+ * will take the latest of each field in `fields` and combine that into
+ * a new `Event`.
+ */
+export interface CoalesceOptions {
+    fields: string[];
+}
+
+/**
  * Options object expected by the `windowBy...()` functions. At this point,
  * this just defines the fixed window (e.g. window: period("1d")) and the
  * trigger for downstream notification, which can currently be either

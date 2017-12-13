@@ -38,6 +38,7 @@ import {
     AggregationTuple,
     AlignmentMethod,
     AlignmentOptions,
+    CoalesceOptions,
     CollapseOptions,
     FillOptions,
     RateOptions,
@@ -402,7 +403,8 @@ export class EventStream<T extends Key, U extends Key> {
         );
     }
 
-    coalesce(fields: string[]) {
+    coalesce(options: CoalesceOptions) {
+        const { fields } = options;
         function keyIn(...keys) {
             const keySet = Immutable.Set(...keys);
             return (v, k) => {
@@ -766,7 +768,7 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  *
  * ```typescript
  * const source = stream()
- *     .coalesce(["in", "out"])
+ *     .coalesce({ fields: ["in", "out"] })
  *     .output((e: Event) => results.push(e));
  *
  * // Stream events
