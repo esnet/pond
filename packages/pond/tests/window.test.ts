@@ -52,6 +52,11 @@ describe("Window", () => {
         ).toBe("30m+1429669680000");
     });
 
+    it("can find the index string for a window given a time", () => {
+        const t1 = time(new Date(2017, 11, 19, 12, 0, 0));
+        const hourly = window(duration("1h"));
+    });
+
     it("can use a day window", () => {
         const dayWindowNewYork = daily("America/New_York");
         // const dayWindowPacificTime = daily("America/Los_Angeles");

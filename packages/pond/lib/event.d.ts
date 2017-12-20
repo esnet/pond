@@ -29,7 +29,7 @@ import { ReducerFunction, ValueListMap, ValueMap } from "./types";
  *
  * ```
  * const timestamp = time(new Date("2015-04-22T03:30:00Z");
- * const e = event(t, Immutable.Map({ temperatuue: 75.2, humidity: 84 }));
+ * const e = event(t, Immutable.Map({ temperature: 75.2, humidity: 84 }));
  * const humidity = e.get("humidity");  // 84
  * ```
  *
@@ -220,6 +220,7 @@ export declare class Event<T extends Key = Time> extends Base {
      *     time: 1487983075328,
      *     data: { a: 2, b: 3 }
      * });
+     * ```
      */
     constructor(key: T, data: Immutable.Map<string, any>);
     /**
