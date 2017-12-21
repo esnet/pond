@@ -86,6 +86,41 @@ export enum FillMethod {
 }
 
 /**
+ * Options object expected by the `reduce()` stream processor. The idea
+ * of this processor is to take a list of Events, always of size `count`
+ * (default is 1),
+ * e.g.
+ * ```
+ * {
+ *     count: 1,
+ *     accumulator: event(time(), Immutable.Map({ total: 0 })),
+ *     iteratee(accum, eventList) {
+ *         const current = eventList.get(0);
+ *         const total = accum.get("total") + current.get("count");
+ *         return event(time(current.timestamp()), Immutable.Map({ total }));
+ *     }
+ * }
+ * ```
+ *  * count - The number of `Event`s to include on each call
+ *  * reducer - a function mapping an `Immutable.List<Event>` to an `Event`
+ *  * accumulator - an optional `Event` initial value
+ */
+export interface ReduceOptions<K extends Key> {
+    count: number;
+    accumulator?: Event<K>;
+    iteratee: ListReducer<K>;
+}
+
+/**
+ * Options object expected by the `coalesce()` stream processor. This
+ * will take the latest of each field in `fields` and combine that into
+ * a new `Event`.
+ */
+export interface CoalesceOptions {
+    fields: string[];
+}
+
+/**
  * Options object expected by the `windowBy...()` functions. At this point,
  * this just defines the fixed window (e.g. window: period("1d")) and the
  * trigger for downstream notification, which can currently be either
@@ -197,7 +232,7 @@ export interface RenameColumnOptions {
  */
 export interface TimeSeriesOptions {
     seriesList: Array<TimeSeries<Key>>;
-    reducer?: ReducerFunction | ArrayReducer | ListReducer;
+    reducer?: ReducerFunction | ArrayMapper | ListMapper;
     fieldSpec?: string | string[];
     [propName: string]: any;
 }
@@ -222,14 +257,22 @@ export type DedupFunction<T extends Key> = (events: Immutable.List<Event<T>>) =>
 export type ReducerFunction = (values: number[]) => number;
 
 /**
- * A function which combines an array of events into a new array of events
+ * A function which combines an Array<Event<Key>> into a new Array<Event<Key>>
  */
-export type ArrayReducer = (events: Array<Event<Key>>) => Array<Event<Key>>;
+export type ArrayMapper = (events: Array<Event<Key>>) => Array<Event<Key>>;
 
 /**
- * A function which combines a list of events into a new list of events
+ * A function which combines a list of `Event`s into a new list of `Event`s
  */
-export type ListReducer = (events: Immutable.List<Event<Key>>) => Immutable.List<Event<Key>>;
+export type ListMapper = (events: Immutable.List<Event<Key>>) => Immutable.List<Event<Key>>;
+
+/**
+ * A function which combines a `Immutable.List<Event<Key>>` into a single `Event`
+ */
+export type ListReducer<T extends Key> = (
+    accum: Event<T>,
+    events: Immutable.List<Event<T>>
+) => Event<T>;
 
 //
 // Aggregation specification

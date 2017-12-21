@@ -6,7 +6,7 @@ import { Index } from "./index";
 import { Key } from "./key";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
-import { AggregationSpec, AlignmentOptions, CollapseOptions, FillOptions, RateOptions, SelectOptions, WindowingOptions } from "./types";
+import { AggregationSpec, AlignmentOptions, CoalesceOptions, CollapseOptions, FillOptions, RateOptions, ReduceOptions, SelectOptions, WindowingOptions } from "./types";
 /**
  * A Node is a transformation between type S and type T. Both S
  * and T much extend Base.
@@ -66,6 +66,11 @@ export declare class EventStream<T extends Key, U extends Key> {
      * Remaps each Event<T> in the stream to 0, 1 or many Event<M>s.
      */
     flatMap<M extends Key>(mapper: (event: Event<T>) => Immutable.List<Event<M>>): EventStream<M, U>;
+    /**
+     * Reduces a sequence of past Event<T>s in the stream to a single output Event<M>.
+     */
+    reduce<M extends Key>(options: ReduceOptions<T>): EventStream<T, U>;
+    coalesce(options: CoalesceOptions): EventStream<T, U>;
     /**
      * Fill missing values in stream events.
      *
@@ -229,7 +234,7 @@ export declare class KeyedCollectionStream<T extends Key, U extends Key> {
      * @private
      * Add events into the stream
      */
-    addEvent(event: Event<U>): void;
+    addEvent(e: Event<U>): void;
     /**
      * An output, specified as an `KeyedCollectionCallback`, essentially
      * `(collection: Collection<T>,vkey: string) => void`.
@@ -286,16 +291,20 @@ export declare type KeyedCollectionToEvent<S extends Key, T extends Key> = Node<
 export declare type KeyedCollectionMap<S extends Key, T extends Key> = Node<KeyedCollection<S>, KeyedCollection<T>>;
 export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
 /**
- * Processing of incoming `Event` streams to for real time processing.
+ * `Stream` and its associated objects are designed for processing of incoming
+ * `Event` streams at real time. This is useful for live dashboard situations or
+ * possibly real time monitoring and alerting from event streams.
  *
  * Supports remapping, filtering, windowing and aggregation. It is designed for
- * relatively light weight handling of incoming events.
+ * relatively light weight handling of incoming events. Any distribution of
+ * incoming events to different streams should be handled by the user. Typically
+ * you would separate streams based on some incoming criteria.
  *
  * A `Stream` object manages a chain of processing nodes, each type of which
  * provides an appropiate interface. When a `Stream` is initially created with
- * the `stream()` factory function the interface you will be returned in an
- * `EventStream`. If you perform a windowing operation you will be exposed to
- * `KeyedCollectionStream`. While if you aggregate a `KeyedCollectionStream` you
+ * the `stream()` factory function the interface exposed is an `EventStream`.
+ * If you perform a windowing operation you will be exposed to a
+ * `KeyedCollectionStream`. If you aggregate a `KeyedCollectionStream` you
  * will be back to an `EventStream` and so on.
  *
  * ---
@@ -310,7 +319,7 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  * purposes, or for light weight handling of events in Node.
  *
  * ---
- * Example:
+ * Examples:
  *
  * ```typescript
  * const result = {};
@@ -342,6 +351,66 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  * source.addEvent(e1)
  * source.addEvent(e2)
  * ...
+ * ```
+ *
+ * If you have multiple sources you can feed them into the same stream and combine them
+ * with the `coalese()` processor. In this example two event sources are fed into the
+ * `Stream`. One contains `Event`s with just a field "in", and the other just a field
+ * "out". The resulting output is `Event`s with the latest (in arrival time) value for
+ * "in" and "out" together:
+ *
+ * ```typescript
+ * const source = stream()
+ *     .coalesce({ fields: ["in", "out"] })
+ *     .output((e: Event) => results.push(e));
+ *
+ * // Stream events
+ * for (let i = 0; i < 5; i++) {
+ *     source.addEvent(streamIn[i]);  // from stream 1
+ *     source.addEvent(streamOut[i]); // from stream 2
+ * }
+ * ```
+ *
+ * You can do generalized reduce operations where you supply a function that
+ * is provided with the last n points (defaults to 1) and the previous result
+ * which is an `Event`. You will return the next result, and `Event`.
+ *
+ * You could use this to produce a running total:
+ *
+ * ```
+ * const source = stream()
+ *     .reduce({
+ *         count: 1,
+ *         accumulator: event(time(), Immutable.Map({ total: 0 })),
+ *         iteratee(accum, eventList) {
+ *             const current = eventList.get(0);
+ *             const total = accum.get("total") + current.get("count");
+ *             return event(time(current.timestamp()), Immutable.Map({ total }));
+ *         }
+ *     })
+ *     .output((e: Event) => console.log("Running total:", e.toString()) );
+ *
+ * // Add Events into the source...
+ * events.forEach(e => source.addEvent(e));
+ * ```
+ *
+ * Or produce a rolling average:
+ * ```
+ * const source = stream()
+ *     .reduce({
+ *         count: 5,
+ *         iteratee(accum, eventList) {
+ *             const values = eventList.map(e => e.get("value")).toJS();
+ *             return event(
+ *                 time(eventList.last().timestamp()),
+ *                 Immutable.Map({ avg: avg()(values) })
+ *             );
+ *          }
+ *     })
+ *     .output((e: Event) => console.log("Rolling average:", e.toString()) );
+ *
+ * // Add Events into the source...
+ * events.forEach(e => source.addEvent(e));
  * ```
  */
 export declare class Stream<U extends Key = Time> {

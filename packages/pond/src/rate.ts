@@ -101,7 +101,8 @@ export class Rate<T extends Key> extends Processor<T, TimeRange> {
     }
 
     /**
-     * Perform the `fill` operation on the `Event` and emit.
+     * Perform the rate operation on the `Event` and the the `_previous`
+     * `Event` and emit the result.
      */
     addEvent(event: Event<T>): Immutable.List<Event<TimeRange>> {
         const eventList = new Array<Event<TimeRange>>();

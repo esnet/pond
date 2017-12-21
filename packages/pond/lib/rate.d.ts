@@ -45,7 +45,8 @@ export declare class Rate<T extends Key> extends Processor<T, TimeRange> {
      */
     getRate(event: any): Event<TimeRange>;
     /**
-     * Perform the `fill` operation on the `Event` and emit.
+     * Perform the rate operation on the `Event` and the the `_previous`
+     * `Event` and emit the result.
      */
     addEvent(event: Event<T>): Immutable.List<Event<TimeRange>>;
 }
