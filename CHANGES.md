@@ -3,7 +3,11 @@
 ---
 
 ## 1.0.0 alpha.1
+> December 2017
 
+ * Properly export `duration` and `window`.
+
+## 1.0.0 alpha.1
 > December 2017
 
 This is a complete rewrite of Pond in Typescript. We think this is the future of this library and

@@ -57,6 +57,7 @@ export {
     sum
 };
 
+export { duration, Duration } from "./duration";
 export { grouped, GroupedCollection };
 export { index, Index };
 export { Key };
@@ -71,4 +72,5 @@ export { timerange, TimeRange };
 export { timeSeries, indexedSeries, timeRangeSeries, TimeSeries };
 export { Trigger, WindowingOptions };
 export { util };
+export { daily, DayWindow, window, Window } from "./window";
 export { windowed, WindowedCollection } from "./windowedcollection";
