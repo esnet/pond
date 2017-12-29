@@ -38,6 +38,11 @@ it("can create a new range with two millisecond timestamps", () => {
     expect(range.toJSON()).toEqual({ timerange: [1326309060000, 1329941520000] });
 });
 
+it("can create a new range with two millisecond tiemstamps as an array", () => {
+    const range = timerange([1326309060000, 1329941520000]);
+    expect(range.toJSON()).toEqual({ timerange: [1326309060000, 1329941520000] });
+})
+
 it("can be used to give a new range", () => {
     const beginTime = moment("2012-01-11 1:11", fmt).toDate();
     const endTime = moment("2012-02-12 2:12", fmt).toDate();
