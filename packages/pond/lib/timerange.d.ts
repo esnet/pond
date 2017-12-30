@@ -32,11 +32,11 @@ export declare class TimeRange extends Key {
      * Builds a new `TimeRange` which may be of several different formats:
      *   - Another `TimeRange` (copy constructor)
      *   - An `Immutable.List` containing two Dates.
-     *   - A Javascript array containing two `Date` or `ms` timestamps
-     *   - Two arguments, begin and end, each of which may be a `Date`,
-     *     a `Moment`, or a `ms` timestamp.
+     *   - A Javascript array containing two millisecond timestamps
+     *   - Two arguments, `begin` and `end`, each of which may be a `Date`,
+     *     a `Moment`, or a millisecond timestamp.
      */
-    constructor(arg: TimeRange | Immutable.List<Date>);
+    constructor(arg: TimeRange | Immutable.List<Date> | number[]);
     constructor(begin: Date, end: Date);
     constructor(begin: Time, end: Time);
     constructor(begin: Moment, end: Moment);
@@ -152,7 +152,7 @@ export declare class TimeRange extends Key {
  * A `Timerange` is a simple representation of a begin and end time, used
  * to maintain consistency across an application.
  */
-declare function timerange(arg: TimeRange | Immutable.List<Date>): any;
+declare function timerange(arg: TimeRange | Immutable.List<Date> | number[]): any;
 declare function timerange(begin: Date, end: Date): any;
 declare function timerange(begin: Time, end: Time): any;
 declare function timerange(begin: Moment, end: Moment): any;
