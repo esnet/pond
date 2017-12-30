@@ -1,6 +1,6 @@
 {
     "name": "docs",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.2",
     "private": true,
     "homepage": "http://software.es.net/pond",
     "dependencies": {
