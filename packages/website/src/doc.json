@@ -30010,7 +30010,7 @@
 								"isExported": true
 							},
 							"comment": {
-								"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two `Date` or `ms` timestamps\n  - Two arguments, begin and end, each of which may be a `Date`,\n    a `Moment`, or a `ms` timestamp."
+								"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two millisecond timestamps\n  - Two arguments, `begin` and `end`, each of which may be a `Date`,\n    a `Moment`, or a millisecond timestamp."
 							},
 							"signatures": [
 								{
@@ -30020,7 +30020,7 @@
 									"kindString": "Constructor signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two `Date` or `ms` timestamps\n  - Two arguments, begin and end, each of which may be a `Date`,\n    a `Moment`, or a `ms` timestamp."
+										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two millisecond timestamps\n  - Two arguments, `begin` and `end`, each of which may be a `Date`,\n    a `Moment`, or a millisecond timestamp."
 									},
 									"parameters": [
 										{
@@ -30046,6 +30046,13 @@
 																"name": "Date"
 															}
 														]
+													},
+													{
+														"type": "array",
+														"elementType": {
+															"type": "intrinsic",
+															"name": "number"
+														}
 													}
 												]
 											}
@@ -30064,7 +30071,7 @@
 									"kindString": "Constructor signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two `Date` or `ms` timestamps\n  - Two arguments, begin and end, each of which may be a `Date`,\n    a `Moment`, or a `ms` timestamp."
+										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two millisecond timestamps\n  - Two arguments, `begin` and `end`, each of which may be a `Date`,\n    a `Moment`, or a millisecond timestamp."
 									},
 									"parameters": [
 										{
@@ -30103,7 +30110,7 @@
 									"kindString": "Constructor signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two `Date` or `ms` timestamps\n  - Two arguments, begin and end, each of which may be a `Date`,\n    a `Moment`, or a `ms` timestamp."
+										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two millisecond timestamps\n  - Two arguments, `begin` and `end`, each of which may be a `Date`,\n    a `Moment`, or a millisecond timestamp."
 									},
 									"parameters": [
 										{
@@ -30144,7 +30151,7 @@
 									"kindString": "Constructor signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two `Date` or `ms` timestamps\n  - Two arguments, begin and end, each of which may be a `Date`,\n    a `Moment`, or a `ms` timestamp."
+										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two millisecond timestamps\n  - Two arguments, `begin` and `end`, each of which may be a `Date`,\n    a `Moment`, or a millisecond timestamp."
 									},
 									"parameters": [
 										{
@@ -30183,7 +30190,7 @@
 									"kindString": "Constructor signature",
 									"flags": {},
 									"comment": {
-										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two `Date` or `ms` timestamps\n  - Two arguments, begin and end, each of which may be a `Date`,\n    a `Moment`, or a `ms` timestamp."
+										"shortText": "Builds a new `TimeRange` which may be of several different formats:\n  - Another `TimeRange` (copy constructor)\n  - An `Immutable.List` containing two Dates.\n  - A Javascript array containing two millisecond timestamps\n  - Two arguments, `begin` and `end`, each of which may be a `Date`,\n    a `Moment`, or a millisecond timestamp."
 									},
 									"parameters": [
 										{
@@ -30225,7 +30232,7 @@
 								{
 									"fileName": "timerange.ts",
 									"line": 54,
-									"character": 55
+									"character": 66
 								},
 								{
 									"fileName": "timerange.ts",
@@ -30311,7 +30318,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 151,
+									"line": 154,
 									"character": 9
 								}
 							],
@@ -30371,7 +30378,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 208,
+									"line": 211,
 									"character": 12
 								}
 							]
@@ -30417,7 +30424,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 243,
+									"line": 246,
 									"character": 12
 								}
 							]
@@ -30449,7 +30456,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 273,
+									"line": 276,
 									"character": 12
 								}
 							]
@@ -30486,7 +30493,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 158,
+									"line": 161,
 									"character": 7
 								}
 							],
@@ -30537,7 +30544,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 197,
+									"line": 200,
 									"character": 10
 								}
 							]
@@ -30584,7 +30591,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 251,
+									"line": 254,
 									"character": 11
 								}
 							]
@@ -30616,7 +30623,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 129,
+									"line": 132,
 									"character": 12
 								}
 							]
@@ -30648,7 +30655,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 280,
+									"line": 283,
 									"character": 20
 								}
 							]
@@ -30686,7 +30693,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 90,
+									"line": 93,
 									"character": 12
 								}
 							]
@@ -30742,7 +30749,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 261,
+									"line": 264,
 									"character": 16
 								}
 							]
@@ -30774,7 +30781,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 165,
+									"line": 168,
 									"character": 7
 								}
 							]
@@ -30820,7 +30827,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 228,
+									"line": 231,
 									"character": 12
 								}
 							]
@@ -30858,7 +30865,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 142,
+									"line": 145,
 									"character": 18
 								}
 							]
@@ -30904,7 +30911,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 181,
+									"line": 184,
 									"character": 12
 								}
 							]
@@ -30950,7 +30957,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 189,
+									"line": 192,
 									"character": 10
 								}
 							]
@@ -30987,7 +30994,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 173,
+									"line": 176,
 									"character": 13
 								}
 							],
@@ -31029,7 +31036,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 98,
+									"line": 101,
 									"character": 10
 								}
 							],
@@ -31066,7 +31073,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 114,
+									"line": 117,
 									"character": 17
 								}
 							]
@@ -31104,7 +31111,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 107,
+									"line": 110,
 									"character": 12
 								}
 							],
@@ -31141,7 +31148,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 121,
+									"line": 124,
 									"character": 15
 								}
 							]
@@ -31175,7 +31182,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 82,
+									"line": 85,
 									"character": 8
 								}
 							],
@@ -31226,7 +31233,7 @@
 							"sources": [
 								{
 									"fileName": "timerange.ts",
-									"line": 220,
+									"line": 223,
 									"character": 10
 								}
 							]
@@ -31332,6 +31339,13 @@
 														"name": "Date"
 													}
 												]
+											},
+											{
+												"type": "array",
+												"elementType": {
+													"type": "intrinsic",
+													"name": "number"
+												}
 											}
 										]
 									}
@@ -31488,21 +31502,6 @@
 					"sources": [
 						{
 							"fileName": "timerange.ts",
-							"line": 289,
-							"character": 18
-						},
-						{
-							"fileName": "timerange.ts",
-							"line": 290,
-							"character": 18
-						},
-						{
-							"fileName": "timerange.ts",
-							"line": 291,
-							"character": 18
-						},
-						{
-							"fileName": "timerange.ts",
 							"line": 292,
 							"character": 18
 						},
@@ -31514,6 +31513,21 @@
 						{
 							"fileName": "timerange.ts",
 							"line": 294,
+							"character": 18
+						},
+						{
+							"fileName": "timerange.ts",
+							"line": 295,
+							"character": 18
+						},
+						{
+							"fileName": "timerange.ts",
+							"line": 296,
+							"character": 18
+						},
+						{
+							"fileName": "timerange.ts",
+							"line": 297,
 							"character": 18
 						}
 					]
