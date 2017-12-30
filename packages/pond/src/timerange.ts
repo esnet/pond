@@ -52,6 +52,7 @@ export class TimeRange extends Key {
      *     a `Moment`, or a `ms` timestamp.
      */
     constructor(arg: TimeRange | Immutable.List<Date>);
+    constructor(arg: Array<number>);
     constructor(begin: Date, end: Date);
     constructor(begin: Time, end: Time);
     constructor(begin: Moment, end: Moment);
@@ -64,6 +65,12 @@ export class TimeRange extends Key {
         } else if (arg1 instanceof Immutable.List) {
             const rangeList = arg1;
             this._range = rangeList;
+        } else if (arg1 instanceof Array) {
+            const rangeArray = arg1;
+            this._range = new Immutable.List([
+                new Date(rangeArray[0]),
+                new Date(rangeArray[1])
+            ]);
         } else {
             const b = arg1;
             const e = arg2;
@@ -287,6 +294,7 @@ export class TimeRange extends Key {
  * to maintain consistency across an application.
  */
 function timerange(arg: TimeRange | Immutable.List<Date>);
+function timerange(arg: Array<number>)
 function timerange(begin: Date, end: Date);
 function timerange(begin: Time, end: Time);
 function timerange(begin: Moment, end: Moment);
