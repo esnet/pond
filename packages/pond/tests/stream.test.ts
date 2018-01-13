@@ -403,6 +403,45 @@ describe("Streaming", () => {
         expect(results[10].get("avg")).toBe(322);
     });
 
+    it("can do split two streams at the source", () => {
+        const eventsIn = [
+            event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 }))
+        ];
+
+        const result1: Event[] = [];
+        const result2: Event[] = [];
+
+        const source = stream<Time>().map(
+            e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })) // 2, 4, 6
+        );
+
+        stream<Time>(source)
+            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 6, 12, 18
+            .output(evt => {
+                const e = evt as Event<Time>;
+                result1.push(e);
+            });
+
+        stream<Time>(source)
+            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 }))) // 8, 16, 24
+            .output(evt => {
+                const e = evt as Event<Time>;
+                result2.push(e);
+            });
+
+        eventsIn.forEach(e => source.addEvent(e));
+
+        expect(result1[0].get("a")).toBe(6);
+        expect(result1[1].get("a")).toBe(12);
+        expect(result1[2].get("a")).toBe(18);
+
+        expect(result2[0].get("a")).toBe(8);
+        expect(result2[1].get("a")).toBe(16);
+        expect(result2[2].get("a")).toBe(24);
+    });
+
     it("can coalese two streams", () => {
         const results = [];
 

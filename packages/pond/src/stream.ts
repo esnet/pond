@@ -332,6 +332,15 @@ class AggregationNode<T extends Key> extends Node<KeyedCollection<T>, Event<Inde
 // Stream interfaces
 //
 
+export class StreamInterface<T extends Key, U extends Key> {
+    // tslint:disable-line:max-classes-per-file
+    constructor(protected stream: Stream<U>) {}
+
+    getStream() {
+        return this.stream;
+    }
+}
+
 /**
  * An `EventStream` is the interface to the stream provided for manipulation of
  * parts of the streaming pipeline that map a stream of Events of type <T>.
@@ -348,9 +357,11 @@ class AggregationNode<T extends Key> extends Node<KeyedCollection<T>, Event<Inde
  * nodes created by the API at this point of the stream will expect Events of type T,
  * and will output new Events, potentially of a different type.
  */
-export class EventStream<T extends Key, U extends Key> {
+export class EventStream<T extends Key, U extends Key> extends StreamInterface<T, U> {
     // tslint:disable-line:max-classes-per-file
-    constructor(private stream: Stream<U>) {}
+    constructor(stream: Stream<U>) {
+        super(stream);
+    }
 
     /**
      * @private
@@ -584,8 +595,11 @@ export class EventStream<T extends Key, U extends Key> {
  *
  */
 // tslint:disable-next-line:max-classes-per-file
-export class KeyedCollectionStream<T extends Key, U extends Key> {
-    constructor(private stream: Stream<U>) {}
+export class KeyedCollectionStream<T extends Key, U extends Key> extends StreamInterface<T, U> {
+    // tslint:disable-line:max-classes-per-file
+    constructor(stream: Stream<U>) {
+        super(stream);
+    }
 
     /**
      * @private
@@ -804,6 +818,10 @@ export class Stream<U extends Key = Time> {
     private head: Node<Base, Base>;
     private tail: Node<Base, Base>;
 
+    constructor(upstream?: Stream<U>) {
+        this.head = this.tail = upstream ? upstream.tail : null;
+    }
+
     /**
      * @private
      */
@@ -859,8 +877,8 @@ export class Stream<U extends Key = Time> {
     }
 }
 
-function streamFactory<T extends Key>(): EventStream<T, T> {
-    const s = new Stream<T>();
+function streamFactory<T extends Key>(upstream?: StreamInterface<T, T>): EventStream<T, T> {
+    const s = upstream ? new Stream<T>(upstream.getStream()) : new Stream<T>();
     return s.addEventMappingNode(new EventInputNode<T>());
 }
 
