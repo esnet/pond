@@ -202,6 +202,7 @@ describe("Streaming", () => {
         expect(result[1].get("a")).toEqual(4);
         expect(result[2].get("a")).toEqual(6);
     });
+
     it("can do streaming event flatmap", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
@@ -237,6 +238,31 @@ describe("Streaming", () => {
         expect(result[3].get("a")).toEqual(30);
         expect(result[4].get("a")).toEqual(31);
         expect(result[5].get("a")).toEqual(32);
+    });
+
+    it("can do filtering on a stream of events", () => {
+        const eventsIn = [
+            event(time(Date.UTC(2015, 2, 14, 7, 31, 0)), Immutable.Map({ a: 1 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 32, 0)), Immutable.Map({ a: 2 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 33, 0)), Immutable.Map({ a: 3 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 34, 0)), Immutable.Map({ a: 4 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 35, 0)), Immutable.Map({ a: 5 }))
+        ];
+
+        const result: Event[] = [];
+
+        const source = stream<Time>()
+            .filter(e => e.get("a") % 2 !== 0)
+            .output(evt => {
+                const e = evt as Event<Time>;
+                result.push(e);
+            });
+
+        eventsIn.forEach(e => source.addEvent(e));
+
+        expect(result[0].get("a")).toEqual(1);
+        expect(result[1].get("a")).toEqual(3);
+        expect(result[2].get("a")).toEqual(5);
     });
 
     it("can selection of specific event fields", () => {
@@ -401,6 +427,45 @@ describe("Streaming", () => {
         expect(results[0].get("avg")).toBe(1);
         expect(results[5].get("avg")).toBe(50.6);
         expect(results[10].get("avg")).toBe(322);
+    });
+
+    it("can do split two streams at the source", () => {
+        const eventsIn = [
+            event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 }))
+        ];
+
+        const result1: Event[] = [];
+        const result2: Event[] = [];
+
+        const source = stream<Time>().map(
+            e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })) // 2, 4, 6
+        );
+
+        stream<Time>(source)
+            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 6, 12, 18
+            .output(evt => {
+                const e = evt as Event<Time>;
+                result1.push(e);
+            });
+
+        stream<Time>(source)
+            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 }))) // 8, 16, 24
+            .output(evt => {
+                const e = evt as Event<Time>;
+                result2.push(e);
+            });
+
+        eventsIn.forEach(e => source.addEvent(e));
+
+        expect(result1[0].get("a")).toBe(6);
+        expect(result1[1].get("a")).toBe(12);
+        expect(result1[2].get("a")).toBe(18);
+
+        expect(result2[0].get("a")).toBe(8);
+        expect(result2[1].get("a")).toBe(16);
+        expect(result2[2].get("a")).toBe(24);
     });
 
     it("can coalese two streams", () => {
