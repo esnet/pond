@@ -189,6 +189,22 @@ class FlatMapNode<T extends Key, M extends Key> extends Node<Event<T>, Event<M>>
  *
  */
 // tslint:disable-next-line:max-classes-per-file
+class FilterNode<T extends Key> extends Node<Event<T>, Event<T>> {
+    private processor: Fill<T>;
+    constructor(private predicate: (event: Event<T>) => boolean) {
+        super();
+    }
+
+    process(e: Event<T>) {
+        return this.predicate(e) ? Immutable.List([e]) : Immutable.List([]);
+    }
+}
+
+/**
+ * @private
+ *
+ */
+// tslint:disable-next-line:max-classes-per-file
 class FillNode<T extends Key> extends Node<Event<T>, Event<T>> {
     private processor: Fill<T>;
     constructor(options: FillOptions) {
@@ -393,6 +409,44 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
         return this.stream.addEventMappingNode(new ReduceNode<T>(options));
     }
 
+    /**
+     * Filter out `Event<T>`s in the stream. Provide a predicate function that
+     * given an Event returns true or false.
+     *
+     * Example:
+     * ```
+     * const source = stream<Time>()
+     *     .filter(e => e.get("a") % 2 !== 0)
+     *     .output(evt => {
+     *         // -> 1, 3, 5
+     *     });
+     *
+     * source.addEvent(...); // <- 1, 2, 3, 4, 5
+     * ```
+     */
+    filter<M extends Key>(predicate: (event: Event<T>) => boolean) {
+        return this.stream.addEventMappingNode(new FilterNode<T>(predicate));
+    }
+
+    /**
+     * If you have multiple sources you can feed them into the same stream and combine them
+     * with the `coalese()` processor. In this example two event sources are fed into the
+     * `Stream`. One contains `Event`s with just a field "in", and the other just a field
+     * "out". The resulting output is `Event`s with the latest (in arrival time) value for
+     * "in" and "out" together:
+     *
+     * ```typescript
+     * const source = stream()
+     *     .coalesce({ fields: ["in", "out"] })
+     *     .output((e: Event) => results.push(e));
+     *
+     * // Stream events
+     * for (let i = 0; i < 5; i++) {
+     *     source.addEvent(streamIn[i]);  // from stream 1
+     *     source.addEvent(streamOut[i]); // from stream 2
+     * }
+     * ```
+     */
     coalesce(options: CoalesceOptions) {
         const { fields } = options;
         function keyIn(...keys) {
@@ -431,7 +485,7 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * a true outage of data then you want to keep that instead of a
      * worthless fill.
      *
-     * @example
+     * Example:
      * ```
      * const source = stream()
      *     .fill({ method: FillMethod.Linear, fieldSpec: "value", limit: 2 })
@@ -452,7 +506,7 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * the method of alignment with `method` (which can be either `Linear`
      * interpolation, or `Hold`).
      *
-     * @example
+     * Example:
      * ```
      * const s = stream()
      *     .align({
@@ -514,7 +568,7 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * Convert incoming events to new events with specified
      * fields collapsed into a new field using an aggregation function.
      *
-     * @example
+     * Example:
      *
      * Events with fields a, b, c can be mapped to events with only a field
      * containing the avg of a and b called "ab".
@@ -540,7 +594,7 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * type will be Event<Key> as the event is generically passed through the stream, but
      * you can cast the type (if you are using Typescript).
      *
-     * @example
+     * Example:
      * ```
      * const source = stream<Time>()
      *     .groupByWindow({...})
@@ -573,7 +627,7 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * the next step is to `aggregate()` those windows back to `Events` or to `output()`
      * to `Collection`s.
      *
-     * @example
+     * Example:
      *
      * ```
      * const source = stream<Time>()
@@ -751,6 +805,30 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  * source.addEvent(e1)
  * source.addEvent(e2)
  * ...
+ * ```
+ *
+ * If you need to branch a stream, pass the parent stream into the `stream()` factory
+ * function as its only arg:
+ *
+ * ```
+ * const source = stream().map(
+ *     e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 }))
+ * );
+ *
+ * stream(source)
+ *     .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 })))
+ *     .output(evt => {
+ *         //
+ *     });
+ *
+ * stream(source)
+ *     .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 })))
+ *     .output(evt => {
+ *         //
+ *     });
+ *
+ * source.addEvent(...);
+ *
  * ```
  *
  * If you have multiple sources you can feed them into the same stream and combine them
