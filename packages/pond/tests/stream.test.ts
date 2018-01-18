@@ -61,9 +61,7 @@ describe("Streaming", () => {
                 method: AlignmentMethod.Linear
             })
             .rate({ fieldSpec: "value", allowNegative: false })
-            .output(e => {
-                result.push(e);
-            });
+            .output(e => result.push(e));
 
         list.forEach(e => {
             s.addEvent(e);
@@ -90,13 +88,13 @@ describe("Streaming", () => {
         const result: { [key: string]: Collection<Time> } = {};
         const everyThirtyMinutes = window(duration("30m"));
         let calls = 0;
-        const source = stream()
+        const source = stream<Time>()
             .groupByWindow({
                 window: everyThirtyMinutes,
                 trigger: Trigger.perEvent
             })
             .output((c, key) => {
-                result[key] = c as Collection<Time>;
+                result[key] = c;
                 calls += 1;
             });
 
@@ -128,8 +126,7 @@ describe("Streaming", () => {
                 in_avg: ["in", avg()],
                 out_avg: ["out", avg()]
             })
-            .output(evt => {
-                const e = evt as Event<Index>;
+            .output(e => {
                 result[e.getKey().toString()] = e;
                 calls += 1;
             });
@@ -191,10 +188,7 @@ describe("Streaming", () => {
 
         const source = stream<Time>()
             .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })))
-            .output(evt => {
-                const e = evt as Event<Time>;
-                result.push(e);
-            });
+            .output(e => result.push(e));
 
         eventsIn.forEach(e => source.addEvent(e));
 
@@ -223,10 +217,7 @@ describe("Streaming", () => {
                 }
                 return eventList;
             })
-            .output(evt => {
-                const e = evt as Event<Time>;
-                result.push(e);
-            });
+            .output(e => result.push(e));
 
         eventsIn.forEach(e => source.addEvent(e));
 
@@ -253,10 +244,7 @@ describe("Streaming", () => {
 
         const source = stream<Time>()
             .filter(e => e.get("a") % 2 !== 0)
-            .output(evt => {
-                const e = evt as Event<Time>;
-                result.push(e);
-            });
+            .output(e => result.push(e));
 
         eventsIn.forEach(e => source.addEvent(e));
 
@@ -278,9 +266,7 @@ describe("Streaming", () => {
             .select({
                 fields: ["b", "c"]
             })
-            .output(e => {
-                result.push(e);
-            });
+            .output(e => result.push(e));
 
         list.forEach(e => {
             s.addEvent(e);
@@ -395,7 +381,7 @@ describe("Streaming", () => {
                     return event(time(current.timestamp()), Immutable.Map({ total }));
                 }
             })
-            .output((e: Event) => results.push(e));
+            .output(e => results.push(e));
 
         // Stream events
         streamingEvents.forEach(e => source.addEvent(e));
@@ -419,7 +405,7 @@ describe("Streaming", () => {
                     );
                 }
             })
-            .output((e: Event) => results.push(e));
+            .output(e => results.push(e));
 
         // Stream events
         streamingEvents.forEach(e => source.addEvent(e));
@@ -429,7 +415,7 @@ describe("Streaming", () => {
         expect(results[10].get("avg")).toBe(322);
     });
 
-    it("can do split two streams at the source", () => {
+    it("can do a split of two streams", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
             event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
@@ -439,23 +425,17 @@ describe("Streaming", () => {
         const result1: Event[] = [];
         const result2: Event[] = [];
 
-        const source = stream<Time>().map(
-            e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })) // 2, 4, 6
-        );
+        const source = stream<Time>().map(e =>
+            event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 }))
+        ); // 2, 4, 6
 
-        stream<Time>(source)
+        const branch1 = source
             .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 6, 12, 18
-            .output(evt => {
-                const e = evt as Event<Time>;
-                result1.push(e);
-            });
+            .output(e => result1.push(e));
 
-        stream<Time>(source)
+        const branch2 = source
             .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 }))) // 8, 16, 24
-            .output(evt => {
-                const e = evt as Event<Time>;
-                result2.push(e);
-            });
+            .output(e => result2.push(e));
 
         eventsIn.forEach(e => source.addEvent(e));
 

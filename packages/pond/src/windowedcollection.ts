@@ -21,7 +21,6 @@ import { Period } from "./period";
 import { Processor } from "./processor";
 import { Rate } from "./rate";
 import { SortedCollection } from "./sortedcollection";
-import { KeyedCollection } from "./stream";
 import { Time, time } from "./time";
 import { timerange, TimeRange } from "./timerange";
 
@@ -32,6 +31,7 @@ import {
     AggregationTuple,
     AlignmentOptions,
     DedupFunction,
+    KeyedCollection,
     RateOptions,
     ReducerFunction,
     Trigger,
@@ -51,6 +51,9 @@ import {
     sum
 } from "./functions";
 
+/**
+ * A map of `SortedCollection`s indexed by a string key representing a window.
+ */
 export class WindowedCollection<T extends Key> extends Base {
     protected collections: Immutable.Map<string, SortedCollection<T>>;
     protected options: WindowingOptions;
@@ -130,7 +133,6 @@ export class WindowedCollection<T extends Key> extends Base {
                 }
 
                 if (collection) {
-                    // TODO: do we use this code path?
                     throw new Error("Unimplemented");
                 } else {
                     this.collections = Immutable.Map<string, SortedCollection<T>>();
@@ -140,7 +142,7 @@ export class WindowedCollection<T extends Key> extends Base {
     }
 
     /**
-     * Fetch the SortedCollection of events contained in the windowed grouping
+     * Fetch the `SortedCollection` of `Event`s contained in the windowed grouping
      */
     get(key: string): SortedCollection<T> {
         return this.collections.get(key);

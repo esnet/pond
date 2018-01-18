@@ -225,6 +225,18 @@ export declare type ListMapper = (events: Immutable.List<Event<Key>>) => Immutab
  */
 export declare type ListReducer<T extends Key> = (accum: Event<T>, events: Immutable.List<Event<T>>) => Event<T>;
 /**
+ * A callback function which is passed an `Event`
+ */
+export declare type EventCallback<T extends Key> = (event: Event<T>) => void;
+/**
+ * A callback function which is passed a `Collection` and associated `key`
+ */
+export declare type KeyedCollectionCallback<T extends Key> = (collection: Collection<T>, key: string) => void;
+/**
+ * A tuple of string key and associated `Collection`
+ */
+export declare type KeyedCollection<T extends Key> = [string, Collection<T>];
+/**
  * Tuple mapping a string -> `ReducerFunction`
  * e.g. `["value", avg()]`
  */
