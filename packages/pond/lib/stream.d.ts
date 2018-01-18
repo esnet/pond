@@ -1,76 +1,139 @@
 import * as Immutable from "immutable";
 import { Base } from "./base";
-import { Collection } from "./collection";
 import { Event } from "./event";
 import { Index } from "./index";
 import { Key } from "./key";
 import { Time } from "./time";
 import { TimeRange } from "./timerange";
-import { AggregationSpec, AlignmentOptions, CoalesceOptions, CollapseOptions, FillOptions, RateOptions, ReduceOptions, SelectOptions, WindowingOptions } from "./types";
-/**
- * A Node is a transformation between type S and type T. Both S
- * and T much extend Base.
- *
- * The transformation happens when a `Node` has its `set()` method called
- * by another `Node`. The `input` to set() is of type `S`. When this happens
- * a subclass specific implementation of `process` is called to actually
- * transform the input (of type `S` to an output of type `T`). Of course
- * `S` and `T` maybe the same if the input and output types are expected
- * to be the same. The result of `process`, of type `T`, is returned and
- * the passed onto other downstream Nodes, by calling their `set()` methods.
- */
-export declare type EventCallback = (event: Event<Key>) => void;
-export declare type KeyedCollectionCallback<T extends Key> = (collection: Collection<T>, key: string) => void;
-export declare type KeyedCollection<T extends Key> = [string, Collection<T>];
+import { Node } from "./node";
+import { AggregationSpec, AlignmentOptions, CoalesceOptions, CollapseOptions, EventCallback, FillOptions, KeyedCollection, KeyedCollectionCallback, RateOptions, ReduceOptions, SelectOptions, WindowingOptions } from "./types";
 /**
  * @private
  *
+ * A `StreamInterface` is the base class for the family of facards placed in front of
+ * the underlying `Stream` to provide the appropiate API layer depending on what type
+ * of data is being passed through the pipeline at any given stage.
+ *
+ * At this base class level, it holds onto a reference to the underlying `Stream`
+ * object (which contains the root of the `Node` tree into which `Event`s are
+ * inserted). It also contains the ability to `addEvent()` method to achieve this (from
+ * the user's point of view) and `addNode()` which gives allows additions to the
+ * tree.
+ *
+ * Note that while the tree is held onto by its root node within the `Stream` object,
+ * the current addition point, the `tail` is held by each `StreamInterface`. When a
+ * `Node` is appended to the `tail` an entirely new interface is returned (its type
+ * dependent on the output type of the `Node` appended), and that interface will contain
+ * the new tail point on the tree, while the old one is unchanged. This allows for
+ * branching of the tree.
  */
-export declare abstract class Node<S extends Base, T extends Base> {
-    protected observers: Immutable.List<Node<T, Base>>;
-    addObserver(node: Node<T, Base>): void;
-    set(input: S): void;
-    protected notify(output: T): void;
-    protected abstract process(input: S): Immutable.List<T>;
+export declare class StreamInterface<IN extends Key, S extends Key> {
+    protected stream: Stream<S>;
+    protected tail: Node<Base, Base>;
+    constructor(stream: Stream<S>, tail: Node<Base, Base>);
+    /**
+     * Returns the underlying `Stream` object, which primarily contains the
+     * `root` of the processing graph.
+     */
+    getStream(): Stream<S>;
+    /**
+     * Add events into the stream
+     */
+    addEvent(e: Event<S>): void;
+    /**
+     * @protected
+     */
+    addNode(node: any): void;
 }
 /**
  * An `EventStream` is the interface to the stream provided for manipulation of
- * parts of the streaming pipeline that map a stream of Events of type <T>.
+ * parts of the streaming pipeline that map a stream of `Event`s of type <IN>.
  *
- * For example a stream of Events<Time> can be mapped to an output stream of
- * new Events<Time> that are aligned to a fixed period boundary. Less or more Events
+ * For example a stream of `Event<Time>`s can be mapped to an output stream of
+ * new `Event<Time>`s that are aligned to a fixed period boundary. Less or more `Event`s
  * may result.
  *
- * The type parameter `<U>` is the input `Event` type at the top of the stream, since each
- * interface exposes the `addEvent(Event<U>)` method for inserting events at the top of
- * the stream.
+ * The type parameter `<S>` is the input `Event` type at the top of the stream, since each
+ * interface exposes the `addEvent(e: Event<S>)` method for inserting events at the top of
+ * the stream this type is maintained across all stream interfaces.
  *
- * The type parameter `<T>` is the type of `Event`s in this part of the stream. That is
- * nodes created by the API at this point of the stream will expect Events of type T,
- * and will output new Events, potentially of a different type.
+ * The type parameter `<IN>` is the type of `Event`s in this part of the stream. That is
+ * nodes created by the API at this point of the tree will expect `Event<IN>`s,
+ * and will output new Events, potentially of a different type (identified as `<OUT>`).
+ * Typically `<IN>` and `<OUT>` would be `Time`, `TimeRange` or `Index`.
  */
-export declare class EventStream<T extends Key, U extends Key> {
-    private stream;
-    constructor(stream: Stream<U>);
+export declare class EventStream<IN extends Key, S extends Key> extends StreamInterface<IN, S> {
+    constructor(stream: Stream<S>, tail: Node<Base, Base>);
     /**
      * @private
      *
-     * Add events into the stream
+     * Adds a new `Node` which converts a stream of `Event<IN>` to `Event<OUT>`
+     *
+     * <IN> is the source type for the processing node
+     * <OUT> is the output Event type for the processing node
+     *
+     * Both IN and OUT extend Key, which is `Time`, `TimeRange` or `Index`, typically.
      */
-    addEvent(e: Event<U>): void;
+    addEventToEventNode<OUT extends Key>(node: EventMap<IN, OUT>): EventStream<OUT, S>;
+    /**
+     * @private
+     *
+     * Adds a new `Node` which converts a stream of `Event<IN>`s to a `KeyedCollection<OUT>`.
+     *
+     * <IN> is the source type for the processing node
+     * <OUT> is the output Event type for the processing node
+     *
+     * Both IN and OUT extend Key, which is Time, TimeRange or Index, typically.
+     */
+    addEventToCollectorNode<OUT extends Key>(node: EventToKeyedCollection<IN, OUT>): KeyedCollectionStream<OUT, S>;
     /**
      * Remaps each Event<T> in the stream to a new Event<M>.
      */
-    map<M extends Key>(mapper: (event: Event<T>) => Event<M>): EventStream<M, U>;
+    map<OUT extends Key>(mapper: (event: Event<IN>) => Event<OUT>): EventStream<OUT, S>;
     /**
-     * Remaps each Event<T> in the stream to 0, 1 or many Event<M>s.
+     * Remaps each Event<IN> in the stream to 0, 1 or many Event<OUT>s.
      */
-    flatMap<M extends Key>(mapper: (event: Event<T>) => Immutable.List<Event<M>>): EventStream<M, U>;
+    flatMap<OUT extends Key>(mapper: (event: Event<IN>) => Immutable.List<Event<OUT>>): EventStream<OUT, S>;
     /**
-     * Reduces a sequence of past Event<T>s in the stream to a single output Event<M>.
+     * Reduces a sequence of past Event<IN>s in the stream to a single output Event<M>.
      */
-    reduce<M extends Key>(options: ReduceOptions<T>): EventStream<T, U>;
-    coalesce(options: CoalesceOptions): EventStream<T, U>;
+    reduce(options: ReduceOptions<IN>): EventStream<IN, S>;
+    /**
+     * Filter out `Event<IN>`s in the stream. Provide a predicate function that
+     * given an Event returns true or false.
+     *
+     * Example:
+     * ```
+     * const source = stream<Time>()
+     *     .filter(e => e.get("a") % 2 !== 0)
+     *     .output(evt => {
+     *         // -> 1, 3, 5
+     *     });
+     *
+     * source.addEvent(...); // <- 1, 2, 3, 4, 5
+     * ```
+     */
+    filter<M extends Key>(predicate: (event: Event<IN>) => boolean): EventStream<IN, S>;
+    /**
+     * If you have multiple sources you can feed them into the same stream and combine them
+     * with the `coalese()` processor. In this example two event sources are fed into the
+     * `Stream`. One contains `Event`s with just a field "in", and the other just a field
+     * "out". The resulting output is `Event`s with the latest (in arrival time) value for
+     * "in" and "out" together:
+     *
+     * ```typescript
+     * const source = stream()
+     *     .coalesce({ fields: ["in", "out"] })
+     *     .output((e: Event) => results.push(e));
+     *
+     * // Stream events
+     * for (let i = 0; i < 5; i++) {
+     *     source.addEvent(streamIn[i]);  // from stream 1
+     *     source.addEvent(streamOut[i]); // from stream 2
+     * }
+     * ```
+     */
+    coalesce(options: CoalesceOptions): EventStream<IN, S>;
     /**
      * Fill missing values in stream events.
      *
@@ -85,7 +148,7 @@ export declare class EventStream<T extends Key, U extends Key> {
      * a true outage of data then you want to keep that instead of a
      * worthless fill.
      *
-     * @example
+     * Example:
      * ```
      * const source = stream()
      *     .fill({ method: FillMethod.Linear, fieldSpec: "value", limit: 2 })
@@ -95,15 +158,15 @@ export declare class EventStream<T extends Key, U extends Key> {
      *     });
      * ```
      */
-    fill(options: FillOptions): EventStream<T, U>;
+    fill(options: FillOptions): EventStream<IN, S>;
     /**
-     * Align Events in the stream to a specific boundary at a fixed period.
+     * Align `Event`s in the stream to a specific boundary at a fixed `period`.
      * Options are a `AlignmentOptions` object where you specify which field to
-     * align with `fieldSpec`, what boundary period to use with `window` and
+     * align with `fieldSpec`, what boundary `period` to use with `window` and
      * the method of alignment with `method` (which can be either `Linear`
      * interpolation, or `Hold`).
      *
-     * @example
+     * Example:
      * ```
      * const s = stream()
      *     .align({
@@ -113,10 +176,10 @@ export declare class EventStream<T extends Key, U extends Key> {
      *     })
      * ```
      */
-    align(options: AlignmentOptions): EventStream<T, U>;
+    align(options: AlignmentOptions): EventStream<IN, S>;
     /**
-     * Convert incoming Events in the stream to rates (essentially taking
-     * the derivative over time). The resulting output Events will be
+     * Convert incoming `Event`s in the stream to rates (essentially taking
+     * the derivative over time). The resulting output `Event`s will be
      * of type `Event<TimeRange>`, where the `TimeRange` key will be
      * the time span over which the rate was calculated. If you want you
      * can remap this later and decide on a timestamp to use instead.
@@ -128,7 +191,7 @@ export declare class EventStream<T extends Key, U extends Key> {
      * the incoming values to always increase while a decrease is considered
      * a bad condition (e.g. network counters or click counts).
      *
-     * @example
+     * Example:
      *
      * ```
      * const s = stream()
@@ -136,12 +199,12 @@ export declare class EventStream<T extends Key, U extends Key> {
      *     .rate({ fieldSpec: "value", allowNegative: false })
      * ```
      */
-    rate(options: RateOptions): EventStream<TimeRange, U>;
+    rate(options: RateOptions): EventStream<TimeRange, S>;
     /**
-     * Convert incoming events to new events with on the specified
+     * Convert incoming `Event`s to new `Event`s with on the specified
      * fields selected out of the source.
      *
-     * @example
+     * Example:
      *
      * Events with fields a, b, c can be mapped to events with only
      * b and c:
@@ -151,12 +214,12 @@ export declare class EventStream<T extends Key, U extends Key> {
      *      .select(["b", "c"])
      * ```
      */
-    select(options: SelectOptions): EventStream<T, U>;
+    select(options: SelectOptions): EventStream<IN, S>;
     /**
-     * Convert incoming events to new events with specified
+     * Convert incoming `Event`s to new `Event`s with specified
      * fields collapsed into a new field using an aggregation function.
      *
-     * @example
+     * Example:
      *
      * Events with fields a, b, c can be mapped to events with only a field
      * containing the avg of a and b called "ab".
@@ -171,15 +234,16 @@ export declare class EventStream<T extends Key, U extends Key> {
      *      })
      * ```
      */
-    collapse(options: CollapseOptions): EventStream<T, U>;
+    collapse(options: CollapseOptions): EventStream<IN, S>;
     /**
      * An output, specified as an `EventCallback`, essentially `(event: Event<Key>) => void`.
+     *
      * Using this method you are able to access the stream result. Your callback
      * function will be called whenever a new Event is available. Not that currently the
      * type will be Event<Key> as the event is generically passed through the stream, but
      * you can cast the type (if you are using Typescript).
      *
-     * @example
+     * Example:
      * ```
      * const source = stream<Time>()
      *     .groupByWindow({...})
@@ -190,15 +254,15 @@ export declare class EventStream<T extends Key, U extends Key> {
      *     });
      * ```
      */
-    output(callback: EventCallback): EventStream<T, U>;
+    output(callback: EventCallback<IN>): EventStream<IN, S>;
     /**
      * The heart of the streaming code is that in addition to remapping operations of
      * a stream of events, you can also group by a window. This is what allows you to do
-     * rollups with the streaming code.
+     * rollups within the streaming code.
      *
      * A window is defined with the `WindowingOptions`, which allows you to specify
      * the window period as a `Period` (e.g. `period("30m")` for each 30 minutes window)
-     * as the `window` and a `Trigger` enum value (emit a completed window on each
+     * as the `window`, and a `Trigger` enum value (emit a completed window on each
      * incoming `Event` or on each completed window).
      *
      * The return type of this operation will no longer be an `EventStream` but rather
@@ -209,7 +273,7 @@ export declare class EventStream<T extends Key, U extends Key> {
      * the next step is to `aggregate()` those windows back to `Events` or to `output()`
      * to `Collection`s.
      *
-     * @example
+     * Example:
      *
      * ```
      * const source = stream<Time>()
@@ -218,31 +282,47 @@ export declare class EventStream<T extends Key, U extends Key> {
      *         trigger: Trigger.perEvent
      *     })
      *     .aggregate({...})
-     *     .output(event => {
+     *     .output(e => {
      *         ...
      *     });
      */
-    groupByWindow(options: WindowingOptions): KeyedCollectionStream<T, U>;
+    groupByWindow(options: WindowingOptions): KeyedCollectionStream<IN, S>;
 }
 /**
+ * A `KeyedCollectionStream` is a stream containing tuples mapping a string key
+ * to a `Collection`. When you window a stream you will get one of these that
+ * maps a string representing the window to the `Collection` of all `Event`s in
+ * that window.
  *
+ * Using this class you can `output()` that or `aggregate()` the `Collection`s
+ * back to `Event`s.
  */
-export declare class KeyedCollectionStream<T extends Key, U extends Key> {
-    private stream;
-    constructor(stream: Stream<U>);
+export declare class KeyedCollectionStream<IN extends Key, S extends Key> extends StreamInterface<IN, S> {
+    constructor(stream: Stream<S>, tail: Node<Base, Base>);
     /**
      * @private
-     * Add events into the stream
+     *
+     * A helper function to create a new `Node` in the graph. The new node will be a
+     * processor that remaps a stream of `KeyedCollection`s to another stream of
+     * `KeyedCollection`s.
      */
-    addEvent(e: Event<U>): void;
+    addKeyedCollectionToKeyedCollectionNode<OUT extends Key>(node: KeyedCollectionMap<IN, OUT>): KeyedCollectionStream<OUT, S>;
     /**
-     * An output, specified as an `KeyedCollectionCallback`, essentially
-     * `(collection: Collection<T>,vkey: string) => void`.
+     * @private
+     *
+     * Helper function to create a new `Node` in the graph. The new node will be a
+     * processor that we remap a stream of `KeyedCollection`s back to `Event`s. An
+     * example would be an aggregation.
+     */
+    addKeyedCollectionToEventNode<OUT extends Key>(node: KeyedCollectionToEvent<IN, OUT>): EventStream<OUT, S>;
+    /**
+     * An output, specified as an `KeyedCollectionCallback`:
+     * `(collection: Collection<T>, key: string) => void`.
      *
      * Using this method you are able to access the stream result. Your callback
      * function will be called whenever a new `Collection` is available.
      *
-     * @example
+     * Example:
      * ```
      * const source = stream<Time>()
      *     .groupByWindow({...})
@@ -251,9 +331,9 @@ export declare class KeyedCollectionStream<T extends Key, U extends Key> {
      *     });
      * ```
      */
-    output(callback: KeyedCollectionCallback<T>): KeyedCollectionStream<T, U>;
+    output(callback: KeyedCollectionCallback<IN>): KeyedCollectionStream<IN, S>;
     /**
-     * Takes an incoming tuple mapping a key (the window name) to a `Collection`
+     * Takes an incoming tuple mapping a key to a `Collection`
      * (containing all `Event`s in the window) and reduces that down
      * to an output `Event<Index>` using an aggregation specification. As
      * indicated, the output is an `IndexedEvent`, since the `Index` describes
@@ -284,7 +364,7 @@ export declare class KeyedCollectionStream<T extends Key, U extends Key> {
      *     });
      * ```
      */
-    aggregate(spec: AggregationSpec<T>): EventStream<Index, U>;
+    aggregate(spec: AggregationSpec<IN>): EventStream<Index, S>;
 }
 export declare type EventToKeyedCollection<S extends Key, T extends Key> = Node<Event<S>, KeyedCollection<T>>;
 export declare type KeyedCollectionToEvent<S extends Key, T extends Key> = Node<KeyedCollection<S>, Event<T>>;
@@ -300,12 +380,21 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  * incoming events to different streams should be handled by the user. Typically
  * you would separate streams based on some incoming criteria.
  *
- * A `Stream` object manages a chain of processing nodes, each type of which
- * provides an appropiate interface. When a `Stream` is initially created with
- * the `stream()` factory function the interface exposed is an `EventStream`.
- * If you perform a windowing operation you will be exposed to a
- * `KeyedCollectionStream`. If you aggregate a `KeyedCollectionStream` you
- * will be back to an `EventStream` and so on.
+ * A `Stream` object manages a tree of processing `Node`s, each type of which
+ * maps either `Event`s to other `Event`s or to and from a `KeyedCollection`.
+ * When an `Event` is added to the stream it will enter the top processing
+ * node where it will be processed to produce 0, 1 or many output `Event`s.
+ * Then then are passed down the tree until an output is reached.
+ *
+ * When a `Stream` is initially created with the `stream()` factory function
+ * the interface exposed is an `EventStream`. If you perform a windowing operation
+ * you will be exposed to a `KeyedCollectionStream`. If you aggregate a
+ * `KeyedCollectionStream` you will be back to an `EventStream` and so on.
+ *
+ * You can think of the `Stream` as the thing that holds the root of the processing
+ * node chain, while either an `EventStream` or `KeyedCollectionStream` holds the
+ * current leaf of the tree (the `tail`) onto which additional operating nodes
+ * can be added using the `EventStream` or `KeyedCollectionStream` API.
  *
  * ---
  * Note:
@@ -316,7 +405,7 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  *
  * For "at scale" stream processing, use Apache Beam or Spark. This library is intended to
  * simplify passing of events to a browser and enabling convenient processing for visualization
- * purposes, or for light weight handling of events in Node.
+ * purposes, or for light weight handling of events in Node.js such as simple event alerting.
  *
  * ---
  * Examples:
@@ -353,6 +442,30 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  * ...
  * ```
  *
+ * If you need to branch a stream, pass the parent stream into the `stream()` factory
+ * function as its only arg:
+ *
+ * ```
+ * const source = stream().map(
+ *     e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 }))
+ * );
+ *
+ * stream(source)
+ *     .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 })))
+ *     .output(e => {
+ *         //
+ *     });
+ *
+ * stream(source)
+ *     .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 })))
+ *     .output(e => {
+ *         //
+ *     });
+ *
+ * source.addEvent(...);
+ *
+ * ```
+ *
  * If you have multiple sources you can feed them into the same stream and combine them
  * with the `coalese()` processor. In this example two event sources are fed into the
  * `Stream`. One contains `Event`s with just a field "in", and the other just a field
@@ -362,7 +475,7 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  * ```typescript
  * const source = stream()
  *     .coalesce({ fields: ["in", "out"] })
- *     .output((e: Event) => results.push(e));
+ *     .output(e => results.push(e));
  *
  * // Stream events
  * for (let i = 0; i < 5; i++) {
@@ -388,7 +501,7 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  *             return event(time(current.timestamp()), Immutable.Map({ total }));
  *         }
  *     })
- *     .output((e: Event) => console.log("Running total:", e.toString()) );
+ *     .output(e => console.log("Running total:", e.toString()) );
  *
  * // Add Events into the source...
  * events.forEach(e => source.addEvent(e));
@@ -407,39 +520,33 @@ export declare type EventMap<S extends Key, T extends Key> = Node<Event<S>, Even
  *             );
  *          }
  *     })
- *     .output((e: Event) => console.log("Rolling average:", e.toString()) );
+ *     .output(e => console.log("Rolling average:", e.toString()) );
  *
  * // Add Events into the source...
  * events.forEach(e => source.addEvent(e));
  * ```
  */
 export declare class Stream<U extends Key = Time> {
-    private head;
-    private tail;
+    /**
+     * The root of the entire event processing tree. All incoming `Event`s are
+     * provided to this `Node`.
+     */
+    private root;
+    constructor(upstream?: Stream<U>);
     /**
      * @private
+     * Set a new new root onto the `Stream`. This is used internally.
      */
-    addEventMappingNode<S extends Key, T extends Key>(node: EventMap<S, T>): EventStream<T, U>;
+    setRoot(node: Node<Base, Base>): void;
     /**
      * @private
+     * Returns the `root` node of the entire processing tree. This is used internally.
      */
-    addEventToCollectorNode<S extends Key, T extends Key>(node: EventToKeyedCollection<S, T>): KeyedCollectionStream<T, U>;
+    getRoot(): Node<Base, Base>;
     /**
-     * @private
-     */
-    addCollectorMappingNode<S extends Key, T extends Key>(node: KeyedCollectionMap<S, T>): KeyedCollectionStream<T, U>;
-    /**
-     * @private
-     */
-    addCollectionToEventNode<S extends Key, T extends Key>(node: KeyedCollectionToEvent<S, T>): EventStream<T, U>;
-    /**
-     * Add an `Event` into the stream
+     * Add an `Event` into the root node of the stream
      */
     addEvent<T extends Key>(e: Event<U>): void;
-    /**
-     * @private
-     */
-    protected addNode(node: any): void;
 }
-declare function streamFactory<T extends Key>(): EventStream<T, T>;
-export { streamFactory as stream };
+declare function eventStreamFactory<T extends Key>(): EventStream<T, T>;
+export { eventStreamFactory as stream };

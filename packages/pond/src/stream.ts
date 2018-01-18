@@ -23,15 +23,26 @@ import { TimeRange } from "./timerange";
 
 import { Trigger } from "./types";
 
-import { Align } from "./align";
-import { Collapse } from "./collapse";
-import { Fill } from "./fill";
-import { Rate } from "./rate";
-import { Reducer } from "./reduce";
-import { Select } from "./select";
-
 import { GroupedCollection } from "./groupedcollection";
 import { WindowedCollection } from "./windowedcollection";
+
+import {
+    AggregationNode,
+    AlignNode,
+    CollapseNode,
+    EventInputNode,
+    EventOutputNode,
+    FillNode,
+    FilterNode,
+    FlatMapNode,
+    KeyedCollectionOutputNode,
+    MapNode,
+    Node,
+    RateNode,
+    ReduceNode,
+    SelectNode,
+    WindowOutputNode
+} from "./node";
 
 import {
     AggregationSpec,
@@ -40,7 +51,10 @@ import {
     AlignmentOptions,
     CoalesceOptions,
     CollapseOptions,
+    EventCallback,
     FillOptions,
+    KeyedCollection,
+    KeyedCollectionCallback,
     RateOptions,
     ReduceOptions,
     SelectOptions,
@@ -48,369 +62,138 @@ import {
 } from "./types";
 
 /**
- * A Node is a transformation between type S and type T. Both S
- * and T much extend Base.
- *
- * The transformation happens when a `Node` has its `set()` method called
- * by another `Node`. The `input` to set() is of type `S`. When this happens
- * a subclass specific implementation of `process` is called to actually
- * transform the input (of type `S` to an output of type `T`). Of course
- * `S` and `T` maybe the same if the input and output types are expected
- * to be the same. The result of `process`, of type `T`, is returned and
- * the passed onto other downstream Nodes, by calling their `set()` methods.
- */
-
-export type EventCallback = (event: Event<Key>) => void;
-export type KeyedCollectionCallback<T extends Key> = (
-    collection: Collection<T>,
-    key: string
-) => void;
-
-export type KeyedCollection<T extends Key> = [string, Collection<T>];
-
-/**
  * @private
  *
- */
-// tslint:disable-next-line:max-classes-per-file
-export abstract class Node<S extends Base, T extends Base> {
-    // Members
-    protected observers = Immutable.List<Node<T, Base>>();
-
-    public addObserver(node: Node<T, Base>): void {
-        this.observers = this.observers.push(node);
-    }
-
-    public set(input: S) {
-        const outputs = this.process(input);
-        if (outputs) {
-            outputs.forEach(output => this.notify(output));
-        }
-    }
-
-    protected notify(output: T): void {
-        if (this.observers.size > 0) {
-            this.observers.forEach(node => {
-                node.set(output);
-            });
-        }
-    }
-
-    protected abstract process(input: S): Immutable.List<T>;
-}
-
-//
-// Nodes
-//
-
-/**
- * @private
+ * A `StreamInterface` is the base class for the family of facards placed in front of
+ * the underlying `Stream` to provide the appropiate API layer depending on what type
+ * of data is being passed through the pipeline at any given stage.
  *
- */
-// tslint:disable-next-line:max-classes-per-file
-class EventInputNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    constructor() {
-        super();
-        // pass
-    }
-    process(e: Event<T>): Immutable.List<Event<T>> {
-        return Immutable.List([e]);
-    }
-}
-
-/**
- * @private
+ * At this base class level, it holds onto a reference to the underlying `Stream`
+ * object (which contains the root of the `Node` tree into which `Event`s are
+ * inserted). It also contains the ability to `addEvent()` method to achieve this (from
+ * the user's point of view) and `addNode()` which gives allows additions to the
+ * tree.
  *
+ * Note that while the tree is held onto by its root node within the `Stream` object,
+ * the current addition point, the `tail` is held by each `StreamInterface`. When a
+ * `Node` is appended to the `tail` an entirely new interface is returned (its type
+ * dependent on the output type of the `Node` appended), and that interface will contain
+ * the new tail point on the tree, while the old one is unchanged. This allows for
+ * branching of the tree.
  */
-// tslint:disable-next-line:max-classes-per-file
-class EventOutputNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    constructor(private callback: EventCallback) {
-        super();
-        // pass
-    }
-    process(e: Event<T>) {
-        this.callback(e);
-        return Immutable.List();
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class KeyedCollectionOutputNode<T extends Key> extends Node<
-    KeyedCollection<T>,
-    KeyedCollection<T>
-> {
-    constructor(private callback: KeyedCollectionCallback<T>) {
-        super();
-        // pass
-    }
-    process(keyedCollection: KeyedCollection<T>) {
-        const [key, collection] = keyedCollection;
-        this.callback(collection, key);
-        return Immutable.List();
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class MapNode<T extends Key, M extends Key> extends Node<Event<T>, Event<M>> {
-    constructor(private mapper: (event: Event<T>) => Event<M>) {
-        super();
-    }
-
-    process(e: Event<T>): Immutable.List<Event<M>> {
-        return Immutable.List([this.mapper(e)]);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class FlatMapNode<T extends Key, M extends Key> extends Node<Event<T>, Event<M>> {
-    constructor(private mapper: (event: Event<T>) => Immutable.List<Event<M>>) {
-        super();
-    }
-
-    process(e: Event<T>) {
-        return this.mapper(e);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class FilterNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    private processor: Fill<T>;
-    constructor(private predicate: (event: Event<T>) => boolean) {
-        super();
-    }
-
-    process(e: Event<T>) {
-        return this.predicate(e) ? Immutable.List([e]) : Immutable.List([]);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class FillNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    private processor: Fill<T>;
-    constructor(options: FillOptions) {
-        super();
-        this.processor = new Fill<T>(options);
-    }
-
-    process(e: Event<T>) {
-        return this.processor.addEvent(e);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class AlignNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    private processor: Align<T>;
-    constructor(options: AlignmentOptions) {
-        super();
-        this.processor = new Align<T>(options);
-    }
-
-    process(e: Event<T>) {
-        return this.processor.addEvent(e);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class SelectNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    private processor: Select<T>;
-    constructor(options: SelectOptions) {
-        super();
-        this.processor = new Select<T>(options);
-    }
-
-    process(e: Event<T>) {
-        return this.processor.addEvent(e);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class CollapseNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    private processor: Collapse<T>;
-    constructor(options: CollapseOptions) {
-        super();
-        this.processor = new Collapse<T>(options);
-    }
-
-    process(e: Event<T>) {
-        return this.processor.addEvent(e);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class RateNode<T extends Key> extends Node<Event<T>, Event<TimeRange>> {
-    private processor: Rate<T>;
-    constructor(options: RateOptions) {
-        super();
-        this.processor = new Rate<T>(options);
-    }
-
-    process(e: Event<T>) {
-        return this.processor.addEvent(e);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class ReduceNode<T extends Key> extends Node<Event<T>, Event<T>> {
-    private processor: Reducer<T>;
-    constructor(options: ReduceOptions<T>) {
-        super();
-        this.processor = new Reducer<T>(options);
-    }
-
-    process(e: Event<T>) {
-        return this.processor.addEvent(e);
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class WindowOutputNode<T extends Key> extends Node<Event<T>, KeyedCollection<T>> {
-    private processor: WindowedCollection<T>;
-    constructor(options: WindowingOptions) {
-        super();
-        this.processor = new WindowedCollection<T>(options);
-    }
-
-    process(e: Event<T>): Immutable.List<KeyedCollection<T>> {
-        const keyedCollections = this.processor.addEvent(e);
-        return keyedCollections;
-    }
-}
-
-/**
- * @private
- *
- */
-// tslint:disable-next-line:max-classes-per-file
-class AggregationNode<T extends Key> extends Node<KeyedCollection<T>, Event<Index>> {
-    constructor(private aggregationSpec: AggregationSpec<Key>) {
-        super();
-    }
-
-    process(keyedCollection: KeyedCollection<T>): Immutable.List<Event<Index>> {
-        const [group, collection] = keyedCollection;
-        const d = {};
-        const [groupKey, windowKey] =
-            group.split("::").length === 2 ? group.split("::") : [null, group];
-        _.forEach(this.aggregationSpec, (src: AggregationTuple, dest: string) => {
-            const [srcField, reducer] = src;
-            d[dest] = collection.aggregate(reducer, srcField);
-        });
-        const indexedEvent = new Event<Index>(index(windowKey), Immutable.fromJS(d));
-        return Immutable.List<Event<Index>>([indexedEvent]);
-    }
-}
-
-//
-// Stream interfaces
-//
-
-export class StreamInterface<T extends Key, U extends Key> {
+export class StreamInterface<IN extends Key, S extends Key> {
     // tslint:disable-line:max-classes-per-file
-    constructor(protected stream: Stream<U>) {}
 
+    constructor(protected stream: Stream<S>, protected tail: Node<Base, Base>) {}
+
+    /**
+     * Returns the underlying `Stream` object, which primarily contains the
+     * `root` of the processing graph.
+     */
     getStream() {
         return this.stream;
+    }
+
+    /**
+     * Add events into the stream
+     */
+    addEvent(e: Event<S>) {
+        this.stream.addEvent(e);
+    }
+
+    /**
+     * @protected
+     */
+    addNode(node) {
+        if (!this.stream.getRoot()) {
+            this.stream.setRoot(node);
+        }
+        if (this.tail) {
+            this.tail.addObserver(node);
+        }
     }
 }
 
 /**
  * An `EventStream` is the interface to the stream provided for manipulation of
- * parts of the streaming pipeline that map a stream of Events of type <T>.
+ * parts of the streaming pipeline that map a stream of `Event`s of type <IN>.
  *
- * For example a stream of Events<Time> can be mapped to an output stream of
- * new Events<Time> that are aligned to a fixed period boundary. Less or more Events
+ * For example a stream of `Event<Time>`s can be mapped to an output stream of
+ * new `Event<Time>`s that are aligned to a fixed period boundary. Less or more `Event`s
  * may result.
  *
- * The type parameter `<U>` is the input `Event` type at the top of the stream, since each
- * interface exposes the `addEvent(Event<U>)` method for inserting events at the top of
- * the stream.
+ * The type parameter `<S>` is the input `Event` type at the top of the stream, since each
+ * interface exposes the `addEvent(e: Event<S>)` method for inserting events at the top of
+ * the stream this type is maintained across all stream interfaces.
  *
- * The type parameter `<T>` is the type of `Event`s in this part of the stream. That is
- * nodes created by the API at this point of the stream will expect Events of type T,
- * and will output new Events, potentially of a different type.
+ * The type parameter `<IN>` is the type of `Event`s in this part of the stream. That is
+ * nodes created by the API at this point of the tree will expect `Event<IN>`s,
+ * and will output new Events, potentially of a different type (identified as `<OUT>`).
+ * Typically `<IN>` and `<OUT>` would be `Time`, `TimeRange` or `Index`.
  */
-export class EventStream<T extends Key, U extends Key> extends StreamInterface<T, U> {
+export class EventStream<IN extends Key, S extends Key> extends StreamInterface<IN, S> {
     // tslint:disable-line:max-classes-per-file
-    constructor(stream: Stream<U>) {
-        super(stream);
+    constructor(stream: Stream<S>, tail: Node<Base, Base>) {
+        super(stream, tail);
     }
 
     /**
      * @private
      *
-     * Add events into the stream
+     * Adds a new `Node` which converts a stream of `Event<IN>` to `Event<OUT>`
+     *
+     * <IN> is the source type for the processing node
+     * <OUT> is the output Event type for the processing node
+     *
+     * Both IN and OUT extend Key, which is `Time`, `TimeRange` or `Index`, typically.
      */
-    addEvent(e: Event<U>) {
-        this.stream.addEvent(e);
+    addEventToEventNode<OUT extends Key>(node: EventMap<IN, OUT>) {
+        this.addNode(node);
+        return new EventStream<OUT, S>(this.getStream(), node);
     }
+
+    /**
+     * @private
+     *
+     * Adds a new `Node` which converts a stream of `Event<IN>`s to a `KeyedCollection<OUT>`.
+     *
+     * <IN> is the source type for the processing node
+     * <OUT> is the output Event type for the processing node
+     *
+     * Both IN and OUT extend Key, which is Time, TimeRange or Index, typically.
+     */
+    addEventToCollectorNode<OUT extends Key>(node: EventToKeyedCollection<IN, OUT>) {
+        this.addNode(node);
+        return new KeyedCollectionStream<OUT, S>(this.getStream(), node);
+    }
+
+    //
+    // Public API to a stream carrying `Event`s
+    //
 
     /**
      * Remaps each Event<T> in the stream to a new Event<M>.
      */
-    map<M extends Key>(mapper: (event: Event<T>) => Event<M>) {
-        return this.stream.addEventMappingNode(new MapNode<T, M>(mapper));
+    map<OUT extends Key>(mapper: (event: Event<IN>) => Event<OUT>) {
+        return this.addEventToEventNode(new MapNode<IN, OUT>(mapper));
     }
 
     /**
-     * Remaps each Event<T> in the stream to 0, 1 or many Event<M>s.
+     * Remaps each Event<IN> in the stream to 0, 1 or many Event<OUT>s.
      */
-    flatMap<M extends Key>(mapper: (event: Event<T>) => Immutable.List<Event<M>>) {
-        return this.stream.addEventMappingNode(new FlatMapNode<T, M>(mapper));
+    flatMap<OUT extends Key>(mapper: (event: Event<IN>) => Immutable.List<Event<OUT>>) {
+        return this.addEventToEventNode(new FlatMapNode<IN, OUT>(mapper));
     }
 
     /**
-     * Reduces a sequence of past Event<T>s in the stream to a single output Event<M>.
+     * Reduces a sequence of past Event<IN>s in the stream to a single output Event<M>.
      */
-    reduce<M extends Key>(options: ReduceOptions<T>) {
-        return this.stream.addEventMappingNode(new ReduceNode<T>(options));
+    reduce(options: ReduceOptions<IN>) {
+        return this.addEventToEventNode(new ReduceNode<IN>(options));
     }
 
     /**
-     * Filter out `Event<T>`s in the stream. Provide a predicate function that
+     * Filter out `Event<IN>`s in the stream. Provide a predicate function that
      * given an Event returns true or false.
      *
      * Example:
@@ -424,8 +207,8 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * source.addEvent(...); // <- 1, 2, 3, 4, 5
      * ```
      */
-    filter<M extends Key>(predicate: (event: Event<T>) => boolean) {
-        return this.stream.addEventMappingNode(new FilterNode<T>(predicate));
+    filter<M extends Key>(predicate: (event: Event<IN>) => boolean) {
+        return this.addEventToEventNode(new FilterNode<IN>(predicate));
     }
 
     /**
@@ -455,8 +238,8 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
                 return keySet.has(k);
             };
         }
-        return this.stream.addEventMappingNode(
-            new ReduceNode<T>({
+        return this.addEventToEventNode(
+            new ReduceNode<IN>({
                 count: 1,
                 iteratee(accum, eventList) {
                     const currentEvent = eventList.get(0);
@@ -496,13 +279,13 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * ```
      */
     fill(options: FillOptions) {
-        return this.stream.addEventMappingNode(new FillNode<T>(options));
+        return this.addEventToEventNode(new FillNode<IN>(options));
     }
 
     /**
-     * Align Events in the stream to a specific boundary at a fixed period.
+     * Align `Event`s in the stream to a specific boundary at a fixed `period`.
      * Options are a `AlignmentOptions` object where you specify which field to
-     * align with `fieldSpec`, what boundary period to use with `window` and
+     * align with `fieldSpec`, what boundary `period` to use with `window` and
      * the method of alignment with `method` (which can be either `Linear`
      * interpolation, or `Hold`).
      *
@@ -517,12 +300,12 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * ```
      */
     align(options: AlignmentOptions) {
-        return this.stream.addEventMappingNode(new AlignNode<T>(options));
+        return this.addEventToEventNode(new AlignNode<IN>(options));
     }
 
     /**
-     * Convert incoming Events in the stream to rates (essentially taking
-     * the derivative over time). The resulting output Events will be
+     * Convert incoming `Event`s in the stream to rates (essentially taking
+     * the derivative over time). The resulting output `Event`s will be
      * of type `Event<TimeRange>`, where the `TimeRange` key will be
      * the time span over which the rate was calculated. If you want you
      * can remap this later and decide on a timestamp to use instead.
@@ -534,7 +317,7 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * the incoming values to always increase while a decrease is considered
      * a bad condition (e.g. network counters or click counts).
      *
-     * @example
+     * Example:
      *
      * ```
      * const s = stream()
@@ -543,14 +326,14 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * ```
      */
     rate(options: RateOptions) {
-        return this.stream.addEventMappingNode(new RateNode<T>(options));
+        return this.addEventToEventNode(new RateNode<IN>(options));
     }
 
     /**
-     * Convert incoming events to new events with on the specified
+     * Convert incoming `Event`s to new `Event`s with on the specified
      * fields selected out of the source.
      *
-     * @example
+     * Example:
      *
      * Events with fields a, b, c can be mapped to events with only
      * b and c:
@@ -561,11 +344,11 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * ```
      */
     select(options: SelectOptions) {
-        return this.stream.addEventMappingNode(new SelectNode<T>(options));
+        return this.addEventToEventNode(new SelectNode<IN>(options));
     }
 
     /**
-     * Convert incoming events to new events with specified
+     * Convert incoming `Event`s to new `Event`s with specified
      * fields collapsed into a new field using an aggregation function.
      *
      * Example:
@@ -584,11 +367,12 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      * ```
      */
     collapse(options: CollapseOptions) {
-        return this.stream.addEventMappingNode(new CollapseNode<T>(options));
+        return this.addEventToEventNode(new CollapseNode<IN>(options));
     }
 
     /**
      * An output, specified as an `EventCallback`, essentially `(event: Event<Key>) => void`.
+     *
      * Using this method you are able to access the stream result. Your callback
      * function will be called whenever a new Event is available. Not that currently the
      * type will be Event<Key> as the event is generically passed through the stream, but
@@ -605,18 +389,18 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      *     });
      * ```
      */
-    output(callback: EventCallback) {
-        return this.stream.addEventMappingNode<T, T>(new EventOutputNode<T>(callback));
+    output(callback: EventCallback<IN>) {
+        return this.addEventToEventNode<IN>(new EventOutputNode<IN>(callback));
     }
 
     /**
      * The heart of the streaming code is that in addition to remapping operations of
      * a stream of events, you can also group by a window. This is what allows you to do
-     * rollups with the streaming code.
+     * rollups within the streaming code.
      *
      * A window is defined with the `WindowingOptions`, which allows you to specify
      * the window period as a `Period` (e.g. `period("30m")` for each 30 minutes window)
-     * as the `window` and a `Trigger` enum value (emit a completed window on each
+     * as the `window`, and a `Trigger` enum value (emit a completed window on each
      * incoming `Event` or on each completed window).
      *
      * The return type of this operation will no longer be an `EventStream` but rather
@@ -636,41 +420,63 @@ export class EventStream<T extends Key, U extends Key> extends StreamInterface<T
      *         trigger: Trigger.perEvent
      *     })
      *     .aggregate({...})
-     *     .output(event => {
+     *     .output(e => {
      *         ...
      *     });
      */
     groupByWindow(options: WindowingOptions) {
-        return this.stream.addEventToCollectorNode(new WindowOutputNode<T>(options));
+        return this.addEventToCollectorNode(new WindowOutputNode<IN>(options));
     }
 }
 
 /**
+ * A `KeyedCollectionStream` is a stream containing tuples mapping a string key
+ * to a `Collection`. When you window a stream you will get one of these that
+ * maps a string representing the window to the `Collection` of all `Event`s in
+ * that window.
  *
+ * Using this class you can `output()` that or `aggregate()` the `Collection`s
+ * back to `Event`s.
  */
 // tslint:disable-next-line:max-classes-per-file
-export class KeyedCollectionStream<T extends Key, U extends Key> extends StreamInterface<T, U> {
+export class KeyedCollectionStream<IN extends Key, S extends Key> extends StreamInterface<IN, S> {
     // tslint:disable-line:max-classes-per-file
-    constructor(stream: Stream<U>) {
-        super(stream);
+    constructor(stream: Stream<S>, tail: Node<Base, Base>) {
+        super(stream, tail);
     }
 
     /**
      * @private
-     * Add events into the stream
+     *
+     * A helper function to create a new `Node` in the graph. The new node will be a
+     * processor that remaps a stream of `KeyedCollection`s to another stream of
+     * `KeyedCollection`s.
      */
-    addEvent(e: Event<U>) {
-        this.stream.addEvent(e);
+    addKeyedCollectionToKeyedCollectionNode<OUT extends Key>(node: KeyedCollectionMap<IN, OUT>) {
+        this.addNode(node);
+        return new KeyedCollectionStream<OUT, S>(this.getStream(), node);
     }
 
     /**
-     * An output, specified as an `KeyedCollectionCallback`, essentially
-     * `(collection: Collection<T>,vkey: string) => void`.
+     * @private
+     *
+     * Helper function to create a new `Node` in the graph. The new node will be a
+     * processor that we remap a stream of `KeyedCollection`s back to `Event`s. An
+     * example would be an aggregation.
+     */
+    addKeyedCollectionToEventNode<OUT extends Key>(node: KeyedCollectionToEvent<IN, OUT>) {
+        this.addNode(node);
+        return new EventStream<OUT, S>(this.getStream(), node);
+    }
+
+    /**
+     * An output, specified as an `KeyedCollectionCallback`:
+     * `(collection: Collection<T>, key: string) => void`.
      *
      * Using this method you are able to access the stream result. Your callback
      * function will be called whenever a new `Collection` is available.
      *
-     * @example
+     * Example:
      * ```
      * const source = stream<Time>()
      *     .groupByWindow({...})
@@ -679,14 +485,14 @@ export class KeyedCollectionStream<T extends Key, U extends Key> extends StreamI
      *     });
      * ```
      */
-    output(callback: KeyedCollectionCallback<T>) {
-        return this.stream.addCollectorMappingNode<T, T>(
-            new KeyedCollectionOutputNode<T>(callback)
+    output(callback: KeyedCollectionCallback<IN>) {
+        return this.addKeyedCollectionToKeyedCollectionNode<IN>(
+            new KeyedCollectionOutputNode<IN>(callback)
         );
     }
 
     /**
-     * Takes an incoming tuple mapping a key (the window name) to a `Collection`
+     * Takes an incoming tuple mapping a key to a `Collection`
      * (containing all `Event`s in the window) and reduces that down
      * to an output `Event<Index>` using an aggregation specification. As
      * indicated, the output is an `IndexedEvent`, since the `Index` describes
@@ -717,8 +523,8 @@ export class KeyedCollectionStream<T extends Key, U extends Key> extends StreamI
      *     });
      * ```
      */
-    aggregate(spec: AggregationSpec<T>) {
-        return this.stream.addCollectionToEventNode<T, Index>(new AggregationNode<T>(spec));
+    aggregate(spec: AggregationSpec<IN>) {
+        return this.addKeyedCollectionToEventNode<Index>(new AggregationNode<IN>(spec));
     }
 }
 
@@ -754,12 +560,21 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  * incoming events to different streams should be handled by the user. Typically
  * you would separate streams based on some incoming criteria.
  *
- * A `Stream` object manages a chain of processing nodes, each type of which
- * provides an appropiate interface. When a `Stream` is initially created with
- * the `stream()` factory function the interface exposed is an `EventStream`.
- * If you perform a windowing operation you will be exposed to a
- * `KeyedCollectionStream`. If you aggregate a `KeyedCollectionStream` you
- * will be back to an `EventStream` and so on.
+ * A `Stream` object manages a tree of processing `Node`s, each type of which
+ * maps either `Event`s to other `Event`s or to and from a `KeyedCollection`.
+ * When an `Event` is added to the stream it will enter the top processing
+ * node where it will be processed to produce 0, 1 or many output `Event`s.
+ * Then then are passed down the tree until an output is reached.
+ *
+ * When a `Stream` is initially created with the `stream()` factory function
+ * the interface exposed is an `EventStream`. If you perform a windowing operation
+ * you will be exposed to a `KeyedCollectionStream`. If you aggregate a
+ * `KeyedCollectionStream` you will be back to an `EventStream` and so on.
+ *
+ * You can think of the `Stream` as the thing that holds the root of the processing
+ * node chain, while either an `EventStream` or `KeyedCollectionStream` holds the
+ * current leaf of the tree (the `tail`) onto which additional operating nodes
+ * can be added using the `EventStream` or `KeyedCollectionStream` API.
  *
  * ---
  * Note:
@@ -770,7 +585,7 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  *
  * For "at scale" stream processing, use Apache Beam or Spark. This library is intended to
  * simplify passing of events to a browser and enabling convenient processing for visualization
- * purposes, or for light weight handling of events in Node.
+ * purposes, or for light weight handling of events in Node.js such as simple event alerting.
  *
  * ---
  * Examples:
@@ -817,13 +632,13 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  *
  * stream(source)
  *     .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 })))
- *     .output(evt => {
+ *     .output(e => {
  *         //
  *     });
  *
  * stream(source)
  *     .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 })))
- *     .output(evt => {
+ *     .output(e => {
  *         //
  *     });
  *
@@ -840,7 +655,7 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  * ```typescript
  * const source = stream()
  *     .coalesce({ fields: ["in", "out"] })
- *     .output((e: Event) => results.push(e));
+ *     .output(e => results.push(e));
  *
  * // Stream events
  * for (let i = 0; i < 5; i++) {
@@ -866,7 +681,7 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  *             return event(time(current.timestamp()), Immutable.Map({ total }));
  *         }
  *     })
- *     .output((e: Event) => console.log("Running total:", e.toString()) );
+ *     .output(e => console.log("Running total:", e.toString()) );
  *
  * // Add Events into the source...
  * events.forEach(e => source.addEvent(e));
@@ -885,7 +700,7 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  *             );
  *          }
  *     })
- *     .output((e: Event) => console.log("Rolling average:", e.toString()) );
+ *     .output(e => console.log("Rolling average:", e.toString()) );
  *
  * // Add Events into the source...
  * events.forEach(e => source.addEvent(e));
@@ -893,71 +708,51 @@ export type EventMap<S extends Key, T extends Key> = Node<Event<S>, Event<T>>;
  */
 // tslint:disable-next-line:max-classes-per-file
 export class Stream<U extends Key = Time> {
-    private head: Node<Base, Base>;
-    private tail: Node<Base, Base>;
+    /**
+     * The root of the entire event processing tree. All incoming `Event`s are
+     * provided to this `Node`.
+     */
+    private root: Node<Base, Base>;
 
     constructor(upstream?: Stream<U>) {
-        this.head = this.tail = upstream ? upstream.tail : null;
+        this.root = null;
     }
 
     /**
      * @private
+     * Set a new new root onto the `Stream`. This is used internally.
      */
-    addEventMappingNode<S extends Key, T extends Key>(node: EventMap<S, T>) {
-        this.addNode(node);
-        return new EventStream<T, U>(this);
+    setRoot(node: Node<Base, Base>) {
+        this.root = node;
     }
 
     /**
      * @private
+     * Returns the `root` node of the entire processing tree. This is used internally.
      */
-    addEventToCollectorNode<S extends Key, T extends Key>(node: EventToKeyedCollection<S, T>) {
-        this.addNode(node);
-        return new KeyedCollectionStream<T, U>(this);
+    getRoot(): Node<Base, Base> {
+        return this.root;
     }
 
     /**
-     * @private
-     */
-    addCollectorMappingNode<S extends Key, T extends Key>(node: KeyedCollectionMap<S, T>) {
-        this.addNode(node);
-        return new KeyedCollectionStream<T, U>(this);
-    }
-
-    /**
-     * @private
-     */
-    addCollectionToEventNode<S extends Key, T extends Key>(node: KeyedCollectionToEvent<S, T>) {
-        this.addNode(node);
-        return new EventStream<T, U>(this);
-    }
-
-    /**
-     * Add an `Event` into the stream
+     * Add an `Event` into the root node of the stream
      */
     addEvent<T extends Key>(e: Event<U>) {
-        if (this.head) {
-            this.head.set(e);
+        if (this.root) {
+            this.root.set(e);
         }
-    }
-
-    /**
-     * @private
-     */
-    protected addNode(node) {
-        if (!this.head) {
-            this.head = node;
-        }
-        if (this.tail) {
-            this.tail.addObserver(node);
-        }
-        this.tail = node;
     }
 }
 
-function streamFactory<T extends Key>(upstream?: StreamInterface<T, T>): EventStream<T, T> {
-    const s = upstream ? new Stream<T>(upstream.getStream()) : new Stream<T>();
-    return s.addEventMappingNode(new EventInputNode<T>());
+/*
+ * `Stream` and its associated objects are designed for processing of incoming
+ * `Event` streams at real time. This is useful for live dashboard situations or
+ * possibly real time monitoring and alerting from event streams.
+ */
+function eventStreamFactory<T extends Key>(): EventStream<T, T> {
+    const s = new Stream<T>();
+    const n = new EventInputNode<T>();
+    return new EventStream<T, T>(s, n);
 }
 
-export { streamFactory as stream };
+export { eventStreamFactory as stream };

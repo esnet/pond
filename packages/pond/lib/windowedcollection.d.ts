@@ -5,8 +5,10 @@ import { GroupedCollection, GroupingFunction } from "./groupedcollection";
 import { Index } from "./index";
 import { Key } from "./key";
 import { SortedCollection } from "./sortedcollection";
-import { KeyedCollection } from "./stream";
-import { AggregationSpec, WindowingOptions } from "./types";
+import { AggregationSpec, KeyedCollection, WindowingOptions } from "./types";
+/**
+ * A map of `SortedCollection`s indexed by a string key representing a window.
+ */
 export declare class WindowedCollection<T extends Key> extends Base {
     protected collections: Immutable.Map<string, SortedCollection<T>>;
     protected options: WindowingOptions;
@@ -37,7 +39,7 @@ export declare class WindowedCollection<T extends Key> extends Base {
     constructor(windowing: WindowingOptions, collection?: SortedCollection<T>);
     constructor(windowing: WindowingOptions, group: string | string[], collection?: SortedCollection<T>);
     /**
-     * Fetch the SortedCollection of events contained in the windowed grouping
+     * Fetch the `SortedCollection` of `Event`s contained in the windowed grouping
      */
     get(key: string): SortedCollection<T>;
     /**

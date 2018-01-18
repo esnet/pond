@@ -274,6 +274,24 @@ export type ListReducer<T extends Key> = (
     events: Immutable.List<Event<T>>
 ) => Event<T>;
 
+/**
+ * A callback function which is passed an `Event`
+ */
+export type EventCallback<T extends Key> = (event: Event<T>) => void;
+
+/**
+ * A callback function which is passed a `Collection` and associated `key`
+ */
+export type KeyedCollectionCallback<T extends Key> = (
+    collection: Collection<T>,
+    key: string
+) => void;
+
+/**
+ * A tuple of string key and associated `Collection`
+ */
+export type KeyedCollection<T extends Key> = [string, Collection<T>];
+
 //
 // Aggregation specification
 //
