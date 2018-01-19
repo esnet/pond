@@ -83,8 +83,16 @@ import {
  */
 export class StreamInterface<IN extends Key, S extends Key> {
     // tslint:disable-line:max-classes-per-file
+    protected stream: Stream<S>;
+    protected tail: Node<Base, Base>;
 
-    constructor(protected stream: Stream<S>, protected tail: Node<Base, Base>) {}
+    constructor(stream: Stream<S>, node: Node<Base, Base>) {
+        this.stream = stream;
+        this.tail = node;
+        if (!this.stream.getRoot()) {
+            this.stream.setRoot(node);
+        }
+    }
 
     /**
      * Returns the underlying `Stream` object, which primarily contains the

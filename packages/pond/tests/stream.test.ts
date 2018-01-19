@@ -415,6 +415,37 @@ describe("Streaming", () => {
         expect(results[10].get("avg")).toBe(322);
     });
 
+    it("can do a split from the root", () => {
+        const eventsIn = [
+            event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
+            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 }))
+        ];
+
+        const result1: Event[] = [];
+        const result2: Event[] = [];
+
+        const source = stream<Time>();
+
+        const branch1 = source
+            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 }))) // 2, 4, 6
+            .output(e => result1.push(e));
+
+        const branch2 = source
+            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 3, 6, 9
+            .output(e => result2.push(e));
+
+        eventsIn.forEach(e => source.addEvent(e));
+
+        expect(result1[0].get("a")).toBe(2);
+        expect(result1[1].get("a")).toBe(4);
+        expect(result1[2].get("a")).toBe(6);
+
+        expect(result2[0].get("a")).toBe(3);
+        expect(result2[1].get("a")).toBe(6);
+        expect(result2[2].get("a")).toBe(9);
+    });
+
     it("can do a split of two streams", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
