@@ -30,7 +30,7 @@ import { AggregationSpec, AlignmentOptions, CoalesceOptions, CollapseOptions, Ev
 export declare class StreamInterface<IN extends Key, S extends Key> {
     protected stream: Stream<S>;
     protected tail: Node<Base, Base>;
-    constructor(stream: Stream<S>, tail: Node<Base, Base>);
+    constructor(stream: Stream<S>, node: Node<Base, Base>);
     /**
      * Returns the underlying `Stream` object, which primarily contains the
      * `root` of the processing graph.

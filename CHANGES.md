@@ -2,6 +2,16 @@
 
 ---
 
+## 1.0.0 alpha.3
+> January 2018
+
+ * Ability to branch `Stream`s. For an example see [#103](https://github.com/esnet/pond/pull/98)
+
+## 1.0.0 alpha.2
+> December 2017
+
+ * Restore ability to construct a TimeRange with an array. [#98](https://github.com/esnet/pond/pull/98)
+
 ## 1.0.0 alpha.1
 > December 2017
 
