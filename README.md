@@ -80,7 +80,7 @@ The current version of the Typescript rewrite of Pond is pre-release 1.0 alpha, 
 install it explicitly:
 
 ```
-npm install pondjs@1.0.0-alpha.0
+npm install pondjs@1.0.0-alpha.4
 ```
 
 The older Javascript version (v0.8.x), which is the only one currently compatible with the companion
