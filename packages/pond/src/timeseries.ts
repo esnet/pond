@@ -1038,7 +1038,7 @@ export class TimeSeries<T extends Key> {
      * ```
      * Options:
      *  * `fieldSpec` - the field to fill
-     *  * `method` - the interpolation method, one of `FillMethod.Hold`, `FillMethod.Pad`
+     *  * `method` - the interpolation method, one of `FillMethod.Zero`, `FillMethod.Pad`
      *               or `FillMethod.Linear`
      *  * `limit` - the number of missing values to fill before giving up
      *

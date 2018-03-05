@@ -75,7 +75,7 @@ export enum AlignmentMethod {
 
 /**
  * Method of filling used by the `fill()` function:
- *  * `Hold` - Fill with the previous value
+ *  * `Pad` - Fill with the previous value
  *  * `Linear` - Fill between the last value and the next value linearly
  *  * `Zero` - Fill with 0
  */
