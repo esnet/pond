@@ -1115,7 +1115,7 @@ class TimeSeries {
             );
         }
 
-        return this.fixedWindowRollup("1h", aggregation, toTimeEvents);
+        return this._rollup("1h", aggregation, toTimeEvents);
     }
 
     /**
