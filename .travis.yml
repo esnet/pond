@@ -1,7 +1,7 @@
 sudo: false
 language: node_js
 node_js:
-    - "5.6.0"
+    - "6.10.3"
 notifications:
   email: false
 before_install:
