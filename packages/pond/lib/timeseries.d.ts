@@ -679,7 +679,7 @@ export declare class TimeSeries<T extends Key> {
      * ```
      * Options:
      *  * `fieldSpec` - the field to fill
-     *  * `method` - the interpolation method, one of `FillMethod.Hold`, `FillMethod.Pad`
+     *  * `method` - the interpolation method, one of `FillMethod.Zero`, `FillMethod.Pad`
      *               or `FillMethod.Linear`
      *  * `limit` - the number of missing values to fill before giving up
      *
@@ -760,7 +760,7 @@ export declare class TimeSeries<T extends Key> {
      *     const timeseries = new TimeSeries(data);
      *     const dailyAvg = timeseries.fixedWindowRollup({
      *         windowSize: "1d",
-     *         aggregation: {value: {value: avg()}}
+     *         aggregation: {value:["value", avg()]}
      *     });
      * ```
      *
@@ -779,7 +779,7 @@ export declare class TimeSeries<T extends Key> {
      * applied. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
@@ -791,7 +791,7 @@ export declare class TimeSeries<T extends Key> {
      * applied. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
@@ -803,7 +803,7 @@ export declare class TimeSeries<T extends Key> {
      * applied. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
@@ -815,7 +815,7 @@ export declare class TimeSeries<T extends Key> {
      * fieldNames to aggregation functions and their fieldPath. For example:
      *
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
