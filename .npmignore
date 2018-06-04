@@ -3,6 +3,7 @@ test
 docs
 website
 scripts
+node_modules/
 *-bundle.js
 *.config.js
 *.html
