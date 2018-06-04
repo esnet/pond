@@ -12,7 +12,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/align.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/align.ts",
 			"children": [
 				{
 					"id": 1568,
@@ -670,7 +670,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/base.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/base.ts",
 			"children": [
 				{
 					"id": 1419,
@@ -734,7 +734,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/collapse.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/collapse.ts",
 			"children": [
 				{
 					"id": 140,
@@ -996,7 +996,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/collection.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/collection.ts",
 			"children": [
 				{
 					"id": 269,
@@ -5222,7 +5222,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/duration.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/duration.ts",
 			"children": [
 				{
 					"id": 16,
@@ -6013,7 +6013,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/event.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/event.ts",
 			"children": [
 				{
 					"id": 1421,
@@ -8869,7 +8869,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/exports.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/exports.ts",
 			"sources": [
 				{
 					"fileName": "exports.ts",
@@ -8886,7 +8886,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/fill.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/fill.ts",
 			"children": [
 				{
 					"id": 150,
@@ -9591,7 +9591,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/functions.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/functions.ts",
 			"children": [
 				{
 					"id": 203,
@@ -10771,7 +10771,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/groupedcollection.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/groupedcollection.ts",
 			"children": [
 				{
 					"id": 1381,
@@ -11743,7 +11743,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/index.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/index.ts",
 			"children": [
 				{
 					"id": 1345,
@@ -12391,7 +12391,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/key.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/key.ts",
 			"children": [
 				{
 					"id": 2,
@@ -12651,7 +12651,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/node.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/node.ts",
 			"children": [
 				{
 					"id": 1908,
@@ -21019,7 +21019,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/period.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/period.ts",
 			"children": [
 				{
 					"id": 1224,
@@ -21618,7 +21618,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/processor.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/processor.ts",
 			"children": [
 				{
 					"id": 55,
@@ -21820,7 +21820,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/rate.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/rate.ts",
 			"children": [
 				{
 					"id": 178,
@@ -22189,7 +22189,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/reduce.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/reduce.ts",
 			"children": [
 				{
 					"id": 1596,
@@ -22572,7 +22572,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/select.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/select.ts",
 			"children": [
 				{
 					"id": 193,
@@ -22834,7 +22834,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/sortedcollection.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/sortedcollection.ts",
 			"children": [
 				{
 					"id": 549,
@@ -27978,7 +27978,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/stream.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/stream.ts",
 			"children": [
 				{
 					"id": 1945,
@@ -28091,21 +28091,21 @@
 									"overwrites": {
 										"type": "reference",
 										"name": "StreamInterface.__constructor",
-										"id": 1931
+										"id": 1933
 									}
 								}
 							],
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 134,
+									"line": 142,
 									"character": 88
 								}
 							],
 							"overwrites": {
 								"type": "reference",
 								"name": "StreamInterface.__constructor",
-								"id": 1931
+								"id": 1933
 							}
 						},
 						{
@@ -28114,15 +28114,14 @@
 							"kind": 1024,
 							"kindString": "Property",
 							"flags": {
-								"isConstructorProperty": true,
 								"isExported": true,
 								"isProtected": true
 							},
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 87,
-									"character": 32
+									"line": 86,
+									"character": 20
 								}
 							],
 							"type": {
@@ -28144,7 +28143,7 @@
 							"inheritedFrom": {
 								"type": "reference",
 								"name": "StreamInterface.stream",
-								"id": 1932
+								"id": 1931
 							}
 						},
 						{
@@ -28153,7 +28152,6 @@
 							"kind": 1024,
 							"kindString": "Property",
 							"flags": {
-								"isConstructorProperty": true,
 								"isExported": true,
 								"isProtected": true
 							},
@@ -28161,7 +28159,7 @@
 								{
 									"fileName": "stream.ts",
 									"line": 87,
-									"character": 59
+									"character": 18
 								}
 							],
 							"type": {
@@ -28184,7 +28182,7 @@
 							"inheritedFrom": {
 								"type": "reference",
 								"name": "StreamInterface.tail",
-								"id": 1933
+								"id": 1932
 							}
 						},
 						{
@@ -28244,7 +28242,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 100,
+									"line": 108,
 									"character": 12
 								}
 							],
@@ -28341,7 +28339,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 165,
+									"line": 173,
 									"character": 27
 								}
 							]
@@ -28433,7 +28431,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 150,
+									"line": 158,
 									"character": 23
 								}
 							]
@@ -28484,7 +28482,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 107,
+									"line": 115,
 									"character": 11
 								}
 							],
@@ -28547,7 +28545,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 302,
+									"line": 310,
 									"character": 9
 								}
 							]
@@ -28605,7 +28603,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 233,
+									"line": 241,
 									"character": 12
 								}
 							]
@@ -28663,7 +28661,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 369,
+									"line": 377,
 									"character": 12
 								}
 							]
@@ -28721,7 +28719,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 281,
+									"line": 289,
 									"character": 8
 								}
 							]
@@ -28815,7 +28813,7 @@
 													"sources": [
 														{
 															"fileName": "stream.ts",
-															"line": 210,
+															"line": 218,
 															"character": 36
 														}
 													]
@@ -28843,7 +28841,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 210,
+									"line": 218,
 									"character": 10
 								}
 							]
@@ -28954,7 +28952,7 @@
 													"sources": [
 														{
 															"fileName": "stream.ts",
-															"line": 184,
+															"line": 192,
 															"character": 36
 														}
 													]
@@ -28982,7 +28980,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 184,
+									"line": 192,
 									"character": 11
 								}
 							]
@@ -29026,7 +29024,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 93,
+									"line": 101,
 									"character": 13
 								}
 							],
@@ -29089,7 +29087,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 427,
+									"line": 435,
 									"character": 17
 								}
 							]
@@ -29194,7 +29192,7 @@
 													"sources": [
 														{
 															"fileName": "stream.ts",
-															"line": 177,
+															"line": 185,
 															"character": 32
 														}
 													]
@@ -29222,7 +29220,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 177,
+									"line": 185,
 									"character": 7
 								}
 							]
@@ -29291,7 +29289,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 392,
+									"line": 400,
 									"character": 10
 								}
 							]
@@ -29350,7 +29348,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 328,
+									"line": 336,
 									"character": 8
 								}
 							]
@@ -29418,7 +29416,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 191,
+									"line": 199,
 									"character": 10
 								}
 							]
@@ -29476,7 +29474,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 346,
+									"line": 354,
 									"character": 10
 								}
 							]
@@ -29525,7 +29523,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 134,
+							"line": 142,
 							"character": 24
 						}
 					],
@@ -29668,21 +29666,21 @@
 									"overwrites": {
 										"type": "reference",
 										"name": "StreamInterface.__constructor",
-										"id": 1931
+										"id": 1933
 									}
 								}
 							],
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 442,
+									"line": 450,
 									"character": 98
 								}
 							],
 							"overwrites": {
 								"type": "reference",
 								"name": "StreamInterface.__constructor",
-								"id": 1931
+								"id": 1933
 							}
 						},
 						{
@@ -29691,15 +29689,14 @@
 							"kind": 1024,
 							"kindString": "Property",
 							"flags": {
-								"isConstructorProperty": true,
 								"isExported": true,
 								"isProtected": true
 							},
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 87,
-									"character": 32
+									"line": 86,
+									"character": 20
 								}
 							],
 							"type": {
@@ -29721,7 +29718,7 @@
 							"inheritedFrom": {
 								"type": "reference",
 								"name": "StreamInterface.stream",
-								"id": 1932
+								"id": 1931
 							}
 						},
 						{
@@ -29730,7 +29727,6 @@
 							"kind": 1024,
 							"kindString": "Property",
 							"flags": {
-								"isConstructorProperty": true,
 								"isExported": true,
 								"isProtected": true
 							},
@@ -29738,7 +29734,7 @@
 								{
 									"fileName": "stream.ts",
 									"line": 87,
-									"character": 59
+									"character": 18
 								}
 							],
 							"type": {
@@ -29761,7 +29757,7 @@
 							"inheritedFrom": {
 								"type": "reference",
 								"name": "StreamInterface.tail",
-								"id": 1933
+								"id": 1932
 							}
 						},
 						{
@@ -29821,7 +29817,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 100,
+									"line": 108,
 									"character": 12
 								}
 							],
@@ -29918,7 +29914,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 467,
+									"line": 475,
 									"character": 33
 								}
 							]
@@ -30010,7 +30006,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 455,
+									"line": 463,
 									"character": 43
 								}
 							]
@@ -30061,7 +30057,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 107,
+									"line": 115,
 									"character": 11
 								}
 							],
@@ -30142,7 +30138,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 526,
+									"line": 534,
 									"character": 13
 								}
 							]
@@ -30186,7 +30182,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 93,
+									"line": 101,
 									"character": 13
 								}
 							],
@@ -30260,7 +30256,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 488,
+									"line": 496,
 									"character": 10
 								}
 							]
@@ -30299,7 +30295,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 442,
+							"line": 450,
 							"character": 34
 						}
 					],
@@ -30410,7 +30406,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 715,
+									"line": 723,
 									"character": 35
 								}
 							]
@@ -30430,7 +30426,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 715,
+									"line": 723,
 									"character": 16
 								}
 							],
@@ -30518,7 +30514,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 740,
+									"line": 748,
 									"character": 12
 								}
 							]
@@ -30564,7 +30560,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 733,
+									"line": 741,
 									"character": 11
 								}
 							]
@@ -30623,7 +30619,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 725,
+									"line": 733,
 									"character": 11
 								}
 							]
@@ -30657,7 +30653,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 710,
+							"line": 718,
 							"character": 19
 						}
 					]
@@ -30700,7 +30696,7 @@
 					],
 					"children": [
 						{
-							"id": 1931,
+							"id": 1933,
 							"name": "constructor",
 							"kind": 512,
 							"kindString": "Constructor",
@@ -30740,7 +30736,7 @@
 										},
 										{
 											"id": 1936,
-											"name": "tail",
+											"name": "node",
 											"kind": 32768,
 											"kindString": "Parameter",
 											"flags": {},
@@ -30773,26 +30769,25 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 84,
-									"character": 61
+									"line": 87,
+									"character": 37
 								}
 							]
 						},
 						{
-							"id": 1932,
+							"id": 1931,
 							"name": "stream",
 							"kind": 1024,
 							"kindString": "Property",
 							"flags": {
-								"isConstructorProperty": true,
 								"isExported": true,
 								"isProtected": true
 							},
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 87,
-									"character": 32
+									"line": 86,
+									"character": 20
 								}
 							],
 							"type": {
@@ -30813,12 +30808,11 @@
 							}
 						},
 						{
-							"id": 1933,
+							"id": 1932,
 							"name": "tail",
 							"kind": 1024,
 							"kindString": "Property",
 							"flags": {
-								"isConstructorProperty": true,
 								"isExported": true,
 								"isProtected": true
 							},
@@ -30826,7 +30820,7 @@
 								{
 									"fileName": "stream.ts",
 									"line": 87,
-									"character": 59
+									"character": 18
 								}
 							],
 							"type": {
@@ -30899,7 +30893,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 100,
+									"line": 108,
 									"character": 12
 								}
 							]
@@ -30945,7 +30939,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 107,
+									"line": 115,
 									"character": 11
 								}
 							]
@@ -30984,7 +30978,7 @@
 							"sources": [
 								{
 									"fileName": "stream.ts",
-									"line": 93,
+									"line": 101,
 									"character": 13
 								}
 							]
@@ -30995,15 +30989,15 @@
 							"title": "Constructors",
 							"kind": 512,
 							"children": [
-								1931
+								1933
 							]
 						},
 						{
 							"title": "Properties",
 							"kind": 1024,
 							"children": [
-								1932,
-								1933
+								1931,
+								1932
 							]
 						},
 						{
@@ -31047,7 +31041,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 547,
+							"line": 555,
 							"character": 20
 						}
 					],
@@ -31092,7 +31086,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 535,
+							"line": 543,
 							"character": 34
 						}
 					],
@@ -31137,7 +31131,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 543,
+							"line": 551,
 							"character": 30
 						}
 					],
@@ -31182,7 +31176,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 539,
+							"line": 547,
 							"character": 34
 						}
 					],
@@ -31273,7 +31267,7 @@
 					"sources": [
 						{
 							"fileName": "stream.ts",
-							"line": 752,
+							"line": 760,
 							"character": 27
 						}
 					]
@@ -31324,7 +31318,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/time.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/time.ts",
 			"children": [
 				{
 					"id": 1188,
@@ -32027,7 +32021,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/timerange.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/timerange.ts",
 			"children": [
 				{
 					"id": 1257,
@@ -33606,7 +33600,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/timeseries.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/timeseries.ts",
 			"children": [
 				{
 					"id": 868,
@@ -34631,7 +34625,7 @@
 									"flags": {},
 									"comment": {
 										"shortText": "Builds a new `TimeSeries` by dividing events into days.",
-										"text": "Each window then has an aggregation specification `aggregation`\napplied. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{in_avg: {in: avg()}, out_avg: {out: avg()}}\n```\n\n"
+										"text": "Each window then has an aggregation specification `aggregation`\napplied. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{in_avg: [\"in\", avg()], out_avg: [\"out\", avg()]}\n```\n\n"
 									},
 									"parameters": [
 										{
@@ -34779,7 +34773,7 @@
 									"flags": {},
 									"comment": {
 										"shortText": "Take the data in this `TimeSeries` and \"fill\" any missing or invalid\nvalues. This could be setting `null` values to zero so mathematical\noperations will succeed, interpolate a new value, or pad with the\npreviously given value.",
-										"text": "The fill is controlled by the `FillOptions`. This is an object of the form:\n```\n{\n    fieldSpec: string | string[];\n    method?: FillMethod;\n    limit?: number;\n}\n```\nOptions:\n * `fieldSpec` - the field to fill\n * `method` - the interpolation method, one of `FillMethod.Hold`, `FillMethod.Pad`\n              or `FillMethod.Linear`\n * `limit` - the number of missing values to fill before giving up\n\nExample:\n```\nconst filled = timeseries.fill({\n    fieldSpec: [\"direction.in\", \"direction.out\"],\n    method: \"zero\",\n    limit: 3\n});\n```\n"
+										"text": "The fill is controlled by the `FillOptions`. This is an object of the form:\n```\n{\n    fieldSpec: string | string[];\n    method?: FillMethod;\n    limit?: number;\n}\n```\nOptions:\n * `fieldSpec` - the field to fill\n * `method` - the interpolation method, one of `FillMethod.Zero`, `FillMethod.Pad`\n              or `FillMethod.Linear`\n * `limit` - the number of missing values to fill before giving up\n\nExample:\n```\nconst filled = timeseries.fill({\n    fieldSpec: [\"direction.in\", \"direction.out\"],\n    method: \"zero\",\n    limit: 3\n});\n```\n"
 									},
 									"parameters": [
 										{
@@ -34949,7 +34943,7 @@
 									"flags": {},
 									"comment": {
 										"shortText": "Builds a new `TimeSeries` by dividing events within the `TimeSeries`\nacross multiple fixed windows of size `windowSize`.",
-										"text": "Note that these are windows defined relative to Jan 1st, 1970,\nand are UTC, so this is best suited to smaller window sizes\n(hourly, 5m, 30s, 1s etc), or in situations where you don't care\nabout the specific window, just that the data is smaller.\n\nEach window then has an aggregation specification applied as\n`aggregation`. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{ in_avg: { in: avg() }, out_avg: { out: avg() } }\n```\nwill aggregate both \"in\" and \"out\" using the average aggregation\nfunction and return the result as in_avg and out_avg.\n\nNote that each aggregation function, such as `avg()` also can take a\nfilter function to apply before the aggregation. A set of filter functions\nexists to do common data cleanup such as removing bad values. For example:\n```\n{ value_avg: { value: avg(filter.ignoreMissing) } }\n```\n\nExample:\n```\n    const timeseries = new TimeSeries(data);\n    const dailyAvg = timeseries.fixedWindowRollup({\n        windowSize: \"1d\",\n        aggregation: {value: {value: avg()}}\n    });\n```\n\nNote that to output the result as `TimeEvent`'s instead of `IndexedEvent`'s,\nyou can do the following :\n```\ntimeseries.fixedWindowRollup(options).mapKeys(index => time(index.asTimerange().mid()))\n```\n\n"
+										"text": "Note that these are windows defined relative to Jan 1st, 1970,\nand are UTC, so this is best suited to smaller window sizes\n(hourly, 5m, 30s, 1s etc), or in situations where you don't care\nabout the specific window, just that the data is smaller.\n\nEach window then has an aggregation specification applied as\n`aggregation`. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{ in_avg: { in: avg() }, out_avg: { out: avg() } }\n```\nwill aggregate both \"in\" and \"out\" using the average aggregation\nfunction and return the result as in_avg and out_avg.\n\nNote that each aggregation function, such as `avg()` also can take a\nfilter function to apply before the aggregation. A set of filter functions\nexists to do common data cleanup such as removing bad values. For example:\n```\n{ value_avg: { value: avg(filter.ignoreMissing) } }\n```\n\nExample:\n```\n    const timeseries = new TimeSeries(data);\n    const dailyAvg = timeseries.fixedWindowRollup({\n        windowSize: \"1d\",\n        aggregation: {value:[\"value\", avg()]}\n    });\n```\n\nNote that to output the result as `TimeEvent`'s instead of `IndexedEvent`'s,\nyou can do the following :\n```\ntimeseries.fixedWindowRollup(options).mapKeys(index => time(index.asTimerange().mid()))\n```\n\n"
 									},
 									"parameters": [
 										{
@@ -35297,7 +35291,7 @@
 									"flags": {},
 									"comment": {
 										"shortText": "Builds a new `TimeSeries` by dividing events into hours.",
-										"text": "Each window then has an aggregation specification `aggregation`\napplied. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{in_avg: {in: avg()}, out_avg: {out: avg()}}\n```\n\n"
+										"text": "Each window then has an aggregation specification `aggregation`\napplied. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{in_avg: [\"in\", avg()], out_avg: [\"out\", avg()]}\n```\n\n"
 									},
 									"parameters": [
 										{
@@ -37962,7 +37956,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/types.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/types.ts",
 			"children": [
 				{
 					"id": 1093,
@@ -38037,7 +38031,7 @@
 						"isExported": true
 					},
 					"comment": {
-						"shortText": "Method of filling used by the `fill()` function:\n * `Hold` - Fill with the previous value\n * `Linear` - Fill between the last value and the next value linearly\n * `Zero` - Fill with 0"
+						"shortText": "Method of filling used by the `fill()` function:\n * `Pad` - Fill with the previous value\n * `Linear` - Fill between the last value and the next value linearly\n * `Zero` - Fill with 0"
 					},
 					"children": [
 						{
@@ -40419,7 +40413,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/util.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/util.ts",
 			"children": [
 				{
 					"id": 63,
@@ -41893,7 +41887,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/window.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/window.ts",
 			"children": [
 				{
 					"id": 796,
@@ -42920,7 +42914,7 @@
 			"flags": {
 				"isExported": true
 			},
-			"originalName": "/Users/pmurphy/code/pond/packages/pond/src/windowedcollection.ts",
+			"originalName": "/Users/ssbaveja/Desktop/Projects/pond/packages/pond/src/windowedcollection.ts",
 			"children": [
 				{
 					"id": 496,

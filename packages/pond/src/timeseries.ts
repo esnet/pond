@@ -1154,7 +1154,7 @@ export class TimeSeries<T extends Key> {
      *     const timeseries = new TimeSeries(data);
      *     const dailyAvg = timeseries.fixedWindowRollup({
      *         windowSize: "1d",
-     *         aggregation: {value: {value: avg()}}
+     *         aggregation: {value:["value", avg()]}
      *     });
      * ```
      *
@@ -1193,7 +1193,7 @@ export class TimeSeries<T extends Key> {
      * applied. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
@@ -1219,7 +1219,7 @@ export class TimeSeries<T extends Key> {
      * applied. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
@@ -1240,7 +1240,7 @@ export class TimeSeries<T extends Key> {
      * applied. This specification describes a mapping of output
      * fieldNames to aggregation functions and their fieldPath. For example:
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
@@ -1266,7 +1266,7 @@ export class TimeSeries<T extends Key> {
      * fieldNames to aggregation functions and their fieldPath. For example:
      *
      * ```
-     * {in_avg: {in: avg()}, out_avg: {out: avg()}}
+     * {in_avg: ["in", avg()], out_avg: ["out", avg()]}
      * ```
      *
      */
