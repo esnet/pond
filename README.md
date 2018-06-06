@@ -1,6 +1,8 @@
 
 # Pond.js
 
+[![Build Status](https://travis-ci.org/esnet/pond.svg)](https://travis-ci.org/esnet/pond) [![npm version](https://badge.fury.io/js/pondjs.svg)](https://badge.fury.io/js/pondjs)
+
 **Version 1.0 (alpha)** of Pond.js is written in Typescript and has a brand new fully typed API**
 
 **Version 0.8.x** of Pond.js is the current version and the last version with the old API.
