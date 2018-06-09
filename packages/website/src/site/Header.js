@@ -27,7 +27,7 @@ export default class Header extends Component {
                     <div className="navbar-header">
                         <div className="navbar-brand">
                             <span>
-                                <a href="/">
+                                <a href="http://software.es.net/pond/">
                                     <img
                                         style={{ marginTop: -4 }}
                                         src={logo}
