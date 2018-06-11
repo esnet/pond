@@ -55,9 +55,9 @@ The old pre-1.0 version (v8.8.x) is available as the default version:
 Within a browser it is highly recommended that you use a module bundler such as webpack:
 
 ```
-import { timeSeries } from "pondjs";
+import { TimeSeries } from "pondjs";
 
-const series = timeSeries({
+const series = new TimeSeries({
     name: "sensor_data",
     columns: ["time", "sensor", "status"],
     points: [
@@ -75,7 +75,7 @@ series.avg("sensor");   // 4
 In Node.js you should be able to just require Pond:
 
 ```
-const { timeSeries } = require("pondjs");
+const { TimeSeries } = require("pondjs");
 ...
 ```
 
