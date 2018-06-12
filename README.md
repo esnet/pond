@@ -128,7 +128,7 @@ it is also a guide for Javascript users as it will tell you the expected types, 
 consistency in generics. See these [How to read these docs](https://facebook.github.io/immutable-js/docs/#/)
 for a quick guide to reading Typescript definitions.
 
-v0.8.8 of Pond ships with basic Typescript declarations that were contributed to the project.
+v0.8.9 of Pond ships with basic Typescript declarations that were contributed to the project.
 
 # Contributing
 
