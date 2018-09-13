@@ -16,7 +16,7 @@ import { Event } from "./event";
 import { Key } from "./key";
 import { Period } from "./period";
 import { TimeSeries } from "./timeseries";
-import { Window, WindowBase } from "./window";
+import { WindowBase } from "./window";
 
 //
 // General types
@@ -215,8 +215,7 @@ export interface SelectOptions {
  */
 export interface RenameColumnOptions {
     renameMap: {
-        key: string;
-        value: string;
+        [key: string]: string;
     };
 }
 

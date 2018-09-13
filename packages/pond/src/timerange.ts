@@ -14,7 +14,6 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 
 import { Key } from "./key";
-import { Period } from "./period";
 import { Time } from "./time";
 
 /**

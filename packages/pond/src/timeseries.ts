@@ -1102,11 +1102,15 @@ export class TimeSeries<T extends Key> {
      *
      * Example:
      * ```
-     * const aligned = ts.align({
-     *     fieldSpec: "value",
-     *     period: "1m",
-     *     method: "linear"
-     * });
+     *  const alignOptions: AlignmentOptions = {
+     *       fieldSpec: ["value"],
+     *       period: period(duration("30s")),
+     *       method: AlignmentMethod.Linear,
+     *       limit: 3
+     *   };
+     *
+     *   const aligned = series.align(alignOptions);
+     *
      * ```
      */
     align(options: AlignmentOptions) {
@@ -1364,10 +1368,10 @@ export class TimeSeries<T extends Key> {
      * });
      * ```
      */
-    static timeSeriesListReduce(options: TimeSeriesOptions) {
+    static timeSeriesListReduce<T extends Key>(options: TimeSeriesOptions): TimeSeries<T> {
         const { seriesList, fieldSpec, reducer, ...data } = options;
         const combiner = Event.combiner(fieldSpec, reducer);
-        return TimeSeries.timeSeriesListEventReduce({
+        return TimeSeries.timeSeriesListEventReduce<T>({
             seriesList,
             fieldSpec,
             reducer: combiner,
@@ -1397,10 +1401,10 @@ export class TimeSeries<T extends Key> {
      * });
      * ```
      */
-    static timeSeriesListMerge(options: TimeSeriesOptions) {
+    static timeSeriesListMerge<T extends Key>(options: TimeSeriesOptions): TimeSeries<T> {
         const { seriesList, fieldSpec, reducer, deep = false, ...data } = options;
         const merger = Event.merger(deep);
-        return TimeSeries.timeSeriesListEventReduce({
+        return TimeSeries.timeSeriesListEventReduce<T>({
             seriesList,
             fieldSpec,
             reducer: merger,
@@ -1411,7 +1415,9 @@ export class TimeSeries<T extends Key> {
     /**
      * @private
      */
-    static timeSeriesListEventReduce(options: TimeSeriesListReducerOptions) {
+    static timeSeriesListEventReduce<T extends Key>(
+        options: TimeSeriesListReducerOptions
+    ): TimeSeries<T> {
         const { seriesList, fieldSpec, reducer, ...data } = options;
         if (!seriesList || !_.isArray(seriesList)) {
             throw new Error("A list of TimeSeries must be supplied to reduce");
@@ -1437,7 +1443,7 @@ export class TimeSeries<T extends Key> {
         // on the start times of the series, along with it the series
         // have missing data, so I think we don't have a choice here.
         const collection = new SortedCollection(events);
-        const timeseries = new TimeSeries({ ...data, collection });
+        const timeseries = new TimeSeries<T>({ ...data, collection });
 
         return timeseries;
     }

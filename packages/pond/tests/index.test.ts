@@ -8,13 +8,10 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-declare const describe: any;
 declare const it: any;
 declare const expect: any;
 
-import { Index, index } from "../src/index";
-import { time } from "../src/time";
-import { daily } from "../src/window";
+import { index } from "../src/index";
 
 it("can create a daily index", done => {
     const idx = index("1d-12355");

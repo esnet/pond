@@ -11,31 +11,14 @@
 import * as Immutable from "immutable";
 import * as _ from "lodash";
 
-import { Align } from "./align";
 import { Base } from "./base";
 import { Collapse } from "./collapse";
 import { Event } from "./event";
-import { Fill } from "./fill";
-import { grouped, GroupedCollection, GroupingFunction } from "./groupedcollection";
-import { Index } from "./index";
 import { Key } from "./key";
-import { Period } from "./period";
-import { Rate } from "./rate";
 import { Select } from "./select";
-import { Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
 
-import {
-    AlignmentMethod,
-    AlignmentOptions,
-    CollapseOptions,
-    FillOptions,
-    RateOptions,
-    SelectOptions,
-    WindowingOptions
-} from "./types";
-
-import util from "./util";
+import { CollapseOptions, SelectOptions } from "./types";
 
 import { DedupFunction, ReducerFunction, ValueMap } from "./types";
 

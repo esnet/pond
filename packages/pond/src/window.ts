@@ -9,11 +9,10 @@
  */
 
 import * as Immutable from "immutable";
-import { OrderedSet } from "immutable";
 import * as _ from "lodash";
 import * as moment from "moment-timezone";
 
-import { Duration, duration } from "./duration";
+import { Duration } from "./duration";
 import { Index, index } from "./index";
 import { Period } from "./period";
 import { Time, time } from "./time";

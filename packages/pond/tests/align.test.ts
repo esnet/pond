@@ -24,7 +24,8 @@ import { period } from "../src/period";
 import { sortedCollection } from "../src/sortedcollection";
 import { time } from "../src/time";
 
-import { AlignmentMethod } from "../src/types";
+import { timeSeries } from "../src/timeseries";
+import { AlignmentMethod, AlignmentOptions } from "../src/types";
 
 const SIMPLE_GAP_DATA = [
     [1471824030000, 0.75], // 00:00:30
@@ -88,4 +89,27 @@ it("can do basic hold alignment", () => {
     expect(aligned.at(5).get("value")).toBe(1);
     expect(aligned.at(6).get("value")).toBe(1);
     expect(aligned.at(7).get("value")).toBe(1);
+});
+
+it("can do alignment on already align data", () => {
+    const alignOptions: AlignmentOptions = {
+        fieldSpec: ["value"],
+        period: period(duration("30s")),
+        method: AlignmentMethod.Linear,
+        limit: 3
+    };
+
+    const ts = timeSeries({
+        name: "aligned",
+        tz: "Etc/UTC",
+        columns: ["time", "value"],
+        points: [[90000, 5], [120000, 10], [185000, 12]]
+    });
+
+    const aligned = ts.align(alignOptions);
+
+    expect(aligned.at(0).get("value")).toBe(5);
+    expect(aligned.at(1).get("value")).toBe(10);
+    expect(aligned.at(2).get("value")).toBe(10.923076923076923);
+    expect(aligned.at(3).get("value")).toBe(11.846153846153847);
 });

@@ -3,17 +3,12 @@ declare const it: any;
 declare const expect: any;
 
 import * as Immutable from "immutable";
-// import * as Joda from "js-joda";
 
-import Collection from "../src/collection";
 import { event, Event, timeEvent } from "../src/event";
 import { avg, sum } from "../src/functions";
 import { index } from "../src/index";
-import Key from "../src/key";
-import { Time, time } from "../src/time";
+import { time } from "../src/time";
 import { timerange } from "../src/timerange";
-
-const fmt = "YYYY-MM-DD HH:mm";
 
 const DATE = new Date("2015-04-22T03:30:00Z");
 
@@ -142,8 +137,10 @@ describe("TimeRange Events", () => {
         // Pick one event
         const sampleEvent = Immutable.Map(OUTAGE_EVENT_LIST.outageList[0]);
 
-        // Extract the begin and end times
+        // Extract the begin and end times  TODO: Fix the ts warning here
+        // @ts-ignore
         const beginTime = new Date(sampleEvent.get("start_time"));
+        // @ts-ignore
         const endTime = new Date(sampleEvent.get("end_time"));
         const e = event(timerange(beginTime, endTime), sampleEvent);
 

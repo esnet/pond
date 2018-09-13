@@ -8,13 +8,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-declare const describe: any;
 declare const it: any;
 declare const expect: any;
 
 import * as moment from "moment";
 import { duration } from "../src/duration";
-import { timerange, TimeRange } from "../src/timerange";
+import { timerange } from "../src/timerange";
 import util from "../src/util";
 
 import Moment = moment.Moment;
@@ -41,7 +40,7 @@ it("can create a new range with two millisecond timestamps", () => {
 it("can create a new range with two millisecond tiemstamps as an array", () => {
     const range = timerange([1326309060000, 1329941520000]);
     expect(range.toJSON()).toEqual({ timerange: [1326309060000, 1329941520000] });
-})
+});
 
 it("can be used to give a new range", () => {
     const beginTime = moment("2012-01-11 1:11", fmt).toDate();

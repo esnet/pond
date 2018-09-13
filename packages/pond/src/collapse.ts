@@ -14,7 +14,6 @@ import * as _ from "lodash";
 import { Event } from "./event";
 import { Key } from "./key";
 import { Processor } from "./processor";
-import util from "./util";
 
 import { CollapseOptions } from "./types";
 

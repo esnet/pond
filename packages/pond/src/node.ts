@@ -2,8 +2,7 @@ import * as Immutable from "immutable";
 import * as _ from "lodash";
 
 import { Base } from "./base";
-import { Collection } from "./collection";
-import { Event, event } from "./event";
+import { Event } from "./event";
 import { Index, index } from "./index";
 import { Key } from "./key";
 import { TimeRange } from "./timerange";
@@ -15,7 +14,6 @@ import { Rate } from "./rate";
 import { Reducer } from "./reduce";
 import { Select } from "./select";
 
-import { GroupedCollection } from "./groupedcollection";
 import { WindowedCollection } from "./windowedcollection";
 
 import {

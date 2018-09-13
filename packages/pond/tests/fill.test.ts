@@ -8,56 +8,17 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-declare const describe: any;
 declare const it: any;
 declare const expect: any;
-declare const beforeEach: any;
 
 import * as Immutable from "immutable";
 
-import { collection } from "../src/collection";
 import { event, Event } from "../src/event";
 import { stream } from "../src/stream";
 import { time } from "../src/time";
 import { timeSeries } from "../src/timeseries";
 
 import { FillMethod } from "../src/types";
-
-// import Stream from "../stream";
-
-const EVENT_LIST = [
-    event(time(1429673400000), Immutable.Map({ in: 1, out: 2 })),
-    event(time(1429673460000), Immutable.Map({ in: 3, out: 4 })),
-    event(time(1429673520000), Immutable.Map({ in: 5, out: 6 }))
-];
-
-const TICKET_RANGE = {
-    name: "outages",
-    columns: ["timerange", "title", "esnet_ticket"],
-    points: [
-        [[1429673400000, 1429707600000], "BOOM", "ESNET-20080101-001"],
-        [[1429673400000, 1429707600000], "BAM!", "ESNET-20080101-002"]
-    ]
-};
-
-const AVAILABILITY_DATA = {
-    name: "availability",
-    columns: ["index", "uptime"],
-    points: [
-        ["2014-07", "100%"],
-        ["2014-08", "88%"],
-        ["2014-09", "95%"],
-        ["2014-10", "99%"],
-        ["2014-11", "91%"],
-        ["2014-12", "99%"],
-        ["2015-01", "100%"],
-        ["2015-02", "92%"],
-        ["2015-03", "99%"],
-        ["2015-04", "87%"],
-        ["2015-05", "92%"],
-        ["2015-06", "100%"]
-    ]
-};
 
 it("can use the TimeSeries.fill() to fill missing values with zero", () => {
     const ts = timeSeries({

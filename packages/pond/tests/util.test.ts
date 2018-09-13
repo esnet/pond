@@ -11,10 +11,6 @@
 declare const describe: any;
 declare const it: any;
 declare const expect: any;
-declare const beforeEach: any;
-
-import * as Immutable from "immutable";
-import * as moment from "moment";
 
 import Util from "../src/util";
 

@@ -12,11 +12,8 @@ import * as Immutable from "immutable";
 import * as _ from "lodash";
 
 import { Event } from "./event";
-import { Index } from "./index";
 import { Key } from "./key";
-import { Period } from "./period";
 import { Processor } from "./processor";
-import { time, Time } from "./time";
 import { TimeRange, timerange } from "./timerange";
 import util from "./util";
 
