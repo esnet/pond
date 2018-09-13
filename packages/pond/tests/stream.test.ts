@@ -1,27 +1,24 @@
 declare const describe: any;
 declare const it: any;
 declare const expect: any;
-declare const beforeEach: any;
 
 import * as Immutable from "immutable";
 import Moment = moment.Moment;
 import * as _ from "lodash";
 import * as moment from "moment";
 
-import { collection, Collection } from "../src/collection";
+import { Collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event, Event } from "../src/event";
-import { avg, count, keep, sum } from "../src/functions";
-import { grouped, GroupedCollection } from "../src/groupedcollection";
-import { index, Index } from "../src/index";
+import { avg, count, sum } from "../src/functions";
+import { Index } from "../src/index";
 import { period } from "../src/period";
 import { stream } from "../src/stream";
 import { time, Time } from "../src/time";
-import { TimeRange } from "../src/timerange";
-import { Trigger, WindowingOptions } from "../src/types";
+import { Trigger } from "../src/types";
 import { window } from "../src/window";
 
-import { AlignmentMethod, TimeAlignment } from "../src/types";
+import { AlignmentMethod } from "../src/types";
 
 const streamingEvents = [
     event(time(0), Immutable.Map({ count: 5, value: 1 })),

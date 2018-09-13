@@ -11,7 +11,6 @@
 declare const describe: any;
 declare const it: any;
 declare const expect: any;
-declare const beforeEach: any;
 
 import * as Immutable from "immutable";
 import * as moment from "moment";
@@ -21,10 +20,9 @@ import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { indexedEvent, timeEvent, timeRangeEvent } from "../src/event";
 import { avg, max, sum } from "../src/functions";
-import { index, Index } from "../src/index";
-import { period, Period } from "../src/period";
+import { index } from "../src/index";
 import { time, Time } from "../src/time";
-import { timerange, TimeRange } from "../src/timerange";
+import { timerange } from "../src/timerange";
 import { TimeSeries, TimeSeriesWireFormat } from "../src/timeseries";
 import { indexedSeries, timeRangeSeries, timeSeries } from "../src/timeseries";
 import { window } from "../src/window";
@@ -790,7 +788,7 @@ describe("Merging two timeseries together", () => {
     it("can merge two timeseries columns together using merge", () => {
         const inTraffic = timeSeries(TRAFFIC_DATA_IN);
         const outTraffic = timeSeries(TRAFFIC_DATA_OUT);
-        const trafficSeries = TimeSeries.timeSeriesListMerge({
+        const trafficSeries = TimeSeries.timeSeriesListMerge<Time>({
             name: "traffic",
             seriesList: [inTraffic, outTraffic],
             fieldSpec: ["in", "out"]
@@ -803,7 +801,7 @@ describe("Merging two timeseries together", () => {
     it("can append two timeseries together using merge", () => {
         const tile1 = timeSeries(PARTIAL_TRAFFIC_PART_A);
         const tile2 = timeSeries(PARTIAL_TRAFFIC_PART_B);
-        const trafficSeries = TimeSeries.timeSeriesListMerge({
+        const trafficSeries = TimeSeries.timeSeriesListMerge<Time>({
             name: "traffic",
             source: "router",
             seriesList: [tile1, tile2],
@@ -825,7 +823,7 @@ describe("Merging two timeseries together", () => {
     it("can merge two series and preserve the correct time format", () => {
         const inTraffic = timeSeries(TRAFFIC_BNL_TO_NEWY);
         const outTraffic = timeSeries(TRAFFIC_NEWY_TO_BNL);
-        const trafficSeries = TimeSeries.timeSeriesListMerge({
+        const trafficSeries = TimeSeries.timeSeriesListMerge<Time>({
             name: "traffic",
             seriesList: [inTraffic, outTraffic]
         });

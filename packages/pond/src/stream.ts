@@ -12,19 +12,10 @@ import * as Immutable from "immutable";
 import * as _ from "lodash";
 
 import { Base } from "./base";
-import { Collection } from "./collection";
 import { Event, event } from "./event";
-import { Index, index } from "./index";
+import { Index } from "./index";
 import { Key } from "./key";
-import { Period } from "./period";
-import { Processor } from "./processor";
-import { Time, time } from "./time";
-import { TimeRange } from "./timerange";
-
-import { Trigger } from "./types";
-
-import { GroupedCollection } from "./groupedcollection";
-import { WindowedCollection } from "./windowedcollection";
+import { Time } from "./time";
 
 import {
     AggregationNode,
@@ -241,6 +232,7 @@ export class EventStream<IN extends Key, S extends Key> extends StreamInterface<
     coalesce(options: CoalesceOptions) {
         const { fields } = options;
         function keyIn(...keys) {
+            // @ts-ignore
             const keySet = Immutable.Set(...keys);
             return (v, k) => {
                 return keySet.has(k);

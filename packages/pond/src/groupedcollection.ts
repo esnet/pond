@@ -11,27 +11,17 @@
 import * as Immutable from "immutable";
 import * as _ from "lodash";
 
-import { Align } from "./align";
-import { Base } from "./base";
 import { Event } from "./event";
-import { Index } from "./index";
 import { Key } from "./key";
-import { Period } from "./period";
-import { Rate } from "./rate";
 import { SortedCollection } from "./sortedcollection";
-import { Time } from "./time";
-import { timerange, TimeRange } from "./timerange";
+import { TimeRange } from "./timerange";
 import { WindowedCollection } from "./windowedcollection";
 
 import {
     Aggregation,
-    AggregationMapFunction,
     AggregationTuple,
     AlignmentOptions,
-    CollapseOptions,
-    DedupFunction,
     RateOptions,
-    ReducerFunction,
     WindowingOptions
 } from "./types";
 

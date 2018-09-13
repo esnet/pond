@@ -12,15 +12,10 @@ import * as Immutable from "immutable";
 import * as _ from "lodash";
 
 import { Event } from "./event";
-import { Index } from "./index";
 import { Key } from "./key";
-import { Period } from "./period";
 import { Processor } from "./processor";
-import { time, Time } from "./time";
-import { TimeRange, timerange } from "./timerange";
-import util from "./util";
 
-import { ListReducer, ReduceOptions, ReducerFunction } from "./types";
+import { ListReducer, ReduceOptions } from "./types";
 
 /**
  * A `Processor` to take a rolling set of incoming `Event`s, a

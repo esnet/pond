@@ -2,12 +2,9 @@ declare const describe: any;
 declare const it: any;
 declare const expect: any;
 
-import * as moment from "moment";
-
 import { duration } from "../src/duration";
 import { period } from "../src/period";
-import { now, time } from "../src/time";
-import { TimeRange } from "../src/timerange";
+import { time } from "../src/time";
 import { daily, window } from "../src/window";
 
 import Util from "../src/util";

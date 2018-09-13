@@ -12,13 +12,11 @@ import * as Immutable from "immutable";
 import * as _ from "lodash";
 
 import { Event } from "./event";
-import { Index } from "./index";
 import { Key } from "./key";
 import { Period } from "./period";
 import { Processor } from "./processor";
 import { time, Time } from "./time";
 import { timerange } from "./timerange";
-import util from "./util";
 
 import { AlignmentMethod, AlignmentOptions } from "./types";
 
@@ -92,6 +90,7 @@ export class Align<T extends Key> extends Processor<T, T> {
         }
 
         const boundaries: Immutable.List<Time> = this.getBoundaries(event);
+
         boundaries.forEach(boundaryTime => {
             let outputEvent;
             if (this._limit && boundaries.size > this._limit) {
@@ -129,6 +128,10 @@ export class Align<T extends Key> extends Processor<T, T> {
      * they are in the same window, return an empty list.
      */
     private getBoundaries(event: Event<T>): Immutable.List<Time> {
+        if (+this._previous.timestamp() === +event.timestamp()) {
+            return Immutable.List<Time>([]);
+        }
+
         const range = timerange(this._previous.timestamp(), event.timestamp());
         return this._period.within(range);
     }

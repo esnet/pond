@@ -89,8 +89,8 @@ describe("Collection", () => {
             const e2 = event(time("2015-04-22T02:30:00Z"), Immutable.Map({ a: 4, b: 2 }));
             const c = collection(Immutable.List([e1, e2]));
 
-            // tslint:disable-next-line:max-line-length
             const expected =
+                // tslint:disable-next-line:max-line-length
                 '[{"time":1429673400000,"data":{"a":5,"b":6}},{"time":1429669800000,"data":{"a":4,"b":2}}]';
             expect(c.toString()).toEqual(expected);
         });

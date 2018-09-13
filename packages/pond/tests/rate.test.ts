@@ -1,13 +1,10 @@
-declare const describe: any;
 declare const it: any;
 declare const expect: any;
-declare const beforeEach: any;
 
 import * as Immutable from "immutable";
 import * as moment from "moment";
 import Moment = moment.Moment;
 
-import { collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { period } from "../src/period";

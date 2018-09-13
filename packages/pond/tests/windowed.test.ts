@@ -9,21 +9,12 @@ import Moment = moment.Moment;
 
 const map = Immutable.Map;
 
-import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
-import { avg, count, keep, sum } from "../src/functions";
-import { grouped, GroupedCollection } from "../src/groupedcollection";
-import { index } from "../src/index";
-import { period } from "../src/period";
+import { keep, sum } from "../src/functions";
 import { sortedCollection } from "../src/sortedcollection";
-import { time, Time } from "../src/time";
-import { TimeRange } from "../src/timerange";
+import { time } from "../src/time";
 import { window } from "../src/window";
-
-import { WindowedCollection } from "../src/windowedcollection";
-
-import { TimeAlignment } from "../src/types";
 
 describe("Windowed", () => {
     it("can build a WindowedCollection", () => {

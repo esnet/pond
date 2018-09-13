@@ -10,10 +10,8 @@
 
 import * as Immutable from "immutable";
 import * as _ from "lodash";
-import * as moment from "moment";
 
 import { Duration, duration } from "./duration";
-import { Index } from "./index";
 import { Time, time } from "./time";
 import { TimeRange } from "./timerange";
 
@@ -110,7 +108,8 @@ export class Period {
 
     /**
      * Returns an `Immutable.List` of `Time`s within the given `TimeRange`
-     * that align with this `Period`.
+     * that align with this `Period`. Not this will potentially include
+     * the start time of the timerange but never the end time of the timerange.
      *
      * Example:
      * ```
@@ -132,7 +131,7 @@ export class Period {
         const t2 = time(timerange.end());
 
         let scan = this.isAligned(t1) ? t1 : this.next(t1);
-        while (+scan <= +t2) {
+        while (+scan < +t2) {
             result = result.push(scan);
             scan = this.next(scan);
         }
