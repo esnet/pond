@@ -4,7 +4,6 @@ import { Event } from "./event";
 import { Index } from "./index";
 import { Key } from "./key";
 import { Time } from "./time";
-import { TimeRange } from "./timerange";
 import { Node } from "./node";
 import { AggregationSpec, AlignmentOptions, CoalesceOptions, CollapseOptions, EventCallback, FillOptions, KeyedCollection, KeyedCollectionCallback, RateOptions, ReduceOptions, SelectOptions, WindowingOptions } from "./types";
 /**
@@ -199,7 +198,7 @@ export declare class EventStream<IN extends Key, S extends Key> extends StreamIn
      *     .rate({ fieldSpec: "value", allowNegative: false })
      * ```
      */
-    rate(options: RateOptions): EventStream<TimeRange, S>;
+    rate(options: RateOptions): EventStream<import("./timerange").TimeRange, S>;
     /**
      * Convert incoming `Event`s to new `Event`s with on the specified
      * fields selected out of the source.

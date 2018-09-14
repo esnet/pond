@@ -67,7 +67,8 @@ export declare class Period {
     next(t: Time): Time;
     /**
      * Returns an `Immutable.List` of `Time`s within the given `TimeRange`
-     * that align with this `Period`.
+     * that align with this `Period`. Not this will potentially include
+     * the start time of the timerange but never the end time of the timerange.
      *
      * Example:
      * ```

@@ -8,7 +8,7 @@ export declare enum WindowType {
     Day = 1,
     Month = 2,
     Week = 3,
-    Year = 4,
+    Year = 4
 }
 export declare abstract class WindowBase {
     abstract getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index>;

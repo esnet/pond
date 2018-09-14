@@ -66,7 +66,7 @@ export declare class WindowedCollection<T extends Key> extends Base {
      */
     ungroup(): Immutable.Map<string, SortedCollection<T>>;
     addEvent(event: Event<T>): Immutable.List<KeyedCollection<T>>;
-    private getEventGroups(event);
+    private getEventGroups;
 }
 declare function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, SortedCollection<T>>): any;
 declare function windowFactory<T extends Key>(windowOptions: WindowingOptions, collectionMap?: Immutable.Map<string, SortedCollection<T>>): any;

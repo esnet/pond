@@ -716,11 +716,15 @@ export declare class TimeSeries<T extends Key> {
      *
      * Example:
      * ```
-     * const aligned = ts.align({
-     *     fieldSpec: "value",
-     *     period: "1m",
-     *     method: "linear"
-     * });
+     *  const alignOptions: AlignmentOptions = {
+     *       fieldSpec: ["value"],
+     *       period: period(duration("30s")),
+     *       method: AlignmentMethod.Linear,
+     *       limit: 3
+     *   };
+     *
+     *   const aligned = series.align(alignOptions);
+     *
      * ```
      */
     align(options: AlignmentOptions): TimeSeries<T>;
@@ -874,7 +878,7 @@ export declare class TimeSeries<T extends Key> {
      * });
      * ```
      */
-    static timeSeriesListReduce(options: TimeSeriesOptions): TimeSeries<Key>;
+    static timeSeriesListReduce<T extends Key>(options: TimeSeriesOptions): TimeSeries<T>;
     /**
      * Takes a list of `TimeSeries` and merges them together to form a new
      * `TimeSeries`.
@@ -897,9 +901,9 @@ export declare class TimeSeries<T extends Key> {
      * });
      * ```
      */
-    static timeSeriesListMerge(options: TimeSeriesOptions): TimeSeries<Key>;
+    static timeSeriesListMerge<T extends Key>(options: TimeSeriesOptions): TimeSeries<T>;
     /**
      * @private
      */
-    static timeSeriesListEventReduce(options: TimeSeriesListReducerOptions): TimeSeries<Key>;
+    static timeSeriesListEventReduce<T extends Key>(options: TimeSeriesListReducerOptions): TimeSeries<T>;
 }

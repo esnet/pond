@@ -27,7 +27,7 @@ export interface ValueMap {
 export declare enum TimeAlignment {
     Begin = 1,
     Middle = 2,
-    End = 3,
+    End = 3
 }
 /**
  * Rate of emit from within a stream:
@@ -36,7 +36,7 @@ export declare enum TimeAlignment {
  */
 export declare enum Trigger {
     perEvent = 1,
-    onDiscardedWindow = 2,
+    onDiscardedWindow = 2
 }
 /**
  * Method of interpolation used by the `align()` function:
@@ -45,7 +45,7 @@ export declare enum Trigger {
  */
 export declare enum AlignmentMethod {
     Hold = 1,
-    Linear = 2,
+    Linear = 2
 }
 /**
  * Method of filling used by the `fill()` function:
@@ -56,7 +56,7 @@ export declare enum AlignmentMethod {
 export declare enum FillMethod {
     Zero = 1,
     Pad = 2,
-    Linear = 3,
+    Linear = 3
 }
 /**
  * Options object expected by the `reduce()` stream processor. The idea
@@ -179,8 +179,7 @@ export interface SelectOptions {
  */
 export interface RenameColumnOptions {
     renameMap: {
-        key: string;
-        value: string;
+        [key: string]: string;
     };
 }
 /**

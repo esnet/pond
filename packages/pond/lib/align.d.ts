@@ -57,13 +57,13 @@ export declare class Align<T extends Key> extends Processor<T, T> {
     /**
      * Test to see if an event is perfectly aligned. Used on first event.
      */
-    private isAligned(event);
+    private isAligned;
     /**
      * Returns a list of indexes of window boundaries if the current
      * event and the previous event do not lie in the same window. If
      * they are in the same window, return an empty list.
      */
-    private getBoundaries(event);
+    private getBoundaries;
     /**
      * Generate a new event on the requested boundary and carry over the
      * value from the previous event.
@@ -71,10 +71,10 @@ export declare class Align<T extends Key> extends Processor<T, T> {
      * A variation just sets the values to null, this is used when the
      * limit is hit.
      */
-    private interpolateHold(boundaryTime, setNone?);
+    private interpolateHold;
     /**
      * Generate a linear differential between two counter values that lie
      * on either side of a window boundary.
      */
-    private interpolateLinear(boundaryTime, event);
+    private interpolateLinear;
 }
