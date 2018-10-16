@@ -141,6 +141,14 @@ To run the tests interactively, use:
 npm test
 ```
 
+# Publishing
+
+We are currently publishing Alpha versions as we find bugs or need to make other changes.
+
+```
+lerna publish --npm-tag alpha
+```
+
 # License
 
 This code is distributed under a BSD style license, see the LICENSE file for complete information.
