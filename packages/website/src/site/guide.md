@@ -125,7 +125,7 @@ range, or "2014-09" is September 2014.
 
 ```js
 const i = index("5m-4135541");
-i.asTimerange(); // Sat, 25 Apr 2009 12:25:00 GMT, Sat, 25 Apr 2009 12:30:00 GMT
+i.toTimeRange(); // Sat, 25 Apr 2009 12:25:00 GMT, Sat, 25 Apr 2009 12:30:00 GMT
 ```
 
 You can aggregate a `TimeSeries` by a duration like "5m" to build a new `TimeSeries` of

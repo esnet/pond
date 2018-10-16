@@ -126,7 +126,7 @@ describe("Indexed Events", () => {
     it("can create an IndexedEvent using a existing Index and data", () => {
         const event1 = event(index("1d-12355"), Immutable.Map({ value: 42 }));
         const expected = "[Thu, 30 Oct 2003 00:00:00 GMT, Fri, 31 Oct 2003 00:00:00 GMT]";
-        const e = event1.getKey().asTimerange();
+        const e = event1.getKey().toTimeRange();
         expect(e.toUTCString()).toBe(expected);
         expect(event1.get("value")).toBe(42);
     });

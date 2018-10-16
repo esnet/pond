@@ -3,6 +3,7 @@ import * as moment from "moment";
 import Moment = moment.Moment;
 import { Key } from "./key";
 import { Time } from "./time";
+import { TimeAlignment } from "./types";
 /**
  * A `TimeRange` is a simple representation of a begin and end time, used
  * to maintain consistency across an application.
@@ -89,6 +90,16 @@ export declare class TimeRange extends Key {
      * Returns the midpoint of the `TimeRange`.
      */
     mid(): Date;
+    /**
+     * Returns a `Time` that is either at the beginning,
+     * middle or end of this `TimeRange`. Specify the alignment
+     * of the output `Time` with the `align` parameter. This is
+     * either:
+     *  * TimeAlignment.Begin
+     *  * TimeAlignment.Middle
+     *  * TimeAlignment.End
+     */
+    toTime(align: TimeAlignment): Time;
     /**
      * Returns the midpoint of the `TimeRange` as the representitive
      * timestamp for the timerange.

@@ -15,16 +15,18 @@ declare const expect: any;
 import * as Immutable from "immutable";
 import * as moment from "moment";
 import Moment = moment.Moment;
+
 import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
 import { event } from "../src/event";
 import { indexedEvent, timeEvent, timeRangeEvent } from "../src/event";
 import { avg, max, sum } from "../src/functions";
-import { index } from "../src/index";
+import { index, Index } from "../src/index";
 import { time, Time } from "../src/time";
 import { timerange } from "../src/timerange";
 import { TimeSeries, TimeSeriesWireFormat } from "../src/timeseries";
 import { indexedSeries, timeRangeSeries, timeSeries } from "../src/timeseries";
+import { TimeAlignment } from "../src/types";
 import { window } from "../src/window";
 
 const EVENT_DATA = {
@@ -1065,6 +1067,56 @@ describe("Remapping Events in a TimeSeries", () => {
         expect(split.at(7).get("in")).toBe(155);
         expect(split.at(7).get("out")).toBe(175);
         expect(split.at(7).get("other")).toBe(1);
+    });
+
+    it("can remap keys of a TimeSeries using mapKeys() from times to timeranges", () => {
+        const series = timeSeries({
+            name: "series",
+            columns: ["time", "a", "b"],
+            points: [
+                [1400425951000, 100, 200],
+                [1400425952000, 300, 400],
+                [1400425953000, 800, 900]
+            ]
+        });
+        const remapped = series.mapKeys(t => t.toTimeRange(duration("5m"), TimeAlignment.Middle));
+
+        expect(remapped.size()).toBe(3);
+        expect(
+            remapped
+                .at(0)
+                .getKey()
+                .duration()
+        ).toBe(1000 * 60 * 5);
+        expect(
+            remapped
+                .at(0)
+                .getKey()
+                .mid()
+                .getTime()
+        ).toBe(1400425951000);
+        expect(remapped.at(0).get("a")).toBe(100);
+        expect(remapped.at(0).get("b")).toBe(200);
+    });
+
+    it("can remap keys of a TimeSeries using mapKeys() from indexes to times", () => {
+        const series = indexedSeries({
+            name: "series",
+            columns: ["index", "c", "d"],
+            points: [["1d-1234", 100, 200], ["1d-1235", 300, 400], ["1d-1236", 800, 900]]
+        });
+
+        const remapped = series.mapKeys<Time>((idx: Index) => idx.toTime(TimeAlignment.End));
+
+        expect(
+            remapped
+                .at(0)
+                .getKey()
+                .timestamp()
+                .getTime()
+        ).toBe(106704000000);
+        expect(remapped.at(0).get("c")).toBe(100);
+        expect(remapped.at(0).get("d")).toBe(200);
     });
 });
 

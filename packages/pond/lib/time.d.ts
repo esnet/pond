@@ -17,6 +17,10 @@ export declare class Time extends Key {
     toJSON(): {};
     toString(): string;
     /**
+     * Returns the native Date object for this `Time`
+     */
+    toDate(): Date;
+    /**
      * The timestamp of this data, in UTC time, as a string.
      */
     toUTCString(): string;
@@ -37,6 +41,23 @@ export declare class Time extends Key {
      * The end time of this `Event`, which will be just the timestamp
      */
     end(): Date;
+    /**
+     * Takes this Time and returns a TimeRange of given duration
+     * which is either centrally located around the Time, or aligned
+     * to either the Begin or End time.
+     *
+     * For example remapping keys, each one of the keys is a Time, but
+     * we want to convert the timeseries to use TimeRanges instead:
+     * ```
+     * const remapped = series.mapKeys(t => t.toTimeRange(duration("5m"), TimeAlignment.Middle));
+     * ```
+     *
+     * The alignment is either:
+     *  * TimeAlignment.Begin
+     *  * TimeAlignment.Middle
+     *  * TimeAlignment.End
+     *
+     */
     toTimeRange(duration: Duration, align: TimeAlignment): TimeRange;
 }
 /**

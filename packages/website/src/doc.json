@@ -11768,7 +11768,7 @@
 							},
 							"comment": {
 								"shortText": "Constructs a new `Index` by passing in the index string `s` and\noptionally a timezone `tz`. You can also use the `index()` factory\nfunction to construct one.",
-								"text": "Example:\n```\nconst idx = index(\"5m-4135541\");\nidx.asTimerange().humanizeDuration();  // \"5 minutes\"\n```\n"
+								"text": "Example:\n```\nconst idx = index(\"5m-4135541\");\nidx.toTimeRange().humanizeDuration();  // \"5 minutes\"\n```\n"
 							},
 							"signatures": [
 								{
@@ -11779,7 +11779,7 @@
 									"flags": {},
 									"comment": {
 										"shortText": "Constructs a new `Index` by passing in the index string `s` and\noptionally a timezone `tz`. You can also use the `index()` factory\nfunction to construct one.",
-										"text": "Example:\n```\nconst idx = index(\"5m-4135541\");\nidx.asTimerange().humanizeDuration();  // \"5 minutes\"\n```\n"
+										"text": "Example:\n```\nconst idx = index(\"5m-4135541\");\nidx.toTimeRange().humanizeDuration();  // \"5 minutes\"\n```\n"
 									},
 									"parameters": [
 										{
@@ -11920,7 +11920,7 @@
 						},
 						{
 							"id": 1366,
-							"name": "asTimerange",
+							"name": "toTimeRange",
 							"kind": 2048,
 							"kindString": "Method",
 							"flags": {
@@ -11930,7 +11930,7 @@
 							"signatures": [
 								{
 									"id": 1367,
-									"name": "asTimerange",
+									"name": "toTimeRange",
 									"kind": 4096,
 									"kindString": "Call signature",
 									"flags": {},
@@ -34943,7 +34943,7 @@
 									"flags": {},
 									"comment": {
 										"shortText": "Builds a new `TimeSeries` by dividing events within the `TimeSeries`\nacross multiple fixed windows of size `windowSize`.",
-										"text": "Note that these are windows defined relative to Jan 1st, 1970,\nand are UTC, so this is best suited to smaller window sizes\n(hourly, 5m, 30s, 1s etc), or in situations where you don't care\nabout the specific window, just that the data is smaller.\n\nEach window then has an aggregation specification applied as\n`aggregation`. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{ in_avg: { in: avg() }, out_avg: { out: avg() } }\n```\nwill aggregate both \"in\" and \"out\" using the average aggregation\nfunction and return the result as in_avg and out_avg.\n\nNote that each aggregation function, such as `avg()` also can take a\nfilter function to apply before the aggregation. A set of filter functions\nexists to do common data cleanup such as removing bad values. For example:\n```\n{ value_avg: { value: avg(filter.ignoreMissing) } }\n```\n\nExample:\n```\n    const timeseries = new TimeSeries(data);\n    const dailyAvg = timeseries.fixedWindowRollup({\n        windowSize: \"1d\",\n        aggregation: {value:[\"value\", avg()]}\n    });\n```\n\nNote that to output the result as `TimeEvent`'s instead of `IndexedEvent`'s,\nyou can do the following :\n```\ntimeseries.fixedWindowRollup(options).mapKeys(index => time(index.asTimerange().mid()))\n```\n\n"
+										"text": "Note that these are windows defined relative to Jan 1st, 1970,\nand are UTC, so this is best suited to smaller window sizes\n(hourly, 5m, 30s, 1s etc), or in situations where you don't care\nabout the specific window, just that the data is smaller.\n\nEach window then has an aggregation specification applied as\n`aggregation`. This specification describes a mapping of output\nfieldNames to aggregation functions and their fieldPath. For example:\n```\n{ in_avg: { in: avg() }, out_avg: { out: avg() } }\n```\nwill aggregate both \"in\" and \"out\" using the average aggregation\nfunction and return the result as in_avg and out_avg.\n\nNote that each aggregation function, such as `avg()` also can take a\nfilter function to apply before the aggregation. A set of filter functions\nexists to do common data cleanup such as removing bad values. For example:\n```\n{ value_avg: { value: avg(filter.ignoreMissing) } }\n```\n\nExample:\n```\n    const timeseries = new TimeSeries(data);\n    const dailyAvg = timeseries.fixedWindowRollup({\n        windowSize: \"1d\",\n        aggregation: {value:[\"value\", avg()]}\n    });\n```\n\nNote that to output the result as `TimeEvent`'s instead of `IndexedEvent`'s,\nyou can do the following :\n```\ntimeseries.fixedWindowRollup(options).mapKeys(index => time(index.toTimeRange().mid()))\n```\n\n"
 									},
 									"parameters": [
 										{

@@ -551,6 +551,29 @@ export declare class TimeSeries<T extends Key> {
      */
     flatMap<M extends Key>(mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<M>>): TimeSeries<M>;
     /**
+     * Remap the keys of the underlying Events, but keep the data the same.
+     *
+     * For example you can use this if you have a `TimeSeries<Index>` and want to
+     * convert to events of `TimeSeries<Time>`s.
+     *
+     * The mapper function supplied to `mapKeys` should return key of type
+     * `U` given a key of type `T`.
+     *
+     * Example:
+     *
+     * In this example we remap `Time` keys to `TimeRange` keys using the `Time.toTimeRange()`
+     * method, centering the new `TimeRange`s around each `Time` with duration given
+     * by the `Duration` object supplied, in this case representing one hour.
+     *
+     * ```
+     * const hourlyRanges = series.mapKeys<TimeRange>(t =>
+     *     t.toTimeRange(duration("1h"), TimeAlignment.Middle)
+     * );
+     * ```
+     *
+     */
+    mapKeys<U extends Key>(mapper: (key: T) => U): TimeSeries<U>;
+    /**
      * Filter the `TimeSeries`'s `Event`'s with the supplied function.
      *
      * The function `predicate` is passed each `Event` and should return
@@ -771,7 +794,7 @@ export declare class TimeSeries<T extends Key> {
      * Note that to output the result as `TimeEvent`'s instead of `IndexedEvent`'s,
      * you can do the following :
      * ```
-     * timeseries.fixedWindowRollup(options).mapKeys(index => time(index.asTimerange().mid()))
+     * timeseries.fixedWindowRollup(options).mapKeys(index => time(index.toTimeRange().mid()))
      * ```
      *
      */

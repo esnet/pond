@@ -146,7 +146,7 @@ describe("Windowed", () => {
                 total: ["score", sum()]
             })
             .flatten()
-            .mapKeys(idx => time(idx.asTimerange().mid()));
+            .mapKeys(idx => time(idx.toTimeRange().mid()));
 
         expect(rolledUp.size()).toBe(4);
         expect(rolledUp.at(0).get("total")).toBe(7);

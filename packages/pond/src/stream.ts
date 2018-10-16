@@ -37,8 +37,6 @@ import {
 
 import {
     AggregationSpec,
-    AggregationTuple,
-    AlignmentMethod,
     AlignmentOptions,
     CoalesceOptions,
     CollapseOptions,

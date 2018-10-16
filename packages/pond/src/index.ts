@@ -14,6 +14,8 @@ import Moment = moment.Moment;
 import { Key } from "./key";
 import { TimeRange } from "./timerange";
 import util from "./util";
+import { TimeAlignment } from "./types";
+import { Time, time } from "./time";
 
 /**
  * An `Index` is a specific instance of a `Window`. For example
@@ -67,7 +69,7 @@ export class Index extends Key {
      * Example:
      * ```
      * const idx = index("5m-4135541");
-     * idx.asTimerange().humanizeDuration();  // "5 minutes"
+     * idx.toTimeRange().humanizeDuration();  // "5 minutes"
      * ```
      */
     constructor(s, tz = "Etc/UTC") {
@@ -128,9 +130,32 @@ export class Index extends Key {
     }
 
     /**
+     * Returns a `Time` that is either at the beginning,
+     * middle or end of this `Index`. Specify the alignment
+     * of the output `Time` with the `align` parameter. This is
+     * either:
+     *  * TimeAlignment.Begin
+     *  * TimeAlignment.Middle
+     *  * TimeAlignment.End
+     */
+    public toTime(align: TimeAlignment): Time {
+        switch (align) {
+            case TimeAlignment.Begin:
+                return time(this.begin());
+                break;
+            case TimeAlignment.Middle:
+                return time(this.toTimeRange().mid());
+                break;
+            case TimeAlignment.End:
+                return time(this.end());
+                break;
+        }
+    }
+
+    /**
      * Returns the `Index` as a `TimeRange`
      */
-    public asTimerange(): TimeRange {
+    public toTimeRange(): TimeRange {
         return this._timerange;
     }
 

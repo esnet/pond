@@ -1,5 +1,7 @@
 import { Key } from "./key";
 import { TimeRange } from "./timerange";
+import { TimeAlignment } from "./types";
+import { Time } from "./time";
 /**
  * An `Index` is a specific instance of a `Window`. For example
  * a `Window` may represent "every day", and so an `Index` would
@@ -51,7 +53,7 @@ export declare class Index extends Key {
      * Example:
      * ```
      * const idx = index("5m-4135541");
-     * idx.asTimerange().humanizeDuration();  // "5 minutes"
+     * idx.toTimeRange().humanizeDuration();  // "5 minutes"
      * ```
      */
     constructor(s: any, tz?: string);
@@ -88,9 +90,19 @@ export declare class Index extends Key {
      */
     asString(): string;
     /**
+     * Returns a `Time` that is either at the beginning,
+     * middle or end of this `Index`. Specify the alignment
+     * of the output `Time` with the `align` parameter. This is
+     * either:
+     *  * TimeAlignment.Begin
+     *  * TimeAlignment.Middle
+     *  * TimeAlignment.End
+     */
+    toTime(align: TimeAlignment): Time;
+    /**
      * Returns the `Index` as a `TimeRange`
      */
-    asTimerange(): TimeRange;
+    toTimeRange(): TimeRange;
     /**
      * Returns the start date of the `Index`
      */
