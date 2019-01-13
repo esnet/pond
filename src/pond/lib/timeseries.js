@@ -232,18 +232,20 @@ class TimeSeries {
             return;
         }
 
+        const columnList = this.columns();
+
         let columns;
         if (e instanceof TimeEvent) {
-            columns = ["time", ...this.columns()];
+            columns = ["time", ...columnList];
         } else if (e instanceof TimeRangeEvent) {
-            columns = ["timerange", ...this.columns()];
+            columns = ["timerange", ...columnList];
         } else if (e instanceof IndexedEvent) {
-            columns = ["index", ...this.columns()];
+            columns = ["index", ...columnList];
         }
 
         const points = [];
         for (const e of this._collection.events()) {
-            points.push(e.toPoint(this.columns()));
+            points.push(e.toPoint(columnList));
         }
 
         return _.extend(this._data.toJSON(), { columns, points });
@@ -386,7 +388,9 @@ class TimeSeries {
         }
 
         for (; i < size; i++) {
-            const ts = this.at(i).timestamp().getTime();
+            const ts = this.at(i)
+                .timestamp()
+                .getTime();
             if (ts > tms) {
                 return i - 1 >= 0 ? i - 1 : 0;
             } else if (ts === tms) {
@@ -796,7 +800,9 @@ class TimeSeries {
      * @return {TimeSeries}               A TimeSeries containing the remapped events
      */
     map(op) {
-        const collections = this.pipeline().map(op).toKeyedCollections();
+        const collections = this.pipeline()
+            .map(op)
+            .toKeyedCollections();
         return this.setCollection(collections["all"], true);
     }
 
@@ -820,7 +826,9 @@ class TimeSeries {
      */
     select(options) {
         const { fieldSpec } = options;
-        const collections = this.pipeline().select(fieldSpec).toKeyedCollections();
+        const collections = this.pipeline()
+            .select(fieldSpec)
+            .toKeyedCollections();
         return this.setCollection(collections["all"], true);
     }
 
@@ -1016,7 +1024,9 @@ class TimeSeries {
      */
     rate(options = {}) {
         const { fieldSpec = "value", allowNegative = true } = options;
-        const collection = this.pipeline().rate(fieldSpec, allowNegative).toKeyedCollections();
+        const collection = this.pipeline()
+            .rate(fieldSpec, allowNegative)
+            .toKeyedCollections();
 
         return this.setCollection(collection["all"], true);
     }
@@ -1038,7 +1048,7 @@ class TimeSeries {
      * ```
      * will aggregate both "in" and "out" using the average aggregation
      * function and return the result as in_avg and out_avg.
-     * 
+     *
      * Note that each aggregation function, such as `avg()` also can take a
      * filter function to apply before the aggregation. A set of filter functions
      * exists to do common data cleanup such as removing bad values. For example:
@@ -1245,19 +1255,22 @@ class TimeSeries {
      * @return {map}    The result is a mapping from window index to a Collection.
      */
     collectByFixedWindow({ windowSize }) {
-        return this.pipeline().windowBy(windowSize).emitOn("discard").toKeyedCollections();
+        return this.pipeline()
+            .windowBy(windowSize)
+            .emitOn("discard")
+            .toKeyedCollections();
     }
 
     /*
      * STATIC
      */
     /**
-      * Defines the event type contained in this TimeSeries. The default here
-      * is to use the supplied type (time, timerange or index) to build either
-      * a TimeEvent, TimeRangeEvent or IndexedEvent. However, you can also
-      * subclass the TimeSeries and reimplement this to return another event
-      * type.
-      */
+     * Defines the event type contained in this TimeSeries. The default here
+     * is to use the supplied type (time, timerange or index) to build either
+     * a TimeEvent, TimeRangeEvent or IndexedEvent. However, you can also
+     * subclass the TimeSeries and reimplement this to return another event
+     * type.
+     */
     static event(eventKey) {
         switch (eventKey) {
             case "time":
@@ -1272,23 +1285,23 @@ class TimeSeries {
     }
 
     /**
-      * Static function to compare two TimeSeries to each other. If the TimeSeries
-      * are of the same instance as each other then equals will return true.
-      * @param  {TimeSeries} series1
-      * @param  {TimeSeries} series2
-      * @return {bool} result
-      */
+     * Static function to compare two TimeSeries to each other. If the TimeSeries
+     * are of the same instance as each other then equals will return true.
+     * @param  {TimeSeries} series1
+     * @param  {TimeSeries} series2
+     * @return {bool} result
+     */
     static equal(series1, series2) {
         return series1._data === series2._data && series1._collection === series2._collection;
     }
 
     /**
-      * Static function to compare two TimeSeries to each other. If the TimeSeries
-      * are of the same value as each other then equals will return true.
-      * @param  {TimeSeries} series1
-      * @param  {TimeSeries} series2
-      * @return {bool} result
-      */
+     * Static function to compare two TimeSeries to each other. If the TimeSeries
+     * are of the same value as each other then equals will return true.
+     * @param  {TimeSeries} series1
+     * @param  {TimeSeries} series2
+     * @return {bool} result
+     */
     static is(series1, series2) {
         return (
             Immutable.is(series1._data, series2._data) &&
