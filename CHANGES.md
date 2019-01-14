@@ -201,6 +201,13 @@ you add the events.
 
 ---
 
+## 0.8.10
+
+> January 2019
+
+* Fixed performance issue with TimeSeries.toJSON()
+* update build / test setup
+
 ## 0.8.8
 
 > November 2017
