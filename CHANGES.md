@@ -2,6 +2,11 @@
 
 ---
 
+## 0.8.10
+> January 2019
+
+* Fixed performance issue with TimeSeries.toJSON()
+
 ## 0.8.8
 
 > November 2017
