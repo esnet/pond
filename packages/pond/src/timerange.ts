@@ -62,7 +62,7 @@ export class TimeRange extends Key {
             const other = arg1;
             this._range = other._range;
         } else if (arg1 instanceof Immutable.List) {
-            const rangeList = arg1;
+            const rangeList = arg1 as Immutable.List<Date>;
             this._range = rangeList;
         } else if (arg1 instanceof Array) {
             const rangeArray = arg1;

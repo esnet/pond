@@ -387,11 +387,12 @@ export class TimeSeries<T extends Key> {
         if (!e) {
             return;
         }
-        const columns = [e.keyType(), ...this.columns()];
 
+        const columnList = this.columns();
+        const columns = [e.keyType(), ...columnList];
         const points = [];
         for (const evt of this._collection.eventList()) {
-            points.push(evt.toPoint(this.columns()));
+            points.push(evt.toPoint(columnList));
         }
 
         return _.extend(this._data.toJSON(), { columns, points });
