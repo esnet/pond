@@ -1,43 +1,44 @@
 {
-    "name": "pondjs",
-    "version": "1.0.0-alpha.8",
-    "description": "A TimeSeries library built on Immutable.js with Typescript",
-    "main": "lib/exports.js",
-    "types": "lib/exports.d.ts",
-    "author": "Software Engineering Group at ESnet",
-    "license": "BSD-style",
-    "dependencies": {
-        "immutable": "^4.0.0-rc.12",
-        "lodash": "^4.17.4",
-        "moment": "^2.18.1",
-        "moment-timezone": "^0.5.13"
+  "name": "pondjs",
+  "version": "1.0.0-alpha.8",
+  "description": "A TimeSeries library built on Immutable.js with Typescript",
+  "main": "lib/exports.js",
+  "types": "lib/exports.d.ts",
+  "author": "Software Engineering Group at ESnet",
+  "license": "BSD-style",
+  "dependencies": {
+    "immutable": "^4.0.0-rc.12",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.25"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.123",
+    "jest": "^24.7.1",
+    "jest-cli": "^24.7.1",
+    "prettier": "^1.17.0",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.16.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.4.5"
+  },
+  "scripts": {
+    "build": "tsc --version && tsc",
+    "watch": "tsc --watch",
+    "docs": "typedoc --json ../website/src/doc.json --mode modules ./src/*.ts --ignoreCompilerErrors",
+    "test": "jest --watch",
+    "lint": "tslint ./src/*.ts"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "devDependencies": {
-        "@types/lodash": "^4.14.71",
-        "jest": "^21.2.1 ",
-        "jest-cli": "^21.2.1",
-        "prettier": "^1.9.1",
-        "ts-jest": "^21.2.4",
-        "tslint": "^5.5.0",
-        "typedoc": "^0.9.0",
-        "typescript": "^2.5.3"
-    },
-    "scripts": {
-        "build": "tsc --version && tsc",
-        "watch": "tsc --watch",
-        "docs": "typedoc --json ../website/src/doc.json --mode modules ./src/*.ts --ignoreCompilerErrors",
-        "test": "jest --watch",
-        "lint": "tslint ./src/*.ts"
-    },
-    "jest": {
-        "transform": {
-            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-        },
-        "testRegex": "(/tests/.*)\\.(ts|tsx|js)$",
-        "moduleFileExtensions": [
-            "ts",
-            "tsx",
-            "js"
-        ]
-    }
+    "testRegex": "(/tests/.*)\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  }
 }

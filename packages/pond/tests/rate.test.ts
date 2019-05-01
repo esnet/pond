@@ -105,3 +105,20 @@ it("can output nulls for negative values", () => {
     expect(rates2.at(1).get("value_rate")).toBeNull();
     expect(rates2.at(2).get("value_rate")).toBeNull();
 });
+
+it("can output a null rate when data has nulls", () => {
+    const INPUT = [[0, 10], [30000, 40], [60000, null], [90000, 100], [120000, 130]];
+
+    const list = INPUT.map(e => {
+        return event(time(e[0]), Immutable.Map({ in: e[1] }));
+    });
+
+    const c = sortedCollection(Immutable.List(list));
+    const rates = c.rate({ fieldSpec: "in" });
+
+    expect(rates.size()).toEqual(list.length - 1);
+    expect(rates.at(0).get("in_rate")).toEqual(1);
+    expect(rates.at(1).get("in_rate")).toEqual(null);
+    expect(rates.at(2).get("in_rate")).toEqual(null);
+    expect(rates.at(3).get("in_rate")).toEqual(1);
+});

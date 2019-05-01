@@ -18,14 +18,18 @@ import Moment = moment.Moment;
 
 import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
-import { event } from "../src/event";
-import { indexedEvent, timeEvent, timeRangeEvent } from "../src/event";
+import { event, indexedEvent, timeEvent, timeRangeEvent } from "../src/event";
 import { avg, max, sum } from "../src/functions";
 import { index, Index } from "../src/index";
 import { time, Time } from "../src/time";
 import { timerange } from "../src/timerange";
-import { TimeSeries, TimeSeriesWireFormat } from "../src/timeseries";
-import { indexedSeries, timeRangeSeries, timeSeries } from "../src/timeseries";
+import {
+    indexedSeries,
+    timeRangeSeries,
+    TimeSeries,
+    timeSeries,
+    TimeSeriesWireFormat
+} from "../src/timeseries";
 import { TimeAlignment } from "../src/types";
 import { window } from "../src/window";
 
@@ -453,7 +457,10 @@ describe("Creation", () => {
         const events = [];
         events.push(timeEvent(time(new Date(2015, 7, 1)), Immutable.Map({ value: 27 })));
         events.push(timeEvent(time(new Date(2015, 8, 1)), Immutable.Map({ value: 14 })));
-        const series = new TimeSeries({ name: "events", events: Immutable.List(events) });
+        const series = new TimeSeries({
+            name: "events",
+            events: Immutable.List(events)
+        });
         expect(series.size()).toBe(2);
     });
 
@@ -486,7 +493,10 @@ describe("Creation", () => {
 
     it("can create an series with no events", () => {
         const events = [];
-        const series = new TimeSeries({ name: "events", events: Immutable.List(events) });
+        const series = new TimeSeries({
+            name: "events",
+            events: Immutable.List(events)
+        });
         expect(series.size()).toBe(0);
     });
 
@@ -624,7 +634,10 @@ describe("Deep Event Data", () => {
                 })
             )
         );
-        const series = new TimeSeries({ name: "Map traffic", events: Immutable.List(events) });
+        const series = new TimeSeries({
+            name: "Map traffic",
+            events: Immutable.List(events)
+        });
         expect(series.at(0).get("NASA_north").in).toBe(100);
         expect(series.at(3).get("NASA_south").out).toBe(175);
         expect(series.size()).toBe(4);

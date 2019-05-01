@@ -42,70 +42,32 @@ import { RateOptions } from "./types";
  */
 export class Rate<T extends Key> extends Processor<T, TimeRange> {
     // Internal state
-    private _fieldSpec: string[];
-    private _allowNegative: boolean;
+    private fieldSpec: string[];
+    private allowNegative: boolean;
 
-    private _previous: Event<T>;
+    private previous: Event<T>;
 
     constructor(options: RateOptions) {
         super();
         const { fieldSpec, allowNegative = false } = options;
 
         // Options
-        this._fieldSpec = _.isString(fieldSpec) ? [fieldSpec] : fieldSpec;
-        this._allowNegative = allowNegative;
+        this.fieldSpec = _.isString(fieldSpec) ? [fieldSpec] : fieldSpec;
+        this.allowNegative = allowNegative;
 
         // Previous event
-        this._previous = null;
-    }
-
-    /**
-     * Generate a new `TimeRangeEvent` containing the rate per second
-     * between two events.
-     */
-    getRate(event): Event<TimeRange> {
-        let d = Immutable.Map<string, any>();
-
-        const previousTime = this._previous.timestamp().getTime();
-        const currentTime = event.timestamp().getTime();
-        const deltaTime = (currentTime - previousTime) / 1000;
-
-        this._fieldSpec.forEach(path => {
-            const fieldPath = util.fieldAsArray(path);
-            const ratePath = fieldPath.slice();
-            ratePath[ratePath.length - 1] += "_rate";
-
-            const previousVal = this._previous.get(fieldPath);
-            const currentVal = event.get(fieldPath);
-
-            let rate = null;
-            if (!_.isNumber(previousVal) || !_.isNumber(currentVal)) {
-                // tslint:disable-next-line
-                console.warn(`Path ${fieldPath} contains a non-numeric value or does not exist`);
-            } else {
-                rate = (currentVal - previousVal) / deltaTime;
-            }
-
-            if (this._allowNegative === false && rate < 0) {
-                // don't allow negative differentials in certain cases
-                d = d.setIn(ratePath, null);
-            } else {
-                d = d.setIn(ratePath, rate);
-            }
-        });
-
-        return new Event(timerange(previousTime, currentTime), d);
+        this.previous = null;
     }
 
     /**
      * Perform the rate operation on the `Event` and the the `_previous`
      * `Event` and emit the result.
      */
-    addEvent(event: Event<T>): Immutable.List<Event<TimeRange>> {
+    public addEvent(event: Event<T>): Immutable.List<Event<TimeRange>> {
         const eventList = new Array<Event<TimeRange>>();
 
-        if (!this._previous) {
-            this._previous = event;
+        if (!this.previous) {
+            this.previous = event;
             return Immutable.List<Event<TimeRange>>();
         }
 
@@ -114,8 +76,50 @@ export class Rate<T extends Key> extends Processor<T, TimeRange> {
             eventList.push(rate);
         }
 
-        this._previous = event;
+        this.previous = event;
 
         return Immutable.List(eventList);
+    }
+
+    /**
+     * Generate a new `TimeRangeEvent` containing the rate per second
+     * between two events.
+     */
+    private getRate(event: Event<T>): Event<TimeRange> {
+        let d = Immutable.Map<string, any>();
+
+        const previousTime = this.previous.timestamp().getTime();
+        const currentTime = event.timestamp().getTime();
+        const deltaTime = (currentTime - previousTime) / 1000;
+
+        this.fieldSpec.forEach(path => {
+            const fieldPath = util.fieldAsArray(path);
+            const ratePath = fieldPath.slice();
+            ratePath[ratePath.length - 1] += "_rate";
+
+            const previousVal = this.previous.get(fieldPath);
+            const currentVal = event.get(fieldPath);
+
+            let rate = null;
+
+            if (_.isNumber(currentVal) && _.isNumber(previousVal)) {
+                // Calculate the rate
+                rate = (currentVal - previousVal) / deltaTime;
+            } else if (
+                (previousVal !== null && !_.isNumber(previousVal)) ||
+                (currentVal !== null && !_.isNumber(currentVal))
+            ) {
+                // Only issue warning if the current or previous values are bad
+                // i.e. not a number or not null (null values result in null output)
+                console.warn(`Event field "${fieldPath}" is a non-numeric or non-null value`);
+            }
+
+            d =
+                this.allowNegative === false && rate < 0
+                    ? (d = d.setIn(ratePath, null)) // don't allow negative differentials in certain cases
+                    : (d = d.setIn(ratePath, rate));
+        });
+
+        return new Event(timerange(previousTime, currentTime), d);
     }
 }

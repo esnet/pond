@@ -1,36 +1,13 @@
 {
-    "extends": "tslint:recommended",
-    "rules": {
-        "max-line-length": [
-            true,
-            100
-        ],
-        "member-access": false,
-        "variable-name": [
-            true,
-            "ban-keywords",
-            "check-format",
-            "allow-leading-underscore"
-        ],
-        "object-literal-sort-keys": false,
-        "no-require-imports": false,
-        "interface-name": [
-            true,
-            "never-prefix"
-        ],
-        "arrow-parens": [
-            true,
-            "ban-single-arg-parens"
-        ],
-        "trailing-comma": [
-            false,
-            {
-                "multiline": "never",
-                "singleline": "never"
-            }
-        ],
-        "semicolon": [
-            false
-        ]
-    }
+  "defaultSeverity": "error",
+  "extends": ["tslint:latest", "tslint-config-prettier"],
+  "jsRules": {},
+  "rules": {
+    "no-console": false,
+    "interface-name": false,
+    "no-submodule-imports": false,
+    "no-object-literal-type-assertion": false,
+    "object-literal-sort-keys": false
+  },
+  "rulesDirectory": []
 }

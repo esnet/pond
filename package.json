@@ -1,15 +1,21 @@
 {
-    "scripts": {
-        "start": "cd packages/website && npm run start",
-        "build": "cd packages/pond && npm run build",
-        "docs": "cd packages/pond && npm run docs",
-        "build-website":
-            "echo \"*** Building website\n\" && rm -rf docs && cd packages/website && npm run build",
-        "prettier": "prettier --print-width 100 --tab-width 4 --write \"packages/pond/src/**/*.ts\""
-    },
-    "devDependencies": {
-        "lerna": "^2.5.1",
-        "prettier": "^1.7.0"
-    },
-    "dependencies": {}
+  "scripts": {
+    "start": "cd packages/website && npm run start",
+    "build": "cd packages/pond && npm run build",
+    "docs": "cd packages/pond && npm run docs",
+    "build-website": "echo \"*** Building website\n\" && rm -rf docs && cd packages/website && npm run build",
+    "prettier": "prettier --print-width 100 --tab-width 4 --write \"packages/pond/src/**/*.ts\""
+  },
+  "devDependencies": {
+    "husky": "^2.1.0",
+    "lerna": "^3.13.4",
+    "prettier": "^1.17.0",
+    "pretty-quick": "^1.10.0"
+  },
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  }
 }
