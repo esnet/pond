@@ -35,18 +35,18 @@ import { RateOptions } from "./types";
  *  * `allowNegative` - allow emit of negative rates
  */
 export declare class Rate<T extends Key> extends Processor<T, TimeRange> {
-  private _fieldSpec;
-  private _allowNegative;
-  private _previous;
-  constructor(options: RateOptions);
-  /**
-   * Perform the rate operation on the `Event` and the the `_previous`
-   * `Event` and emit the result.
-   */
-  addEvent(event: Event<T>): Immutable.List<Event<TimeRange>>;
-  /**
-   * Generate a new `TimeRangeEvent` containing the rate per second
-   * between two events.
-   */
-  private getRate;
+    private fieldSpec;
+    private allowNegative;
+    private previous;
+    constructor(options: RateOptions);
+    /**
+     * Perform the rate operation on the `Event` and the the `_previous`
+     * `Event` and emit the result.
+     */
+    addEvent(event: Event<T>): Immutable.List<Event<TimeRange>>;
+    /**
+     * Generate a new `TimeRangeEvent` containing the rate per second
+     * between two events.
+     */
+    private getRate;
 }
