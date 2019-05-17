@@ -1,6 +1,6 @@
 {
     "name": "pondjs",
-    "version": "1.0.0-alpha.9",
+    "version": "1.0.0-alpha.10",
     "description": "A TimeSeries library built on Immutable.js with Typescript",
     "main": "lib/exports.js",
     "types": "lib/exports.d.ts",
