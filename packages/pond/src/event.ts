@@ -507,9 +507,11 @@ export class Event<T extends Key = Time> extends Base {
      * ```
      *
      * Note: the default `field` is "value".
+     * `fieldSeparator` lets one specify the separator used in the `field spec`
+     * (defaults to ".")
      */
-    public get(field: string | string[] = "value"): any {
-        const f = util.fieldAsArray(field);
+    public get(field: string | string[] = "value", fieldSeparator: string = "."): any {
+        const f = util.fieldAsArray(field, fieldSeparator);
         return this.getData().getIn(f);
     }
 
@@ -530,9 +532,15 @@ export class Event<T extends Key = Time> extends Base {
      * const modified = e.set("name", "fred");
      * modified.toString() // {"time": 1487983075328, "data": {"name":"fred"} }
      * ```
+     * `fieldSeparator` lets one specify the separator used in the `field spec`
+     * (defaults to ".")
      */
-    public set(field: string | string[] = "value", value: any): Event<T> {
-        const f = util.fieldAsArray(field);
+    public set(
+        field: string | string[] = "value",
+        value: any,
+        fieldSeparator: string = "."
+    ): Event<T> {
+        const f = util.fieldAsArray(field, fieldSeparator);
         return new Event<T>(this.getKey(), this.getData().setIn(f, value));
     }
 

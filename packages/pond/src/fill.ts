@@ -27,6 +27,7 @@ import { FillMethod, FillOptions } from "./types";
 export class Fill<T extends Key> extends Processor<T, T> {
     // Options
     private _fieldSpec: string[];
+    private _fieldSeparator: string;
     private _method: FillMethod;
     private _limit: number | null;
 
@@ -39,10 +40,11 @@ export class Fill<T extends Key> extends Processor<T, T> {
     constructor(options: FillOptions) {
         super();
 
-        const { fieldSpec, method = FillMethod.Pad, limit = null } = options;
+        const { fieldSpec, fieldSeparator = ".", method = FillMethod.Pad, limit = null } = options;
 
         // Options
         this._fieldSpec = _.isString(fieldSpec) ? [fieldSpec] : fieldSpec;
+        this._fieldSeparator = fieldSeparator;
         this._method = method;
         this._limit = limit;
 
@@ -66,7 +68,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
         let newData = data;
 
         for (const path of this._fieldSpec) {
-            const fieldPath = util.fieldAsArray(path);
+            const fieldPath = util.fieldAsArray(path, this._fieldSeparator);
             const pathKey = fieldPath.join(":");
 
             // initialize a counter for this column
@@ -122,7 +124,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
      */
     isValidLinearEvent(event: Event<T>) {
         let valid = true;
-        const fieldPath = util.fieldAsArray(this._fieldSpec[0]);
+        const fieldPath = util.fieldAsArray(this._fieldSpec[0], this._fieldSeparator);
 
         // Detect path that doesn't exist
         if (!event.getData().hasIn(fieldPath)) {
@@ -227,7 +229,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
         // new array of interpolated events for each field path
         const newEvents: Array<Event<T>> = [];
 
-        const fieldPath = util.fieldAsArray(this._fieldSpec[0]);
+        const fieldPath = util.fieldAsArray(this._fieldSpec[0], this._fieldSeparator);
 
         // setup done, loop through the events
         for (let i = 0; i < events.length; i++) {
