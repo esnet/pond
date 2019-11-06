@@ -10,7 +10,7 @@
     "husky": "^2.1.0",
     "lerna": "^3.13.4",
     "prettier": "^1.17.0",
-    "pretty-quick": "^1.10.0"
+    "pretty-quick": "^2.0.1"
   },
   "dependencies": {},
   "husky": {
