@@ -5,8 +5,8 @@
 
 **Version 1.0 (alpha)** of Pond.js is written in Typescript and has a brand new fully typed API**
 
-**Version 0.8.x** of Pond.js is the current version and the last version with the old API.
-([Documentation](https://esnet-pondjs.appspot.com/#/) is still available)  Note that v0.8.x
+**Version 0.9.x** of Pond.js is the current version and the last version with the old API.
+([Documentation](https://esnet-pondjs.appspot.com/#/) is still available)  Note that v0.8.x/v0.9.x
 is the only version currently aligned with [react-timeseries-charts](http://software.es.net/react-timeseries-charts).
 
 ---
