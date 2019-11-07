@@ -9,8 +9,6 @@
  */
 
 import * as Immutable from "immutable";
-import * as _ from "lodash";
-
 import { Collection } from "./collection";
 import { Event } from "./event";
 import { Key } from "./key";
@@ -105,10 +103,10 @@ export enum FillMethod {
  *  * reducer - a function mapping an `Immutable.List<Event>` to an `Event`
  *  * accumulator - an optional `Event` initial value
  */
-export interface ReduceOptions<K extends Key> {
+export interface ReduceOptions<K extends Key, D> {
     count: number;
-    accumulator?: Event<K>;
-    iteratee: ListReducer<K>;
+    accumulator?: Event<K, D>;
+    iteratee: ListReducer<K, D>;
 }
 
 /**
@@ -194,10 +192,10 @@ export interface FillOptions {
  *  * `toTimeEvents` - Convert the rollup events to `TimeEvent`s, otherwise it
  *                     will be returned as a `TimeSeries` of `IndexedEvent`s
  */
-export interface RollupOptions<T extends Key> {
+export interface RollupOptions<K extends Key, D> {
     window: WindowBase;
     timezone?: string;
-    aggregation?: AggregationSpec<T>;
+    aggregation?: AggregationSpec<K, D>;
     toTimeEvents?: boolean;
 }
 
@@ -229,9 +227,9 @@ export interface RenameColumnOptions {
  *                  'this.notation']. A single deep value with a
  *                  string.like.this.
  */
-export interface TimeSeriesOptions {
+export interface TimeSeriesOptions<D> {
     seriesList: Array<TimeSeries<Key>>;
-    reducer?: ReducerFunction | ArrayMapper | ListMapper;
+    reducer?: ReducerFunction | ArrayMapper<D> | ListMapper<D>;
     fieldSpec?: string | string[];
     [propName: string]: any;
 }
@@ -248,48 +246,57 @@ export interface TimeSeriesOptions {
  * the result you return will be the `Event` that those `Event`s will
  * be replaced with.
  */
-export type DedupFunction<T extends Key> = (events: Immutable.List<Event<T>>) => Event<T>;
+export type DedupFunction<K extends Key, D> = (events: Immutable.List<Event<K, D>>) => Event<K, D>;
 
 /**
  * A function which takes a list of numbers and returns a single number.
  */
 export type ReducerFunction = (values: number[]) => number;
 
+// export type Selector<D> = (data: D) => any;
+
+/**
+ * A function which takes a data value of type D and returns a single number.
+ */
+export type Selector<D> = (data: D) => number;
+
 /**
  * A function which combines an Array<Event<Key>> into a new Array<Event<Key>>
  */
-export type ArrayMapper = (events: Array<Event<Key>>) => Array<Event<Key>>;
+export type ArrayMapper<D> = (events: Array<Event<Key, D>>) => Array<Event<Key, D>>;
 
 /**
  * A function which combines a list of `Event`s into a new list of `Event`s
  */
-export type ListMapper = (events: Immutable.List<Event<Key>>) => Immutable.List<Event<Key>>;
+export type ListMapper<D> = (
+    events: Immutable.List<Event<Key, D>>
+) => Immutable.List<Event<Key, D>>;
 
 /**
  * A function which combines a `Immutable.List<Event<Key>>` into a single `Event`
  */
-export type ListReducer<T extends Key> = (
-    accum: Event<T>,
-    events: Immutable.List<Event<T>>
-) => Event<T>;
+export type ListReducer<T extends Key, D> = (
+    accum: Event<T, D>,
+    events: Immutable.List<Event<T, D>>
+) => Event<T, D>;
 
 /**
  * A callback function which is passed an `Event`
  */
-export type EventCallback<T extends Key> = (event: Event<T>) => void;
+export type EventCallback<K extends Key, D> = (event: Event<K, D>) => void;
 
 /**
  * A callback function which is passed a `Collection` and associated `key`
  */
-export type KeyedCollectionCallback<T extends Key> = (
-    collection: Collection<T>,
+export type KeyedCollectionCallback<K extends Key, D> = (
+    collection: Collection<K, D>,
     key: string
 ) => void;
 
 /**
  * A tuple of string key and associated `Collection`
  */
-export type KeyedCollection<T extends Key> = [string, Collection<T>];
+export type KeyedCollection<K extends Key, D> = [string, Collection<K, D>];
 
 //
 // Aggregation specification
@@ -305,13 +312,13 @@ export type AggregationTuple = [string, ReducerFunction];
  * An alternative to the `AggregationTuple` where you can specify a function to
  * generate the resulting aggregation given the full `Collection` as input.
  */
-export type AggregationMapFunction<T extends Key> = (collection: Collection<T>) => any;
+export type AggregationMapFunction<K extends Key, D> = (collection: Collection<K, D>) => any;
 
 /**
  * A general aggregation specification, either as a `AggregationTuple` or
  * `AggregationMapFunction`. Your choice.
  */
-export type Aggregation<T extends Key> = AggregationTuple | AggregationMapFunction<T>;
+export type Aggregation<K extends Key, D> = AggregationTuple | AggregationMapFunction<K, D>;
 
 /**
  * @example
@@ -322,6 +329,6 @@ export type Aggregation<T extends Key> = AggregationTuple | AggregationMapFuncti
  * };
  * ```
  */
-export interface AggregationSpec<T extends Key> {
-    [dest: string]: Aggregation<T>;
+export interface AggregationSpec<K extends Key, D> {
+    [dest: string]: Aggregation<K, D>;
 }

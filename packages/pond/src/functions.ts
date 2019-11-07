@@ -91,7 +91,7 @@ export function keep(clean = filter.ignoreMissing): ReducerFunction {
  * * `zeroMissing` - will replace missing values with a zero, which for a sum
  *                   is the same as excluding those values
  */
-export function sum(clean = filter.ignoreMissing): ReducerFunction {
+export function sum<D>(clean = filter.ignoreMissing): ReducerFunction {
     return (values: number[]): number => {
         const cleanValues = clean(values);
         if (!cleanValues) {

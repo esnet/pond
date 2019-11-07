@@ -1388,12 +1388,22 @@ export class TimeSeries<T extends Key> {
      * the `sum()` reducer function and an ["in", "out"] fieldSpec.
      *
      * ```
+     * interface InOutTraffic {
+     *     in: number;
+     *     out: number;
+     * }
+     *
+     * const series = timeSeries<InOutTraffic>()
+     *
      * const totalSeries = TimeSeries.timeSeriesListReduce({
      *     name: "totals",
      *     seriesList: [inTraffic, outTraffic],
      *     reducer: sum(),
      *     fieldSpec: [ "in", "out" ]
      * });
+     *        in    out    ->    result
+     * t1     5     6            11
+     * t2     3     5            8
      * ```
      */
     static timeSeriesListReduce<T extends Key>(options: TimeSeriesOptions): TimeSeries<T> {

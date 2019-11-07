@@ -10,30 +10,17 @@
 
 import * as Immutable from "immutable";
 import * as _ from "lodash";
-
 import { Base } from "./base";
-import { Collapse } from "./collapse";
 import { Event } from "./event";
+import { avg, InterpolationType, max, median, percentile, stdev, sum } from "./functions";
 import { Key } from "./key";
-import { Select } from "./select";
 import { timerange, TimeRange } from "./timerange";
+import { DedupFunction, ReducerFunction } from "./types";
 
-import { CollapseOptions, SelectOptions } from "./types";
-
-import { DedupFunction, ReducerFunction, ValueMap } from "./types";
-
-import {
-    avg,
-    first,
-    InterpolationType,
-    last,
-    max,
-    median,
-    min,
-    percentile,
-    stdev,
-    sum
-} from "./functions";
+/**
+ * A function which takes a data value of type D and returns a single number.
+ */
+export type Selector<D> = (data: D) => number;
 
 /**
  * Convert the `fieldspec` into a list if it is not already.
@@ -50,11 +37,15 @@ function fieldAsArray(field: string | string[]): string[] {
  * A `Collection` holds a ordered (but not sorted) list of `Event`s and provides the
  * underlying functionality for manipulating those `Event`s.
  *
- * In Typescript, `Collection` is a generic of type `T`, which is the homogeneous
- * `Event` type of the `Collection`. `T` is likely one of:
+ * In Typescript, `Collection` is a generic of type `K` and `D`, which is the homogeneous
+ * `Event` type of the `Collection`.
+ *
+ * `K` is likely one of:
  *  * `Collection<Time>`
  *  * `Collection<TimeRange>`
  *  * `Collection<Index>`
+ *
+ * `D` is the type of the data in each event.
  *
  * A `Collection` has several sub-classes, including a `SortedCollection`, which maintains
  * `Events` in chronological order.
@@ -63,15 +54,14 @@ function fieldAsArray(field: string | string[]): string[] {
  * chronological `Event`s. This provides the most common structure to use for dealing with
  * sequences of `Event`s.
  */
-export class Collection<T extends Key> extends Base {
+export class Collection<K extends Key, D> extends Base {
     /**
      * Rebuild the keyMap from scratch
      */
-    protected static buildKeyMap<S extends Key>(
-        events: Immutable.List<Event<S>>
+    protected static buildKeyMap<S extends Key, D>(
+        events: Immutable.List<Event<S, D>>
     ): Immutable.Map<string, Immutable.Set<number>> {
         let keyMap = Immutable.Map<string, Immutable.Set<number>>();
-
         events.forEach((e, i) => {
             const k = e.getKey().toString();
             const indicies: Immutable.Set<number> = keyMap.has(k)
@@ -79,13 +69,12 @@ export class Collection<T extends Key> extends Base {
                 : Immutable.Set<number>([i]);
             keyMap = keyMap.set(k, indicies);
         });
-
         return keyMap;
     }
 
     // Member variables
-    protected _events: Immutable.List<Event<T>>;
-    protected _keyMap: Immutable.Map<string, Immutable.Set<number>>;
+    protected events: Immutable.List<Event<K, D>>;
+    protected keyMap: Immutable.Map<string, Immutable.Set<number>>;
 
     /**
      * Construct a new `Collection`.
@@ -103,7 +92,7 @@ export class Collection<T extends Key> extends Base {
      * ```
      *
      * A `Collection` may also be constructed with an initial list of `Events`
-     * by supplying an `Immutable.List<Event<T>>`, or from another `Collection`
+     * by supplying an `Immutable.List<Event<K, D>>`, or from another `Collection`
      * to make a copy.
      *
      * See also `SortedCollection`, which keeps `Event`s in chronological order,
@@ -111,26 +100,26 @@ export class Collection<T extends Key> extends Base {
      * level interface for managing `Event`s, use the `TimeSeries`, which wraps
      * the `SortedCollection` along with meta data about that collection.
      */
-    constructor(arg1?: Immutable.List<Event<T>> | Collection<T>) {
+    constructor(arg1?: Immutable.List<Event<K, D>> | Collection<K, D>) {
         super();
         if (!arg1) {
-            this._events = Immutable.List<Event<T>>();
-            this._keyMap = Immutable.Map<string, Immutable.Set<number>>();
+            this.events = Immutable.List<Event<K, D>>();
+            this.keyMap = Immutable.Map<string, Immutable.Set<number>>();
         } else if (arg1 instanceof Collection) {
-            const other = arg1 as Collection<T>;
-            this._events = other._events;
-            this._keyMap = other._keyMap;
+            const other = arg1 as Collection<K, D>;
+            this.events = other.events;
+            this.keyMap = other.keyMap;
         } else if (Immutable.List.isList(arg1)) {
-            this._events = arg1;
-            this._keyMap = Collection.buildKeyMap<T>(arg1);
+            this.events = arg1;
+            this.keyMap = Collection.buildKeyMap<K, D>(arg1);
         }
     }
 
     /**
      * Returns the `Collection` as a regular JSON object.
      */
-    public toJSON(): any {
-        return this._events.toJS();
+    public toJSON(marshaller?: (d: D) => object): any {
+        return this.events.map(e => e.toJSON(marshaller)).toArray();
     }
 
     /**
@@ -171,13 +160,13 @@ export class Collection<T extends Key> extends Base {
      *     });
      * ```
      */
-    public addEvent(event: Event<T>, dedup?: DedupFunction<T> | boolean): Collection<T> {
+    public addEvent(event: Event<K, D>, dedup?: DedupFunction<K, D> | boolean): Collection<K, D> {
         const k = event.getKey().toString();
 
-        let events = this._events;
+        let events = this.events;
         let e = event; // Our event to be added
-        let indicies: Immutable.Set<number> = this._keyMap.has(k)
-            ? this._keyMap.get(k)
+        let indicies: Immutable.Set<number> = this.keyMap.has(k)
+            ? this.keyMap.get(k)
             : Immutable.Set<number>();
 
         // Dedup
@@ -185,7 +174,7 @@ export class Collection<T extends Key> extends Base {
             const conflicts = this.atKey(event.getKey()).toList();
             if (conflicts.size > 0) {
                 // Remove duplicates from the event list
-                events = this._events.filterNot(
+                events = this.events.filterNot(
                     duplicate => duplicate.getKey().toString() === event.getKey().toString()
                 );
 
@@ -204,38 +193,38 @@ export class Collection<T extends Key> extends Base {
 
         // Call the post add hook to give sub-classes a chance to modify
         // the event list. If they do, then we'll rebuild the keyMap.
-        let newKeyMap = this._keyMap;
+        let newKeyMap = this.keyMap;
 
         indicies = indicies.add(events.size - 1);
-        newKeyMap = this._keyMap.set(k, indicies);
+        newKeyMap = this.keyMap.set(k, indicies);
 
-        return this.clone(events, newKeyMap) as Collection<T>;
+        return this.clone(events, newKeyMap) as Collection<K, D>;
     }
 
     /**
      * Removes the `Event` (or duplicate keyed Events) with the given key.
      */
-    public removeEvents(key: T): Collection<T> {
+    public removeEvents(key: K): Collection<K, D> {
         const k = key.toString();
-        const indices = this._keyMap.get(k);
-        const events = this._events.filterNot((event, i) => indices.has(i));
-        const keyMap = this._keyMap.remove(k);
-        return this.clone(events, keyMap) as Collection<T>;
+        const indices = this.keyMap.get(k);
+        const events = this.events.filterNot((event, i) => indices.has(i));
+        const keyMap = this.keyMap.remove(k);
+        return this.clone(events, keyMap) as Collection<K, D>;
     }
 
     /**
      * Takes the last n `Event`'s of the `Collection` and returns a new `Collection`.
      */
-    public takeLast(amount: number): Collection<T> {
-        const events = this._events.takeLast(amount);
+    public takeLast(amount: number): Collection<K, D> {
+        const events = this.events.takeLast(amount);
         const keyMap = Collection.buildKeyMap(events);
-        return this.clone(events, keyMap) as Collection<T>;
+        return this.clone(events, keyMap) as Collection<K, D>;
     }
 
     /**
      * Completely replace the existing `Event`'s in this Collection.
      */
-    public setEvents(events: Immutable.List<Event<T>>): Collection<T> {
+    public setEvents(events: Immutable.List<Event<K, D>>): Collection<K, D> {
         let keyMap = Immutable.Map<string, Immutable.Set<number>>();
         events.forEach((e, i) => {
             const k = e.getKey().toString();
@@ -244,14 +233,14 @@ export class Collection<T extends Key> extends Base {
                 : Immutable.Set<number>([i]);
             keyMap = keyMap.set(k, indicies);
         });
-        return this.clone(events, keyMap) as Collection<T>;
+        return this.clone(events, keyMap) as Collection<K, D>;
     }
 
     /**
      * Returns the number of `Event`'s in this Collection
      */
     public size(): number {
-        return this._events.size;
+        return this.events.size;
     }
 
     /**
@@ -265,15 +254,16 @@ export class Collection<T extends Key> extends Base {
      *  * undefined
      *  * null.
      */
-    public sizeValid(fieldPath: string = "value"): number {
-        let count = 0;
-        this._events.forEach(e => {
-            if (e.isValid(fieldPath)) {
-                count++;
-            }
-        });
-        return count;
-    }
+    // XXX
+    // public sizeValid(fieldPath: string = "value"): number {
+    //     let count = 0;
+    //     this.events.forEach(e => {
+    //         if (e.isValid(fieldPath)) {
+    //             count++;
+    //         }
+    //     });
+    //     return count;
+    // }
 
     /**
      * Return if the `Collection` has any events in it
@@ -303,7 +293,7 @@ export class Collection<T extends Key> extends Base {
      * c1.at(1).get("a")  // 4
      * ```
      */
-    public at(pos: number): Event<T> {
+    public at(pos: number): Event<K, D> {
         return this.eventList().get(pos);
     }
 
@@ -329,34 +319,30 @@ export class Collection<T extends Key> extends Base {
      * event.get("a")   // 4
      * ```
      */
-    public atKey(key: T): Immutable.List<Event<T>> {
-        const indexes = this._keyMap.get(key.toString());
-        return indexes
-            .map(i => {
-                return this._events.get(i);
-            })
-            .toList();
+    public atKey(key: K): Immutable.List<Event<K, D>> {
+        const indexes = this.keyMap.get(key.toString());
+        return indexes.map(i => this.events.get(i)).toList();
     }
 
     /**
      * Returns the first event in the `Collection`.
      */
-    public firstEvent(): Event<T> {
-        return this._events.first();
+    public firstEvent(): Event<K, D> {
+        return this.events.first();
     }
 
     /**
      * Returns the last event in the `Collection`.
      */
-    public lastEvent(): Event<T> {
-        return this._events.last();
+    public lastEvent(): Event<K, D> {
+        return this.events.last();
     }
 
     /**
-     * Returns all the `Event<T>`s as an `Immutable.List`.
+     * Returns all the `Event<K, D>`s as an `Immutable.List`.
      */
-    public eventList(): Immutable.List<Event<T>> {
-        return this._events.toList();
+    public eventList(): Immutable.List<Event<K, D>> {
+        return this.events.toList();
     }
 
     /**
@@ -364,11 +350,11 @@ export class Collection<T extends Key> extends Base {
      * the key of type `T` (`Time`, `Index`, or `TimeRange`),
      * represented as a string, is mapped to the `Event` itself.
      *
-     * @returns Immutable.Map<T, Event<T>> Events in this Collection,
+     * @returns Immutable.Map<T, Event<K, D>> Events in this Collection,
      *                                     converted to a Map.
      */
     public eventMap() {
-        return this._events.toMap();
+        return this.events.toMap();
     }
 
     /**
@@ -384,8 +370,8 @@ export class Collection<T extends Key> extends Base {
      * }
      * ```
      */
-    public entries(): IterableIterator<[number, Event<T>]> {
-        return this._events.entries();
+    public entries(): IterableIterator<[number, Event<K, D>]> {
+        return this.events.entries();
     }
 
     /**
@@ -393,7 +379,7 @@ export class Collection<T extends Key> extends Base {
      *
      * `Event`s are in the order that they were added, unless the Collection
      * has since been sorted. The `sideEffect` is a user supplied function which
-     * is passed the `Event<T>` and the index.
+     * is passed the `Event<K, D>` and the index.
      *
      * Returns the number of items iterated.
      *
@@ -404,14 +390,15 @@ export class Collection<T extends Key> extends Base {
      * })
      * ```
      */
-    public forEach(sideEffect: (value?: Event<T>, index?: number) => any): number {
-        return this._events.forEach(sideEffect);
+    public forEach(sideEffect: (value?: Event<K, D>, index?: number) => any): number {
+        return this.events.forEach(sideEffect);
     }
 
     /**
-     * Map the `Event`s in this `Collection` to new `Event`s.
+     * Map the `Event`s of type <K, D> in this `Collection` to new `Event`s of
+     * type <KK, D> where K and KK may be different.
      *
-     * For each `Event` passed to your `mapper` function you return a new Event.
+     * For each `Event` passed to the `mapper` function you return a new Event.
      *
      * Example:
      * ```
@@ -420,19 +407,19 @@ export class Collection<T extends Key> extends Base {
      * });
      * ```
      */
-    public map<M extends Key>(
-        mapper: (event?: Event<T>, index?: number) => Event<M>
-    ): Collection<M> {
-        const remapped = this._events.map(mapper);
-        return new Collection<M>(Immutable.List<Event<M>>(remapped));
+    public map<KK extends Key>(
+        mapper: (event?: Event<K, D>, index?: number) => Event<KK, D>
+    ): Collection<KK, D> {
+        const remapped = this.events.map(mapper);
+        return new Collection<KK, D>(Immutable.List<Event<KK, D>>(remapped));
     }
 
     /**
      * Remap the keys, but keep the data the same. You can use this if you
-     * have a `Collection` of `Event<Index>` and want to convert to events
-     * of `Event<Time>`s, for example. The return result of remapping the
-     * keys of a T to U i.e. `Collection<T>` remapped with new keys of type
-     * `U` as a `Collection<U>`.
+     * have, say, a `Collection` of `Event<Index>` and want to convert to events
+     * of `Event<Time>`s. The return result of remapping the keys of a
+     * `K = Index` to `KK = Time` i.e. `Collection<K, D>` remapped with new keys of type
+     * `KK` as a `Collection<KK>` with the data type remaining the same, `D`.
      *
      * Example:
      *
@@ -447,17 +434,17 @@ export class Collection<T extends Key> extends Base {
      * ```
      *
      */
-    public mapKeys<U extends Key>(mapper: (key: T) => U): Collection<U> {
-        const list = this._events.map(
-            event => new Event<U>(mapper(event.getKey()), event.getData())
+    public mapKeys<KK extends Key>(mapper: (key: K) => KK): Collection<KK, D> {
+        const list = this.events.map(
+            event => new Event<KK, D>(mapper(event.getKey()), event.data())
         );
-        return new Collection<U>(list);
+        return new Collection<KK, D>(list);
     }
 
     /**
      * Flat map over the events in this `Collection`.
      *
-     * For each `Event<T>` passed to your callback function you should map that to
+     * For each `Event<K, D>` passed to your callback function you should map that to
      * zero, one or many `Event<U>`s, returned as an `Immutable.List<Event<U>>`.
      *
      * Example:
@@ -466,11 +453,11 @@ export class Collection<T extends Key> extends Base {
      * const filled = this.flatMap<T>(e => processor.addEvent(e));
      * ```
      */
-    public flatMap<U extends Key>(
-        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<U>>
-    ): Collection<U> {
-        const remapped: Immutable.List<Event<U>> = this._events.flatMap(mapper);
-        return new Collection<U>(Immutable.List<Event<U>>(remapped));
+    public flatMap<KK extends Key, DD>(
+        mapper: (event?: Event<K, D>, index?: number) => Immutable.List<Event<KK, DD>>
+    ): Collection<KK, DD> {
+        const remapped: Immutable.List<Event<KK, DD>> = this.events.flatMap(mapper);
+        return new Collection<KK, DD>(Immutable.List<Event<KK, DD>>(remapped));
     }
 
     /**
@@ -485,48 +472,46 @@ export class Collection<T extends Key> extends Base {
      *
      * See also `Collection.isChronological()`.
      *
-     * @example
+     * Example:
      * ```
      * const sorted = collection.sortByKey();
      * ```
      */
-    public sortByKey(): Collection<T> {
-        const sorted = Immutable.List<Event<T>>(
-            this._events.sortBy(event => {
+    public sortByKey(): Collection<K, D> {
+        const sorted = Immutable.List<Event<K, D>>(
+            this.events.sortBy(event => {
                 return +event.getKey().timestamp();
             })
         );
-        return new Collection<T>(sorted);
+        return new Collection<K, D>(sorted);
     }
 
     /**
-     * Sorts the `Collection` using the value referenced by
-     * the `field`.
+     * Sorts the `Collection` using the sort key (a number or string) returned by the sorter.
      */
-    public sort(field: string | string[]): Collection<T> {
-        const fs = fieldAsArray(field);
-        const sorted = Immutable.List<Event<T>>(
-            this._events.sortBy(event => {
-                return event.get(fs);
+    public sort(sorter: (data: D) => number | string): Collection<K, D> {
+        const sorted = Immutable.List<Event<K, D>>(
+            this.events.sortBy(event => {
+                return sorter(event.data());
             })
         );
-        return new Collection<T>(sorted);
+        return new Collection<K, D>(sorted);
     }
 
     /**
      * Perform a slice of events within the `Collection`, returns a new
-     * `Collection` representing a portion of this `TimeSeries` from `begin` up to
-     * but not including `end`.
+     * `Collection` representing a portion of this `TimeSeries` from `begin`
+     * up to but not including `end`.
      */
-    public slice(begin?: number, end?: number): Collection<T> {
-        return this.setEvents(this._events.slice(begin, end));
+    public slice(begin?: number, end?: number): Collection<K, D> {
+        return this.setEvents(this.events.slice(begin, end));
     }
 
     /**
      * Returns a new `Collection` with all `Event`s except the first
      */
-    public rest(): Collection<T> {
-        return this.setEvents(this._events.rest());
+    public rest(): Collection<K, D> {
+        return this.setEvents(this.events.rest());
     }
 
     /**
@@ -540,27 +525,29 @@ export class Collection<T extends Key> extends Base {
      * const filtered = collection.filter(e => e.get("a") < 8)
      * ```
      */
-    public filter(predicate: (event: Event<T>, index: number) => boolean) {
-        return this.setEvents(this._events.filter(predicate));
+    public filter(predicate: (event: Event<K, D>, index: number) => boolean) {
+        return this.setEvents(this.events.filter(predicate));
     }
 
     /**
-     * Returns the time range extents of the `Collection` as a `TimeRange`.
+     * Returns the time range extents of the `Collection` as a new `TimeRange`.
      *
      * Since this `Collection` is not necessarily in order, this method will traverse the
-     * `Collection` and determine the earliest and latest time represented within it.
+     * entire `Collection` and determine the earliest and latest time represented within it.
      */
-    public timerange(): TimeRange {
-        let minimum;
-        let maximum;
+    public timeRange(): TimeRange {
+        let minimum: number;
+        let maximum: number;
+
         this.forEach(e => {
-            if (!minimum || e.begin() < minimum) {
-                minimum = e.begin();
+            if (!minimum || +e.begin() < minimum) {
+                minimum = +e.begin();
             }
-            if (!maximum || e.end() > maximum) {
-                maximum = e.end();
+            if (!maximum || +e.end() > maximum) {
+                maximum = +e.end();
             }
         });
+
         if (minimum && maximum) {
             return timerange(minimum, maximum);
         }
@@ -569,147 +556,138 @@ export class Collection<T extends Key> extends Base {
     /**
      * Aggregates the `Collection`'s `Event`s down to a single value per field.
      *
+     * The user selects the values to use via the user defined selector function.
+     * That function will be passed each data object (type D) and should return
+     * either a string or number based on that data.
+     *
      * This makes use of a user defined function suppled as the `reducer` to do
      * the reduction of values to a single value. The `ReducerFunction` is defined
      * like so:
-     *
      * ```
      * (values: number[]) => number
      * ```
      *
-     * Fields to be aggregated are specified using a `fieldSpec` argument, which
-     * can be a field name or array of field names.
-     *
-     * If the `fieldSpec` matches multiple fields then an object is returned
-     * with keys being the fields and the values being the aggregated value for
-     * those fields. If the `fieldSpec` is for a single field then just the
-     * aggregated value is returned.
-     *
      * Note: The `Collection` class itself contains most of the common aggregation functions
-     * built in (e.g. `myCollection.avg("value")`), but this is here to help when what
+     * built in (e.g. `myCollection.avg(d => d.value)`), but this is here to help when what
      * you need isn't supplied out of the box.
      */
-    public aggregate(reducer: ReducerFunction, fieldSpec: string | string[]);
-    public aggregate(reducer: ReducerFunction, fieldSpec?) {
-        const v: ValueMap = Event.aggregate(this.eventList(), reducer, fieldSpec);
-        if (_.isString(fieldSpec)) {
-            return v[fieldSpec];
-        } else if (_.isArray(fieldSpec)) {
-            return v;
-        }
+    public aggregate(reducer: ReducerFunction, selector: Selector<D>): number {
+        return reducer(
+            this.eventList()
+                .map(e => selector(e.data()))
+                .toArray()
+        );
     }
 
-    /**
-     * Returns the first value in the `Collection` for the `fieldspec`
-     */
-    public first(fieldSpec: string, filter?): number;
-    public first(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public first(fieldSpec: any, filter?) {
-        return this.aggregate(first(filter), fieldSpec);
-    }
+    // /**
+    //  * Returns the first value in the `Collection` for the `fieldspec`
+    //  */
+    // public first(fieldSpec: string, filter?): number;
+    // public first(fieldSpec: string[], filter?): { [s: string]: number[] };
+    // public first(fieldSpec: any, filter?) {
+    //     return this.aggregate(first(filter), fieldSpec);
+    // }
 
-    /**
-     * Returns the last value in the `Collection` for the `fieldspec`
-     */
-    public last(fieldSpec: string, filter?): number;
-    public last(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public last(fieldSpec: any, filter?) {
-        return this.aggregate(last(filter), fieldSpec);
-    }
+    // /**
+    //  * Returns the last value in the `Collection` for the `fieldspec`
+    //  */
+    // public last(fieldSpec: string, filter?): number;
+    // public last(fieldSpec: string[], filter?): { [s: string]: number[] };
+    // public last(fieldSpec: any, filter?) {
+    //     return this.aggregate(last(filter), fieldSpec);
+    // }
 
     /**
      * Returns the sum of the `Event`'s in this `Collection`
      * for the `fieldspec`
      */
-    public sum(fieldSpec: string, filter?): number;
-    public sum(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public sum(fieldSpec: any, filter?) {
-        return this.aggregate(sum(filter), fieldSpec);
+    public sum(selector: Selector<D>, filter?): number {
+        return this.aggregate(sum(filter), selector);
     }
 
     /**
-     * Aggregates the `Event`'s in this `Collection` down
-     * to their average(s).
+     * Aggregates the `Event`'s in this `Collection` down to their average.
      *
-     * The `fieldSpec` passed into the avg function is either
-     * a field name or a list of fields.
+     * The `selector()` passed into the `avg()` function is a user defined function to select
+     * a numeric value to aggregate from the data.
      *
      * The `filter` is one of the Pond filter functions that can be used to remove
      * bad values in different ways before filtering.
      *
      * Example:
      * ```
-     * const e1 = event(time("2015-04-22T02:30:00Z"), Immutable.Map({ a: 8, b: 2 }));
-     * const e2 = event(time("2015-04-22T01:30:00Z"), Immutable.Map({ a: 3, b: 3 }));
-     * const e3 = event(time("2015-04-22T03:30:00Z"), Immutable.Map({ a: 5, b: 7 }));
+     * const e1 = event(time("2015-04-22T02:30:00Z"), { a: 8, b: 2 });
+     * const e2 = event(time("2015-04-22T01:30:00Z"), { a: 3, b: 3 });
+     * const e3 = event(time("2015-04-22T03:30:00Z"), { a: 5, b: 7 });
      * const c = collection<Time>()
      *     .addEvent(e1)
      *     .addEvent(e2)
      *     .addEvent(e3);
      *
-     * c.avg("b") // 4
+     * c.avg(a => d.b) // 4
      */
-    public avg(fieldSpec: string, filter?): number;
-    public avg(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public avg(fieldSpec: any, filter?) {
-        return this.aggregate(avg(filter), fieldSpec);
+    public avg(selector: Selector<D>, filter?): number {
+        return this.aggregate(avg(filter), selector);
     }
 
     /**
-     * Aggregates the `Event`'s in this `Collection` down to
-     * their maximum value(s).
+     * Aggregates the `Event`'s in this `Collection` down to their maximum value.
      *
-     * The `fieldSpec` passed into the avg function is either a field name or
-     * a list of fields.
+     * The `selector()` passed into the `max()` function is a user defined function to select
+     * a numeric value from each data point, the results of which are then used to aggregate
+     * the data.
      *
-     * The `filter` is one of the Pond filter functions that can be used to remove
+     * The `filter()` is one of the Pond filter functions that can be used to remove
      * bad values in different ways before filtering.
      *
      * The result is the maximum value if the fieldSpec is for one field. If
      * multiple fields then a map of fieldName -> max values is returned
      */
-    public max(fieldSpec: string, filter?): number;
-    public max(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public max(fieldSpec: any, filter?) {
-        return this.aggregate(max(filter), fieldSpec);
+    public max(selector: Selector<D>, filter?): number {
+        return this.aggregate(max(filter), selector);
     }
 
     /**
-     * Aggregates the `Event`'s in this `Collection` down to
-     * their minimum value(s)
+     * Aggregates the `Event`'s in this `Collection` down to their minumum value.
+     *
+     * The `selector()` passed into the `min()` function is a user defined function to select
+     * a numeric value from each data point, the results of which are then used to aggregate
+     * the data.
+     *
+     * The `filter()` is one of the Pond filter functions that can be used to remove
+     * bad values in different ways before filtering.
+     *
+     * The result is the maximum value if the fieldSpec is for one field. If
+     * multiple fields then a map of fieldName -> max values is returned
      */
-    public min(fieldSpec: string, filter?): number;
-    public min(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public min(fieldSpec: any, filter?) {
-        return this.aggregate(min(filter), fieldSpec);
+    public min(selector: Selector<D>, filter?): number {
+        return this.aggregate(max(filter), selector);
     }
 
     /**
      * Aggregates the events down to their median value
      */
-    public median(fieldSpec: string, filter?): number;
-    public median(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public median(fieldSpec: any, filter?) {
-        return this.aggregate(median(filter), fieldSpec);
+    public median(selector: Selector<D>, filter?): number {
+        return this.aggregate(median(filter), selector);
     }
 
     /**
      * Aggregates the events down to their standard deviation
      */
-    public stdev(fieldSpec: string, filter?): number;
-    public stdev(fieldSpec: string[], filter?): { [s: string]: number[] };
-    public stdev(fieldSpec: any, filter?) {
-        return this.aggregate(stdev(filter), fieldSpec);
+    public stdev(selector: Selector<D>, filter?): number {
+        return this.aggregate(stdev(filter), selector);
     }
 
     /**
      * Gets percentile q within the `Collection`. This works the same way as numpy.
      *
      * The percentile function has several parameters that can be supplied:
-     * * `q` - The percentile (should be between 0 and 100)
-     * * `fieldSpec` - Field or fields to find the percentile of
-     * * `interp` - Specifies the interpolation method to use when the desired, see below
-     * * `filter` - Optional filter function used to clean data before aggregating
+     * * `q`          - The percentile (should be between 0 and 100)
+     * * `selector()` - User defined function to select a numeric value from each
+     *                  data point, the results of which are then used to aggregate
+     *                  the data.
+     * * `interp`     - Specifies the interpolation method to use when the desired, see below
+     * * `filter`     - Optional filter function used to clean data before aggregating
      *
      * For `interp` a `InterpolationType` should be supplied if the default ("linear") is
      * not used. This enum is defined like so:
@@ -731,20 +709,13 @@ export class Collection<T extends Key> extends Base {
      *   * `midpoint`: (i + j) / 2.
      *
      */
-    public percentile(q: number, fieldSpec: string, interp?: InterpolationType, filter?): number;
     public percentile(
+        selector: Selector<D>,
         q: number,
-        fieldSpec: string[],
         interp?: InterpolationType,
         filter?
-    ): { [s: string]: number[] };
-    public percentile(
-        q: number,
-        fieldSpec: any,
-        interp: InterpolationType = InterpolationType.linear,
-        filter?
-    ) {
-        return this.aggregate(percentile(q, interp, filter), fieldSpec);
+    ): number {
+        return this.aggregate(percentile(q, interp, filter), selector);
     }
 
     /**
@@ -774,42 +745,46 @@ export class Collection<T extends Key> extends Base {
      *   * `nearest`: i or j whichever is nearest.
      *   * `midpoint`: (i + j) / 2.
      */
-    public quantile(
-        n: number,
-        column: string = "value",
-        interp: InterpolationType = InterpolationType.linear
-    ) {
-        const results = [];
-        const sorted = this.sort(column);
-        const subsets = 1.0 / n;
+    // XXX
+    // public quantile(selector: Selector<D>, n: number, interp?: InterpolationType, filter?): number {
+    // }
 
-        if (n > this.size()) {
-            throw new Error("Subset n is greater than the Collection length");
-        }
+    // public quantile(
+    //     n: number,
+    //     column: string = "value",
+    //     interp: InterpolationType = InterpolationType.linear
+    // ) {
+    //     const results = [];
+    //     const sorted = this.sort(column);
+    //     const subsets = 1.0 / n;
 
-        for (let i = subsets; i < 1; i += subsets) {
-            const index = Math.floor((sorted.size() - 1) * i);
-            if (index < sorted.size() - 1) {
-                const fraction = (sorted.size() - 1) * i - index;
-                const v0 = +sorted.at(index).get(column);
-                const v1 = +sorted.at(index + 1).get(column);
-                let v;
-                if (InterpolationType.lower || fraction === 0) {
-                    v = v0;
-                } else if (InterpolationType.linear) {
-                    v = v0 + (v1 - v0) * fraction;
-                } else if (InterpolationType.higher) {
-                    v = v1;
-                } else if (InterpolationType.nearest) {
-                    v = fraction < 0.5 ? v0 : v1;
-                } else if (InterpolationType.midpoint) {
-                    v = (v0 + v1) / 2;
-                }
-                results.push(v);
-            }
-        }
-        return results;
-    }
+    //     if (n > this.size()) {
+    //         throw new Error("Subset n is greater than the Collection length");
+    //     }
+
+    //     for (let i = subsets; i < 1; i += subsets) {
+    //         const index = Math.floor((sorted.size() - 1) * i);
+    //         if (index < sorted.size() - 1) {
+    //             const fraction = (sorted.size() - 1) * i - index;
+    //             const v0 = +sorted.at(index).get(column);
+    //             const v1 = +sorted.at(index + 1).get(column);
+    //             let v;
+    //             if (InterpolationType.lower || fraction === 0) {
+    //                 v = v0;
+    //             } else if (InterpolationType.linear) {
+    //                 v = v0 + (v1 - v0) * fraction;
+    //             } else if (InterpolationType.higher) {
+    //                 v = v1;
+    //             } else if (InterpolationType.nearest) {
+    //                 v = fraction < 0.5 ? v0 : v1;
+    //             } else if (InterpolationType.midpoint) {
+    //                 v = (v0 + v1) / 2;
+    //             }
+    //             results.push(v);
+    //         }
+    //     }
+    //     return results;
+    // }
 
     /**
      * Returns true if all events in this `Collection` are in chronological order.
@@ -830,99 +805,6 @@ export class Collection<T extends Key> extends Base {
         return result;
     }
 
-    /**
-     * Collapse multiple columns of a `Collection` into a new column.
-     *
-     * The `collapse()` method needs to be supplied with a `CollapseOptions`
-     * object. You use this to specify the columns to collapse, the column name
-     * of the column to collapse to and the reducer function. In addition you
-     * can choose to append this new column or use it in place of the columns
-     * collapsed.
-     *
-     * ```
-     * {
-     *    fieldSpecList: string[];
-     *    fieldName: string;
-     *    reducer: any;
-     *    append: boolean;
-     * }
-     * ```
-     * Options:
-     *  * `fieldSpecList` - the list of fields to collapse
-     *  * `fieldName` - the new field's name
-     *  * `reducer()` - a function to collapse using e.g. `avg()`
-     *  * `append` - to include only the new field, or include it in addition
-     *     to the previous fields.
-     *
-     * Example:
-     * ```
-     * // Initial collection
-     * const t1 = time("2015-04-22T02:30:00Z");
-     * const t2 = time("2015-04-22T03:30:00Z");
-     * const t3 = time("2015-04-22T04:30:00Z");
-     * const c = collection<Time>()
-     *     .addEvent(event(t1, Immutable.Map({ a: 5, b: 6 })))
-     *     .addEvent(event(t2, Immutable.Map({ a: 4, b: 2 })))
-     *     .addEvent( event(t2, Immutable.Map({ a: 6, b: 3 })));
-     *
-     * // Sum columns "a" and "b" into a new column "v"
-     * const sums = c.collapse({
-     *     fieldSpecList: ["a", "b"],
-     *     fieldName: "v",
-     *     reducer: sum(),
-     *     append: false
-     * });
-     *
-     * sums.at(0).get("v")  // 11
-     * sums.at(1).get("v")  // 6
-     * sums.at(2).get("v")  // 9
-     * ```
-     */
-    public collapse(options: CollapseOptions): Collection<T> {
-        const p = new Collapse<T>(options);
-        return this.flatMap(e => p.addEvent(e));
-    }
-
-    /**
-     * Select out specified columns from the `Event`s within this `Collection`.
-     *
-     * The `select()` method needs to be supplied with a `SelectOptions`
-     * object, which takes the following form:
-     *
-     * ```
-     * {
-     *     fields: string[];
-     * }
-     * ```
-     * Options:
-     *  * `fields` - array of columns to keep within each `Event`.
-     *
-     * Example:
-     * ```
-     * const timestamp1 = time("2015-04-22T02:30:00Z");
-     * const timestamp2 = time("2015-04-22T03:30:00Z");
-     * const timestamp3 = time("2015-04-22T04:30:00Z");
-     * const e1 = event(timestamp1, Immutable.Map({ a: 5, b: 6, c: 7 }));
-     * const e2 = event(timestamp2, Immutable.Map({ a: 4, b: 5, c: 6 }));
-     * const e3 = event(timestamp2, Immutable.Map({ a: 6, b: 3, c: 2 }));
-     *
-     * const c = collection<Time>()
-     *     .addEvent(e1)
-     *     .addEvent(e2)
-     *     .addEvent(e3);
-     *
-     * const c1 = c.select({
-     *     fields: ["b", "c"]
-     * });
-     *
-     * // result: 3 events containing just b and c (a is discarded)
-     * ```
-     */
-    public select(options: SelectOptions): Collection<T> {
-        const p = new Select<T>(options);
-        return this.flatMap(e => p.addEvent(e));
-    }
-
     //
     // To be reimplemented by subclass
     //
@@ -931,19 +813,21 @@ export class Collection<T extends Key> extends Base {
      * Internal method to clone this `Collection` (protected)
      */
     protected clone(events, keyMap): Base {
-        const c = new Collection<T>();
-        c._events = events;
-        c._keyMap = keyMap;
+        const c = new Collection<K, D>();
+        c.events = events;
+        c.keyMap = keyMap;
         return c;
     }
 
-    protected onEventAdded(events: Immutable.List<Event<T>>): Immutable.List<Event<T>> {
+    protected onEventAdded(events: Immutable.List<Event<K, D>>): Immutable.List<Event<K, D>> {
         return events;
     }
 }
 
-function collectionFactory<T extends Key>(arg1?: Immutable.List<Event<T>> | Collection<T>) {
-    return new Collection<T>(arg1);
+function collectionFactory<K extends Key, D>(
+    arg1?: Immutable.List<Event<K, D>> | Collection<K, D>
+) {
+    return new Collection<K, D>(arg1);
 }
 
 export { collectionFactory as collection };
