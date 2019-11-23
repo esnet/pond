@@ -310,12 +310,14 @@ function dataFromArg(
 
 /**
  * Convert the `field spec` into a list if it is not already.
+ * `fieldSeparator` lets one specify the separator used in the `field spec`
+ * (defaults to ".")
  */
-function fieldAsArray(field: string | string[]): string[] {
+function fieldAsArray(field: string | string[], fieldSeparator: string = "."): string[] {
     if (_.isArray(field)) {
         return field;
     } else if (_.isString(field)) {
-        return field.split(".");
+        return field.split(fieldSeparator);
     }
 }
 

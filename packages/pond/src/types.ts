@@ -167,22 +167,26 @@ export interface CollapseOptions {
 /**
  * Option object passed to the `rate()` function:
  *  * fieldSpec - the field to calculate the rate on
+ *  * fieldSeparator - the separator used in the `fieldSpec` (defaults to ".")
  *  * allowNegative - allow emit of negative rates
  */
 export interface RateOptions {
     fieldSpec: string | string[];
+    fieldSeparator?: string;
     allowNegative?: boolean;
 }
 
 /**
  * Options object expected by the `fill()` function:
  *  * `fieldSpec` - the field to fill
+ *  * `fieldSeparator` - the separator used in the `fieldSpec` (defaults to ".")
  *  * `method` - the interpolation method, one of
  *    `FillMethod.Hold`, `FillMethod.Pad` or `FillMethod.Linear`
  *  * `limit` - the number of missing values to fill before giving up
  */
 export interface FillOptions {
     fieldSpec: string | string[];
+    fieldSeparator?: string;
     method?: FillMethod;
     limit?: number;
 }

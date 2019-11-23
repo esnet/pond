@@ -38,21 +38,24 @@ import { RateOptions } from "./types";
  * ```
  * Options:
  *  * `fieldSpec` - the field to calculate the rate on
+ *  * `fieldSeparator` - the separator used in the `fieldSpec` (defaults to ".")
  *  * `allowNegative` - allow emit of negative rates
  */
 export class Rate<T extends Key> extends Processor<T, TimeRange> {
     // Internal state
     private fieldSpec: string[];
+    private fieldSeparator: string;
     private allowNegative: boolean;
 
     private previous: Event<T>;
 
     constructor(options: RateOptions) {
         super();
-        const { fieldSpec, allowNegative = false } = options;
+        const { fieldSpec, allowNegative = false, fieldSeparator = "." } = options;
 
         // Options
         this.fieldSpec = _.isString(fieldSpec) ? [fieldSpec] : fieldSpec;
+        this.fieldSeparator = fieldSeparator;
         this.allowNegative = allowNegative;
 
         // Previous event
@@ -93,7 +96,7 @@ export class Rate<T extends Key> extends Processor<T, TimeRange> {
         const deltaTime = (currentTime - previousTime) / 1000;
 
         this.fieldSpec.forEach(path => {
-            const fieldPath = util.fieldAsArray(path);
+            const fieldPath = util.fieldAsArray(path, this.fieldSeparator);
             const ratePath = fieldPath.slice();
             ratePath[ratePath.length - 1] += "_rate";
 

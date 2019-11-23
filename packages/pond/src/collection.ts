@@ -35,16 +35,7 @@ import {
     sum
 } from "./functions";
 
-/**
- * Convert the `fieldspec` into a list if it is not already.
- */
-function fieldAsArray(field: string | string[]): string[] {
-    if (_.isArray(field)) {
-        return field;
-    } else if (_.isString(field)) {
-        return field.split(".");
-    }
-}
+import util from "./util";
 
 /**
  * A `Collection` holds a ordered (but not sorted) list of `Event`s and provides the
@@ -502,9 +493,11 @@ export class Collection<T extends Key> extends Base {
     /**
      * Sorts the `Collection` using the value referenced by
      * the `field`.
+     * `fieldSeparator` lets one specify the separator used in the `field spec`
+     * (defaults to ".")
      */
-    public sort(field: string | string[]): Collection<T> {
-        const fs = fieldAsArray(field);
+    public sort(field: string | string[], fieldSeparator: string = "."): Collection<T> {
+        const fs = util.fieldAsArray(field, fieldSeparator);
         const sorted = Immutable.List<Event<T>>(
             this._events.sortBy(event => {
                 return event.get(fs);
