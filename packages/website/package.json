@@ -10,7 +10,7 @@
         "prismjs": "^1.8.1",
         "react": "^15.4.2",
         "react-addons-shallow-compare": "^15.6.0",
-        "react-bootstrap": "^0.31.0",
+        "react-bootstrap": "^0.32.4",
         "react-dom": "^15.4.2",
         "react-lowlight": "^1.1.1",
         "react-markdown": "^2.4.6",
