@@ -9,7 +9,7 @@
     "dependencies": {
         "immutable": "^4.0.0-rc.12",
         "lodash": "^4.17.11",
-        "moment": "^2.24.0",
+        "moment": "^2.19.3",
         "moment-timezone": "^0.5.25"
     },
     "devDependencies": {
