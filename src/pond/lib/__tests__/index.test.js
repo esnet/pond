@@ -100,7 +100,7 @@ it("can create a day index", done => {
 
 it("can create a day index for a date", done => {
     const date = new Date(1429673400000);
-    const expected = "2015-04-21";
+    const expected = "2015-04-22";
     expect(Index.getDailyIndexString(date)).toBe(expected);
     done();
 });

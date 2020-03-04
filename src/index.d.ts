@@ -294,9 +294,9 @@ declare module "pondjs" {
          *  outageEvent.data()
          * to fetch the whole data object, which will be an Immutable Map.
          */
-    export class Event {
+    export class TimeEvent {
         /**
-             *  The creation of an Event is done by combining two parts: the timestamp and the data.
+             *  The creation of an TimeEvent is done by combining two parts: the timestamp and the data.
              * To construct you specify the timestamp as either:
              *  - Javascript Date object
              *  - a Moment, or
@@ -1030,7 +1030,7 @@ declare module "pondjs" {
                 | {
                       name: string;
                       utc?: boolean;
-                      events: Event[] | IndexedEvent[] | TimeRangeEvent[];
+                      events: TimeEvent[] | IndexedEvent[] | TimeRangeEvent[];
                   }
                 | {
                       name: string;
@@ -1075,24 +1075,24 @@ declare module "pondjs" {
              * Params
              *      pos number - The event position
              */
-        at(pos: number): Event | TimeRangeEvent | IndexedEvent;
+        at(pos: number): TimeEvent | TimeRangeEvent | IndexedEvent;
 
         /**
              * Returns an event in the series by its time. This is the same as calling bisect first and then using at with the index.
              * Params
              *      time Date - The time of the event.
              */
-        atTime(time: Date): Event | TimeRangeEvent | IndexedEvent;
+        atTime(time: Date): TimeEvent | TimeRangeEvent | IndexedEvent;
 
         /**
              * Returns the first event in the series.
              */
-        atFirst(): Event | TimeRangeEvent | IndexedEvent;
+        atFirst(): TimeEvent | TimeRangeEvent | IndexedEvent;
 
         /**
              * Returns the last event in the series.
              */
-        atLast(): Event | TimeRangeEvent | IndexedEvent;
+        atLast(): TimeEvent | TimeRangeEvent | IndexedEvent;
 
         /**
              * Generator to return all the events in the series.
@@ -1103,7 +1103,7 @@ declare module "pondjs" {
              * }
              */
         events():
-            | Enumerator<Event>
+            | Enumerator<TimeEvent>
             | Enumerator<TimeRangeEvent>
             | Enumerator<IndexedEvent>;
 
