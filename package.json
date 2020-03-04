@@ -12,6 +12,7 @@
     "license": "BSD-3-Clause-LBNL",
     "dependencies": {
         "@babel/polyfill": "^7.7.0",
+        "babel-preset-react-app": "^7.0.0",
         "immutable": "^3.6.4",
         "immutable-devtools": "0.0.4",
         "moment": "^2.24.0",
