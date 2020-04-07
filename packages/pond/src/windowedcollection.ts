@@ -187,12 +187,12 @@ export class WindowedCollection<T extends Key> extends Base {
      * mapping just the window to the `SortedCollection`.
      */
     public ungroup(): Immutable.Map<string, SortedCollection<T>> {
-        const result = Immutable.Map<string, SortedCollection<T>>();
+        const mutableResult: { [key: string]: SortedCollection<T> } = {};
         this.collections.forEach((collection, key) => {
             const newKey = key.split("::")[1];
-            result[newKey] = collection;
+            mutableResult[newKey] = collection;
         });
-        return result;
+        return Immutable.Map<SortedCollection<T>>(mutableResult);
     }
 
     addEvent(event: Event<T>): Immutable.List<KeyedCollection<T>> {
@@ -262,8 +262,8 @@ export class WindowedCollection<T extends Key> extends Base {
             }
         }
         const groupKey = fn ? fn(event) : null;
-        return windowKeyList.map(
-            windowKey => (groupKey ? `${groupKey}::${windowKey}` : `${windowKey}`)
+        return windowKeyList.map(windowKey =>
+            groupKey ? `${groupKey}::${windowKey}` : `${windowKey}`
         );
     }
 }

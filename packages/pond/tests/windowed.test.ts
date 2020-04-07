@@ -154,4 +154,27 @@ describe("Windowed", () => {
         expect(rolledUp.at(2).get("total")).toBe(5);
         expect(rolledUp.at(3).get("total")).toBe(10);
     });
+
+    it("can ungroup WindowedCollection", () => {
+        const eventCollection = sortedCollection(
+            Immutable.List([
+                event(time("2015-04-22T02:28:00Z"), map({ value: 3 })),
+                event(time("2015-04-22T02:29:00Z"), map({ value: 4 })),
+                event(time("2015-04-22T02:30:00Z"), map({ value: 5 })),
+                event(time("2015-04-22T02:29:00Z"), map({ value: 3 })),
+                event(time("2015-04-22T02:30:00Z"), map({ value: 4 })),
+                event(time("2015-04-22T02:31:00Z"), map({ value: 6 }))
+            ])
+        );
+
+        const everyThirtyMinutes = window(duration("30m"));
+        const groups = eventCollection.window({ window: everyThirtyMinutes }).ungroup();
+
+        expect(groups.size).toBe(2);
+
+        const groupsList = groups.toList();
+
+        expect(groupsList.get(0).size()).toBe(3);
+        expect(groupsList.get(1).size()).toBe(3);
+    });
 });
