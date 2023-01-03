@@ -5,7 +5,7 @@
     "homepage": "http://software.es.net/pond",
     "dependencies": {
         "bootstrap": "^3.3.7",
-        "jest-cli": "^20.0.4",
+        "jest-cli": "^29.3.1",
         "lodash.clonedeep": "^4.5.0",
         "prismjs": "^1.8.1",
         "react": "^15.4.2",
@@ -20,7 +20,7 @@
     },
     "devDependencies": {
         "eslint": "^3.17.1",
-        "react-scripts": "^1.0.10",
+        "react-scripts": "^5.0.1",
         "react-test-renderer": "^15.6.1"
     },
     "scripts": {
