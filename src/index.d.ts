@@ -1061,6 +1061,11 @@ declare module "pondjs" {
         timerange(): TimeRange;
 
         /**
+             * Alias for `timerange()`
+             */
+        range(): TimeRange;
+
+        /**
              * Gets the earliest time represented in the TimeSeries.
              */
         begin(): Date;
