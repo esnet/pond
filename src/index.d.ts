@@ -225,7 +225,7 @@ declare module "pondjs" {
         /**
              *  Given the time range, return a list of strings of index values every tick.
              */
-        static getIndexStringList(): string;
+        static getIndexStringList(win: string, date: Date): string;
 
         /**
              * Generate an index string with day granularity.
