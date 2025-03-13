@@ -82,10 +82,9 @@ class Rate extends processor_1.Processor {
             if (_.isNumber(currentVal) && _.isNumber(previousVal)) {
                 // Calculate the rate
                 rate = (currentVal - previousVal) / deltaTime;
-            } else if (
-                (previousVal !== null && !_.isNumber(previousVal)) ||
-                (currentVal !== null && !_.isNumber(currentVal))
-            ) {
+            }
+            else if ((previousVal !== null && !_.isNumber(previousVal)) ||
+                (currentVal !== null && !_.isNumber(currentVal))) {
                 // Only issue warning if the current or previous values are bad
                 // i.e. not a number or not null (null values result in null output)
                 console.warn(`Event field "${fieldPath}" is a non-numeric or non-null value`);

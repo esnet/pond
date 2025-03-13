@@ -509,6 +509,9 @@ export class Event<T extends Key = Time> extends Base {
      * Note: the default `field` is "value".
      */
     public get(field: string | string[] = "value"): any {
+        if (_.isString(field) && this.data.has(field)) {
+            return this.getData().get(field);
+        }
         const f = util.fieldAsArray(field);
         return this.getData().getIn(f);
     }

@@ -8,17 +8,15 @@
  *  This source code is licensed under the BSD-style license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-var __rest =
-    (this && this.__rest) ||
-    function(s, e) {
-        var t = {};
-        for (var p in s)
-            if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-        if (s != null && typeof Object.getOwnPropertySymbols === "function")
-            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++)
-                if (e.indexOf(p[i]) < 0) t[p[i]] = s[p[i]];
-        return t;
-    };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const Immutable = require("immutable");
 const _ = require("lodash");
@@ -39,7 +37,8 @@ function buildMetaData(meta) {
     if (meta.index) {
         if (_.isString(meta.index)) {
             d.index = new index_1.Index(meta.index).asString();
-        } else if (meta.index instanceof index_1.Index) {
+        }
+        else if (meta.index instanceof index_1.Index) {
             d.index = meta.index.asString();
         }
     }
@@ -66,8 +65,7 @@ function buildMetaData(meta) {
  */
 function timeSeries(arg) {
     const wireFormat = arg;
-    const { columns, points, tz = "Etc/UTC" } = wireFormat,
-        meta2 = __rest(wireFormat, ["columns", "points", "tz"]);
+    const { columns, points, tz = "Etc/UTC" } = wireFormat, meta2 = __rest(wireFormat, ["columns", "points", "tz"]);
     const [eventKey, ...eventFields] = columns;
     const events = points.map(point => {
         const [key, ...eventValues] = point;
@@ -93,8 +91,7 @@ exports.timeSeries = timeSeries;
  */
 function indexedSeries(arg) {
     const wireFormat = arg;
-    const { columns, points, tz = "Etc/UTC" } = wireFormat,
-        meta2 = __rest(wireFormat, ["columns", "points", "tz"]);
+    const { columns, points, tz = "Etc/UTC" } = wireFormat, meta2 = __rest(wireFormat, ["columns", "points", "tz"]);
     const [eventKey, ...eventFields] = columns;
     const events = points.map(point => {
         const [key, ...eventValues] = point;
@@ -120,8 +117,7 @@ exports.indexedSeries = indexedSeries;
  */
 function timeRangeSeries(arg) {
     const wireFormat = arg;
-    const { columns, points, tz = "Etc/UTC" } = wireFormat,
-        meta2 = __rest(wireFormat, ["columns", "points", "tz"]);
+    const { columns, points, tz = "Etc/UTC" } = wireFormat, meta2 = __rest(wireFormat, ["columns", "points", "tz"]);
     const [eventKey, ...eventFields] = columns;
     const events = points.map(point => {
         const [key, ...eventValues] = point;
@@ -287,21 +283,21 @@ class TimeSeries {
             const other = arg;
             this._data = other._data;
             this._collection = other._collection;
-        } else if (_.isObject(arg)) {
+        }
+        else if (_.isObject(arg)) {
             if (_.has(arg, "collection")) {
                 //
                 // Initialized from a Collection
                 //
-                const { collection } = arg,
-                    meta3 = __rest(arg, ["collection"]);
+                const { collection } = arg, meta3 = __rest(arg, ["collection"]);
                 this._collection = new sortedcollection_1.SortedCollection(collection);
                 this._data = buildMetaData(meta3);
-            } else if (_.has(arg, "events")) {
+            }
+            else if (_.has(arg, "events")) {
                 //
                 // Has a list of events
                 //
-                const { events } = arg,
-                    meta1 = __rest(arg, ["events"]);
+                const { events } = arg, meta1 = __rest(arg, ["events"]);
                 this._collection = new sortedcollection_1.SortedCollection(events);
                 this._data = buildMetaData(meta1);
             }
@@ -390,7 +386,8 @@ class TimeSeries {
         const result = new TimeSeries(this);
         if (collection) {
             result._collection = collection;
-        } else {
+        }
+        else {
             result._collection = new sortedcollection_1.SortedCollection();
         }
         return result;
@@ -505,7 +502,8 @@ class TimeSeries {
     meta(key) {
         if (!key) {
             return this._data.toJSON();
-        } else {
+        }
+        else {
             return this._data.get(key);
         }
     }
@@ -779,9 +777,7 @@ class TimeSeries {
      *
      */
     mapKeys(mapper) {
-        const collection = new sortedcollection_1.SortedCollection(
-            this._collection.mapKeys(mapper)
-        );
+        const collection = new sortedcollection_1.SortedCollection(this._collection.mapKeys(mapper));
         return this.setCollection(collection);
     }
     /**
@@ -832,9 +828,7 @@ class TimeSeries {
      * ```
      */
     select(options) {
-        const collection = new sortedcollection_1.SortedCollection(
-            this._collection.select(options)
-        );
+        const collection = new sortedcollection_1.SortedCollection(this._collection.select(options));
         return this.setCollection(collection);
     }
     /**
@@ -887,9 +881,7 @@ class TimeSeries {
      * ```
      */
     collapse(options) {
-        const collection = new sortedcollection_1.SortedCollection(
-            this._collection.collapse(options)
-        );
+        const collection = new sortedcollection_1.SortedCollection(this._collection.collapse(options));
         return this.setCollection(collection);
     }
     /**
@@ -959,21 +951,24 @@ class TimeSeries {
         let filledCollection;
         if (method === types_1.FillMethod.Zero || method === types_1.FillMethod.Pad) {
             filledCollection = this._collection.fill({ fieldSpec, method, limit });
-        } else if (method === types_1.FillMethod.Linear) {
+        }
+        else if (method === types_1.FillMethod.Linear) {
             if (_.isArray(fieldSpec)) {
                 filledCollection = this._collection;
                 fieldSpec.forEach(fieldPath => {
                     const args = { fieldSpec: fieldPath, method, limit };
                     filledCollection = filledCollection.fill(args);
                 });
-            } else {
+            }
+            else {
                 filledCollection = this._collection.fill({
                     fieldSpec,
                     method,
                     limit
                 });
             }
-        } else {
+        }
+        else {
             throw new Error(`Invalid fill method: ${method}`);
         }
         const collection = new sortedcollection_1.SortedCollection(filledCollection);
@@ -1072,9 +1067,7 @@ class TimeSeries {
             throw new Error("window must be supplied");
         }
         if (!options.aggregation || !_.isObject(options.aggregation)) {
-            throw new Error(
-                "aggregation object must be supplied, for example: {value: {value: avg()}}"
-            );
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
         const aggregatorPipeline = this._collection
             .window({ window: options.window, trigger: types_1.Trigger.onDiscardedWindow })
@@ -1097,9 +1090,7 @@ class TimeSeries {
     hourlyRollup(options) {
         const { aggregation } = options;
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error(
-                "aggregation object must be supplied, for example: {value: {value: avg()}}"
-            );
+            throw new Error("aggregation object must be supplied, for example: {value: {value: avg()}}");
         }
         return this.fixedWindowRollup({
             window: window_1.window(duration_1.duration("1h")),
@@ -1120,9 +1111,7 @@ class TimeSeries {
     dailyRollup(options) {
         const { aggregation, timezone = "Etc/UTC" } = options;
         if (!aggregation || !_.isObject(aggregation)) {
-            throw new Error(
-                "aggregation object must be supplied, for example: {avg_value: {value: avg()}}"
-            );
+            throw new Error("aggregation object must be supplied, for example: {avg_value: {value: avg()}}");
         }
         return this._rollup({ window: window_1.daily(timezone), aggregation });
     }
@@ -1221,10 +1210,8 @@ class TimeSeries {
      * are of the same value as each other then equals will return true.
      */
     static is(series1, series2) {
-        return (
-            Immutable.is(series1._data, series2._data) &&
-            sortedcollection_1.SortedCollection.is(series1._collection, series2._collection)
-        );
+        return (Immutable.is(series1._data, series2._data) &&
+            sortedcollection_1.SortedCollection.is(series1._collection, series2._collection));
     }
     /**
      * Reduces a list of `TimeSeries` objects using a reducer function. This works
@@ -1251,12 +1238,10 @@ class TimeSeries {
      * ```
      */
     static timeSeriesListReduce(options) {
-        const { seriesList, fieldSpec, reducer } = options,
-            data = __rest(options, ["seriesList", "fieldSpec", "reducer"]);
+        const { seriesList, fieldSpec, reducer } = options, data = __rest(options, ["seriesList", "fieldSpec", "reducer"]);
         const combiner = event_1.Event.combiner(fieldSpec, reducer);
-        return TimeSeries.timeSeriesListEventReduce(
-            Object.assign({ seriesList, fieldSpec, reducer: combiner }, data)
-        );
+        return TimeSeries.timeSeriesListEventReduce(Object.assign({ seriesList,
+            fieldSpec, reducer: combiner }, data));
     }
     /**
      * Takes a list of `TimeSeries` and merges them together to form a new
@@ -1281,19 +1266,16 @@ class TimeSeries {
      * ```
      */
     static timeSeriesListMerge(options) {
-        const { seriesList, fieldSpec, reducer, deep = false } = options,
-            data = __rest(options, ["seriesList", "fieldSpec", "reducer", "deep"]);
+        const { seriesList, fieldSpec, reducer, deep = false } = options, data = __rest(options, ["seriesList", "fieldSpec", "reducer", "deep"]);
         const merger = event_1.Event.merger(deep);
-        return TimeSeries.timeSeriesListEventReduce(
-            Object.assign({ seriesList, fieldSpec, reducer: merger }, data)
-        );
+        return TimeSeries.timeSeriesListEventReduce(Object.assign({ seriesList,
+            fieldSpec, reducer: merger }, data));
     }
     /**
      * @private
      */
     static timeSeriesListEventReduce(options) {
-        const { seriesList, fieldSpec, reducer } = options,
-            data = __rest(options, ["seriesList", "fieldSpec", "reducer"]);
+        const { seriesList, fieldSpec, reducer } = options, data = __rest(options, ["seriesList", "fieldSpec", "reducer"]);
         if (!seriesList || !_.isArray(seriesList)) {
             throw new Error("A list of TimeSeries must be supplied to reduce");
         }

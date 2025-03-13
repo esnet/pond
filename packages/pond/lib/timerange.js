@@ -41,22 +41,28 @@ class TimeRange extends key_1.Key {
         if (arg1 instanceof TimeRange) {
             const other = arg1;
             this._range = other._range;
-        } else if (arg1 instanceof Immutable.List) {
+        }
+        else if (arg1 instanceof Immutable.List) {
             const rangeList = arg1;
             this._range = rangeList;
-        } else if (arg1 instanceof Array) {
+        }
+        else if (arg1 instanceof Array) {
             const rangeArray = arg1;
             this._range = Immutable.List([new Date(rangeArray[0]), new Date(rangeArray[1])]);
-        } else {
+        }
+        else {
             const b = arg1;
             const e = arg2;
             if (_.isDate(b) && _.isDate(e)) {
                 this._range = Immutable.List([new Date(b.getTime()), new Date(e.getTime())]);
-            } else if (moment.isMoment(b) && moment.isMoment(e)) {
+            }
+            else if (moment.isMoment(b) && moment.isMoment(e)) {
                 this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
-            } else if (time_1.Time.isTime(b) && time_1.Time.isTime(e)) {
+            }
+            else if (time_1.Time.isTime(b) && time_1.Time.isTime(e)) {
                 this._range = Immutable.List([new Date(b.valueOf()), new Date(e.valueOf())]);
-            } else if (_.isNumber(b) && _.isNumber(e)) {
+            }
+            else if (_.isNumber(b) && _.isNumber(e)) {
                 this._range = Immutable.List([new Date(b), new Date(e)]);
             }
         }
@@ -185,10 +191,8 @@ class TimeRange extends key_1.Key {
      * in that they have the same times.
      */
     equals(other) {
-        return (
-            this.begin().getTime() === other.begin().getTime() &&
-            this.end().getTime() === other.end().getTime()
-        );
+        return (this.begin().getTime() === other.begin().getTime() &&
+            this.end().getTime() === other.end().getTime());
     }
     /**
      * Determine if a `Date` or a `TimeRange` is contained entirely
@@ -197,7 +201,8 @@ class TimeRange extends key_1.Key {
     contains(other) {
         if (_.isDate(other)) {
             return this.begin() <= other && this.end() >= other;
-        } else {
+        }
+        else {
             return this.begin() <= other.begin() && this.end() >= other.end();
         }
     }
@@ -213,12 +218,11 @@ class TimeRange extends key_1.Key {
      * this `TimeRange`.
      */
     overlaps(other) {
-        if (
-            (this.contains(other.begin()) && !this.contains(other.end())) ||
-            (this.contains(other.end()) && !this.contains(other.begin()))
-        ) {
+        if ((this.contains(other.begin()) && !this.contains(other.end())) ||
+            (this.contains(other.end()) && !this.contains(other.begin()))) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }

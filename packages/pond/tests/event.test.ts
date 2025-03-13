@@ -120,6 +120,16 @@ describe("Time Events", () => {
         const eventValue = event1.get(["NorthRoute", "in"]);
         expect(eventValue).toBe(123);
     });
+
+    it("can check get values when field has a dot notation", () => {
+        const timestamp = time(new Date("2015-04-22T03:30:00Z"));
+        const event1 = event(
+            timestamp,
+            Immutable.fromJS({ "not.fieldpath": { in: 789, out: 223 } })
+        );
+        const eventValue = event1.get("not.fieldpath");
+        expect(eventValue.toJS()).toEqual({ in: 789, out: 223 });
+    });
 });
 
 describe("Indexed Events", () => {
