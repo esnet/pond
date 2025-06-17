@@ -1,0 +1,52 @@
+name: Test and build the project
+
+on:
+    pull_request:
+        branches:
+            - master
+    push:
+        branches:
+            - master
+
+jobs:
+    # Test and build the library
+    build-lib:
+        runs-on: ubuntu-24.04
+        defaults:
+            run:
+                working-directory: ./packages/pond/
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 23
+                  cache: "npm"
+                  cache-dependency-path: ./package-lock.json
+            - name: Install dependencies
+              run: npm ci
+              working-directory: ./
+            - name: Run lint
+              run: npm run lint
+            - name: Run tests
+              run: npm test
+            - name: Build library
+              run: npm run build
+
+    # Test and build the website
+    build-website:
+        runs-on: ubuntu-24.04
+        defaults:
+            run:
+                working-directory: ./packages/website/
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 23
+                  cache: "npm"
+                  cache-dependency-path: ./package-lock.json
+            - name: Install dependencies
+              run: npm ci
+              working-directory: ./
+            - name: Run tests
+              run: npm test

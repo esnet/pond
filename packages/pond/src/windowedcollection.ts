@@ -25,7 +25,7 @@ import {
     AggregationTuple,
     KeyedCollection,
     Trigger,
-    WindowingOptions
+    WindowingOptions,
 } from "./types";
 
 import {
@@ -38,7 +38,7 @@ import {
     min,
     percentile,
     stdev,
-    sum
+    sum,
 } from "./functions";
 
 /**
@@ -74,18 +74,18 @@ export class WindowedCollection<T extends Key> extends Base {
     constructor(collectionMap: Immutable.Map<string, SortedCollection<T>>);
     constructor(
         windowing: WindowingOptions,
-        collectionMap: Immutable.Map<string, SortedCollection<T>>
+        collectionMap: Immutable.Map<string, SortedCollection<T>>,
     );
     constructor(windowing: WindowingOptions, collection?: SortedCollection<T>);
     constructor(
         windowing: WindowingOptions,
         group: string | string[],
-        collection?: SortedCollection<T>
+        collection?: SortedCollection<T>,
     );
     constructor(arg1: any, arg2?: any, arg3?: any) {
         super();
         if (Immutable.Map.isMap(arg1)) {
-            this.collections = arg1;
+            this.collections = arg1 as Immutable.Map<string, any>;
         } else {
             this.options = arg1 as WindowingOptions;
 
@@ -98,20 +98,20 @@ export class WindowedCollection<T extends Key> extends Base {
                 // window's period and duration, as supplied in the `WindowOptions`.
                 let remapped = Immutable.List();
                 collections.forEach((c, k) => {
-                    c.forEach(e => {
+                    c.forEach((e) => {
                         const groups = this.options.window
                             .getIndexSet(time(e.timestamp()))
                             .toList();
-                        groups.forEach(g => {
+                        groups.forEach((g) => {
                             remapped = remapped.push([`${k}::${g.asString()}`, e]);
                         });
                     });
                 });
 
                 this.collections = remapped
-                    .groupBy(e => e[0])
-                    .map(eventList => eventList.map(kv => kv[1]))
-                    .map(eventList => new SortedCollection<T>(eventList.toList()))
+                    .groupBy((e) => e[0])
+                    .map((eventList) => eventList.map((kv) => kv[1]))
+                    .map((eventList) => new SortedCollection<T>(eventList.toList()))
                     .toMap();
             } else {
                 let collection;
@@ -166,7 +166,7 @@ export class WindowedCollection<T extends Key> extends Base {
             }
             eventMap = eventMap.set(groupKey, eventMap.get(groupKey).push(indexedEvent));
         });
-        const mapping = eventMap.map(eventList => new SortedCollection<Index>(eventList));
+        const mapping = eventMap.map((eventList) => new SortedCollection<Index>(eventList));
         return new GroupedCollection<Index>(mapping);
     }
 
@@ -176,8 +176,8 @@ export class WindowedCollection<T extends Key> extends Base {
      */
     public flatten(): SortedCollection<T> {
         let events = Immutable.List<Event<T>>();
-        this.collections.flatten().forEach(collection => {
-            events = events.concat(collection.eventList());
+        this.collections.flatten().forEach((collection) => {
+            events = events.concat((collection as SortedCollection<T>).eventList());
         });
         return new SortedCollection<T>(events);
     }
@@ -205,7 +205,7 @@ export class WindowedCollection<T extends Key> extends Base {
         const keys: Immutable.List<string> = this.getEventGroups(event);
 
         // Add event to an existing collection(s) or a new collection(s)
-        keys.forEach(key => {
+        keys.forEach((key) => {
             // Add event to collection referenced by this key
             let targetCollection: SortedCollection<T>;
             let createdCollection = false;
@@ -258,12 +258,12 @@ export class WindowedCollection<T extends Key> extends Base {
             } else {
                 const fieldSpec = this.group as string | string[];
                 const fs = util.fieldAsArray(fieldSpec);
-                fn = e => e.get(fs);
+                fn = (e) => e.get(fs);
             }
         }
         const groupKey = fn ? fn(event) : null;
-        return windowKeyList.map(
-            windowKey => (groupKey ? `${groupKey}::${windowKey}` : `${windowKey}`)
+        return windowKeyList.map((windowKey) =>
+            groupKey ? `${groupKey}::${windowKey}` : `${windowKey}`,
         );
     }
 }
@@ -271,16 +271,16 @@ export class WindowedCollection<T extends Key> extends Base {
 function windowFactory<T extends Key>(collectionMap: Immutable.Map<string, SortedCollection<T>>);
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
-    collectionMap?: Immutable.Map<string, SortedCollection<T>>
+    collectionMap?: Immutable.Map<string, SortedCollection<T>>,
 );
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
-    initialCollection?: SortedCollection<T> // tslint:disable-line:unified-signatures
+    initialCollection?: SortedCollection<T>, // tslint:disable-line:unified-signatures
 );
 function windowFactory<T extends Key>(
     windowOptions: WindowingOptions,
     group: string | string[],
-    initialCollection?: SortedCollection<T>
+    initialCollection?: SortedCollection<T>,
 );
 function windowFactory<T extends Key>(arg1: any, arg2?: any) {
     return new WindowedCollection<T>(arg1, arg2);

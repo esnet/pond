@@ -1,0 +1,53 @@
+name: Publish the documentation to GitHub pages
+
+defaults:
+    run:
+        working-directory: ./packages/website/
+
+on:
+    push:
+        tags:
+            - "*"
+
+permissions:
+    contents: read
+
+jobs:
+    # Build the documentation and upload the static files as an artifact.
+    build:
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 23
+                  cache: "npm"
+                  cache-dependency-path: ./package-lock.json
+            - id: pages-config
+              uses: actions/configure-pages@v5
+            - name: Install dependencies
+              run: npm ci
+              working-directory: ./
+            - name: Build the documentation website
+              env:
+                  REACT_APP_VERSION: ${{ github.ref_name }}
+                  REACT_APP_BASE_URL: ${{ steps.pages-config.outputs.base_url }}
+                  REACT_APP_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+              run: npm run build
+            - uses: actions/upload-pages-artifact@v3
+              with:
+                  path: ./packages/website/build/
+
+    # Deploy the artifact to GitHub pages.
+    deploy:
+        needs: build
+        runs-on: ubuntu-24.04
+        permissions:
+            pages: write
+            id-token: write
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - id: deployment
+              uses: actions/deploy-pages@v4

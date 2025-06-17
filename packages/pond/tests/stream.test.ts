@@ -31,7 +31,7 @@ const streamingEvents = [
     event(time(210000), Immutable.Map({ count: 6, value: 220 })),
     event(time(240000), Immutable.Map({ count: 1, value: 300 })),
     event(time(270000), Immutable.Map({ count: 0, value: 390 })),
-    event(time(300000), Immutable.Map({ count: 2, value: 510 }))
+    event(time(300000), Immutable.Map({ count: 2, value: 510 })),
 ];
 
 describe("Streaming", () => {
@@ -42,10 +42,10 @@ describe("Streaming", () => {
             [1471824210000, 1], // 00:03:30
             [1471824390000, 1], // 00:06:30
             [1471824510000, 3], // 00:08:30
-            [1471824525000, 5] // 00:08:45
+            [1471824525000, 5], // 00:08:45
         ];
 
-        const list = SIMPLE_GAP_DATA.map(e => {
+        const list = SIMPLE_GAP_DATA.map((e) => {
             return event(time(e[0]), Immutable.Map({ value: e[1] }));
         });
 
@@ -55,12 +55,12 @@ describe("Streaming", () => {
             .align({
                 fieldSpec: "value",
                 period: everyMinute,
-                method: AlignmentMethod.Linear
+                method: AlignmentMethod.Linear,
             })
             .rate({ fieldSpec: "value", allowNegative: false })
-            .output(e => result.push(e));
+            .output((e) => result.push(e));
 
-        list.forEach(e => {
+        list.forEach((e) => {
             s.addEvent(e);
         });
 
@@ -79,7 +79,7 @@ describe("Streaming", () => {
             event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ in: 9, out: 2 })),
             event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ in: 6, out: 6 })),
             event(time(Date.UTC(2015, 2, 14, 8, 0, 0)), Immutable.Map({ in: 4, out: 7 })),
-            event(time(Date.UTC(2015, 2, 14, 8, 1, 0)), Immutable.Map({ in: 5, out: 9 }))
+            event(time(Date.UTC(2015, 2, 14, 8, 1, 0)), Immutable.Map({ in: 5, out: 9 })),
         ];
 
         const result: { [key: string]: Collection<Time> } = {};
@@ -88,14 +88,14 @@ describe("Streaming", () => {
         const source = stream<Time>()
             .groupByWindow({
                 window: everyThirtyMinutes,
-                trigger: Trigger.perEvent
+                trigger: Trigger.perEvent,
             })
             .output((c, key) => {
                 result[key] = c;
                 calls += 1;
             });
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(result["30m-792399"].size()).toEqual(3);
         expect(result["30m-792400"].size()).toEqual(2);
@@ -108,7 +108,7 @@ describe("Streaming", () => {
             event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ in: 9, out: 2 })),
             event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ in: 6, out: 6 })),
             event(time(Date.UTC(2015, 2, 14, 8, 0, 0)), Immutable.Map({ in: 4, out: 7 })),
-            event(time(Date.UTC(2015, 2, 14, 8, 1, 0)), Immutable.Map({ in: 5, out: 9 }))
+            event(time(Date.UTC(2015, 2, 14, 8, 1, 0)), Immutable.Map({ in: 5, out: 9 })),
         ];
 
         const result: { [key: string]: Event<Index> } = {};
@@ -117,18 +117,18 @@ describe("Streaming", () => {
         const source = stream<Time>()
             .groupByWindow({
                 window: everyThirtyMinutes,
-                trigger: Trigger.perEvent
+                trigger: Trigger.perEvent,
             })
             .aggregate({
                 in_avg: ["in", avg()],
-                out_avg: ["out", avg()]
+                out_avg: ["out", avg()],
             })
-            .output(e => {
+            .output((e) => {
                 result[e.getKey().toString()] = e;
                 calls += 1;
             });
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(result["30m-792399"].get("in_avg")).toEqual(6);
         expect(result["30m-792399"].get("out_avg")).toEqual(3);
@@ -144,7 +144,7 @@ describe("Streaming", () => {
             event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ in: 6, out: 6 })),
             event(time(Date.UTC(2015, 2, 14, 8, 0, 0)), Immutable.Map({ in: 4, out: 7 })),
             event(time(Date.UTC(2015, 2, 14, 8, 1, 0)), Immutable.Map({ in: 5, out: 9 })),
-            event(time(Date.UTC(2015, 2, 14, 8, 31, 0)), Immutable.Map({ in: 0, out: 0 }))
+            event(time(Date.UTC(2015, 2, 14, 8, 31, 0)), Immutable.Map({ in: 0, out: 0 })),
         ];
 
         const result: { [key: string]: Event<Index> } = {};
@@ -154,19 +154,19 @@ describe("Streaming", () => {
         const source = stream<Time>()
             .groupByWindow({
                 window: everyThirtyMinutes,
-                trigger: Trigger.onDiscardedWindow
+                trigger: Trigger.onDiscardedWindow,
             })
             .aggregate({
                 in_avg: ["in", avg()],
-                out_avg: ["out", avg()]
+                out_avg: ["out", avg()],
             })
-            .output(evt => {
+            .output((evt) => {
                 const e = evt as Event<Index>;
                 result[e.getKey().toString()] = e;
                 outputCalls += 1;
             });
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(outputCalls).toBe(2); // .output should be called twice
         expect(result["30m-792399"].get("in_avg")).toEqual(6);
@@ -178,16 +178,16 @@ describe("Streaming", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
             event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
-            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 }))
+            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 })),
         ];
 
         const result: Event[] = [];
 
         const source = stream<Time>()
-            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })))
-            .output(e => result.push(e));
+            .map((e) => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })))
+            .output((e) => result.push(e));
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(result[0].get("a")).toEqual(2);
         expect(result[1].get("a")).toEqual(4);
@@ -198,25 +198,25 @@ describe("Streaming", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
             event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
-            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 }))
+            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 })),
         ];
 
         const result: Event[] = [];
 
         const source = stream<Time>()
-            .flatMap(e => {
+            .flatMap((e) => {
                 let eventList = Immutable.List<Event<Time>>();
                 const num = e.get("a");
                 for (let i = 0; i < num; i++) {
                     eventList = eventList.push(
-                        event(e.getKey(), Immutable.Map({ a: num * 10 + i }))
+                        event(e.getKey(), Immutable.Map({ a: num * 10 + i })),
                     );
                 }
                 return eventList;
             })
-            .output(e => result.push(e));
+            .output((e) => result.push(e));
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(result[0].get("a")).toEqual(10);
 
@@ -234,16 +234,16 @@ describe("Streaming", () => {
             event(time(Date.UTC(2015, 2, 14, 7, 32, 0)), Immutable.Map({ a: 2 })),
             event(time(Date.UTC(2015, 2, 14, 7, 33, 0)), Immutable.Map({ a: 3 })),
             event(time(Date.UTC(2015, 2, 14, 7, 34, 0)), Immutable.Map({ a: 4 })),
-            event(time(Date.UTC(2015, 2, 14, 7, 35, 0)), Immutable.Map({ a: 5 }))
+            event(time(Date.UTC(2015, 2, 14, 7, 35, 0)), Immutable.Map({ a: 5 })),
         ];
 
         const result: Event[] = [];
 
         const source = stream<Time>()
-            .filter(e => e.get("a") % 2 !== 0)
-            .output(e => result.push(e));
+            .filter((e) => e.get("a") % 2 !== 0)
+            .output((e) => result.push(e));
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(result[0].get("a")).toEqual(1);
         expect(result[1].get("a")).toEqual(3);
@@ -251,9 +251,13 @@ describe("Streaming", () => {
     });
 
     it("can selection of specific event fields", () => {
-        const DATA = [[1471824030000, 1, 2, 3], [1471824105000, 4, 5, 6], [1471824210000, 7, 8, 9]];
+        const DATA = [
+            [1471824030000, 1, 2, 3],
+            [1471824105000, 4, 5, 6],
+            [1471824210000, 7, 8, 9],
+        ];
 
-        const list = DATA.map(e => {
+        const list = DATA.map((e) => {
             return event(time(e[0]), Immutable.Map({ a: e[1], b: e[2], c: e[3] }));
         });
 
@@ -261,11 +265,11 @@ describe("Streaming", () => {
 
         const s = stream()
             .select({
-                fields: ["b", "c"]
+                fields: ["b", "c"],
             })
-            .output(e => result.push(e));
+            .output((e) => result.push(e));
 
-        list.forEach(e => {
+        list.forEach((e) => {
             s.addEvent(e);
         });
 
@@ -281,9 +285,13 @@ describe("Streaming", () => {
     });
 
     it("can collapse of specific event fields", () => {
-        const DATA = [[1471824030000, 1, 2, 3], [1471824105000, 4, 5, 6], [1471824210000, 7, 8, 9]];
+        const DATA = [
+            [1471824030000, 1, 2, 3],
+            [1471824105000, 4, 5, 6],
+            [1471824210000, 7, 8, 9],
+        ];
 
-        const list = DATA.map(e => {
+        const list = DATA.map((e) => {
             return event(time(e[0]), Immutable.Map({ a: e[1], b: e[2], c: e[3] }));
         });
 
@@ -294,13 +302,13 @@ describe("Streaming", () => {
                 fieldSpecList: ["a", "b"],
                 fieldName: "ab",
                 reducer: sum(),
-                append: false
+                append: false,
             })
-            .output(e => {
+            .output((e) => {
                 result.push(e);
             });
 
-        list.forEach(e => {
+        list.forEach((e) => {
             s.addEvent(e);
         });
 
@@ -316,7 +324,7 @@ describe("Streaming", () => {
             event(time(Date.UTC(2015, 2, 14, 1, 16, 0)), Immutable.Map({ in: 2, out: 7 })),
             event(time(Date.UTC(2015, 2, 14, 1, 17, 0)), Immutable.Map({ in: 3, out: 8 })),
             event(time(Date.UTC(2015, 2, 14, 1, 18, 0)), Immutable.Map({ in: 4, out: 9 })),
-            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ in: 5, out: 10 }))
+            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ in: 5, out: 10 })),
         ];
 
         const result: { [key: string]: Collection<Time> } = {};
@@ -326,24 +334,24 @@ describe("Streaming", () => {
         const source = stream()
             .groupByWindow({
                 window: slidingWindow,
-                trigger: Trigger.onDiscardedWindow
+                trigger: Trigger.onDiscardedWindow,
             })
             .aggregate({
                 in_avg: ["in", avg()],
                 out_avg: ["out", avg()],
-                count: ["in", count()]
+                count: ["in", count()],
             })
-            .map(e => new Event<Time>(time(e.timerange().end()), e.getData()))
+            .map((e) => new Event<Time>(time(e.timerange().end()), e.getData()))
             .groupByWindow({
                 window: fixedHourlyWindow,
-                trigger: Trigger.perEvent
+                trigger: Trigger.perEvent,
             })
             .output((col, key) => {
                 result[key] = col as Collection<Time>;
                 calls += 1;
             });
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         const c = result["1h-396193"];
         expect(c.size()).toBe(4);
@@ -376,12 +384,12 @@ describe("Streaming", () => {
                     const current = eventList.get(0);
                     const total = accum.get("total") + current.get("count");
                     return event(time(current.timestamp()), Immutable.Map({ total }));
-                }
+                },
             })
-            .output(e => results.push(e));
+            .output((e) => results.push(e));
 
         // Stream events
-        streamingEvents.forEach(e => source.addEvent(e));
+        streamingEvents.forEach((e) => source.addEvent(e));
 
         expect(results[0].get("total")).toBe(5);
         expect(results[5].get("total")).toBe(21);
@@ -395,17 +403,17 @@ describe("Streaming", () => {
             .reduce({
                 count: 5,
                 iteratee(accum, eventList) {
-                    const values = eventList.map(e => e.get("value")).toJS();
+                    const values = eventList.map((e) => e.get("value")).toJS();
                     return event(
-                        time(eventList.last().timestamp()),
-                        Immutable.Map({ avg: avg()(values) })
+                        time((eventList.last() as Event).timestamp()),
+                        Immutable.Map({ avg: avg()(values) }),
                     );
-                }
+                },
             })
-            .output(e => results.push(e));
+            .output((e) => results.push(e));
 
         // Stream events
-        streamingEvents.forEach(e => source.addEvent(e));
+        streamingEvents.forEach((e) => source.addEvent(e));
 
         expect(results[0].get("avg")).toBe(1);
         expect(results[5].get("avg")).toBe(50.6);
@@ -416,7 +424,7 @@ describe("Streaming", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
             event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
-            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 }))
+            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 })),
         ];
 
         const result1: Event[] = [];
@@ -425,14 +433,14 @@ describe("Streaming", () => {
         const source = stream<Time>();
 
         const branch1 = source
-            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 }))) // 2, 4, 6
-            .output(e => result1.push(e));
+            .map((e) => event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 }))) // 2, 4, 6
+            .output((e) => result1.push(e));
 
         const branch2 = source
-            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 3, 6, 9
-            .output(e => result2.push(e));
+            .map((e) => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 3, 6, 9
+            .output((e) => result2.push(e));
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(result1[0].get("a")).toBe(2);
         expect(result1[1].get("a")).toBe(4);
@@ -447,25 +455,25 @@ describe("Streaming", () => {
         const eventsIn = [
             event(time(Date.UTC(2015, 2, 14, 7, 57, 0)), Immutable.Map({ a: 1 })),
             event(time(Date.UTC(2015, 2, 14, 7, 58, 0)), Immutable.Map({ a: 2 })),
-            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 }))
+            event(time(Date.UTC(2015, 2, 14, 7, 59, 0)), Immutable.Map({ a: 3 })),
         ];
 
         const result1: Event[] = [];
         const result2: Event[] = [];
 
-        const source = stream<Time>().map(e =>
-            event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 }))
+        const source = stream<Time>().map((e) =>
+            event(e.getKey(), Immutable.Map({ a: e.get("a") * 2 })),
         ); // 2, 4, 6
 
         const branch1 = source
-            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 6, 12, 18
-            .output(e => result1.push(e));
+            .map((e) => event(e.getKey(), Immutable.Map({ a: e.get("a") * 3 }))) // 6, 12, 18
+            .output((e) => result1.push(e));
 
         const branch2 = source
-            .map(e => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 }))) // 8, 16, 24
-            .output(e => result2.push(e));
+            .map((e) => event(e.getKey(), Immutable.Map({ a: e.get("a") * 4 }))) // 8, 16, 24
+            .output((e) => result2.push(e));
 
-        eventsIn.forEach(e => source.addEvent(e));
+        eventsIn.forEach((e) => source.addEvent(e));
 
         expect(result1[0].get("a")).toBe(6);
         expect(result1[1].get("a")).toBe(12);
@@ -484,7 +492,7 @@ describe("Streaming", () => {
             event(time(Date.UTC(2015, 2, 14, 1, 16, 0)), Immutable.Map({ in: 2 })),
             event(time(Date.UTC(2015, 2, 14, 1, 17, 0)), Immutable.Map({ in: 3 })),
             event(time(Date.UTC(2015, 2, 14, 1, 18, 0)), Immutable.Map({ in: 4 })),
-            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ in: 5 }))
+            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ in: 5 })),
         ];
 
         const streamOut = [
@@ -492,12 +500,12 @@ describe("Streaming", () => {
             event(time(Date.UTC(2015, 2, 14, 1, 16, 0)), Immutable.Map({ out: 10, count: 3 })),
             event(time(Date.UTC(2015, 2, 14, 1, 17, 0)), Immutable.Map({ count: 4 })),
             event(time(Date.UTC(2015, 2, 14, 1, 18, 0)), Immutable.Map({ out: 12, count: 5 })),
-            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ out: 13, count: 6 }))
+            event(time(Date.UTC(2015, 2, 14, 1, 19, 0)), Immutable.Map({ out: 13, count: 6 })),
         ];
 
         const source = stream()
             .coalesce({
-                fields: ["in", "out"]
+                fields: ["in", "out"],
             })
             .output((e: Event) => results.push(e));
 

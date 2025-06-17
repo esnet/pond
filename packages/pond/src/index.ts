@@ -142,13 +142,10 @@ export class Index extends Key {
         switch (align) {
             case TimeAlignment.Begin:
                 return time(this.begin());
-                break;
             case TimeAlignment.Middle:
                 return time(this.toTimeRange().mid());
-                break;
             case TimeAlignment.End:
                 return time(this.end());
-                break;
         }
     }
 

@@ -22,16 +22,16 @@ export default class TsSignatureList extends Component {
 
     buildTypeArguments(typeArguments, unionTypes = null, declaration = null) {
         if (typeArguments) {
-            const typeArgs = typeArguments.map(t => {
+            const typeArgs = typeArguments.map((t) => {
                 return this.buildType(t);
             });
             return `<${typeArgs.join(", ")}>`;
         } else if (unionTypes) {
-            const types = unionTypes.map(t => {
+            const types = unionTypes.map((t) => {
                 const typeArgs = this.buildTypeArguments(t.typeArguments);
-                const isArray = (t.isArray || t.type === "array") ? true : false;
+                const isArray = t.isArray || t.type === "array" ? true : false;
                 let elementType;
-                if(t.elementType) {
+                if (t.elementType) {
                     elementType = t.elementType.name;
                     return `${elementType}${isArray ? "[]" : ""}`;
                 } else {
@@ -41,7 +41,7 @@ export default class TsSignatureList extends Component {
             return `${types.join(" | ")}`;
         } else if (declaration) {
             const { signatures } = declaration;
-            const methodSignatures = signatures.map(signature => {
+            const methodSignatures = signatures.map((signature) => {
                 const parameters = signature.parameters;
                 const paramList = this.buildParamList(parameters);
                 const returnType = this.buildReturnType(signature);
@@ -66,12 +66,12 @@ export default class TsSignatureList extends Component {
                   const typeArgs = this.buildTypeArguments(
                       paramType.typeArguments,
                       paramType.types,
-                      paramType.declaration
+                      paramType.declaration,
                   );
 
-                  return `${paramName}${defaultValue || isUnion ? "?" : ""}: ${paramTypeName
-                      ? paramTypeName
-                      : ""}${typeArgs}${isArray ? "[]" : ""}`;
+                  return `${paramName}${defaultValue || isUnion ? "?" : ""}: ${
+                      paramTypeName ? paramTypeName : ""
+                  }${typeArgs}${isArray ? "[]" : ""}`;
               })
             : [];
     }
@@ -93,21 +93,21 @@ export default class TsSignatureList extends Component {
                 case "reflection":
                     const { indexSignature, signatures } = signature.type.declaration;
                     if (indexSignature) {
-                        const mapIndex = indexSignature.map(index => {
+                        const mapIndex = indexSignature.map((index) => {
                             const { parameters, type } = index;
-                            const paramArray = parameters.map(param => {
+                            const paramArray = parameters.map((param) => {
                                 const paramName = param.name;
                                 const paramTypeName = param.type.name;
                                 return `${paramName}: ${paramTypeName}`;
                             });
                             const isArray = type.isArray ? true : false;
-                            return `{ [${paramArray.join(" ")}]: ${type.name}${isArray
-                                ? "[]"
-                                : ""} };\n`;
+                            return `{ [${paramArray.join(" ")}]: ${type.name}${
+                                isArray ? "[]" : ""
+                            } };\n`;
                         });
                         return `${mapIndex}`;
-                    } else {
-                        const methodSignatures = signatures.map(signature => {
+                    } else if (signatures) {
+                        const methodSignatures = signatures.map((signature) => {
                             const parameters = signature.parameters;
                             const paramList = this.buildParamList(parameters);
                             const returnType = this.buildReturnType(signature);
@@ -115,6 +115,9 @@ export default class TsSignatureList extends Component {
                             return output;
                         });
                         return methodSignatures;
+                    } else {
+                        console.warn(`No signatures available for ${signature.name}`);
+                        return "";
                     }
                 case "array":
                     return `${signature.type.elementType.name}[]`;
@@ -128,7 +131,7 @@ export default class TsSignatureList extends Component {
 
     buildTypeParameter(typeParameter) {
         if (typeParameter && typeParameter.length) {
-            const typeParameters = typeParameter.map(t => {
+            const typeParameters = typeParameter.map((t) => {
                 if (t.type) {
                     const type = t.type.name;
                     return `${t.name} extends ${type}`;

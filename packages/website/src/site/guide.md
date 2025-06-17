@@ -1,5 +1,5 @@
 **This is the documentation for the next version (1.0 alpha) of Pond.js, written in Typescript. This
-version has a brand new fully typed API. [CHANGES.md](https://github.com/esnet/pond/blob/master/CHANGES.md) contains an overview of the differences between the old pre-1.0 API and this one**
+version has a brand new fully typed API. [CHANGES.md](https://github.com/fkleon/pond/blob/master/CHANGES.md) contains an overview of the differences between the old pre-1.0 API and this one**
 
 Version 0.8.x ([Documentation](https://esnet-pondjs.appspot.com/#/)) is the last released version of
 the old Pond.js API. Note that v0.8 is the only version currently aligned with
@@ -22,7 +22,7 @@ We are still developing Pond.js as it integrates further into our code, so it ma
 incomplete in parts. That said, it has a growing collection of tests and we will strive not to break
 those without careful consideration.
 
-See the [CHANGES.md](https://github.com/esnet/pond/blob/master/CHANGES.md).
+See the [CHANGES.md](https://github.com/fkleon/pond/blob/master/CHANGES.md).
 
 ---
 
@@ -229,7 +229,7 @@ to performing time-based aggregations:
 ```js
 const dailyAvg = series.fixedWindowRollup({
     window: everyDay,
-    aggregation: { dailyAvg: ["sensor", avg()] }
+    aggregation: { dailyAvg: ["sensor", avg()] },
 }); // returns avg for every day of sensor values
 ```
 
@@ -238,7 +238,7 @@ As well as ways to split, combine and merge multiple `TimeSeries` in different w
 ```js
 const mergedSeries = TimeSeries.timeSeriesListMerge({
     name: "traffic",
-    seriesList: [inSeries, outSeries]
+    seriesList: [inSeries, outSeries],
 });
 ```
 

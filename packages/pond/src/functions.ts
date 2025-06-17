@@ -30,7 +30,7 @@ const ignoreMissing = (values: number[]) => values.filter(util.isValid);
 /**
  * Replaces any missing value (`null`, `undefined` or `NaN`) with the value `0`
  */
-const zeroMissing = (values: number[]) => values.map(v => (util.isValid(v) ? v : 0));
+const zeroMissing = (values: number[]) => values.map((v) => (util.isValid(v) ? v : 0));
 
 /**
  * Scans the input values for missing values (`null`, `undefined` or `NaN`) and
@@ -63,7 +63,7 @@ export function keep(clean = filter.ignoreMissing): ReducerFunction {
             return null;
         }
         const result = first()(cleanValues);
-        cleanValues.forEach(v => {
+        cleanValues.forEach((v) => {
             if (v !== result) {
                 return null;
             }
@@ -131,7 +131,7 @@ export function avg(clean = filter.ignoreMissing): ReducerFunction {
             (a: number, b: number) => {
                 return a + b;
             },
-            0
+            0,
         );
         return total / cleanValues.length;
     };
@@ -299,7 +299,7 @@ export function stdev(clean = filter.ignoreMissing): ReducerFunction {
         }
         let sums = 0;
         const mean = avg(clean)(cleanValues);
-        cleanValues.forEach(v => (sums += Math.pow(v - mean, 2)));
+        cleanValues.forEach((v) => (sums += Math.pow(v - mean, 2)));
         return Math.sqrt(sums / values.length);
     };
 }
@@ -309,7 +309,7 @@ export enum InterpolationType {
     lower,
     higher,
     nearest,
-    midpoint
+    midpoint,
 }
 
 /**
@@ -336,7 +336,7 @@ export enum InterpolationType {
 export function percentile(
     q: number,
     interp: InterpolationType = InterpolationType.linear,
-    clean = filter.ignoreMissing
+    clean = filter.ignoreMissing,
 ): ReducerFunction {
     return (values: number[]): number => {
         const cleanValues = clean(values);
@@ -389,5 +389,5 @@ export const filter = {
     ignoreMissing,
     zeroMissing,
     propagateMissing,
-    noneIfEmpty
+    noneIfEmpty,
 };

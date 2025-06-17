@@ -22,7 +22,7 @@ export enum WindowType {
     Day = 1,
     Month,
     Week,
-    Year
+    Year,
 }
 
 export abstract class WindowBase {
@@ -51,8 +51,8 @@ export class DayWindow extends WindowBase {
             throw new Error("Index string for day is badly formatted");
         }
 
-        let beginTime: moment;
-        let endTime: moment;
+        let beginTime: moment.Moment;
+        let endTime: moment.Moment;
         if (
             !_.isNaN(parseInt(parts[0], 10)) &&
             !_.isNaN(parseInt(parts[1], 10)) &&
@@ -89,8 +89,8 @@ export class DayWindow extends WindowBase {
      */
     public getIndexSet(t: Time | TimeRange): Immutable.OrderedSet<Index> {
         let results = Immutable.OrderedSet<Index>();
-        let t1: moment;
-        let t2: moment;
+        let t1: moment.Moment;
+        let t2: moment.Moment;
         if (t instanceof Time) {
             t1 = moment(+t).tz(this._tz);
             t2 = moment(+t).tz(this._tz);
@@ -169,11 +169,7 @@ export class Window extends WindowBase {
     constructor(d: Duration, period?: Period) {
         super();
         this._duration = d;
-        if (period) {
-            this._period = period;
-        } else {
-            this._period = new Period(d);
-        }
+        this._period = period ? period : new Period(d);
     }
 
     toString() {

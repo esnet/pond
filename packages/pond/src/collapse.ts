@@ -34,8 +34,8 @@ export class Collapse<T extends Key> extends Processor<T, T> {
                 this.options.fieldSpecList,
                 this.options.fieldName,
                 this.options.reducer,
-                this.options.append
-            )
+                this.options.append,
+            ),
         ]);
     }
 }

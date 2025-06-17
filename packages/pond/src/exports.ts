@@ -17,7 +17,7 @@ import {
     min,
     percentile,
     stdev,
-    sum
+    sum,
 } from "./functions";
 import { grouped, GroupedCollection } from "./groupedcollection";
 import { index, Index } from "./index";
@@ -31,9 +31,7 @@ import { stream } from "./stream";
 import { time, Time } from "./time";
 import { timerange, TimeRange } from "./timerange";
 import { indexedSeries, timeRangeSeries, timeSeries, TimeSeries } from "./timeseries";
-import { Trigger, WindowingOptions } from "./types";
 import util from "./util";
-import { windowed, WindowedCollection } from "./windowedcollection";
 
 export { Align };
 export { Base };
@@ -54,7 +52,7 @@ export {
     min,
     percentile,
     stdev,
-    sum
+    sum,
 };
 
 export { duration, Duration } from "./duration";
@@ -70,7 +68,15 @@ export { stream };
 export { time, Time };
 export { timerange, TimeRange };
 export { timeSeries, indexedSeries, timeRangeSeries, TimeSeries };
-export { Trigger, WindowingOptions };
+export {
+    AlignmentMethod,
+    AlignmentOptions,
+    FillMethod,
+    FillOptions,
+    TimeAlignment,
+    Trigger,
+    WindowingOptions,
+} from "./types";
 export { util };
 export { daily, DayWindow, window, Window } from "./window";
 export { windowed, WindowedCollection } from "./windowedcollection";

@@ -25,7 +25,7 @@ const UNITS = {
     s: { label: "seconds", length: 1000 },
     m: { label: "minutes", length: 60 * 1000 },
     h: { label: "hours", length: 60 * 60 * 1000 },
-    d: { label: "days", length: 60 * 60 * 24 * 1000 }
+    d: { label: "days", length: 60 * 60 * 24 * 1000 },
 };
 
 /**
@@ -140,9 +140,8 @@ function timeRangeFromIndexString(indexString: string, tz: string = "Etc/UTC"): 
         case 2:
             if (isIndexString(indexString)) {
                 // Period index string e.g. 1d-1234
-                const { decodedPeriod, decodedDuration, decodedIndex } = decodeIndexString(
-                    indexString
-                );
+                const { decodedPeriod, decodedDuration, decodedIndex } =
+                    decodeIndexString(indexString);
                 const beginTimestamp = decodedIndex * +decodedPeriod.frequency();
                 const endTimestamp = beginTimestamp + +decodedDuration;
                 beginTime = moment(beginTimestamp).tz(tz);
@@ -248,7 +247,7 @@ function timestampFromArg(arg: number | string | Date | Moment): Date {
         return new Date(arg.valueOf());
     } else {
         throw new Error(
-            `Unable to get timestamp from ${arg}. Should be a number, date, or moment.`
+            `Unable to get timestamp from ${arg}. Should be a number, date, or moment.`,
         );
     }
 }
@@ -289,7 +288,7 @@ function indexFromArgs(arg1: string | Index, arg2: string = "Etc/UTC"): Index {
  * of data.
  */
 function dataFromArg(
-    arg: {} | Immutable.Map<string, any> | number | string
+    arg: {} | Immutable.Map<string, any> | number | string,
 ): Immutable.Map<string, any> {
     let data;
     if (_.isObject(arg)) {
@@ -334,5 +333,5 @@ export default {
     timestampFromArg,
     untilNow,
     windowDuration,
-    windowPositionFromDate
+    windowPositionFromDate,
 };

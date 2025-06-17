@@ -32,9 +32,9 @@ export class Fill<T extends Key> extends Processor<T, T> {
 
     // Internal state
     private _previous: Event<T>;
-    private _keyCount;
-    private _lastGoodLinear;
-    private _linearFillCache;
+    private _keyCount: { [key: string]: number };
+    private _lastGoodLinear: Event<T>;
+    private _linearFillCache: Event<T>[];
 
     constructor(options: FillOptions) {
         super();
@@ -157,12 +157,12 @@ export class Fill<T extends Key> extends Processor<T, T> {
      * be filled and returned. That will be a list of indeterminate
      * length.
      */
-    linearFill(event: Event<T>): Array<Event<T>> {
+    linearFill(event: Event<T>): Event<T>[] {
         // See if the event is valid and also if it has any
         // list values to be filled.
         const isValidEvent = this.isValidLinearEvent(event);
 
-        const events: Array<Event<T>> = [];
+        const events: Event<T>[] = [];
         if (isValidEvent && !this._linearFillCache.length) {
             // Valid event, no cached events, use as last good val
             this._lastGoodLinear = event;
@@ -173,7 +173,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
             // Check limit
             if (!_.isNull(this._limit) && this._linearFillCache.length >= this._limit) {
                 // Flush the cache now because limit is reached
-                this._linearFillCache.forEach(e => {
+                this._linearFillCache.forEach((e) => {
                     events.push(e);
                 });
 
@@ -198,7 +198,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
             // is our last good event. This event has already been emitted so
             // it is sliced off.
             //
-            interpolatedEvents.slice(1).forEach(e => {
+            interpolatedEvents.slice(1).forEach((e) => {
                 events.push(e);
             });
 
@@ -220,12 +220,12 @@ export class Fill<T extends Key> extends Processor<T, T> {
      * A Pipeline result list, etc etc.
      *
      */
-    interpolateEventList(events: Array<Event<T>>): Array<Event<T>> {
+    interpolateEventList(events: Event<T>[]): Event<T>[] {
         let prevValue;
         let prevTime;
 
         // new array of interpolated events for each field path
-        const newEvents: Array<Event<T>> = [];
+        const newEvents: Event<T>[] = [];
 
         const fieldPath = util.fieldAsArray(this._fieldSpec[0]);
 
@@ -308,7 +308,7 @@ export class Fill<T extends Key> extends Processor<T, T> {
             eventList.push(e);
             this._previous = e;
         } else if (this._method === FillMethod.Linear) {
-            this.linearFill(event).forEach(e => {
+            this.linearFill(event).forEach((e) => {
                 eventList.push(e);
             });
         }

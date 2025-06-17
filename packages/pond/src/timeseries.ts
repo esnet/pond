@@ -34,7 +34,7 @@ import {
     min,
     percentile,
     stdev,
-    sum
+    sum,
 } from "./functions";
 
 import {
@@ -51,7 +51,7 @@ import {
     SelectOptions,
     TimeSeriesOptions,
     Trigger,
-    ValueMap
+    ValueMap,
 } from "./types";
 
 function buildMetaData(meta) {
@@ -114,7 +114,7 @@ export interface TimeSeriesEvents<T extends Key> {
 }
 
 export interface TimeSeriesListReducerOptions {
-    seriesList: Array<TimeSeries<Key>>;
+    seriesList: TimeSeries<Key>[];
     reducer?: (events: Immutable.List<Event<Key>>) => Immutable.List<Event<Key>>;
     fieldSpec?: string | string[];
     [propName: string]: any;
@@ -138,10 +138,10 @@ function timeSeries(arg: TimeSeriesWireFormat) {
     const wireFormat = arg as TimeSeriesWireFormat;
     const { columns, points, tz = "Etc/UTC", ...meta2 } = wireFormat;
     const [eventKey, ...eventFields] = columns;
-    const events = points.map(point => {
+    const events = points.map((point) => {
         const [key, ...eventValues] = point;
         const d = _.zipObject(eventFields, eventValues);
-        return new Event<Time>(time(key), Immutable.fromJS(d as { [key: string]: {} }));
+        return new Event<Time>(time(key), Immutable.fromJS(d) as Immutable.Map<string, any>);
     });
     return new TimeSeries({ events: Immutable.List(events), ...meta2 });
 }
@@ -164,10 +164,10 @@ function indexedSeries(arg: TimeSeriesWireFormat) {
     const wireFormat = arg as TimeSeriesWireFormat;
     const { columns, points, tz = "Etc/UTC", ...meta2 } = wireFormat;
     const [eventKey, ...eventFields] = columns;
-    const events = points.map(point => {
+    const events = points.map((point) => {
         const [key, ...eventValues] = point;
         const d = _.zipObject(eventFields, eventValues);
-        return new Event<Index>(index(key), Immutable.fromJS(d as { [key: string]: {} }));
+        return new Event<Index>(index(key), Immutable.fromJS(d) as Immutable.Map<string, any>);
     });
     return new TimeSeries({ events: Immutable.List(events), ...meta2 });
 }
@@ -190,12 +190,12 @@ function timeRangeSeries(arg: TimeSeriesWireFormat) {
     const wireFormat = arg as TimeSeriesWireFormat;
     const { columns, points, tz = "Etc/UTC", ...meta2 } = wireFormat;
     const [eventKey, ...eventFields] = columns;
-    const events = points.map(point => {
+    const events = points.map((point) => {
         const [key, ...eventValues] = point;
         const d = _.zipObject(eventFields, eventValues);
         return new Event<TimeRange>(
             timerange(key[0], key[1]),
-            Immutable.fromJS(d as { [key: string]: {} })
+            Immutable.fromJS(d) as Immutable.Map<string, any>,
         );
     });
     return new TimeSeries({ events: Immutable.List(events), ...meta2 });
@@ -472,11 +472,7 @@ export class TimeSeries<T extends Key> {
      */
     setCollection<M extends Key>(collection: SortedCollection<M>): TimeSeries<M> {
         const result = new TimeSeries<M>(this);
-        if (collection) {
-            result._collection = collection;
-        } else {
-            result._collection = new SortedCollection<M>();
-        }
+        result._collection = collection ? collection : new SortedCollection<M>();
         return result;
     }
 
@@ -745,7 +741,7 @@ export class TimeSeries<T extends Key> {
         q: number,
         fieldPath: string = "value",
         interp: InterpolationType = InterpolationType.linear,
-        filter?
+        filter?,
     ): number {
         return this._collection.percentile(q, fieldPath, interp, filter);
     }
@@ -785,7 +781,7 @@ export class TimeSeries<T extends Key> {
     quantile(
         quantity: number,
         fieldPath: string = "value",
-        interp: InterpolationType = InterpolationType.linear
+        interp: InterpolationType = InterpolationType.linear,
     ) {
         return this._collection.quantile(quantity, fieldPath, interp);
     }
@@ -876,7 +872,7 @@ export class TimeSeries<T extends Key> {
      * ```
      */
     flatMap<M extends Key>(
-        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<M>>
+        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<M>>,
     ): TimeSeries<M> {
         const remapped = this._collection.flatMap(mapper);
         return this.setCollection(remapped);
@@ -1035,9 +1031,9 @@ export class TimeSeries<T extends Key> {
      */
     renameColumns(options: RenameColumnOptions): TimeSeries<Key> {
         const { renameMap } = options;
-        return this.map(e => {
+        return this.map((e) => {
             const eventType = e.keyType();
-            const d = e.getData().mapKeys(key => renameMap[key] || key);
+            const d = e.getData().mapKeys((key) => renameMap[key] || key);
             switch (eventType) {
                 case "time":
                     return new Event(time(e.toPoint(this.columns())[0]), d);
@@ -1088,7 +1084,7 @@ export class TimeSeries<T extends Key> {
         } else if (method === FillMethod.Linear) {
             if (_.isArray(fieldSpec)) {
                 filledCollection = this._collection;
-                fieldSpec.forEach(fieldPath => {
+                fieldSpec.forEach((fieldPath) => {
                     const args: FillOptions = { fieldSpec: fieldPath, method, limit };
                     filledCollection = filledCollection.fill(args);
                 });
@@ -1096,7 +1092,7 @@ export class TimeSeries<T extends Key> {
                 filledCollection = this._collection.fill({
                     fieldSpec,
                     method,
-                    limit
+                    limit,
                 });
             }
         } else {
@@ -1204,7 +1200,7 @@ export class TimeSeries<T extends Key> {
 
         if (!options.aggregation || !_.isObject(options.aggregation)) {
             throw new Error(
-                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+                "aggregation object must be supplied, for example: {value: {value: avg()}}",
             );
         }
 
@@ -1234,13 +1230,13 @@ export class TimeSeries<T extends Key> {
 
         if (!aggregation || !_.isObject(aggregation)) {
             throw new Error(
-                "aggregation object must be supplied, for example: {value: {value: avg()}}"
+                "aggregation object must be supplied, for example: {value: {value: avg()}}",
             );
         }
 
         return this.fixedWindowRollup({
             window: window(duration("1h")),
-            aggregation
+            aggregation,
         });
     }
 
@@ -1259,7 +1255,7 @@ export class TimeSeries<T extends Key> {
         const { aggregation, timezone = "Etc/UTC" } = options;
         if (!aggregation || !_.isObject(aggregation)) {
             throw new Error(
-                "aggregation object must be supplied, for example: {avg_value: {value: avg()}}"
+                "aggregation object must be supplied, for example: {avg_value: {value: avg()}}",
             );
         }
         return this._rollup({ window: daily(timezone), aggregation });
@@ -1403,7 +1399,7 @@ export class TimeSeries<T extends Key> {
             seriesList,
             fieldSpec,
             reducer: combiner,
-            ...data
+            ...data,
         });
     }
 
@@ -1436,7 +1432,7 @@ export class TimeSeries<T extends Key> {
             seriesList,
             fieldSpec,
             reducer: merger,
-            ...data
+            ...data,
         });
     }
 
@@ -1444,7 +1440,7 @@ export class TimeSeries<T extends Key> {
      * @private
      */
     static timeSeriesListEventReduce<T extends Key>(
-        options: TimeSeriesListReducerOptions
+        options: TimeSeriesListReducerOptions,
     ): TimeSeries<T> {
         const { seriesList, fieldSpec, reducer, ...data } = options;
         if (!seriesList || !_.isArray(seriesList)) {
@@ -1458,7 +1454,7 @@ export class TimeSeries<T extends Key> {
         // for each series, make a map from timestamp to the
         // list of events with that timestamp
         const eventList = [];
-        seriesList.forEach(series => {
+        seriesList.forEach((series) => {
             for (const e of series._collection.eventList()) {
                 eventList.push(e);
             }

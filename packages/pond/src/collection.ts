@@ -18,9 +18,7 @@ import { Key } from "./key";
 import { Select } from "./select";
 import { timerange, TimeRange } from "./timerange";
 
-import { CollapseOptions, SelectOptions } from "./types";
-
-import { DedupFunction, ReducerFunction, ValueMap } from "./types";
+import { CollapseOptions, SelectOptions, DedupFunction, ReducerFunction, ValueMap } from "./types";
 
 import {
     avg,
@@ -32,7 +30,7 @@ import {
     min,
     percentile,
     stdev,
-    sum
+    sum,
 } from "./functions";
 
 /**
@@ -68,7 +66,7 @@ export class Collection<T extends Key> extends Base {
      * Rebuild the keyMap from scratch
      */
     protected static buildKeyMap<S extends Key>(
-        events: Immutable.List<Event<S>>
+        events: Immutable.List<Event<S>>,
     ): Immutable.Map<string, Immutable.Set<number>> {
         let keyMap = Immutable.Map<string, Immutable.Set<number>>();
 
@@ -186,7 +184,7 @@ export class Collection<T extends Key> extends Base {
             if (conflicts.size > 0) {
                 // Remove duplicates from the event list
                 events = this._events.filterNot(
-                    duplicate => duplicate.getKey().toString() === event.getKey().toString()
+                    (duplicate) => duplicate.getKey().toString() === event.getKey().toString(),
                 );
 
                 // Resolves the duplicates and this event to a single event
@@ -267,7 +265,7 @@ export class Collection<T extends Key> extends Base {
      */
     public sizeValid(fieldPath: string = "value"): number {
         let count = 0;
-        this._events.forEach(e => {
+        this._events.forEach((e) => {
             if (e.isValid(fieldPath)) {
                 count++;
             }
@@ -332,7 +330,7 @@ export class Collection<T extends Key> extends Base {
     public atKey(key: T): Immutable.List<Event<T>> {
         const indexes = this._keyMap.get(key.toString());
         return indexes
-            .map(i => {
+            .map((i) => {
                 return this._events.get(i);
             })
             .toList();
@@ -421,7 +419,7 @@ export class Collection<T extends Key> extends Base {
      * ```
      */
     public map<M extends Key>(
-        mapper: (event?: Event<T>, index?: number) => Event<M>
+        mapper: (event?: Event<T>, index?: number) => Event<M>,
     ): Collection<M> {
         const remapped = this._events.map(mapper);
         return new Collection<M>(Immutable.List<Event<M>>(remapped));
@@ -449,7 +447,7 @@ export class Collection<T extends Key> extends Base {
      */
     public mapKeys<U extends Key>(mapper: (key: T) => U): Collection<U> {
         const list = this._events.map(
-            event => new Event<U>(mapper(event.getKey()), event.getData())
+            (event) => new Event<U>(mapper(event.getKey()), event.getData()),
         );
         return new Collection<U>(list);
     }
@@ -467,7 +465,7 @@ export class Collection<T extends Key> extends Base {
      * ```
      */
     public flatMap<U extends Key>(
-        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<U>>
+        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<U>>,
     ): Collection<U> {
         const remapped: Immutable.List<Event<U>> = this._events.flatMap(mapper);
         return new Collection<U>(Immutable.List<Event<U>>(remapped));
@@ -492,9 +490,9 @@ export class Collection<T extends Key> extends Base {
      */
     public sortByKey(): Collection<T> {
         const sorted = Immutable.List<Event<T>>(
-            this._events.sortBy(event => {
+            this._events.sortBy((event) => {
                 return +event.getKey().timestamp();
-            })
+            }),
         );
         return new Collection<T>(sorted);
     }
@@ -506,9 +504,9 @@ export class Collection<T extends Key> extends Base {
     public sort(field: string | string[]): Collection<T> {
         const fs = fieldAsArray(field);
         const sorted = Immutable.List<Event<T>>(
-            this._events.sortBy(event => {
+            this._events.sortBy((event) => {
                 return event.get(fs);
-            })
+            }),
         );
         return new Collection<T>(sorted);
     }
@@ -553,7 +551,7 @@ export class Collection<T extends Key> extends Base {
     public timerange(): TimeRange {
         let minimum;
         let maximum;
-        this.forEach(e => {
+        this.forEach((e) => {
             if (!minimum || e.begin() < minimum) {
                 minimum = e.begin();
             }
@@ -736,13 +734,13 @@ export class Collection<T extends Key> extends Base {
         q: number,
         fieldSpec: string[],
         interp?: InterpolationType,
-        filter?
+        filter?,
     ): { [s: string]: number[] };
     public percentile(
         q: number,
         fieldSpec: any,
         interp: InterpolationType = InterpolationType.linear,
-        filter?
+        filter?,
     ) {
         return this.aggregate(percentile(q, interp, filter), fieldSpec);
     }
@@ -777,7 +775,7 @@ export class Collection<T extends Key> extends Base {
     public quantile(
         n: number,
         column: string = "value",
-        interp: InterpolationType = InterpolationType.linear
+        interp: InterpolationType = InterpolationType.linear,
     ) {
         const results = [];
         const sorted = this.sort(column);
@@ -817,7 +815,7 @@ export class Collection<T extends Key> extends Base {
     public isChronological(): boolean {
         let result = true;
         let t;
-        this.forEach(e => {
+        this.forEach((e) => {
             if (!t) {
                 t = e.timestamp().getTime();
             } else {
@@ -880,7 +878,7 @@ export class Collection<T extends Key> extends Base {
      */
     public collapse(options: CollapseOptions): Collection<T> {
         const p = new Collapse<T>(options);
-        return this.flatMap(e => p.addEvent(e));
+        return this.flatMap((e) => p.addEvent(e));
     }
 
     /**
@@ -920,7 +918,7 @@ export class Collection<T extends Key> extends Base {
      */
     public select(options: SelectOptions): Collection<T> {
         const p = new Select<T>(options);
-        return this.flatMap(e => p.addEvent(e));
+        return this.flatMap((e) => p.addEvent(e));
     }
 
     //

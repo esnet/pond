@@ -91,7 +91,7 @@ export class Align<T extends Key> extends Processor<T, T> {
 
         const boundaries: Immutable.List<Time> = this.getBoundaries(event);
 
-        boundaries.forEach(boundaryTime => {
+        boundaries.forEach((boundaryTime) => {
             let outputEvent;
             if (this._limit && boundaries.size > this._limit) {
                 outputEvent = this.interpolateHold(boundaryTime, true);
@@ -145,7 +145,7 @@ export class Align<T extends Key> extends Processor<T, T> {
      */
     private interpolateHold(boundaryTime: Time, setNone: boolean = false): Event<Time> {
         let d = Immutable.Map<string, any>();
-        this._fieldSpec.forEach(fieldPath => {
+        this._fieldSpec.forEach((fieldPath) => {
             const value = setNone ? null : this._previous.get(fieldPath);
             d = _.isString(fieldPath) ? d.set(fieldPath, value) : d.setIn(fieldPath, value);
         });
@@ -165,7 +165,7 @@ export class Align<T extends Key> extends Processor<T, T> {
         // This ratio will be the same for all values being processed
         const f = (+boundaryTime - previousTime) / (currentTime - previousTime);
 
-        this._fieldSpec.forEach(fieldPath => {
+        this._fieldSpec.forEach((fieldPath) => {
             //
             // Generate the delta beteen the values and
             // bulletproof against non-numeric or bad paths

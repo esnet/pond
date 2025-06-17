@@ -18,7 +18,7 @@ import Moment = moment.Moment;
 
 import { collection, Collection } from "../src/collection";
 import { duration } from "../src/duration";
-import { event, indexedEvent, timeEvent, timeRangeEvent } from "../src/event";
+import { Event, event, indexedEvent, timeEvent, timeRangeEvent } from "../src/event";
 import { avg, max, sum } from "../src/functions";
 import { index, Index } from "../src/index";
 import { time, Time } from "../src/time";
@@ -28,7 +28,7 @@ import {
     timeRangeSeries,
     TimeSeries,
     timeSeries,
-    TimeSeriesWireFormat
+    TimeSeriesWireFormat,
 } from "../src/timeseries";
 import { TimeAlignment } from "../src/types";
 import { window } from "../src/window";
@@ -37,8 +37,8 @@ const EVENT_DATA = {
     name: "avg temps",
     events: Immutable.List([
         event(time("2015-04-22T03:30:00Z"), Immutable.Map({ in: 1, out: 2 })),
-        event(time("2015-04-22T03:31:00Z"), Immutable.Map({ in: 3, out: 4 }))
-    ])
+        event(time("2015-04-22T03:31:00Z"), Immutable.Map({ in: 3, out: 4 })),
+    ]),
 };
 
 const COLLECTION_DATA = {
@@ -46,9 +46,9 @@ const COLLECTION_DATA = {
     collection: collection(
         Immutable.List([
             event(time("2015-04-22T02:30:00Z"), Immutable.Map({ a: 5, b: 6 })),
-            event(time("2015-04-22T03:30:00Z"), Immutable.Map({ a: 4, b: 2 }))
-        ])
-    )
+            event(time("2015-04-22T03:30:00Z"), Immutable.Map({ a: 4, b: 2 })),
+        ]),
+    ),
 };
 
 const TIMESERIES_TEST_DATA = {
@@ -58,8 +58,8 @@ const TIMESERIES_TEST_DATA = {
         [1400425947000, 52, "ok"],
         [1400425948000, 18, "ok"],
         [1400425949000, 26, "fail"],
-        [1400425950000, 93, "offline"]
-    ]
+        [1400425950000, 93, "offline"],
+    ],
 };
 
 const AVAILABILITY_DATA = {
@@ -77,8 +77,8 @@ const AVAILABILITY_DATA = {
         ["2015-03", "99%"],
         ["2015-04", "87%"],
         ["2015-05", "92%"],
-        ["2015-06", "100%"]
-    ]
+        ["2015-06", "100%"],
+    ],
 };
 
 const AVAILABILITY_DATA_2 = {
@@ -96,8 +96,8 @@ const AVAILABILITY_DATA_2 = {
         ["2015-03", 99, "Minor outage March 2", 4],
         ["2015-04", 87, "Planned downtime in April", 82],
         ["2015-05", 92, "Router failure June 12", 26],
-        ["2015-06", 100, "", 0]
-    ]
+        ["2015-06", 100, "", 0],
+    ],
 };
 
 const INDEXED_DATA = {
@@ -108,8 +108,8 @@ const INDEXED_DATA = {
         [1400425947000, 52, "ok"],
         [1400425948000, 18, "ok"],
         [1400425949000, 26, "fail"],
-        [1400425950000, 93, "offline"]
-    ]
+        [1400425950000, 93, "offline"],
+    ],
 };
 
 const INTERFACE_TEST_DATA = {
@@ -132,8 +132,8 @@ const INTERFACE_TEST_DATA = {
         [1400425947000, 52, 34],
         [1400425948000, 18, 13],
         [1400425949000, 26, 67],
-        [1400425950000, 93, 91]
-    ]
+        [1400425950000, 93, 91],
+    ],
 };
 
 const fmt = "YYYY-MM-DD HH:mm";
@@ -148,32 +148,52 @@ const BISECT_TEST_DATA = {
         [moment("2012-01-11 04:00", fmt).valueOf(), 55],
         [moment("2012-01-11 05:00", fmt).valueOf(), 66],
         [moment("2012-01-11 06:00", fmt).valueOf(), 77],
-        [moment("2012-01-11 07:00", fmt).valueOf(), 88]
-    ]
+        [moment("2012-01-11 07:00", fmt).valueOf(), 88],
+    ],
 };
 
 const TRAFFIC_DATA_IN = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "in"],
-    points: [[1400425947000, 52], [1400425948000, 18], [1400425949000, 26], [1400425950000, 93]]
+    points: [
+        [1400425947000, 52],
+        [1400425948000, 18],
+        [1400425949000, 26],
+        [1400425950000, 93],
+    ],
 };
 
 const TRAFFIC_DATA_OUT = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "out"],
-    points: [[1400425947000, 34], [1400425948000, 13], [1400425949000, 67], [1400425950000, 91]]
+    points: [
+        [1400425947000, 34],
+        [1400425948000, 13],
+        [1400425949000, 67],
+        [1400425950000, 91],
+    ],
 };
 
 const PARTIAL_TRAFFIC_PART_A = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "value"],
-    points: [[1400425947000, 34], [1400425948000, 13], [1400425949000, 67], [1400425950000, 91]]
+    points: [
+        [1400425947000, 34],
+        [1400425948000, 13],
+        [1400425949000, 67],
+        [1400425950000, 91],
+    ],
 };
 
 const PARTIAL_TRAFFIC_PART_B = {
     name: "star-cr5:to_anl_ip-a_v4",
     columns: ["time", "value"],
-    points: [[1400425951000, 65], [1400425952000, 86], [1400425953000, 27], [1400425954000, 72]]
+    points: [
+        [1400425951000, 65],
+        [1400425952000, 86],
+        [1400425953000, 27],
+        [1400425954000, 72],
+    ],
 };
 
 const TRAFFIC_BNL_TO_NEWY = {
@@ -182,8 +202,8 @@ const TRAFFIC_BNL_TO_NEWY = {
     points: [
         [1441051950000, 2998846524.2666664],
         [1441051980000, 2682032885.3333335],
-        [1441052010000, 2753537586.9333334]
-    ]
+        [1441052010000, 2753537586.9333334],
+    ],
 };
 
 const TRAFFIC_NEWY_TO_BNL = {
@@ -192,8 +212,8 @@ const TRAFFIC_NEWY_TO_BNL = {
     points: [
         [1441051950000, 22034579982.4],
         [1441051980000, 24783871443.2],
-        [1441052010000, 26907368572.800003]
-    ]
+        [1441052010000, 26907368572.800003],
+    ],
 };
 
 const sumPart1 = {
@@ -203,8 +223,8 @@ const sumPart1 = {
         [1400425951000, 1, 6],
         [1400425952000, 2, 7],
         [1400425953000, 3, 8],
-        [1400425954000, 4, 9]
-    ]
+        [1400425954000, 4, 9],
+    ],
 };
 const sumPart2 = {
     name: "part2",
@@ -213,8 +233,8 @@ const sumPart2 = {
         [1400425951000, 9, 1],
         [1400425952000, 7, 2],
         [1400425953000, 5, 3],
-        [1400425954000, 3, 4]
-    ]
+        [1400425954000, 3, 4],
+    ],
 };
 
 const sept2014Data = {
@@ -337,8 +357,8 @@ const sept2014Data = {
         [1409932800000, 86],
         [1409936400000, 65],
         [1409940000000, 93],
-        [1409943600000, 35]
-    ]
+        [1409943600000, 35],
+    ],
 };
 
 const OUTAGE_EVENT_LIST = Immutable.List([
@@ -351,7 +371,7 @@ const OUTAGE_EVENT_LIST = Immutable.List([
         external_ticket: "",
         esnet_ticket: "ESNET-20150302-002",
         organization: "ANL",
-        type: "Planned"
+        type: "Planned",
     },
     {
         startTime: "2015-04-22T03:30:00Z",
@@ -362,7 +382,7 @@ const OUTAGE_EVENT_LIST = Immutable.List([
         external_ticket: "",
         esnet_ticket: "ESNET-20150421-013",
         organization: "Internet2 / Level 3",
-        type: "Unplanned"
+        type: "Unplanned",
     },
     {
         startTime: "2015-04-22T03:35:00Z",
@@ -373,11 +393,11 @@ const OUTAGE_EVENT_LIST = Immutable.List([
         external_ticket: "3576:144",
         esnet_ticket: "ESNET-20150421-013",
         organization: "Internet2 / Level 3",
-        type: "Unplanned"
-    }
+        type: "Unplanned",
+    },
 ]);
 
-const TIMERANGE_EVENT_LIST = OUTAGE_EVENT_LIST.map(evt => {
+const TIMERANGE_EVENT_LIST = OUTAGE_EVENT_LIST.map((evt) => {
     const { startTime, endTime, ...other } = evt;
     const b = new Date(startTime);
     const e = new Date(endTime);
@@ -398,7 +418,7 @@ const weather = Immutable.List([
         record_max_temp_year: 1901,
         actual_precipitation: 0,
         average_precipitation: 0.12,
-        record_precipitation: 2.17
+        record_precipitation: 2.17,
     },
     {
         date: "2014-7-2",
@@ -413,7 +433,7 @@ const weather = Immutable.List([
         record_max_temp_year: 1966,
         actual_precipitation: 0.96,
         average_precipitation: 0.13,
-        record_precipitation: 1.79
+        record_precipitation: 1.79,
     },
     {
         date: "2014-7-3",
@@ -428,8 +448,8 @@ const weather = Immutable.List([
         record_max_temp_year: 1966,
         actual_precipitation: 1.78,
         average_precipitation: 0.12,
-        record_precipitation: 2.8
-    }
+        record_precipitation: 2.8,
+    },
 ]);
 
 describe("Creation", () => {
@@ -454,25 +474,20 @@ describe("Creation", () => {
     });
 
     it("can create an series with a list of Events", () => {
-        const events = [];
+        const events: Array<Event<Time>> = [];
         events.push(timeEvent(time(new Date(2015, 7, 1)), Immutable.Map({ value: 27 })));
         events.push(timeEvent(time(new Date(2015, 8, 1)), Immutable.Map({ value: 14 })));
         const series = new TimeSeries({
             name: "events",
-            events: Immutable.List(events)
+            events: Immutable.List(events),
         });
         expect(series.size()).toBe(2);
     });
 
     it("can create an series with a list of Indexed Events", () => {
-        const events = weather.map(item => {
-            const {
-                date,
-                actual_min_temp,
-                actual_max_temp,
-                record_min_temp,
-                record_max_temp
-            } = item;
+        const events = weather.map((item) => {
+            const { date, actual_min_temp, actual_max_temp, record_min_temp, record_max_temp } =
+                item;
             return indexedEvent(
                 index(date),
                 Immutable.Map({
@@ -480,14 +495,14 @@ describe("Creation", () => {
                         +record_min_temp, // tslint-disable-line
                         +actual_min_temp, // tslint-disable-line
                         +actual_max_temp, // tslint-disable-line
-                        +record_max_temp // tslint-disable-line
-                    ]
-                })
+                        +record_max_temp, // tslint-disable-line
+                    ],
+                }),
             );
         });
 
         const c = new Collection(events);
-        const series = new TimeSeries({ name, collection: c });
+        const series = new TimeSeries({ name: "weather", collection: c });
         expect(series.size()).toBe(3);
     });
 
@@ -495,7 +510,7 @@ describe("Creation", () => {
         const events = [];
         const series = new TimeSeries({
             name: "events",
-            events: Immutable.List(events)
+            events: Immutable.List(events),
         });
         expect(series.size()).toBe(0);
     });
@@ -503,7 +518,7 @@ describe("Creation", () => {
     it("can create a timerange series with the right timerange", () => {
         const series = new TimeSeries({
             name: "outages",
-            events: TIMERANGE_EVENT_LIST
+            events: TIMERANGE_EVENT_LIST,
         });
         expect(series.range().toString()).toBe('{"timerange":[1425459600000,1429721400000]}');
     });
@@ -576,67 +591,57 @@ describe("Deep Event Data", () => {
                 [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
                 [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
                 [1400425953000, { in: 300, out: 600 }, { in: 147, out: 158 }],
-                [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175 }]
-            ]
+                [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175 }],
+            ],
         });
-        expect(
-            series
-                .at(0)
-                .get("NASA_north")
-                .get("in")
-        ).toBe(100);
-        expect(
-            series
-                .at(0)
-                .get("NASA_north")
-                .get("out")
-        ).toBe(200);
+        expect(series.at(0).get("NASA_north").get("in")).toBe(100);
+        expect(series.at(0).get("NASA_north").get("out")).toBe(200);
 
         expect(series.at(0).get("NASA_north.in")).toBe(100);
         expect(series.at(0).get(["NASA_north", "in"])).toBe(100);
     });
 
     it("can create a series with nested events", () => {
-        const events = [];
+        const events: Array<Event<Time>> = [];
         events.push(
             timeEvent(
                 time(new Date(2015, 6, 1)),
                 Immutable.Map({
                     NASA_north: { in: 100, out: 200 },
-                    NASA_south: { in: 145, out: 135 }
-                })
-            )
+                    NASA_south: { in: 145, out: 135 },
+                }),
+            ),
         );
         events.push(
             timeEvent(
                 time(new Date(2015, 7, 1)),
                 Immutable.Map({
                     NASA_north: { in: 200, out: 400 },
-                    NASA_south: { in: 146, out: 142 }
-                })
-            )
+                    NASA_south: { in: 146, out: 142 },
+                }),
+            ),
         );
         events.push(
             timeEvent(
                 time(new Date(2015, 8, 1)),
                 Immutable.Map({
                     NASA_north: { in: 300, out: 600 },
-                    NASA_south: { in: 147, out: 158 }
-                })
-            )
+                    NASA_south: { in: 147, out: 158 },
+                }),
+            ),
         );
         events.push(
             timeEvent(
                 time(new Date(2015, 9, 1)),
                 Immutable.Map({
                     NASA_north: { in: 400, out: 800 },
-                    NASA_south: { in: 155, out: 175 }
-                })
-            )
+                    NASA_south: { in: 155, out: 175 },
+                }),
+            ),
         );
         const series = new TimeSeries({
             name: "Map traffic",
-            events: Immutable.List(events)
+            events: Immutable.List(events),
         });
         expect(series.at(0).get("NASA_north").in).toBe(100);
         expect(series.at(3).get("NASA_south").out).toBe(175);
@@ -702,7 +707,7 @@ describe("Time Range Events", () => {
     it("can make a timeseries with the right timerange", () => {
         const series = new TimeSeries({
             name: "outages",
-            events: TIMERANGE_EVENT_LIST
+            events: TIMERANGE_EVENT_LIST,
         });
         expect(series.range().toString()).toBe('{"timerange":[1425459600000,1429721400000]}');
     });
@@ -710,7 +715,7 @@ describe("Time Range Events", () => {
     it("can make a timeseries that can be serialized to a string", () => {
         const series = new TimeSeries({
             name: "outages",
-            events: TIMERANGE_EVENT_LIST
+            events: TIMERANGE_EVENT_LIST,
         });
         const expected = `{"name":"outages","tz":"Etc/UTC","columns":["timerange","title","description","completed","external_ticket","esnet_ticket","organization","type"],"points":[[[1425459600000,1425477600000],"ANL Scheduled Maintenance","ANL will be switching border routers...",true,"","ESNET-20150302-002","ANL","Planned"],[[1429673400000,1429707600000],"STAR-CR5 < 100 ge 06519 > ANL  - Outage","At 13:33 pacific circuit 06519 went down.",true,"","ESNET-20150421-013","Internet2 / Level 3","Unplanned"],[[1429673700000,1429721400000],"STAR-CR5 < 100 ge 06519 > ANL  - Outage","The listed circuit was unavailable due to bent pins.",true,"3576:144","ESNET-20150421-013","Internet2 / Level 3","Unplanned"]]}`;
         expect(series.toString()).toBe(expected);
@@ -719,7 +724,7 @@ describe("Time Range Events", () => {
     it("can make a timeseries that can be serialized to JSON and then used to construct a TimeSeries again", () => {
         const series = new TimeSeries({
             name: "outages",
-            events: TIMERANGE_EVENT_LIST
+            events: TIMERANGE_EVENT_LIST,
         });
         const newSeries = timeRangeSeries(series.toJSON() as TimeSeriesWireFormat);
         expect(series.toString()).toBe(newSeries.toString());
@@ -743,20 +748,10 @@ describe("Indexed Events", () => {
         const series = indexedSeries(AVAILABILITY_DATA);
         const e = series.at(2);
         expect(e.timerangeAsUTCString()).toBe(
-            "[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]"
+            "[Mon, 01 Sep 2014 00:00:00 GMT, Tue, 30 Sep 2014 23:59:59 GMT]",
         );
-        expect(
-            series
-                .range()
-                .begin()
-                .getTime()
-        ).toBe(1404172800000);
-        expect(
-            series
-                .range()
-                .end()
-                .getTime()
-        ).toBe(1435708799999);
+        expect(series.range().begin().getTime()).toBe(1404172800000);
+        expect(series.range().end().getTime()).toBe(1435708799999);
     });
 });
 
@@ -785,8 +780,8 @@ describe("Cropping a timeseries", () => {
                 [1504014065243, 2],
                 [1504014065244, 3],
                 [1504014065245, 4],
-                [1504014065249, 5]
-            ]
+                [1504014065249, 5],
+            ],
         });
         const ts1 = series.crop(timerange(1504014065243, 1504014065245));
         expect(ts1.size()).toBe(3);
@@ -806,7 +801,7 @@ describe("Merging two timeseries together", () => {
         const trafficSeries = TimeSeries.timeSeriesListMerge<Time>({
             name: "traffic",
             seriesList: [inTraffic, outTraffic],
-            fieldSpec: ["in", "out"]
+            fieldSpec: ["in", "out"],
         });
 
         expect(trafficSeries.at(2).get("in")).toBe(26);
@@ -820,7 +815,7 @@ describe("Merging two timeseries together", () => {
             name: "traffic",
             source: "router",
             seriesList: [tile1, tile2],
-            fieldSpec: "value"
+            fieldSpec: "value",
         });
         expect(trafficSeries.size()).toBe(8);
         expect(trafficSeries.at(0).get()).toBe(34);
@@ -840,7 +835,7 @@ describe("Merging two timeseries together", () => {
         const outTraffic = timeSeries(TRAFFIC_NEWY_TO_BNL);
         const trafficSeries = TimeSeries.timeSeriesListMerge<Time>({
             name: "traffic",
-            seriesList: [inTraffic, outTraffic]
+            seriesList: [inTraffic, outTraffic],
         });
         expect(trafficSeries.at(0).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:12:30 GMT");
         expect(trafficSeries.at(1).timestampAsUTCString()).toBe("Mon, 31 Aug 2015 20:13:00 GMT");
@@ -855,8 +850,8 @@ describe("Merging two timeseries together", () => {
                 [1400425947000, 34],
                 [1400425948000, 13],
                 [1400425949000, 67],
-                [1400425950000, 91]
-            ]
+                [1400425950000, 91],
+            ],
         };
 
         const B = {
@@ -866,8 +861,8 @@ describe("Merging two timeseries together", () => {
                 [1400425951000, 65],
                 [1400425952000, 86],
                 [1400425953000, 27],
-                [1400425954000, 72]
-            ]
+                [1400425954000, 72],
+            ],
         };
 
         const tile1 = timeSeries(A);
@@ -875,7 +870,7 @@ describe("Merging two timeseries together", () => {
 
         const series = TimeSeries.timeSeriesListMerge({
             name: "traffic",
-            seriesList: [tile1, tile2]
+            seriesList: [tile1, tile2],
         });
         // console.log("series is ", series);
         const expected = `{"name":"traffic","tz":"Etc/UTC","columns":["time","valueA","valueB"],"points":[[1400425947000,34,null],[1400425948000,13,null],[1400425949000,67,null],[1400425950000,91,null],[1400425951000,null,65],[1400425952000,null,86],[1400425953000,null,27],[1400425954000,null,72]]}`;
@@ -892,7 +887,7 @@ describe("Summing two timeseries together", () => {
             name: "sum",
             seriesList: [part1, part2],
             reducer: sum(),
-            fieldSpec: ["in", "out"]
+            fieldSpec: ["in", "out"],
         });
 
         // 10, 9, 8, 7
@@ -918,8 +913,8 @@ describe("Averaging two timeseries together", () => {
                 [1400425951000, 1, 6],
                 [1400425952000, 2, 7],
                 [1400425953000, 3, 8],
-                [1400425954000, 4, 9]
-            ]
+                [1400425954000, 4, 9],
+            ],
         });
         const part2 = timeSeries({
             name: "part2",
@@ -928,15 +923,15 @@ describe("Averaging two timeseries together", () => {
                 [1400425951000, 9, 1],
                 [1400425952000, 7, 2],
                 [1400425953000, 5, 3],
-                [1400425954000, 3, 4]
-            ]
+                [1400425954000, 3, 4],
+            ],
         });
 
         const avgSeries = TimeSeries.timeSeriesListReduce({
             name: "avg",
             seriesList: [part1, part2],
             fieldSpec: ["in", "out"],
-            reducer: avg()
+            reducer: avg(),
         });
 
         expect(avgSeries.at(0).get("in")).toBe(5);
@@ -953,7 +948,7 @@ describe("Averaging two timeseries together", () => {
             name: "avg",
             seriesList: [part1, part2],
             reducer: avg(),
-            fieldSpec: ["in", "out"]
+            fieldSpec: ["in", "out"],
         });
 
         expect(avgSeries2.at(0).get("in")).toBe(5);
@@ -970,7 +965,7 @@ describe("Collapsing down columns in a timeseries", () => {
             fieldName: "sum",
             fieldSpecList: ["in", "out"],
             reducer: sum(),
-            append: false
+            append: false,
         });
 
         expect(sums.at(0).get("sum")).toBe(7);
@@ -985,7 +980,7 @@ describe("Collapsing down columns in a timeseries", () => {
             fieldName: "max_in_out",
             fieldSpecList: ["in", "out"],
             reducer: max(),
-            append: true
+            append: true,
         });
 
         expect(c.at(0).get("max_in_out")).toBe(9);
@@ -1000,7 +995,7 @@ describe("Collapsing down columns in a timeseries", () => {
             fieldName: "value",
             fieldSpecList: ["in", "out"],
             reducer: sum(),
-            append: false
+            append: false,
         });
         expect(sums.max("value")).toBe(13);
     });
@@ -1028,13 +1023,13 @@ describe("Select specific columns in a TimeSeries", () => {
     it("can rename columns", () => {
         const ts = timeSeries(sumPart1);
         const newTs = ts.renameColumns({
-            renameMap: { in: "new_in", out: "new_out" }
+            renameMap: { in: "new_in", out: "new_out" },
         });
         expect(newTs.columns()).toEqual(["new_in", "new_out"]);
 
         const series = indexedSeries(AVAILABILITY_DATA);
         const newSeries = series.renameColumns({
-            renameMap: { uptime: "new_uptime" }
+            renameMap: { uptime: "new_uptime" },
         });
         expect(newSeries.columns()).toEqual(["new_uptime"]);
     });
@@ -1046,8 +1041,8 @@ describe("Remapping Events in a TimeSeries", () => {
 
         expect(timeseries.columns()).toEqual(["in", "out"]);
 
-        const ts = timeseries.map(e =>
-            e.setData(Immutable.Map({ in: e.get("out"), out: e.get("in") }))
+        const ts = timeseries.map((e) =>
+            e.setData(Immutable.Map({ in: e.get("out"), out: e.get("in") })),
         );
 
         expect(ts.at(0).get("in")).toBe(34);
@@ -1063,11 +1058,11 @@ describe("Remapping Events in a TimeSeries", () => {
                 [1400425951000, { in: 100, out: 200 }, { in: 145, out: 135 }],
                 [1400425952000, { in: 200, out: 400 }, { in: 146, out: 142 }],
                 [1400425953000, { in: 300, out: 600 }, { in: 147, out: 158 }],
-                [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175, other: 1 }]
-            ]
+                [1400425954000, { in: 400, out: 800 }, { in: 155, out: 175, other: 1 }],
+            ],
         });
-        const split = series.flatMap(e =>
-            Immutable.List([e.setData(e.get("NASA_north")), e.setData(e.get("NASA_south"))])
+        const split = series.flatMap((e) =>
+            Immutable.List([e.setData(e.get("NASA_north")), e.setData(e.get("NASA_south"))]),
         );
 
         expect(split.size()).toBe(8);
@@ -1089,25 +1084,14 @@ describe("Remapping Events in a TimeSeries", () => {
             points: [
                 [1400425951000, 100, 200],
                 [1400425952000, 300, 400],
-                [1400425953000, 800, 900]
-            ]
+                [1400425953000, 800, 900],
+            ],
         });
-        const remapped = series.mapKeys(t => t.toTimeRange(duration("5m"), TimeAlignment.Middle));
+        const remapped = series.mapKeys((t) => t.toTimeRange(duration("5m"), TimeAlignment.Middle));
 
         expect(remapped.size()).toBe(3);
-        expect(
-            remapped
-                .at(0)
-                .getKey()
-                .duration()
-        ).toBe(1000 * 60 * 5);
-        expect(
-            remapped
-                .at(0)
-                .getKey()
-                .mid()
-                .getTime()
-        ).toBe(1400425951000);
+        expect(remapped.at(0).getKey().duration()).toBe(1000 * 60 * 5);
+        expect(remapped.at(0).getKey().mid().getTime()).toBe(1400425951000);
         expect(remapped.at(0).get("a")).toBe(100);
         expect(remapped.at(0).get("b")).toBe(200);
     });
@@ -1116,18 +1100,16 @@ describe("Remapping Events in a TimeSeries", () => {
         const series = indexedSeries({
             name: "series",
             columns: ["index", "c", "d"],
-            points: [["1d-1234", 100, 200], ["1d-1235", 300, 400], ["1d-1236", 800, 900]]
+            points: [
+                ["1d-1234", 100, 200],
+                ["1d-1235", 300, 400],
+                ["1d-1236", 800, 900],
+            ],
         });
 
         const remapped = series.mapKeys<Time>((idx: Index) => idx.toTime(TimeAlignment.End));
 
-        expect(
-            remapped
-                .at(0)
-                .getKey()
-                .timestamp()
-                .getTime()
-        ).toBe(106704000000);
+        expect(remapped.at(0).getKey().timestamp().getTime()).toBe(106704000000);
         expect(remapped.at(0).get("c")).toBe(100);
         expect(remapped.at(0).get("d")).toBe(200);
     });
@@ -1139,7 +1121,7 @@ describe("Rollups", () => {
         const everyDay = window(duration("1d"));
         const dailyAvg = timeseries.fixedWindowRollup({
             window: everyDay,
-            aggregation: { value: ["value", avg()] }
+            aggregation: { value: ["value", avg()] },
         });
 
         expect(dailyAvg.size()).toBe(5);

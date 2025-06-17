@@ -20,7 +20,7 @@ import { codeStyle, headingStyle, textStyle, groupStyle } from "./styles";
 
 export default class TsClass extends Component {
     static defaultProps = {
-        showExtends: false
+        showExtends: false,
     };
 
     componentDidMount() {
@@ -36,7 +36,7 @@ export default class TsClass extends Component {
         let extendedName;
         let typeArgument;
         if (typeParameter && typeParameter.length) {
-            const typeParameters = typeParameter.map(t => {
+            const typeParameters = typeParameter.map((t) => {
                 if (t.type) {
                     const type = t.type.name;
                     return `${t.name} extends ${type}`;
@@ -48,7 +48,7 @@ export default class TsClass extends Component {
                 const { typeArguments } = extendedTypes[0];
                 extendedName = extendedTypes[0].name;
                 if (typeArguments && typeArguments.length) {
-                    typeArgument = typeArguments.map(t => {
+                    typeArgument = typeArguments.map((t) => {
                         return `${t.name}`;
                     });
                 }
@@ -56,7 +56,7 @@ export default class TsClass extends Component {
             return typeArgument ? (
                 <code style={codeStyle}>
                     {`class ${name} <${typeParameters.join(
-                        ", "
+                        ", ",
                     )}> extends ${extendedName} <${typeArgument.join(", ")}>`}
                 </code>
             ) : (
@@ -102,7 +102,7 @@ export default class TsClass extends Component {
     renderGroups() {
         const entityMap = {};
         if (this.props.class.children) {
-            this.props.class.children.forEach(child => {
+            this.props.class.children.forEach((child) => {
                 entityMap[child.id] = child;
             });
             const groups = this.props.class.groups.map((group, i) => {
@@ -185,7 +185,7 @@ export default class TsClass extends Component {
                         borderTopStyle: "none",
                         borderBottomStyle: "none",
                         borderRightStyle: "none",
-                        background: "#fafafa"
+                        background: "#fafafa",
                     }}
                 >
                     {this.renderClassSignature()}

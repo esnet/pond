@@ -1,21 +1,19 @@
 {
-  "scripts": {
-    "start": "cd packages/website && npm run start",
-    "build": "cd packages/pond && npm run build",
-    "docs": "cd packages/pond && npm run docs",
-    "build-website": "echo \"*** Building website\n\" && rm -rf docs && cd packages/website && npm run build",
-    "prettier": "prettier --print-width 100 --tab-width 4 --write \"packages/pond/src/**/*.ts\""
-  },
-  "devDependencies": {
-    "husky": "^2.1.0",
-    "lerna": "^3.13.4",
-    "prettier": "^1.17.0",
-    "pretty-quick": "^1.10.0"
-  },
-  "dependencies": {},
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  }
+    "private": true,
+    "scripts": {
+        "build-lib": "npm run build --workspace packages/pond",
+        "build-website": "npm run build --workspace packages/website",
+        "prettier": "prettier ./packages/pond/src/**/*.ts --write",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "husky": "^9.1.5",
+        "lerna": "^8.1.8",
+        "prettier": "^3.3.3",
+        "pretty-quick": "^4.0.0"
+    },
+    "workspaces": [
+        "packages/pond",
+        "packages/website"
+    ]
 }

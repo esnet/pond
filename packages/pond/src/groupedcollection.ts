@@ -22,7 +22,7 @@ import {
     AggregationTuple,
     AlignmentOptions,
     RateOptions,
-    WindowingOptions
+    WindowingOptions,
 } from "./types";
 
 import util from "./util";
@@ -37,7 +37,7 @@ import {
     min,
     percentile,
     stdev,
-    sum
+    sum,
 } from "./functions";
 
 /**
@@ -98,7 +98,7 @@ export class GroupedCollection<T extends Key> {
     constructor(collectionMap: Immutable.Map<string, SortedCollection<T>>);
     constructor(
         fieldSpec: string | string[] | GroupingFunction<T>,
-        collection: SortedCollection<T>
+        collection: SortedCollection<T>,
     );
     constructor(arg1: any, arg2?: any) {
         if (Immutable.Map.isMap(arg1)) {
@@ -112,13 +112,13 @@ export class GroupedCollection<T extends Key> {
             } else {
                 const fieldSpec = arg1 as string | string[];
                 const fs = util.fieldAsArray(fieldSpec);
-                fn = e => e.get(fs);
+                fn = (e) => e.get(fs);
             }
             this.collections = collection
                 .eventList()
                 .groupBy(fn)
                 .toMap()
-                .map(events => new SortedCollection(events.toList()));
+                .map((events) => new SortedCollection(events.toList()));
         }
     }
 
@@ -158,7 +158,7 @@ export class GroupedCollection<T extends Key> {
      * ```
      */
     public aggregate(
-        aggregationSpec: AggregationSpec<T>
+        aggregationSpec: AggregationSpec<T>,
     ): Immutable.Map<string, Immutable.Map<string, any>> {
         const result = {};
         this.collections.forEach((collection, group) => {
@@ -182,7 +182,7 @@ export class GroupedCollection<T extends Key> {
      * containing all `Event`s in all the previous `Collection`s.
      */
     public ungroup(): GroupedCollection<T> {
-        let eventList = Immutable.List();
+        let eventList = Immutable.List<Event<T>>();
         this.collections.forEach((collection, group) => {
             eventList = eventList.concat(collection.eventList());
         });
@@ -244,7 +244,7 @@ export class GroupedCollection<T extends Key> {
 
 function groupedFactory<T extends Key>(
     fieldSpec: string | string[] | GroupingFunction<T>,
-    collection: SortedCollection<T>
+    collection: SortedCollection<T>,
 ) {
     return new GroupedCollection<T>(fieldSpec, collection);
 }

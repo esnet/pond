@@ -7,19 +7,19 @@ import * as Immutable from "immutable";
 import { event, Event, timeEvent } from "../src/event";
 import { avg, sum } from "../src/functions";
 import { index } from "../src/index";
-import { time } from "../src/time";
+import { Time, time } from "../src/time";
 import { timerange } from "../src/timerange";
 
 const DATE = new Date("2015-04-22T03:30:00Z");
 
 const DEEP_EVENT_DATA = Immutable.fromJS({
     NorthRoute: { in: 123, out: 456 },
-    SouthRoute: { in: 654, out: 223 }
+    SouthRoute: { in: 654, out: 223 },
 });
 
 const ALT_DEEP_EVENT_DATA = Immutable.fromJS({
     NorthRoute: { in: 100, out: 456 },
-    SouthRoute: { in: 654, out: 200 }
+    SouthRoute: { in: 654, out: 200 },
 });
 
 const OUTAGE_EVENT_LIST = {
@@ -34,7 +34,7 @@ const OUTAGE_EVENT_LIST = {
             external_ticket: "",
             esnet_ticket: "ESNET-20150421-013",
             organization: "Internet2 / Level 3",
-            type: "U"
+            type: "U",
         },
         {
             start_time: "2015-04-22T03:30:00Z",
@@ -45,7 +45,7 @@ const OUTAGE_EVENT_LIST = {
             external_ticket: "3576:144",
             esnet_ticket: "ESNET-20150421-013",
             organization: "Internet2 / Level 3",
-            type: "U"
+            type: "U",
         },
         {
             start_time: "2015-03-04T09:00:00Z",
@@ -56,9 +56,9 @@ const OUTAGE_EVENT_LIST = {
             external_ticket: "",
             esnet_ticket: "ESNET-20150302-002",
             organization: "ANL",
-            type: "P"
-        }
-    ]
+            type: "P",
+        },
+    ],
 };
 
 describe("Event static", () => {
@@ -95,7 +95,7 @@ describe("Time Events", () => {
     it("can create a time event with a serialized object", () => {
         const e = timeEvent({
             time: 1487983075328,
-            data: { a: 2, b: 3 }
+            data: { a: 2, b: 3 },
         });
         expect(e.toString()).toEqual(`{\"time\":1487983075328,\"data\":{\"a\":2,\"b\":3}}`);
     });
@@ -119,6 +119,16 @@ describe("Time Events", () => {
         const event1 = event(timestamp, DEEP_EVENT_DATA);
         const eventValue = event1.get(["NorthRoute", "in"]);
         expect(eventValue).toBe(123);
+    });
+
+    it("can check get values when field has a dot notation", () => {
+        const timestamp = time(new Date("2015-04-22T03:30:00Z"));
+        const event1 = event(
+            timestamp,
+            Immutable.fromJS({ "not.fieldpath": { in: 789, out: 223 } }),
+        );
+        const eventValue = event1.get("not.fieldpath");
+        expect(eventValue.toJS()).toEqual({ in: 789, out: 223 });
     });
 });
 
@@ -162,9 +172,9 @@ describe("Event list merge", () => {
         const event2 = event(t, Immutable.Map({ c: 2 }));
         const merged = Event.merge(Immutable.List([event1, event2]));
 
-        expect(merged.get(0).get("a")).toBe(5);
-        expect(merged.get(0).get("b")).toBe(6);
-        expect(merged.get(0).get("c")).toBe(2);
+        expect(merged.get(0)?.get("a")).toBe(5);
+        expect(merged.get(0)?.get("b")).toBe(6);
+        expect(merged.get(0)?.get("c")).toBe(2);
     });
 
     it("can merge multiple indexed events together", () => {
@@ -172,9 +182,9 @@ describe("Event list merge", () => {
         const event2 = event(index("1h-396206"), Immutable.Map({ c: 2 }));
         const merged = Event.merge(Immutable.List([event1, event2]));
 
-        expect(merged.get(0).get("a")).toBe(5);
-        expect(merged.get(0).get("b")).toBe(6);
-        expect(merged.get(0).get("c")).toBe(2);
+        expect(merged.get(0)?.get("a")).toBe(5);
+        expect(merged.get(0)?.get("b")).toBe(6);
+        expect(merged.get(0)?.get("c")).toBe(2);
     });
 
     it("can merge multiple timerange events together", () => {
@@ -185,9 +195,9 @@ describe("Event list merge", () => {
         const event2 = event(tr, Immutable.Map({ c: 2 }));
         const merged = Event.merge(Immutable.List([event1, event2]));
 
-        expect(merged.get(0).get("a")).toBe(5);
-        expect(merged.get(0).get("b")).toBe(6);
-        expect(merged.get(0).get("c")).toBe(2);
+        expect(merged.get(0)?.get("a")).toBe(5);
+        expect(merged.get(0)?.get("b")).toBe(6);
+        expect(merged.get(0)?.get("c")).toBe(2);
     });
 
     it("can deeply merge multiple events together", () => {
@@ -196,10 +206,10 @@ describe("Event list merge", () => {
         const event2 = event(t, Immutable.fromJS({ d: 2, b: { e: 4 } }));
         const merged = Event.merge(Immutable.List([event1, event2]), true);
 
-        expect(merged.get(0).get("a")).toBe(5);
-        expect(merged.get(0).get("b.c")).toBe(6);
-        expect(merged.get(0).get("d")).toBe(2);
-        expect(merged.get(0).get("b.e")).toBe(4);
+        expect(merged.get(0)?.get("a")).toBe(5);
+        expect(merged.get(0)?.get("b.c")).toBe(6);
+        expect(merged.get(0)?.get("d")).toBe(2);
+        expect(merged.get(0)?.get("b.e")).toBe(4);
     });
 });
 
@@ -242,18 +252,18 @@ describe("Event list combining", () => {
         const events = [
             event(t, Immutable.Map({ a: 5, b: 6, c: 7 })),
             event(t, Immutable.Map({ a: 2, b: 3, c: 4 })),
-            event(t, Immutable.Map({ a: 1, b: 2, c: 3 }))
+            event(t, Immutable.Map({ a: 1, b: 2, c: 3 })),
         ];
         const result = Event.combine(Immutable.List(events), sum());
 
-        expect(result.get(0).get("a")).toBe(8);
-        expect(result.get(0).get("b")).toBe(11);
-        expect(result.get(0).get("c")).toBe(14);
+        expect(result.get(0)?.get("a")).toBe(8);
+        expect(result.get(0)?.get("b")).toBe(11);
+        expect(result.get(0)?.get("c")).toBe(14);
     });
 
     it("can pass no events to sum and get back an empty list", () => {
         const t = new Date("2015-04-22T03:30:00Z");
-        const events = Immutable.List();
+        const events = Immutable.List<Event>();
         const result1 = Event.combine(events, sum());
         expect(result1.size).toBe(0);
 
@@ -265,20 +275,20 @@ describe("Event list combining", () => {
         const events = Immutable.List([
             event(index("1d-1234"), Immutable.Map({ a: 5, b: 6, c: 7 })),
             event(index("1d-1234"), Immutable.Map({ a: 2, b: 3, c: 4 })),
-            event(index("1d-1235"), Immutable.Map({ a: 1, b: 2, c: 3 }))
+            event(index("1d-1235"), Immutable.Map({ a: 1, b: 2, c: 3 })),
         ]);
 
         const result = Event.combine(events, sum());
 
         expect(result.size).toEqual(2);
-        expect(`${result.get(0).getKey()}`).toBe("1d-1234");
-        expect(result.get(0).get("a")).toBe(7);
-        expect(result.get(0).get("b")).toBe(9);
-        expect(result.get(0).get("c")).toBe(11);
-        expect(`${result.get(1).getKey()}`).toBe("1d-1235");
-        expect(result.get(1).get("a")).toBe(1);
-        expect(result.get(1).get("b")).toBe(2);
-        expect(result.get(1).get("c")).toBe(3);
+        expect(`${result.get(0)?.getKey()}`).toBe("1d-1234");
+        expect(result.get(0)?.get("a")).toBe(7);
+        expect(result.get(0)?.get("b")).toBe(9);
+        expect(result.get(0)?.get("c")).toBe(11);
+        expect(`${result.get(1)?.getKey()}`).toBe("1d-1235");
+        expect(result.get(1)?.get("a")).toBe(1);
+        expect(result.get(1)?.get("b")).toBe(2);
+        expect(result.get(1)?.get("c")).toBe(3);
     });
 
     it("can sum multiple events together if they have different timestamps", () => {
@@ -288,10 +298,10 @@ describe("Event list combining", () => {
         const events = Immutable.List([
             event(ts1, Immutable.Map({ a: 5, b: 6, c: 7 })),
             event(ts1, Immutable.Map({ a: 2, b: 3, c: 4 })),
-            event(ts3, Immutable.Map({ a: 1, b: 2, c: 3 }))
+            event(ts3, Immutable.Map({ a: 1, b: 2, c: 3 })),
         ]);
         const result = Event.combine(events, sum());
-        expect(result.get(0).get("a")).toBe(7);
+        expect(result.get(0)?.get("a")).toBe(7);
     });
 });
 
@@ -300,16 +310,16 @@ const t2 = time(1445449200000);
 const t3 = time(1445449230000);
 const t4 = time(1445449260000);
 
-const EVENTS = [];
+const EVENTS: Array<Event<Time>> = [];
 EVENTS.push(
     event(
         t1,
         Immutable.Map({
             name: "source1",
             in: 2,
-            out: 11
-        })
-    )
+            out: 11,
+        }),
+    ),
 );
 EVENTS.push(
     event(
@@ -317,9 +327,9 @@ EVENTS.push(
         Immutable.Map({
             name: "source1",
             in: 4,
-            out: 13
-        })
-    )
+            out: 13,
+        }),
+    ),
 );
 EVENTS.push(
     event(
@@ -327,9 +337,9 @@ EVENTS.push(
         Immutable.Map({
             name: "source1",
             in: 6,
-            out: 15
-        })
-    )
+            out: 15,
+        }),
+    ),
 );
 EVENTS.push(
     event(
@@ -337,9 +347,9 @@ EVENTS.push(
         Immutable.Map({
             name: "source1",
             in: 8,
-            out: 18
-        })
-    )
+            out: 18,
+        }),
+    ),
 );
 
 const EVENT_LIST = Immutable.List(EVENTS);
@@ -352,7 +362,7 @@ describe("Event list map generation", () => {
     it("should generate the correct key values for a string selector", () => {
         expect(Event.map(EVENT_LIST, ["in", "out"])).toEqual({
             in: [2, 4, 6, 8],
-            out: [11, 13, 15, 18]
+            out: [11, 13, 15, 18],
         });
     });
 

@@ -34,7 +34,7 @@ import TsMethod from "./api/Method";
 
 // Generated pond.js code and documentation as a JSON file. This is what we are
 // parsing here to generate the API documentation
-import docsJSON from "../doc.json";
+const docsJSON = require("../doc.json");
 
 const docs = {
     modules: {},
@@ -45,11 +45,11 @@ const docs = {
     enums: {},
     objects: {},
     types: {},
-    properties: {}
+    properties: {},
 };
 
 function buildTypes(root) {
-    _.forEach(root, child => {
+    _.forEach(root, (child) => {
         const { name, kindString } = child;
         const n = name.toLowerCase();
         switch (kindString) {
@@ -97,7 +97,7 @@ const filterList = [
     "ignoreMissing",
     "zeroMissing",
     "propagateMissing",
-    "noneIfEmpty"
+    "noneIfEmpty",
 ];
 
 const aggregationList = [
@@ -112,7 +112,7 @@ const aggregationList = [
     "min",
     "percentile",
     "stdev",
-    "sum"
+    "sum",
 ];
 
 export default class extends Component {
@@ -122,22 +122,22 @@ export default class extends Component {
             marginTop: 100,
             display: "flex",
             minHeight: "100vh",
-            flexDirection: "column"
+            flexDirection: "column",
         };
         const mainStyle = {
             display: "flex",
             flex: 1,
             marginLeft: 20,
-            marginRight: 40
+            marginRight: 40,
         };
 
         const footerStyle = {
             flex: "none",
             height: 10,
-            background: "#DDD"
+            background: "#DDD",
         };
         const contentStyle = {
-            flex: 1
+            flex: 1,
         };
 
         return (
@@ -175,13 +175,13 @@ export default class extends Component {
                                 />
                                 <Route
                                     path={`/module/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <TsModule module={docs.modules[props.match.params.name]} />
                                     )}
                                 />
                                 <Route
                                     path={`/class/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <ScrollToTop key={props.match.params.name}>
                                             <TsClass
                                                 class={docs.classes[props.match.params.name]}
@@ -192,7 +192,7 @@ export default class extends Component {
                                 />
                                 <Route
                                     path={`/function/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <TsFunction
                                             function={docs.function[props.match.params.name]}
                                         />
@@ -200,13 +200,13 @@ export default class extends Component {
                                 />
                                 <Route
                                     path={`/method/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <TsMethod method={docs.methods[props.match.params.name]} />
                                     )}
                                 />
                                 <Route
                                     path={`/interface/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <ScrollToTop>
                                             <TsInterface
                                                 interface={docs.interfaces[props.match.params.name]}
@@ -216,25 +216,25 @@ export default class extends Component {
                                 />
                                 <Route
                                     path={`/enum/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <TsEnum enum={docs.enums[props.match.params.name]} />
                                     )}
                                 />
                                 <Route
                                     path={`/type/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <TsObject object={docs.types[props.match.params.name]} />
                                     )}
                                 />
                                 <Route
                                     path={`/object/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <TsObject object={docs.objects[props.match.params.name]} />
                                     )}
                                 />
                                 <Route
                                     path={`/type/:name`}
-                                    render={props => (
+                                    render={(props) => (
                                         <TsType type={docs.types[props.match.params.name]} />
                                     )}
                                 />

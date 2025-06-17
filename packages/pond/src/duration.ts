@@ -19,7 +19,7 @@ const UNITS: { [key: string]: number } = {
     minutes: 1000 * 60,
     hours: 1000 * 60 * 60,
     days: 1000 * 60 * 60 * 24,
-    weeks: 1000 * 60 * 60 * 24 * 7
+    weeks: 1000 * 60 * 60 * 24 * 7,
 };
 
 const SHORT_UNITS: { [key: string]: number } = {
@@ -30,7 +30,7 @@ const SHORT_UNITS: { [key: string]: number } = {
     m: 1000 * 60,
     h: 1000 * 60 * 60,
     d: 1000 * 60 * 60 * 24,
-    w: 1000 * 60 * 60 * 24 * 7
+    w: 1000 * 60 * 60 * 24 * 7,
 };
 
 /**

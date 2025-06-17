@@ -19,10 +19,14 @@ import { grouped, GroupedCollection, GroupingFunction } from "./groupedcollectio
 import { Key } from "./key";
 import { Rate } from "./rate";
 import { TimeRange } from "./timerange";
-import { DedupFunction } from "./types";
+import {
+    DedupFunction,
+    AlignmentOptions,
+    FillOptions,
+    RateOptions,
+    WindowingOptions,
+} from "./types";
 import { windowed, WindowedCollection } from "./windowedcollection";
-
-import { AlignmentOptions, FillOptions, RateOptions, WindowingOptions } from "./types";
 
 /**
  * In general, a `Collection` is a bucket of `Event`'s, with no particular order. This,
@@ -41,7 +45,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
     constructor(arg1?: Immutable.List<Event<T>> | Collection<T>) {
         super(arg1);
         if (!super.isChronological()) {
-            this._events = this._events.sortBy(event => {
+            this._events = this._events.sortBy((event) => {
                 return +event.getKey().timestamp();
             });
         }
@@ -135,7 +139,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
      * ```
      */
     public map<M extends Key>(
-        mapper: (event?: Event<T>, index?: number) => Event<M>
+        mapper: (event?: Event<T>, index?: number) => Event<M>,
     ): SortedCollection<M> {
         const remapped = this._events.map(mapper);
         return new SortedCollection<M>(Immutable.List<Event<M>>(remapped));
@@ -154,7 +158,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
      * ```
      */
     public flatMap<U extends Key>(
-        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<U>>
+        mapper: (event?: Event<T>, index?: number) => Immutable.List<Event<U>>,
     ): SortedCollection<U> {
         const remapped: Immutable.List<Event<U>> = this._events.flatMap(mapper);
         return new SortedCollection<U>(Immutable.List<Event<U>>(remapped));
@@ -189,9 +193,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
         }
 
         for (; i < size; i++) {
-            const ts = this.at(i)
-                .timestamp()
-                .getTime();
+            const ts = this.at(i).timestamp().getTime();
             if (ts > tms) {
                 return i - 1 >= 0 ? i - 1 : 0;
             } else if (ts === tms) {
@@ -236,7 +238,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
      */
     public align(options: AlignmentOptions): SortedCollection<T> {
         const p = new Align<T>(options);
-        return this.flatMap<T>(e => p.addEvent(e));
+        return this.flatMap<T>((e) => p.addEvent(e));
     }
 
     /**
@@ -260,7 +262,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
      */
     public rate(options: RateOptions): SortedCollection<TimeRange> {
         const p = new Rate<T>(options);
-        return this.flatMap<TimeRange>(e => p.addEvent(e));
+        return this.flatMap<TimeRange>((e) => p.addEvent(e));
     }
 
     /**
@@ -287,7 +289,7 @@ export class SortedCollection<T extends Key> extends Collection<T> {
      */
     public fill(options: FillOptions): SortedCollection<T> {
         const p = new Fill<T>(options);
-        return this.flatMap<T>(e => p.addEvent(e));
+        return this.flatMap<T>((e) => p.addEvent(e));
     }
 
     /**

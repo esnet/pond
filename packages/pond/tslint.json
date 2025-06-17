@@ -1,13 +1,14 @@
 {
-  "defaultSeverity": "error",
-  "extends": ["tslint:latest", "tslint-config-prettier"],
-  "jsRules": {},
-  "rules": {
-    "no-console": false,
-    "interface-name": false,
-    "no-submodule-imports": false,
-    "no-object-literal-type-assertion": false,
-    "object-literal-sort-keys": false
-  },
-  "rulesDirectory": []
+    "defaultSeverity": "error",
+    "extends": ["tslint:latest", "tslint-config-prettier"],
+    "jsRules": {},
+    "rules": {
+        "no-console": false,
+        "interface-name": false,
+        "no-submodule-imports": false,
+        "no-object-literal-type-assertion": false,
+        "object-literal-sort-keys": false,
+        "trailing-comma": true
+    },
+    "rulesDirectory": []
 }

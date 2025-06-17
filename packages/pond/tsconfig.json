@@ -7,7 +7,6 @@
         "declaration": true,
         "inlineSourceMap": true,
         "listFiles": false,
-        "noStrictGenericChecks": true,
         "skipLibCheck": true
     },
     "include": ["src/*.ts"],

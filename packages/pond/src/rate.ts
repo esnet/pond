@@ -92,7 +92,7 @@ export class Rate<T extends Key> extends Processor<T, TimeRange> {
         const currentTime = event.timestamp().getTime();
         const deltaTime = (currentTime - previousTime) / 1000;
 
-        this.fieldSpec.forEach(path => {
+        this.fieldSpec.forEach((path) => {
             const fieldPath = util.fieldAsArray(path);
             const ratePath = fieldPath.slice();
             ratePath[ratePath.length - 1] += "_rate";

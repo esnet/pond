@@ -1,0 +1,786 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders a snapshot 1`] = `
+<div
+  style={
+    Object {
+      "display": "flex",
+      "flexDirection": "column",
+      "marginTop": 100,
+      "minHeight": "100vh",
+    }
+  }
+>
+  <nav
+    className="navbar navbar-fixed-top"
+  >
+    <div
+      className="container-fluid"
+    >
+      <div
+        className="navbar-header"
+      >
+        <div
+          className="navbar-brand"
+        >
+          <span>
+            <a
+              href="http://software.es.net/pond/"
+            >
+              <img
+                alt="logo"
+                height={60}
+                src="logo.png"
+                style={
+                  Object {
+                    "marginTop": -4,
+                  }
+                }
+              />
+            </a>
+          </span>
+          <span
+            style={
+              Object {
+                "fontSize": 32,
+                "marginLeft": 10,
+              }
+            }
+          >
+            pond.js
+          </span>
+          <span>
+             (v: 
+            unknown
+            )
+          </span>
+        </div>
+      </div>
+      <div>
+        <ul
+          className="nav navbar-nav navbar-right tools-links"
+        >
+          <li>
+            <a
+              href="https://github.com/esnet/pond"
+              style={
+                Object {
+                  "paddingTop": 8,
+                }
+              }
+            >
+              <img
+                alt="github"
+                src="github.png"
+                style={
+                  Object {
+                    "marginTop": -4,
+                    "paddingRight": 5,
+                    "width": 24,
+                  }
+                }
+              />
+              Github
+            </a>
+          </li>
+          <li>
+            <a
+              href="http://software.es.net"
+              style={
+                Object {
+                  "paddingTop": 8,
+                }
+              }
+            >
+              Open Source
+            </a>
+          </li>
+          <li>
+            <a
+              href="http://es.net"
+              style={
+                Object {
+                  "paddingTop": 8,
+                }
+              }
+            >
+              ESnet
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div
+    style={
+      Object {
+        "display": "flex",
+        "flex": 1,
+        "marginLeft": 20,
+        "marginRight": 40,
+      }
+    }
+  >
+    <div
+      style={
+        Object {
+          "flex": 1,
+        }
+      }
+    >
+       
+      <div
+        className="row"
+      >
+        <div
+          className="col-md-12"
+        />
+      </div>
+    </div>
+    <div
+      style={
+        Object {
+          "background": "#FEFEFE",
+          "borderLeftColor": "#64b2c5",
+          "borderLeftStyle": "solid",
+          "color": "#4183C4",
+          "flex": "0 0 12em",
+          "marginLeft": 40,
+          "textDecoration": "none",
+        }
+      }
+    >
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current="page"
+          className="active"
+          href="#/"
+          onClick={[Function]}
+          style={
+            Object {
+              "color": "black",
+              "textDecoration": "none",
+            }
+          }
+        >
+          Introduction
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontSize": 13,
+            "fontWeight": 500,
+            "letterSpacing": ".08em",
+            "marginBottom": 15,
+            "marginTop": 30,
+            "padding": "0 20px",
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        FUNCTIONS
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/filters"
+          onClick={[Function]}
+        >
+          Filters
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/aggregation"
+          onClick={[Function]}
+        >
+          Aggregators
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontSize": 13,
+            "fontWeight": 500,
+            "letterSpacing": ".08em",
+            "marginBottom": 15,
+            "marginTop": 30,
+            "padding": "0 20px",
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        CLASSES
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/align"
+          onClick={[Function]}
+        >
+          Align
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/base"
+          onClick={[Function]}
+        >
+          Base
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/collapse"
+          onClick={[Function]}
+        >
+          Collapse
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/collection"
+          onClick={[Function]}
+        >
+          Collection
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/daywindow"
+          onClick={[Function]}
+        >
+          DayWindow
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/duration"
+          onClick={[Function]}
+        >
+          Duration
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/event"
+          onClick={[Function]}
+        >
+          Event
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/eventstream"
+          onClick={[Function]}
+        >
+          EventStream
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/fill"
+          onClick={[Function]}
+        >
+          Fill
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/groupedcollection"
+          onClick={[Function]}
+        >
+          GroupedCollection
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/index"
+          onClick={[Function]}
+        >
+          Index
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/key"
+          onClick={[Function]}
+        >
+          Key
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/keyedcollectionstream"
+          onClick={[Function]}
+        >
+          KeyedCollectionStream
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/period"
+          onClick={[Function]}
+        >
+          Period
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/processor"
+          onClick={[Function]}
+        >
+          Processor
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/rate"
+          onClick={[Function]}
+        >
+          Rate
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/reducer"
+          onClick={[Function]}
+        >
+          Reducer
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/select"
+          onClick={[Function]}
+        >
+          Select
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/sortedcollection"
+          onClick={[Function]}
+        >
+          SortedCollection
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/stream"
+          onClick={[Function]}
+        >
+          Stream
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/time"
+          onClick={[Function]}
+        >
+          Time
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/timerange"
+          onClick={[Function]}
+        >
+          TimeRange
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/timeseries"
+          onClick={[Function]}
+        >
+          TimeSeries
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/window"
+          onClick={[Function]}
+        >
+          Window
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/windowbase"
+          onClick={[Function]}
+        >
+          WindowBase
+        </a>
+      </div>
+      <div
+        style={
+          Object {
+            "color": "#5c666f",
+            "fontFamily": "fakt-web,Helvetica Neue,Hevetica,sans-serif",
+            "fontSize": 16,
+            "fontWeight": 400,
+            "letterSpacing": 0,
+            "padding": "10px 20px",
+          }
+        }
+      >
+        <a
+          aria-current={null}
+          href="#/class/windowedcollection"
+          onClick={[Function]}
+        >
+          WindowedCollection
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    style={
+      Object {
+        "background": "#DDD",
+        "flex": "none",
+        "height": 10,
+      }
+    }
+  >
+    …
+  </div>
+</div>
+`;

@@ -18,7 +18,7 @@ export default class extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            markdown: null
+            markdown: null,
         };
     }
 
@@ -26,22 +26,10 @@ export default class extends Component {
         window.scrollTo(0, 0);
         Prism.highlightAll();
         fetch(markdownFile)
-            .then(response => {
+            .then((response) => {
                 return response.text();
             })
-            .then(markdown => {
-                this.setState({ markdown });
-            });
-        this.setState({ markdown: null });
-    }
-
-    componentWillReceiveProps(nextProps) {
-        window.scrollTo(0, 0);
-        fetch(markdownFile)
-            .then(response => {
-                return response.text();
-            })
-            .then(markdown => {
+            .then((markdown) => {
                 this.setState({ markdown });
             });
         this.setState({ markdown: null });

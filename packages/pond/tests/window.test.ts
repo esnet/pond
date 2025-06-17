@@ -6,6 +6,7 @@ import { duration } from "../src/duration";
 import { period } from "../src/period";
 import { time } from "../src/time";
 import { daily, window } from "../src/window";
+import { Index } from "../src/index";
 
 import Util from "../src/util";
 
@@ -38,14 +39,14 @@ describe("Window", () => {
         expect(
             window(
                 duration("30m"),
-                period(duration("10s"), time("2015-04-22T02:28:00Z"))
-            ).toString()
+                period(duration("10s"), time("2015-04-22T02:28:00Z")),
+            ).toString(),
         ).toBe("30m@10s+1429669680000");
         expect(
             window(
                 duration("30m"),
-                period(duration("30m"), time("2015-04-22T02:28:00Z"))
-            ).toString()
+                period(duration("30m"), time("2015-04-22T02:28:00Z")),
+            ).toString(),
         ).toBe("30m+1429669680000");
     });
 
@@ -68,24 +69,9 @@ describe("Window", () => {
         const window1 = daily("America/Los_Angeles");
         const window2 = daily("Etc/UTC");
         const window3 = daily();
-        expect(
-            window1
-                .getIndexSet(t)
-                .first()
-                .asString()
-        ).toBe("2015-04-21");
-        expect(
-            window2
-                .getIndexSet(t)
-                .first()
-                .asString()
-        ).toBe("2015-04-22");
-        expect(
-            window3
-                .getIndexSet(t)
-                .first()
-                .asString()
-        ).toBe("2015-04-22");
+        expect((window1.getIndexSet(t).first() as Index).asString()).toBe("2015-04-21");
+        expect((window2.getIndexSet(t).first() as Index).asString()).toBe("2015-04-22");
+        expect((window3.getIndexSet(t).first() as Index).asString()).toBe("2015-04-22");
     });
 
     /*

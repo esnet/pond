@@ -12,22 +12,24 @@ import React, { Component } from "react";
 import logo from "./logo.png";
 import github from "./github.png";
 
-/* eslint-disable  jsx-a11y/href-no-hash */
-
 export default class Header extends Component {
     render() {
         const githubLogoStyle = {
             width: 24,
             paddingRight: 5,
-            marginTop: -4
+            marginTop: -4,
         };
+        const githubUrl = process.env.REACT_APP_REPO_URL || "https://github.com/esnet/pond";
+        const baseUrl = process.env.REACT_APP_BASE_URL || "http://software.es.net/pond/";
+        const versionLabel = process.env.REACT_APP_VERSION || "unknown";
+
         return (
             <nav className="navbar navbar-fixed-top">
                 <div className="container-fluid">
                     <div className="navbar-header">
                         <div className="navbar-brand">
                             <span>
-                                <a href="http://software.es.net/pond/">
+                                <a href={baseUrl}>
                                     <img
                                         style={{ marginTop: -4 }}
                                         src={logo}
@@ -37,12 +39,13 @@ export default class Header extends Component {
                                 </a>
                             </span>
                             <span style={{ fontSize: 32, marginLeft: 10 }}>pond.js</span>
+                            <span> (v: {versionLabel})</span>
                         </div>
                     </div>
                     <div>
                         <ul className="nav navbar-nav navbar-right tools-links">
                             <li>
-                                <a href="https://github.com/esnet/pond" style={{ paddingTop: 8 }}>
+                                <a href={githubUrl} style={{ paddingTop: 8 }}>
                                     <img src={github} style={githubLogoStyle} alt="github" />
                                     Github
                                 </a>
